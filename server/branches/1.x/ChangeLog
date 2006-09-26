@@ -17,6 +17,11 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for CVS:
 
+server/rune.c: Cleanup spring_trap() and clean some questionable logic.
+server/attack.c: Cause spell traps to be triggered when containers with traps
+   are destroyed by a spell effect.
+Alex Schultz 2006-09-25
+
 server/plugins.c: Change cfapi_object_say() to use either command_say() or
    npc_say() depending on if the object is a player. Fixes bug #1534889.
 server/monster.c, include/sproto: Move code for NPCs to talk from the code that
