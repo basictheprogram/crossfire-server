@@ -17,6 +17,10 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Fix for bug #1547517: DM issue with containers
+ server/apply.c: move_apply shouldn't exit if opened container.
+Ryo 2006-10-29
+
 Implement feature request #1551406: Add player's name to disease symptoms
  server/disease.c: add player's name.
 Ryo 2006-10-28
