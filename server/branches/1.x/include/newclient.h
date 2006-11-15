@@ -439,4 +439,4 @@ typedef struct CS_Stats {
 
 extern CS_Stats cst_tot, cst_lst;
 
-#endif
+#endif /* NEWCLIENT_H */
