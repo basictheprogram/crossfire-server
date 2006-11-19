@@ -75,7 +75,7 @@ static void esrv_print_ext_msg(socket_struct *ns,int color,uint8 type, uint8 sub
     char buf[HUGE_BUF];
     snprintf(buf,HUGE_BUF, "drawextinfo %d %hhu %hhu %s", color, type, subtype, message);
 	Write_String_To_Socket(ns, buf, strlen(buf));
-/*    LOG(llevDebug,"sending %s to socket, len=%d", buf, strlen(buf));*/
+/*    LOG(llevDebug,"sending %s to socket, len=%d\n", buf, strlen(buf));*/
 
 }
 
@@ -267,7 +267,7 @@ void draw_ext_info(
     if (!CLIENT_SUPPORT_READABLES(&pl->contr->socket,type)){
         char *buf = (char*)malloc(strlen(oldmessage==NULL?message:oldmessage)+1);
         if (buf==NULL)
-            LOG(llevError,"info::draw_ext_info -> Out of memory!");
+            LOG(llevError,"info::draw_ext_info -> Out of memory!\n");
         else{
             strcpy(buf,oldmessage==NULL?message:oldmessage);
             strip_media_tag(buf);

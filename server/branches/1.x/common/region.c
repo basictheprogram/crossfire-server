@@ -386,5 +386,5 @@ void assign_region_parents(void) {
 	}
 	region_count++;
     }
-    LOG(llevDebug, "Assigned %u regions with %u parents.", region_count, parent_count);
+    LOG(llevDebug, "Assigned %u regions with %u parents.\n", region_count, parent_count);
 }
