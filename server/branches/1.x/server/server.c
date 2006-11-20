@@ -1059,7 +1059,7 @@ static void process_events (mapstruct *map)
         {
             LOG (llevError, "BUG: process_events(): Removed object on list\n");
             dump_object(op);
-            LOG(llevError, "%s\n", "errmsg);
+            LOG(llevError, "%s\n", errmsg);
             free_object(op);
             continue;
         }
