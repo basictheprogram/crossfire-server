@@ -1283,9 +1283,7 @@ void fix_player(object *op) {
     else /* Something wrong here...: */
 	op->speed /= (float)(1.0-added_speed);
 
-    /* Max is determined by armour */
-    if(op->speed>max)
-	op->speed=max;
+    op->speed+=bonus_speed/10.0; /* Not affected by limits */
 
     if(op->type == PLAYER) {
 	/* f is a number the represents the number of kg above (positive num)
@@ -1294,10 +1292,13 @@ void fix_player(object *op) {
 	 * much above he is, and what is max carry is
 	 */
 	f=(op->carrying/1000)-max_carry[op->stats.Str];
-	if(f>0) op->speed=op->speed/(1.0+f/max_carry[op->stats.Str]);
+	if(f>0)
+	    op->speed=op->speed/(1.0+f/max_carry[op->stats.Str]);
     }
 
-    op->speed+=bonus_speed/10.0; /* Not affected by limits */
+    /* Max is determined by armour */
+    if(op->speed>max)
+        op->speed=max;
 
     /* Put a lower limit on speed.  Note with this speed, you move once every
      * 100 ticks or so.  This amounts to once every 12 seconds of realtime.
