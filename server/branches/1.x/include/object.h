@@ -276,6 +276,7 @@ typedef struct archt {
     sint8   tail_x, tail_y; /* Where the lower right most portion of the object is
 			     * in comparison to the head.
 			     */
+    int reference_count; /**< How many times this temporary archetype is used. If 0, "permanent" archetype. */
 } archetype;
 
 extern object *objects;
