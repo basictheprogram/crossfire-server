@@ -855,7 +855,7 @@ static int do_skill_attack(object *tmp, object *op, const char *string, object *
 	    }
 	    if (skill != op->chosen_skill) {
 		/* now try to ready the new skill */
-		if(!change_skill(op,skill,0)) {  /* oh oh, trouble! */
+		if(!change_skill(op,skill,1)) {  /* oh oh, trouble! */
 		    new_draw_info_format(NDI_UNIQUE, 0, tmp, "Couldn't change to skill %s", skill->name);
 		    return 0;
 		}
