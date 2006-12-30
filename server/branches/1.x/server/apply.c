@@ -942,6 +942,7 @@ static int check_improve_weapon (object *op, object *tmp)
 static int improve_armour(object *op, object *improver, object *armour)
 {
     object *tmp;
+    int oldmagic = armour->magic;
 
     if (armour->magic >= settings.armor_max_enchant) {
         new_draw_info(NDI_UNIQUE, 0,op,"This armour can not be enchanted any further.");
@@ -1003,7 +1004,8 @@ static int improve_armour(object *op, object *improver, object *armour)
         armour->weight = 1;
         }
 
-    armour->item_power = get_power_from_ench(armour->arch->clone.item_power + armour->magic);
+    armour->item_power += (armour->magic-oldmagic)*3;
+    if (armour->item_power < 0) armour->item_power = 0;
 
     if (op->type == PLAYER) {
         esrv_send_item(op, armour);
