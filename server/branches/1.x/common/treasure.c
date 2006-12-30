@@ -810,7 +810,7 @@ void fix_generated_item (object *op, object *creator, int difficulty,
         }
 
         /* Object was made an artifact.  Calculate its item_power rating.
-         * the item_power in the object is what the artfiact adds.
+         * the item_power in the object is what the artifact adds.
          */
         if (op->title)
         {
@@ -825,8 +825,7 @@ void fix_generated_item (object *op, object *creator, int difficulty,
                 op->item_power = save_item_power +
                     get_power_from_ench(op->item_power);
             else
-                op->item_power = get_power_from_ench(op->item_power
-                    + num_enchantments);
+                op->item_power += get_power_from_ench(num_enchantments);
         }
         else if (save_item_power)
         {
