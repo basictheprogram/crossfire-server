@@ -1735,7 +1735,7 @@ skill smithery
 cauldron forge
 ingred mithril chainmail,3 pixie's wings,3 xan's wing,potion of speed
 #
-Object Ruggilli
+Object Blazing Fires
 arch dragon_mail
 chance 1
 diff 30
@@ -1746,7 +1746,7 @@ skill smithery
 cauldron forge
 ingred dragon mail,3 dragon's steak,dragon's eye,dragon scale,fire para-elemental's residue
 #
-Object Ruggilli
+Object Blazing Fires
 arch scale_mail,b_scale_mail
 chance 2
 diff 25
