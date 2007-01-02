@@ -17,6 +17,12 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Implement feature request #1443844: Lock in 1.9.0 is ethernal.
+ Added new 'lock' command, locking/unlocking specified item.
+ include/sproto.h
+ server/c_object.c commands.c
+Ryo 2007-01-02
+
 server/{player.c, gods.c, apply.c, monster.c}: Fix bug #1543130 and make
   handling of can_use_armour and can_use_shield consistant.
 Alex Schultz 2006-12-31
