@@ -282,7 +282,10 @@ static int god_gives_present (object *op, object *god, treasure *tr)
         return 0;
 
     tmp = arch_to_object (tr->item);
-    new_draw_info_format (NDI_UNIQUE, 0, op,
+    draw_ext_info_format (NDI_UNIQUE, 0, op, MSG_TYPE_ITEM, MSG_TYPE_ITEM_ADD,
+			  "%s lets %s appear in your hands.",
+			  god->name, query_short_name (tmp),
+			  god->name, query_short_name (tmp));
     /**
      * Mark what god gave it, so it can be taken vengefully later!
      */
