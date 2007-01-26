@@ -1621,7 +1621,7 @@ skill smithery
 cauldron forge
 ingred jack boots,goblin's head,lead
 #
-Object of steel
+Object steel
 arch high_boots,high_boots_b,high_boots_w
 chance 5
 diff 15
@@ -1632,7 +1632,7 @@ skill smithery
 cauldron forge
 ingred jack boots,3 mithril crystal
 #
-Object of steel
+Object steel
 arch low_boots
 chance 5
 diff 15
