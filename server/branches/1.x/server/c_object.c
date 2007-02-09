@@ -1994,4 +1994,5 @@ int command_lock_item(object *op, char *params) {
         esrv_del_item(op->contr, tag);
         esrv_send_item(op, tmp);
     }
+    return 1;
 }
