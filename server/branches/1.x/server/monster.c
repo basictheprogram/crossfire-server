@@ -6,7 +6,7 @@
 /*
     CrossFire, A Multiplayer game for X-windows
 
-    Copyright (C) 2002 Mark Wedel & Crossfire Development Team
+    Copyright (C) 2002,2007 Mark Wedel & Crossfire Development Team
     Copyright (C) 1992 Frank Tore Johansen
 
     This program is free software; you can redistribute it and/or modify
@@ -1659,7 +1659,6 @@ void communicate(object *op, const char *txt) {
 static int do_talk_npc(object* op, object* npc, object* override, const char* txt)
 {
     char* cp;
-    char buf[MAX_BUF];
 
     if(override->msg == NULL || *override->msg != '@')
 	return 0;

@@ -6,7 +6,7 @@
 /*
     CrossFire, A Multiplayer game for X-windows
 
-    Copyright (C) 2002 Mark Wedel & Crossfire Development Team
+    Copyright (C) 2002,2007 Mark Wedel & Crossfire Development Team
     Copyright (C) 1992 Frank Tore Johansen
 
     This program is free software; you can redistribute it and/or modify
@@ -1006,8 +1006,8 @@ int key_change_class(object *op, char key)
          */
         if(*first_map_ext_path) {
             object *tmp;
-            mapstruct *oldmap = op->map;
             char mapname[MAX_BUF];
+
             snprintf(mapname, MAX_BUF-1, "%s/%s",
                      first_map_ext_path, op->arch->name);
             printf("%s\n", mapname);
