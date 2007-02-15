@@ -196,56 +196,56 @@ void decay_objects(mapstruct *m)
 	return;
 
     for (x=0; x < MAP_WIDTH(m); x++)
-	for (y=0; y < MAP_HEIGHT(m); y++)
-	   for (op = get_map_ob(m, x, y); op; op = otmp) {
-		destroy = 0;
-		otmp = op->above;
-		if (QUERY_FLAG(op,FLAG_IS_FLOOR) && QUERY_FLAG(op, FLAG_UNIQUE))
-		    break;
-		if (QUERY_FLAG(op, FLAG_IS_FLOOR) ||
-		   QUERY_FLAG(op, FLAG_OBJ_ORIGINAL) ||
-		   QUERY_FLAG(op, FLAG_OBJ_SAVE_ON_OVL) ||
-		   QUERY_FLAG(op, FLAG_UNIQUE) ||
-		   QUERY_FLAG(op, FLAG_OVERLAY_FLOOR) ||
-		   QUERY_FLAG(op, FLAG_UNPAID) || IS_LIVE(op))
-		    continue;
-		/* otherwise, we decay and destroy */
-		if (IS_WEAPON(op)) {
-		    op->stats.dam--;
-		    if (op->stats.dam < 0)
-			destroy = 1;
-		} else if (IS_ARMOR(op)) {
-		    op->stats.ac--;
-		    if (op->stats.ac < 0)
-			destroy = 1;
-		} else if (op->type == FOOD) {
-		    op->stats.food -= rndm(5,20);
-		    if (op->stats.food < 0)
-			destroy = 1;
-		} else {
-		    if (op->material & M_PAPER || op->material & M_LEATHER ||
-			op->material & M_WOOD || op->material & M_ORGANIC ||
-			op->material & M_CLOTH || op->material & M_LIQUID)
-			destroy = 1;
-		    if (op->material & M_IRON && rndm(1,5) == 1)
-			destroy = 1;
-		    if (op->material & M_GLASS && rndm(1,2) == 1)
-			destroy = 1;
-		    if ((op->material & M_STONE || op->material & M_ADAMANT) &&
-			rndm(1,10) == 1)
-			destroy = 1;
-		    if ((op->material & M_SOFT_METAL || op->material & M_BONE) &&
-			rndm(1,3) == 1)
-			destroy = 1;
-		    if (op->material & M_ICE && MAP_TEMP(m) > 32)
-			destroy = 1;
-		}
-		/* adjust overall chance below */
-		if (destroy && rndm(0, 1)) {
-		    remove_ob(op);
-		    free_object(op);
-		}
-	    }
+        for (y=0; y < MAP_HEIGHT(m); y++)
+            for (op = get_map_ob(m, x, y); op; op = otmp) {
+                destroy = 0;
+                otmp = op->above;
+                if (QUERY_FLAG(op,FLAG_IS_FLOOR) && QUERY_FLAG(op, FLAG_UNIQUE))
+                    break;
+                if (QUERY_FLAG(op, FLAG_IS_FLOOR) ||
+                  QUERY_FLAG(op, FLAG_OBJ_ORIGINAL) ||
+                  QUERY_FLAG(op, FLAG_OBJ_SAVE_ON_OVL) ||
+                  QUERY_FLAG(op, FLAG_UNIQUE) ||
+                  QUERY_FLAG(op, FLAG_OVERLAY_FLOOR) ||
+                  QUERY_FLAG(op, FLAG_UNPAID) || IS_LIVE(op))
+                    continue;
+                /* otherwise, we decay and destroy */
+                if (IS_WEAPON(op)) {
+                    op->stats.dam--;
+                    if (op->stats.dam < 0)
+                    destroy = 1;
+                } else if (IS_ARMOR(op) || IS_SHIELD(op) || op->type == GIRDLE || op->type == GLOVES || op->type == CLOAK) {
+                    op->stats.ac--;
+                    if (op->stats.ac < 0)
+                    destroy = 1;
+                } else if (op->type == FOOD) {
+                    op->stats.food -= rndm(5,20);
+                    if (op->stats.food < 0)
+                    destroy = 1;
+                } else {
+                    if (op->material & M_PAPER || op->material & M_LEATHER ||
+                      op->material & M_WOOD || op->material & M_ORGANIC ||
+                      op->material & M_CLOTH || op->material & M_LIQUID)
+                        destroy = 1;
+                    if (op->material & M_IRON && rndm(1,5) == 1)
+                        destroy = 1;
+                    if (op->material & M_GLASS && rndm(1,2) == 1)
+                        destroy = 1;
+                    if ((op->material & M_STONE || op->material & M_ADAMANT) &&
+                      rndm(1,10) == 1)
+                        destroy = 1;
+                    if ((op->material & M_SOFT_METAL || op->material & M_BONE) &&
+                      rndm(1,3) == 1)
+                        destroy = 1;
+                    if (op->material & M_ICE && MAP_TEMP(m) > 32)
+                        destroy = 1;
+                }
+                /* adjust overall chance below */
+                if (destroy && rndm(0, 1)) {
+                    remove_ob(op);
+                    free_object(op);
+                }
+            }
 }
 
 /* convert materialname to materialtype_t */
@@ -280,7 +280,7 @@ void transmute_materialname(object *op, const object *change)
 	strcmp(op->materialname, change->materialname))
 	return;
 
-    if (!IS_ARMOR(op))
+    if (!(IS_ARMOR(op)  || IS_SHIELD(op) || op->type == GIRDLE || op->type == GLOVES || op->type == CLOAK))
 	return;
 
     mt = name_to_material(op->materialname);
@@ -320,15 +320,15 @@ void set_materialname(object *op, int difficulty, materialtype_t *nmt)
 	}
 
 #else
-	for (mt = materialt; mt != NULL && mt->next != NULL; mt=mt->next) {
-	    if (op->material & mt->material && rndm(1, 100) <= mt->chance &&
-		difficulty >= mt->difficulty &&
-		(op->magic >= mt->magic || mt->magic == 0)) {
-		lmt = mt;
-		if (!(IS_WEAPON(op) || IS_ARMOR(op)))
-		    break;
-	    }
-	}
+        for (mt = materialt; mt != NULL && mt->next != NULL; mt=mt->next) {
+            if (op->material & mt->material && rndm(1, 100) <= mt->chance &&
+              difficulty >= mt->difficulty &&
+              (op->magic >= mt->magic || mt->magic == 0)) {
+                lmt = mt;
+                if (!(IS_WEAPON(op) || IS_ARMOR(op) || IS_SHIELD(op) || op->type == GIRDLE || op->type == GLOVES || op->type == CLOAK))
+                    break;
+            }
+        }
 #endif
     } else {
 	lmt = nmt;
@@ -340,34 +340,34 @@ void set_materialname(object *op, int difficulty, materialtype_t *nmt)
 	return;
 #else
 
-	if (op->stats.dam && IS_WEAPON(op)) {
-	    op->stats.dam += lmt->damage;
-	    if (op->stats.dam < 1)
-		op->stats.dam = 1;
-	}
-	if (op->stats.sp && op->type == BOW)
-	    op->stats.sp += lmt->sp;
-	if (op->stats.wc && IS_WEAPON(op))
-	    op->stats.wc += lmt->wc;
-	if (IS_ARMOR(op)) {
-	    int j;
-	    if (op->stats.ac)
-		op->stats.ac += lmt->ac;
-	    for (j=0; j < NROFATTACKS; j++)
-		if (op->resist[j] != 0) {
-		    op->resist[j] += lmt->mod[j];
-		    if (op->resist[j] > 100)
-			op->resist[j] = 100;
-		    if (op->resist[j] < -100)
-			op->resist[j] = -100;
-		}
-	}
-	op->materialname = add_string(lmt->name);
-	/* dont make it unstackable if it doesn't need to be */
-	if (IS_WEAPON(op) || IS_ARMOR(op)) {
-	    op->weight = (op->weight * lmt->weight)/100;
-	    op->value = (op->value * lmt->value)/100;
-	}
+        if (op->stats.dam && IS_WEAPON(op)) {
+            op->stats.dam += lmt->damage;
+            if (op->stats.dam < 1)
+                op->stats.dam = 1;
+        }
+        if (op->stats.sp && op->type == BOW)
+            op->stats.sp += lmt->sp;
+        if (op->stats.wc && IS_WEAPON(op))
+            op->stats.wc += lmt->wc;
+        if (IS_ARMOR(op) || IS_SHIELD(op) || op->type == GIRDLE || op->type == GLOVES || op->type == CLOAK) {
+            int j;
+            if (op->stats.ac)
+                op->stats.ac += lmt->ac;
+            for (j=0; j < NROFATTACKS; j++)
+                if (op->resist[j] != 0) {
+                    op->resist[j] += lmt->mod[j];
+                    if (op->resist[j] > 100)
+                    op->resist[j] = 100;
+                    if (op->resist[j] < -100)
+                    op->resist[j] = -100;
+                }
+        }
+        op->materialname = add_string(lmt->name);
+        /* dont make it unstackable if it doesn't need to be */
+        if (IS_WEAPON(op) || IS_ARMOR(op) || IS_SHIELD(op) || op->type == GIRDLE || op->type == GLOVES || op->type == CLOAK) {
+            op->weight = (op->weight * lmt->weight)/100;
+            op->value = (op->value * lmt->value)/100;
+        }
 #endif
     }
 }

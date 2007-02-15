@@ -3213,17 +3213,12 @@ int can_apply_object(object *who, object *op)
     } /* for i -> num_body_locations loop */
 
     /* Do checks for can_use_weapon/shield/armour. */
-    if (op->type == WEAPON && !QUERY_FLAG(who,FLAG_USE_WEAPON))
-	retval |= CAN_APPLY_RESTRICTION;
-    if (op->type == SHIELD && !QUERY_FLAG(who,FLAG_USE_SHIELD))
-	retval |= CAN_APPLY_RESTRICTION;
-    if (!QUERY_FLAG(who,FLAG_USE_ARMOUR) &&
-        (op->type == ARMOUR || op->type == BOOTS ||
-         op->type == CLOAK || op->type == HELMET ||
-         op->type == GLOVES || op->type == BRACERS ||
-         op->type == GIRDLE)) 
-	retval |= CAN_APPLY_RESTRICTION;
-
+    if (IS_WEAPON(op) && !QUERY_FLAG(who,FLAG_USE_WEAPON))
+        retval |= CAN_APPLY_RESTRICTION;
+    if (IS_SHIELD(op) && !QUERY_FLAG(who,FLAG_USE_SHIELD))
+        retval |= CAN_APPLY_RESTRICTION;
+    if (IS_ARMOR(op) && !QUERY_FLAG(who,FLAG_USE_ARMOUR))
+        retval |= CAN_APPLY_RESTRICTION;
 
     if (who->type != PLAYER) {
 	if ((op->type == WAND || op->type == HORN || op->type==ROD)
