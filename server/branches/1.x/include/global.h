@@ -393,6 +393,7 @@ typedef struct Settings {
     uint8   armor_speed_linear;         /* If 1, speed improvement is linear, else exponantiel */
     uint8   no_player_stealing;     /* If 1, can not steal from other players */
     uint8   create_home_portals;     /* If 1, can create portals in unique maps (apartments) */
+    int     allow_denied_spells_writing; /* If set, players can write spells they can't cast. */
 } Settings;
 
 extern Settings settings;

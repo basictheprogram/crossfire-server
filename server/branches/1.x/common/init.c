@@ -44,7 +44,6 @@ CSPORT,				/* Client/server port */
 #else
   llevInfo,
 #endif
-
 0, NULL, 0,    /* dumpvalues, dumparg, daemonmode */
 0, /* argc */
 NULL, /* argv */
@@ -97,6 +96,7 @@ ARMOR_SPEED_IMPROVEMENT,
 ARMOR_SPEED_LINEAR,
 1, /* no_player_stealing */
 0, /* create_home_portals */
+0, /* allow_denied_spells_writing */
 };
 
 /** perhaps not the best place for this, but needs to be
