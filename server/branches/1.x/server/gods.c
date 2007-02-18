@@ -584,6 +584,9 @@ void become_follower (object *op, object *new_god) {
     update_priest_flag(new_god,skop,FLAG_UNDEAD);
     update_priest_flag(new_god,skop,FLAG_BLIND);
     update_priest_flag(new_god,skop,FLAG_XRAYS); /* better have this if blind! */
+    update_priest_flag(new_god,skop,FLAG_USE_WEAPON);
+    update_priest_flag(new_god,skop,FLAG_USE_ARMOUR);
+    update_priest_flag(new_god,skop,FLAG_USE_SHIELD);
 
     new_draw_info_format(NDI_UNIQUE,0,op,
 	"You are bathed in %s's aura.",new_god->name);
