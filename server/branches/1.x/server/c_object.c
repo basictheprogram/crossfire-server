@@ -604,9 +604,15 @@ static void pick_up_object (object *pl, object *op, object *tmp, int nrof)
 		query_cost_string(tmp,pl,F_BUY | F_SHOP));
     else
 	(void) sprintf(buf,"You pick up the %s.", query_name(tmp));
+
+    /* Now item is about to be picked. */
+    if (execute_event(tmp, EVENT_PICKUP, pl, op, NULL, SCRIPT_FIX_ALL) != 0)
+        return;
+
     new_draw_info(NDI_UNIQUE, 0,pl,buf);
 
     tmp = insert_ob_in_ob(tmp, op);
+
 
     /* All the stuff below deals with client/server code, and is only
      * usable by players
