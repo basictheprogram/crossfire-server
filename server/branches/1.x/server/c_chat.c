@@ -126,8 +126,16 @@ int command_chat (object *op, char *params)
     return command_tell_all(op, params, 9, NDI_BLUE, "chats");
 }
 
-
-
+/**
+ * Private communication.
+ *
+ * @param op
+ * player trying to tell something to someone.
+ * @param params
+ * who to tell, and message.
+ * @return
+ * 1.
+ */
 int command_tell (object *op, char *params)
 {
     char buf[MAX_BUF],*name = NULL ,*msg = NULL;
@@ -136,10 +144,10 @@ int command_tell (object *op, char *params)
     if ( params != NULL){
         name = params;
         msg = strchr(name, ' ');
-        if(msg){
-	     *(msg++)=0;
-	     if(*msg == 0)
-		msg = NULL;
+        if(msg) {
+            *(msg++)=0;
+            if (*msg == 0)
+                msg = NULL;
         }
     }
 
@@ -158,19 +166,34 @@ int command_tell (object *op, char *params)
     if ( pl )
         {
 	    new_draw_info(NDI_UNIQUE | NDI_ORANGE, 0, pl->ob, buf);
-	    new_draw_info_format(NDI_UNIQUE | NDI_ORANGE, 0, op, 
-			     "You tell %s: %s", pl->ob->name, msg);
 
-	    /* Update last_tell value [mids 01/14/2002] */
-	    strcpy(pl->last_tell, op->name);
-	    return 1;
+        /* Update last_tell value [mids 01/14/2002] */
+        snprintf(pl->last_tell, sizeof(pl->last_tell), op->name);
+
+        /* Hidden DMs get the message, but player should think DM isn't online. */
+        if (!pl->hidden || QUERY_FLAG(op, FLAG_WIZ)) {
+            new_draw_info_format(NDI_UNIQUE | NDI_ORANGE, 0, op,
+                "You tell %s: %s", pl->ob->name, msg);
+            return 1;
+            }
         }
 
     new_draw_info(NDI_UNIQUE, 0,op,"No such player or ambiguous name.");
     return 1;
 }
 
-/* Reply to last person who told you something [mids 01/14/2002] */
+/**
+ * Reply to last person who told you something [mids 01/14/2002]
+ *
+ * Must have been told something by someone first.
+ *
+ * @param op
+ * who is telling.
+ * @param params
+ * message to say.
+ * @return
+ * 1.
+ */
 int command_reply (object *op, char *params) {
     player *pl;
 
@@ -197,8 +220,14 @@ int command_reply (object *op, char *params) {
 
     new_draw_info_format(NDI_UNIQUE | NDI_ORANGE, 0, pl->ob, 
 	"%s tells you: %s", op->name, params);
-    new_draw_info_format(NDI_UNIQUE | NDI_ORANGE, 0, op, 
-		  "You tell to %s: %s", pl->ob->name, params);
+
+    if (pl->hidden && !QUERY_FLAG(op, FLAG_WIZ)) {
+        new_draw_info(NDI_UNIQUE, 0, op, "You can't reply, this player left.");
+        return 1;
+    }
+
+    new_draw_info_format(NDI_UNIQUE | NDI_ORANGE, 0, op,
+        "You tell to %s: %s", pl->ob->name, params);
     return 1;
 }
 
