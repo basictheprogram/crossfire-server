@@ -497,6 +497,7 @@ void *cfapi_region_get_property(int *type, ...);
 void *cfapi_get_time(int *type, ...);
 void *cfapi_timer_create(int *type, ...);
 void *cfapi_timer_destroy(int *type, ...);
+void *cfapi_friendlylist_get_next(int *type, ...);
 command_array_struct *find_plugin_command(char *cmd, object *op);
 int initPlugins(void);
 /* resurrection.c */
