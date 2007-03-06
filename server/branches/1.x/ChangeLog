@@ -17,6 +17,10 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Implement feature request #1675158: dmhide - "detect monster" will reveal DM.
+ spell_effect.c: detection doesn't concern DMs.
+Ryo 2007-03-06
+
 Add Object.Owner (read/write) and Crossfire.GetFriendlyList.
  plugins/cfpython/include/cfpython_object_private.h
  plugins/cfpython/cfpython.c

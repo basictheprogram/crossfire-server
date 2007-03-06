@@ -2122,7 +2122,7 @@ int cast_detection(object *op, object *caster, object *spell, object *skill) {
 		}
 		/* detect monster */
 		if (QUERY_FLAG(spell, FLAG_MONSTER) &&
-		    (QUERY_FLAG(tmp, FLAG_MONSTER) || tmp->type==PLAYER)) {
+		    (QUERY_FLAG(tmp, FLAG_MONSTER) || (tmp->type==PLAYER && !QUERY_FLAG(tmp, FLAG_WIZ)))) {
 			done_one = 2;
 			if (!detect) detect=tmp;
 		}
