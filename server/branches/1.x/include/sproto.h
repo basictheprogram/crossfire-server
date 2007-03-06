@@ -636,6 +636,8 @@ void spell_failure(object *op, int failure, int power, object *skill);
 int cast_spell(object *op, object *caster, int dir, object *spell_ob, char *stringarg);
 void move_spell_effect(object *op);
 void apply_spell_effect(object *spell, object *victim);
+void store_spell_expiry(object* spell);
+void check_spell_expiry(object* spell);
 /* swamp.c */
 void walk_on_deep_swamp(object *op, object *victim);
 void move_deep_swamp(object *op);
