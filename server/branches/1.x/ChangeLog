@@ -17,6 +17,10 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+=======
+Fix bug #1673713: event_attack in (sword etc) weapon doesn't work.
+ server/attack.c: fix EVENT_ATTACK weirdness.
+ ---
 Implement feature request #1560416: give warning when spell is about to expire.
 Player will be warned when left duration is one fifth, then one twenty-fifth.
 Two new functions are introduced, check_spell_expiry() and store_spell_expiry().
