@@ -1400,6 +1400,9 @@ int command_nowiz(object *op, char *params) { /* 'noadm' is alias */
         op->invisible = 1;
     } else
         new_draw_info(NDI_UNIQUE|NDI_ALL|NDI_LT_GREEN, 1, NULL, "The Dungeon Master is gone..");
+
+    update_los(op);
+
     return 1;
 }
 
