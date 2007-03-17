@@ -1834,12 +1834,16 @@ void update_position (mapstruct *m, int x, int y) {
 
     for (tmp = get_map_ob (m, x, y); tmp; tmp = tmp->above) {
 
-	/* This could be made additive I guess (two lights better than
-	 * one).  But if so, it shouldn't be a simple additive - 2
-	 * light bulbs do not illuminate twice as far as once since
-	 * it is a dissipation factor that is squared (or is it cubed?)
-	 */
-	if (tmp->glow_radius > light) light = tmp->glow_radius;
+        /* DMs just don't do anything when hidden, including no light. */
+        if (QUERY_FLAG(tmp, FLAG_WIZ) && tmp->contr->hidden)
+            continue;
+
+        /* This could be made additive I guess (two lights better than
+         * one).  But if so, it shouldn't be a simple additive - 2
+         * light bulbs do not illuminate twice as far as once since
+         * it is a dissipation factor that is squared (or is it cubed?)
+         */
+        if (tmp->glow_radius > light) light = tmp->glow_radius;
 
 	/* if this object is visible and not a blank face,
 	 * update the objects that show how this space
