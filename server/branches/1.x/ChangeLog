@@ -17,7 +17,13 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
-=======
+ doing a wrong check related to marked item/destroyer.
+Fix bug #1657675: multi-tile buildable object bug (note: one .x11 image though).
+ code now uses multi-tile aware function to generate object, and correctly
+ checks all relevant spots for building.
+ server/build_map.c
+Nicolas Weeger 2007-03-17
+
 Fix bug #1673713: event_attack in (sword etc) weapon doesn't work.
  server/attack.c: fix EVENT_ATTACK weirdness.
  ---
