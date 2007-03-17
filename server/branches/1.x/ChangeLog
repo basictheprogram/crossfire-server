@@ -17,6 +17,13 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Implement feature requet #1669464: Need new command - dmtell.
+ include/sproto.h
+ server/c_chat.c commands.c
+---
+server/c_wiz.c: enable 'teleport' to use a partial name.
+server/c_misc: 'listen' should be positive.
+---
 Fix bug #1668283: Crossfire.CreateObjectByName is faulty, by applying
  patch (feature request) #1682802: CreateObjectByName fix/change.
  Code by Yann Chackhoff.

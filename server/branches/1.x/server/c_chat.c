@@ -127,19 +127,21 @@ int command_chat (object *op, char *params)
 }
 
 /**
- * Private communication.
+ * Actual function sending a private message.
  *
  * @param op
  * player trying to tell something to someone.
  * @param params
- * who to tell, and message.
+ * who to tell, and message
+ * @param adjust_listen
+ * if non-zero, recipient can't ignore the message through 'listen' levels.
  * @return
  * 1.
  */
-int command_tell (object *op, char *params)
-{
+static int do_tell(object* op, char* params, int adjust_listen) {
     char buf[MAX_BUF],*name = NULL ,*msg = NULL;
     player *pl;
+    uint8 original_listen;
 
     if ( params != NULL){
         name = params;
@@ -164,8 +166,16 @@ int command_tell (object *op, char *params)
     pl = find_player_partial_name( name );
 
     if ( pl )
-        {
+    {
+        if (adjust_listen) {
+            original_listen = pl->listening;
+            pl->listening = 10;
+        }
+
 	    new_draw_info(NDI_UNIQUE | NDI_ORANGE, 0, pl->ob, buf);
+
+        if (adjust_listen)
+            pl->listening = original_listen;
 
         /* Update last_tell value [mids 01/14/2002] */
         snprintf(pl->last_tell, sizeof(pl->last_tell), op->name);
@@ -175,11 +185,40 @@ int command_tell (object *op, char *params)
             new_draw_info_format(NDI_UNIQUE | NDI_ORANGE, 0, op,
                 "You tell %s: %s", pl->ob->name, msg);
             return 1;
-            }
         }
+    }
 
     new_draw_info(NDI_UNIQUE, 0,op,"No such player or ambiguous name.");
     return 1;
+}
+
+/**
+ * Private communication.
+ *
+ * @param op
+ * player trying to tell something to someone.
+ * @param params
+ * who to tell, and message.
+ * @return
+ * 1.
+ */
+int command_tell (object *op, char *params)
+{
+    do_tell(op, params, 0);
+}
+
+/**
+ * Private communication, by a DM (can't be ignored by player).
+ *
+ * @param op
+ * player trying to tell something to someone.
+ * @param params
+ * who to tell, and message.
+ * @return
+ * 1.
+ */
+int command_dmtell (object *op, char *params) {
+    do_tell(op, params, 1);
 }
 
 /**
