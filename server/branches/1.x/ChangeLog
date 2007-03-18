@@ -17,6 +17,11 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Implement feature request #1528522: Initial items should be applied/worn.
+ server/player.c
+---
+ server/apply.c skill_util.c: keep the AP_NOPRINT flag for subcalls.
+---
  server/c_wiz.c: update DM's view when using nodm.
 ---
  server/apply.c: update player's view when turning on/off a lamp.
