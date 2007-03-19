@@ -6,7 +6,7 @@
 /*
     CrossFire, A Multiplayer game for X-windows
 
-    Copyright (C) 2002-2006 Mark Wedel & Crossfire Development Team
+    Copyright (C) 2002 Mark Wedel & Crossfire Development Team
     Copyright (C) 1992 Frank Tore Johansen
 
     This program is free software; you can redistribute it and/or modify
@@ -52,7 +52,7 @@ int move_object(object *op, int dir) {
  * can be different if originator is causing op to
  * move (originator is pushing op)
  * returns 0 if the object is not able to move to the
- * desired space, 1 otherwise (in which case we also
+ * desired space, 1 otherwise (in which case we also 
  * move the object accordingly.  This function is
  * very similiar to move_object.
   */
@@ -265,7 +265,7 @@ int teleport (object *teleporter, uint8 tele_type, object *user)
     if (k==-1) {
 	if (tele_type == SHOP_MAT && user->type == PLAYER) {
 	    for (k=1; k<9; k++) {
-		if (get_map_flags(other_teleporter->map, &m,
+		if (get_map_flags(other_teleporter->map, &m, 
 			other_teleporter->x + freearr_x[k],
 			other_teleporter->y + freearr_y[k], &sx,&sy) &
 			P_OUT_OF_MAP) continue;
@@ -297,23 +297,15 @@ int teleport (object *teleporter, uint8 tele_type, object *user)
 }
 
 void recursive_roll(object *op,int dir,object *pusher) {
-    char name[MAX_BUF];
-    query_name(op, name, MAX_BUF);
-    if(!roll_ob(op,dir,pusher)) {
-	draw_ext_info_format(NDI_UNIQUE, 0, pusher,
-			     MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_FAILURE,
-			     "You fail to push the %s.",
-			     "You fail to push the %s.",
-			     name);
-	return;
-    }
-    (void) move_ob(pusher,dir,pusher);
-    draw_ext_info_format(NDI_BLACK, 0, pusher,
-			  MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_SUCCESS,
-			 "You move the %s.",
-			 "You move the %s.",
-			 name);
+  if(!roll_ob(op,dir,pusher)) {
+    new_draw_info_format(NDI_UNIQUE, 0, pusher,
+	"You fail to push the %s.",query_name(op));
     return;
+  }
+  (void) move_ob(pusher,dir,pusher);
+  new_draw_info_format(NDI_BLACK, 0, pusher,
+	"You move the %s.",query_name(op));
+  return;
 }
 
 /**
@@ -325,14 +317,14 @@ void recursive_roll(object *op,int dir,object *pusher) {
  * Returns 1 if object does not fit, 0 if it does.
  */
 
-static int try_fit (object *op, mapstruct *m, int x, int y)
+static int try_fit (object *op, mapstruct *m, int x, int y) 
 {
     object *tmp, *more;
     sint16 tx, ty;
     int mflags;
     mapstruct *m2;
 
-    if (op->head)
+    if (op->head) 
 	op = op->head;
 
     for (more = op; more ; more = more->more) {
@@ -359,7 +351,7 @@ static int try_fit (object *op, mapstruct *m, int x, int y)
 }
 
 /**
- * this is not perfect yet.
+ * this is not perfect yet. 
  * it does not roll objects behind multipart objects properly.
  * Support for rolling multipart objects is questionable.
  */
@@ -371,13 +363,13 @@ static int roll_ob(object *op,int dir, object *pusher) {
     mapstruct *m;
     MoveType	move_block;
 
-    if (op->head)
+    if (op->head) 
 	op = op->head;
 
     x=op->x+freearr_x[dir];
     y=op->y+freearr_y[dir];
 
-    if(!QUERY_FLAG(op,FLAG_CAN_ROLL) ||
+    if(!QUERY_FLAG(op,FLAG_CAN_ROLL) || 
        (op->weight &&
        random_roll(0, op->weight/50000-1, pusher, PREFER_LOW) > pusher->stats.Str))
 	return 0;
@@ -420,10 +412,10 @@ int push_ob(object *who, int dir, object *pusher) {
 
     /* Wake up sleeping monsters that may be pushed */
     CLEAR_FLAG(who,FLAG_SLEEP);
-
+  
     /* player change place with his pets or summoned creature */
     /* TODO: allow multi arch pushing. Can't be very difficult */
-    if (who->more == NULL && (owner == pusher || (owner != NULL && owner->type == PLAYER && owner->contr->party != NULL && owner->contr->party == pusher->contr->party))) {
+    if (who->more == NULL && owner == pusher) {
 	int temp;
 	mapstruct *m;
 
@@ -465,36 +457,27 @@ int push_ob(object *who, int dir, object *pusher) {
     if(owner != pusher &&  pusher->type == PLAYER && who->type != PLAYER &&
       !QUERY_FLAG(who,FLAG_FRIENDLY)&& !QUERY_FLAG(who,FLAG_NEUTRAL)) {
 	if(pusher->contr->run_on) /* only when we run */ {
-	    draw_ext_info_format(NDI_UNIQUE, 0, pusher,
-				 MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_FAILURE,
-				 "You start to attack %s !!",
-				 "You start to attack %s !!",
-				 who->name);
+	    new_draw_info_format(NDI_UNIQUE, 0, pusher,
+              "You start to attack %s !!",who->name);
 	    CLEAR_FLAG(who,FLAG_UNAGGRESSIVE); /* the sucker don't like you anymore */
 	    who->enemy = pusher;
 	    return 1;
 	}
-	else
+	else 
 	{
-	    draw_ext_info_format(NDI_UNIQUE, 0, pusher,
-				  MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_FAILURE,
-				 "You avoid attacking %s .",
-				 "You avoid attacking %s .",
-				 who->name);
+	    new_draw_info_format(NDI_UNIQUE, 0, pusher,
+				 "You avoid attacking %s .",who->name);
 	}
     }
 
     /* now, lets test stand still. we NEVER can push stand_still monsters. */
     if(QUERY_FLAG(who,FLAG_STAND_STILL))
     {
-	draw_ext_info_format(NDI_UNIQUE, 0, pusher,
-			     MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_FAILURE,
-			     "You can't push %s.",
-			     "You can't push %s.",
-			     who->name);
+	new_draw_info_format(NDI_UNIQUE, 0, pusher,
+          "You can't push %s.",who->name);
 	return 0;
     }
-
+  
     /* This block is basically if you are pushing friendly but
      * non pet creaturs.
      * It basically does a random strength comparision to
@@ -505,16 +488,13 @@ int push_ob(object *who, int dir, object *pusher) {
     str1 = (who->stats.Str>0?who->stats.Str:who->level);
     str2 = (pusher->stats.Str>0?pusher->stats.Str:pusher->level);
     if(QUERY_FLAG(who,FLAG_WIZ) ||
-       random_roll(str1, str1/2+str1*2, who, PREFER_HIGH) >=
+       random_roll(str1, str1/2+str1*2, who, PREFER_HIGH) >= 
        random_roll(str2, str2/2+str2*2, pusher, PREFER_HIGH) ||
        !move_object(who,dir))
     {
 	if (who ->type == PLAYER) {
-	    draw_ext_info_format(NDI_UNIQUE, 0, who,
-				 MSG_TYPE_VICTIM,MSG_TYPE_VICTIM_WAS_PUSHED,
-				 "%s tried to push you.",
-				 "%s tried to push you.",
-				 pusher->name);
+	    new_draw_info_format(NDI_UNIQUE, 0, who,
+		 "%s tried to push you.",pusher->name);
 	}
 	return 0;
     }
@@ -523,19 +503,13 @@ int push_ob(object *who, int dir, object *pusher) {
      * Let everyone know the status.
      */
     if (who->type == PLAYER) {
-	draw_ext_info_format(NDI_UNIQUE, 0, who,
-			     MSG_TYPE_VICTIM,MSG_TYPE_VICTIM_WAS_PUSHED,
-			     "%s pushed you.",
-			     "%s pushed you.",
-			     pusher->name);
+	new_draw_info_format(NDI_UNIQUE, 0, who,
+			     "%s pushed you.",pusher->name);
     }
     if (pusher->type == PLAYER) {
-	draw_ext_info_format(NDI_UNIQUE, 0, pusher,
-			     MSG_TYPE_VICTIM,MSG_TYPE_VICTIM_WAS_PUSHED,
-			     "You pushed %s back.",
-			     "You pushed %s back.",
-			     who->name);
+	new_draw_info_format(NDI_UNIQUE, 0, pusher,
+		"You pushed %s back.", who->name);
     }
-
+  
     return 1;
 }

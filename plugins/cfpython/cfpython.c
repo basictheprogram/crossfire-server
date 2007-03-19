@@ -643,6 +643,7 @@ static PyObject* registerCommand(PyObject* self, PyObject* args)
 static PyObject* getTime(PyObject* self, PyObject* args)
 {
     PyObject* list;
+    partylist* party;
     timeofday_t tod;
 
     if (!PyArg_ParseTuple(args, "", NULL))
@@ -1339,7 +1340,7 @@ CF_PLUGIN void* globalEventListener(int* type, ...)
     
     /* Invalidate freed map wrapper. */
     if (context->event_code == EVENT_MAPUNLOAD)
-        Handle_Map_Unload_Hook((Crossfire_Map*)context->who);
+        Handle_Map_Unload_Hook(context->who);
     
     freeContext(context);
     
@@ -1378,7 +1379,7 @@ CF_PLUGIN void* eventListener(int* type, ...)
     va_end(args);
     
     if ((context->event_code == EVENT_DESTROY) && !strcmp(script_tmp, "cfpython_auto_hook")) {
-        Handle_Destroy_Hook((Crossfire_Object*)context->who);
+        Handle_Destroy_Hook(context->who);
         freeContext(context);
         return &rv;
     }

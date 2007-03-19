@@ -71,7 +71,7 @@ void cctk_setdatadir(char* datadir){
  * tree. This function requires that cctk_setlog and cctk_setdatadir have both
  * been run already.
  */
-void cctk_init_std_archetypes(void){
+void cctk_init_std_archetypes(){
     CCTK_ASSERT(STATUS_LOGDIR|STATUS_DATADIR);
     settings.archetypes="archetypes";
     settings.treasures="treasures.bld";

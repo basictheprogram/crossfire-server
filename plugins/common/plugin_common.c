@@ -109,8 +109,6 @@ static f_plug_api cfapiParty_get_property = NULL;
 static f_plug_api cfapiRegion_get_property = NULL;
 static f_plug_api cfapiPlayer_can_pay = NULL;
 static f_plug_api cfapiFriendlylist_get_next = NULL;
-static f_plug_api cfapiSet_random_map_variable = NULL;
-static f_plug_api cfapiGenerate_random_map = NULL;
 
 #define GET_HOOK( x, y, z ) \
     { \
@@ -196,9 +194,6 @@ int cf_init_plugin( f_plug_api getHooks )
     GET_HOOK( cfapiSystem_timer_create, "cfapi_system_timer_create", z );
     GET_HOOK( cfapiSystem_timer_destroy, "cfapi_system_timer_destroy", z );
     GET_HOOK( cfapiFriendlylist_get_next, "cfapi_friendlylist_get_next", z );
-    GET_HOOK( cfapiSet_random_map_variable, "cfapi_set_random_map_variable", z );
-    GET_HOOK( cfapiGenerate_random_map, "cfapi_generate_random_map", z );
-
     return 1;
 }
 
@@ -273,38 +268,11 @@ object* cf_player_send_inventory(object* op)
     int val;
     return cfapiPlayer_send_inventory(&val, op);
 }
-
-/**
- * Wrapper for manual_apply().
- *
- * Checks for unpaid items before applying.
- *
- * @param op
- * ::object object being applied.
- * @param author
- * ::object causing op to be applied.
- * @param flags
- * special (always apply/unapply) flags.  Nothing is done with
- * them in this function - they are passed to apply_special().
- * @return
- * - 0: player or monster can't apply objects of that type
- * - 1: has been applied, or there was an error applying the object
- * - 2: objects of that type can't be applied if not in inventory
- *
- */
-int cf_object_apply(object* op, object* author, int flags)
+void cf_object_apply(object* op, object* author, int flags)
 {
-    int val, ret;
-    cfapiObject_apply(&val,op,author,flags, &ret);
-    return ret;
+    int val;
+    cfapiObject_apply(&val,op,author,flags);
 }
-
-/**
- * Wrapper for player_apply_below().
- *
- * @param op
- * player applying below.
- */
 void cf_object_apply_below(object* op)
 {
     int val;
@@ -786,35 +754,10 @@ int cf_map_get_flags( mapstruct* map, mapstruct** nmap, sint16 x, sint16 y, sint
     int val;
     return *( int* )cfapiMap_get_flags(&val, map, nmap, x, y, nx, ny);
 }
-
-int cf_random_map_set_variable(RMParms* rp, const char* buf)
-{
-    int val, ret;
-    cfapiSet_random_map_variable(&val, rp, buf, &ret);
-    return ret;
-}
-
-mapstruct* cf_random_map_generate(const char *filename, RMParms *RP, char** use_layout)
+int cf_find_animation(char* txt)
 {
     int val;
-    mapstruct* map;
-    cfapiGenerate_random_map(&val, filename, RP, use_layout, &map);
-    return map;
-}
-
-
-/**
- * Wrapper for find_animation().
- * @param txt
- * the animation's name
- * @return
- * animation number, or 0 if no match found (animation 0 is initialized as the 'bug' face
- */
-int cf_find_animation(const char* txt)
-{
-    int val, anim;
-    cfapiSystem_find_animation(&val, txt, &anim);
-    return anim;
+    return *(int*)cfapiSystem_find_animation(&val, txt);
 }
 void cf_log( LogLevel logLevel, const char* format, ... )
 {
@@ -839,75 +782,27 @@ void cf_get_time( timeofday_t* tod )
     cfapiSystem_get_time(&val, tod);
 }
 
-/**
- * Creates a timer, equivalent of calling cftimer_create().
- *
- * @param ob
- * ::object that will get called. Should handle ::EVENT_TIMER.
- * @param delay
- * delay, seconds or ticks.
- * @param mode
- * timer mode, ::TIMER_MODE_SECONDS or ::TIMER_MODE_CYCLES
- * @return
- * timer identifier, or one of ::TIMER_ERR_ID, ::TIMER_ERR_OBJ or ::TIMER_ERR_MODE
- */
 int cf_timer_create(object* ob, long delay, int mode)
 {
-    int val, timer;
-    cfapiSystem_timer_create(&val, ob, delay, mode, &timer);
-    return timer;
+    int val;
+    return *( int* )cfapiSystem_timer_create(&val, ob, delay, mode);
 }
 
-/**
- * Destroys specified timer, equivalent of calling cftimer_destroy().
- *
- * @param id
- * timer to destroy
- * @return
- * ::TIMER_ERR_ID if invalid id, ::TIMER_ERR_NONE else.
- */
 int cf_timer_destroy(int id)
 {
-    int val, code;
-    cfapiSystem_timer_destroy(&val, id, &code);
-    return code;
+    int val;
+    return *( int* )cfapiSystem_timer_destroy(&val, id);
 }
 
-/**
- * Gets value for specified key, equivalent of get_ob_key_value().
- * @param op
- * ::object for which we search a key.
- * @param keyname
- * key to look for. Not required to be a shared string.
- * @return
- * value (shared string), or NULL if not found.
- */
-const char* cf_object_get_key(object* op, const char* keyname)
+char* cf_object_get_key(object* op, char* keyname)
 {
     int val;
-    const char* value;
-    cfapiObject_get_key(&val, op, keyname, &value);
-    return value;
+    return (char*)cfapiObject_get_key(&val, op, keyname);
 }
-
-/**
- * Sets a value for specified key, equivalent to set_ob_key_value().
- * @param op
- * ::object which will contain the key/value
- * @param keyname
- * key
- * @param value
- * value
- * @param add_key
- * if 0, key is only updated if it exists, else it's updated or added.
- * @return
- * TRUE or FALSE.
- */
-int cf_object_set_key(object* op, const char* keyname, const char* value, int add_key)
+void cf_object_set_key(object* op, char* keyname, char* value, int add_key)
 {
-    int val, ret;
-    cfapiObject_set_key(&val, op, keyname, value, add_key, &ret);
-    return ret;
+    int val;
+    cfapiObject_set_key(&val, op, keyname, value, add_key);
 }
 
 /* Archetype-related functions */

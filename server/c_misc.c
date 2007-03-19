@@ -28,7 +28,6 @@
 
 #include <global.h>
 #include <loader.h>
-#include <shstr.h>
 #ifndef __CEXTRACT__
 #include <sproto.h>
 #endif
@@ -512,10 +511,10 @@ void display_who_entry(object *op, player *pl, const char *format) {
  * T    the optional "the " sequence value (depend if player has own_title or not)
  * c	count
  * n	newline
- * h	<Hostile> if character is hostile, nothing otherwise
- * d	<WIZ> if character is a dm, nothing otherwise
- * a	<AFK> if character is afk, nothing otherwise
- * b	<BOT> if character is a bot, nothing otherwise
+ * h	[Hostile] if character is hostile, nothing otherwise
+ * d	[WIZ] if character is a dm, nothing otherwise
+ * a	[AFK] if character is afk, nothing otherwise
+ * b	[BOT] if character is a bot, nothing otherwise
  * l	the level of the character
  * m	the map path the character is currently on
  * M	the map name of the map the character is currently on
@@ -628,17 +627,24 @@ int command_whereami (object *op, char *params)
 
 int command_strings (object *op, char *params)
 {
-    char stats[HUGE_BUF];
-    ss_dump_statistics(stats, sizeof(stats));
+    ss_dump_statistics();
     draw_ext_info_format(NDI_UNIQUE, 0,op, MSG_TYPE_COMMAND, MSG_TYPE_LAST,
 		"[fixed]%s\n",
 		"%s",
-		  stats);
+		  errmsg);
 
     draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_COMMAND, MSG_TYPE_LAST,
-		  ss_dump_table(SS_DUMP_TOTALS, stats, sizeof(stats)), NULL);
+		  ss_dump_table(2), NULL);
     return 1;
 }
+
+#ifdef DEBUG
+int command_sstable (object *op, char *params)
+{
+    ss_dump_table(1);
+    return 1;
+}
+#endif
 
 int command_time (object *op, char *params)
 {
@@ -869,9 +875,8 @@ int command_debug (object *op, char *params)
 int command_dumpbelow (object *op, char *params)
 {
     if (op && op->below) {
-        char buf[HUGE_BUF];
-	dump_object(op->below, buf, sizeof(buf));
-	draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_COMMAND, MSG_SUBTYPE_NONE, buf, NULL);
+	dump_object(op->below);
+	draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_COMMAND, MSG_SUBTYPE_NONE, errmsg, NULL);
 
 	/* Let's push that item on the dm's stack */
 	dm_stack_push( op->contr, op->below->count );
@@ -947,7 +952,7 @@ int command_dumpallarchetypes (object *op, char *params)
 
 int command_ssdumptable (object *op, char *params)
 {
-    ss_dump_table(SS_DUMP_TABLE, NULL, 0);
+    ss_dump_table(1);
     return 0;
 }
 
@@ -1118,7 +1123,7 @@ int command_statistics(object *pl, char *params)
 int command_fix_me(object *op, char *params)
 {
     sum_weight(op);
-    fix_object(op);
+    fix_player(op);
     return 1;
 }
 
@@ -1567,7 +1572,7 @@ int command_help (object *op, char *params)
     if (!params) {
 	sprintf(filename, "%s/def_help", settings.datadir);
 	if ((fp=fopen(filename, "r")) == NULL) {
-	    LOG(llevError, "Cannot open help file %s: %s\n", filename, strerror_local(errno, line, sizeof(line)));
+	    LOG(llevError, "Cannot open help file %s: %s\n", filename, strerror_local(errno));
 	    return 0;
 	}
 	while (fgets(line, MAX_BUF, fp)) {
@@ -1636,7 +1641,7 @@ int command_help (object *op, char *params)
      * Found that. Just cat it to screen.
      */
     if ((fp=fopen(filename, "r")) == NULL) {
-	LOG(llevError, "Cannot open help file %s: %s\n", filename, strerror_local(errno, line, sizeof(line)));
+	LOG(llevError, "Cannot open help file %s: %s\n", filename, strerror_local(errno));
 	return 0;
     }
 
@@ -1957,7 +1962,7 @@ int command_brace (object *op, char *params)
 	draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_COMMAND, MSG_SUBTYPE_NONE,
 		      "Not braced.", NULL);
 
-    fix_object(op);
+    fix_player(op);
 
     return 0;
 }

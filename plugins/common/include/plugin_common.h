@@ -47,7 +47,7 @@ extern char*        cf_add_string( char* str );
 extern void         cf_free_string( char* str );
 extern char*        cf_strdup_local(char* txt);
 extern char*        cf_get_maps_directory( char* str );
-extern int          cf_find_animation(const char* txt);
+extern int          cf_find_animation(char* txt);
 extern void			cf_log( LogLevel logLevel, const char* format, ... );
 extern void         cf_get_time( timeofday_t* tod );
 extern int          cf_timer_create(object* ob, long delay, int mode);
@@ -96,7 +96,7 @@ extern void         cf_object_say( object* op, char* msg);
 extern void         cf_object_speak( object* op, char* msg);
 extern object*      cf_object_insert_object(object* op, object* container);
 extern object*      cf_object_present_archname_inside(object* op, char* whatstr);
-extern int          cf_object_apply(object* op, object* author, int flags);
+extern void         cf_object_apply(object* op, object* author, int flags);
 extern void         cf_object_remove(object* op);
 extern void         cf_object_free(object* op);
 extern object*      cf_create_object(void);
@@ -105,8 +105,8 @@ extern int          cf_object_change_map(object* op, int x, int y, mapstruct* ma
 extern int          cf_object_teleport( object* ob, mapstruct* map, int x, int y );
 extern void         cf_object_update( object* op, int flags);
 extern void         cf_object_pickup( object* op, object* what);
-extern const char*  cf_object_get_key(object* op, const char* keyname);
-extern int          cf_object_set_key(object* op, const char* keyname, const char* value, int add_key);
+extern char*        cf_object_get_key(object* op, char* keyname);
+extern void         cf_object_set_key(object* op, char* keyname, char* value, int add_key);
 extern sint16       cf_object_get_resistance(object* op, int rtype);
 extern void         cf_object_move(object* op, int dir, object*originator);
 extern void         cf_object_apply_below(object* op);
@@ -141,10 +141,6 @@ extern int          cf_map_get_winddir(mapstruct* map);
 extern int          cf_map_get_sky(mapstruct* map);
 extern int          cf_map_get_wpartx(mapstruct* map);
 extern int          cf_map_get_wparty(mapstruct* map);
-
-/* Random maps */
-extern int           cf_random_map_set_variable(RMParms* rp, const char* buf);
-extern mapstruct*    cf_random_map_generate(const char *filename, RMParms *RP, char** use_layout);
 
 /* Players */
 extern char*        cf_player_get_ip(object* op);

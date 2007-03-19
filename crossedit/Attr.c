@@ -525,11 +525,10 @@ static void AttrCancelCb(Widget w,XtPointer client,XtPointer call)
  */
 static void AttrDumpCb(Widget w,XtPointer client,XtPointer call)
 {
-    char buf[HUGE_BUF];
   Attr self = (Attr)client;
 
-  dump_object(self->op, buf, sizeof(buf));
-  CnvBrowseShowString(self->dump,buf); 
+  dump_object(self->op);
+  CnvBrowseShowString(self->dump,errmsg); 
 }
 
 /**********************************************************************

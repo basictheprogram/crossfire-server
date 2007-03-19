@@ -6,7 +6,7 @@
 /*
     CrossFire, A Multiplayer game for X-windows
 
-    Copyright (C) 2002-2007 Mark Wedel & Crossfire Development Team
+    Copyright (C) 2002,2007 Mark Wedel & Crossfire Development Team
     Copyright (C) 1992 Frank Tore Johansen
 
     This program is free software; you can redistribute it and/or modify
@@ -25,12 +25,6 @@
 
     The authors can be reached via e-mail at crossfire-devel@real-time.com
 */
-
-/**
- * @file
- * This deals with monster moving, attacking, using items and such.
- * The core function is move_monster().
- */
 
 #include <global.h>
 #ifndef __CEXTRACT__
@@ -68,22 +62,14 @@ static int talk_to_wall(object *pl, object *npc, const char *txt);
 #define MIN_MON_RADIUS 3 /* minimum monster detection radius */
 
 
-/**
- * Checks npc->enemy and returns that enemy if still valid,
+/* checks npc->enemy and returns that enemy if still valid,
  * NULL otherwise.
- * This is map tile aware.
+ * this is map tile aware.
  * If this returns an enemy, the range vector rv should also be
  * set to sane values.
- *
- * @param npc
- * monster we're considering
- * @param[out] rv
- * will contain vector to go to enemy if function returns not NULL.
- * @return
- * valid enemy for npc.
  */
 object *check_enemy(object *npc, rv_vector *rv) {
-
+    
     /* if this is pet, let him attack the same enemy as his owner
      * TODO: when there is no ower enemy, try to find a target,
      * which CAN attack the owner. */
@@ -145,8 +131,7 @@ object *check_enemy(object *npc, rv_vector *rv) {
     return can_detect_enemy(npc,npc->enemy,rv)?npc->enemy:NULL;
 }
 
-/**
- * Returns the nearest living creature (monster or generator).
+/* Returns the nearest living creature (monster or generator).
  * Modified to deal with tiled maps properly.
  * Also fixed logic so that monsters in the lower directions were more
  * likely to be skipped - instead of just skipping the 'start' number
@@ -158,12 +143,7 @@ object *check_enemy(object *npc, rv_vector *rv) {
  * the first few directions, it could very well choose something 
  * 3 spaces away even though something directly north is closer.
  *
- * This function is map tile aware.
- *
- * @param npc
- * monster to consider
- * @return
- * living creature, or NULL if none found.
+ * this function is map tile aware.
  */
 object *find_nearest_living_creature(object *npc) {
     int i,mflags;
@@ -204,21 +184,14 @@ object *find_nearest_living_creature(object *npc) {
 }
 
 
-/**
- * Tries to find an enmy for npc.  We pass the range vector since
+/* Tries to find an enmy for npc.  We pass the range vector since
  * our caller will find the information useful.
  * Currently, only move_monster calls this function.
  * Fix function so that we always make calls to get_rangevector
  * if we have a valid target - function as not doing so in
  * many cases.
- *
- * @param npc
- * monster we're considering.
- * @param[out] rv
- * vector that will contain how to reach the target. Must not be NULL.
- * @return
- * enemy npc wants to attack, or NULL if nont found.
  */
+
 static object *find_enemy(object *npc, rv_vector *rv)
 {
     object *attacker, *tmp=NULL;
@@ -289,21 +262,12 @@ static object *find_enemy(object *npc, rv_vector *rv)
     return tmp;
 }
 
-/**
- * Sees if this monster should wake up.
+/* Sees if this monster should wake up.
  * Currently, this is only called from move_monster, and
  * if enemy is set, then so should be rv.
- * @param op
- * monster to check.
- * @param enemy
- * enemy that can cause to wake up.
- * @param[out] rv
- * vector pointing to enemy.
- * @return
- * 1 if the monster should wake up, 0 otherwise.
- * @note
- * will return 0 if enemy is NULL.
+ * returns 1 if the monster should wake up, 0 otherwise.
  */
+
 static int check_wakeup(object *op, object *enemy, rv_vector *rv) {
     int radius = op->stats.Wis>MIN_MON_RADIUS?op->stats.Wis:MIN_MON_RADIUS;
 
@@ -338,14 +302,6 @@ static int check_wakeup(object *op, object *enemy, rv_vector *rv) {
     return 0;
 }
 
-/**
- * Makes an object move in a random direction.
- *
- * @param op
- * object to move.
- * @return
- * 1 if moved, 0 else.
- */
 static int move_randomly(object *op) {
     int i;
 
@@ -357,17 +313,10 @@ static int move_randomly(object *op) {
     return 0;
 }
 
-/**
- * Main monster processing routine.
- *
- * Will regenerate spell points, hit points.
- * Moves the monster, handle attack, item applying, pickup, ...
- *
- * @param op
- * monster to process.
- * @return
- * 1 if the object has been freed, otherwise 0.
+/*
+ * Move-monster returns 1 if the object has been freed, otherwise 0.
  */
+
 int move_monster(object *op) {
     int dir, diff;
     object  *owner, *enemy, *part, *oph=op;
@@ -728,20 +677,6 @@ int move_monster(object *op) {
     return 0;
 }
 
-/**
- * Checks if monster can hit in hand-to-hand combat. Multitile aware.
- *
- * @param ob1
- * monster trying to hit.
- * @param ob2
- * target to hit.
- * @param rv
- * vector from ob1 to ob2.
- * @return
- * 1 if ob1 is adjacent to ob2, 0 else.
- * @todo
- * rename to something more clear (is_adjacent?).
- */
 static int can_hit(object *ob1,object *ob2, rv_vector *rv) {
     object *more;
     rv_vector rv1;
@@ -762,14 +697,13 @@ static int can_hit(object *ob1,object *ob2, rv_vector *rv) {
 
 }
 
-/**
- * Checks if a monster should cast a spell.
+/* Returns 1 is monster should cast spell sp at an enemy
+ * Returns 0 if the monster should not cast this spell.
  *
  * Note that this function does not check to see if the monster can
  * in fact cast the spell (sp dependencies and what not.)  That is because
  * this function is also sued to see if the monster should use spell items
  * (rod/horn/wand/scroll).
- *
  * Note that there are certainly other offensive spells that could be
  * included, but I decided to leave out the spells that may kill more
  * monsters than players (eg, disease).
@@ -777,15 +711,8 @@ static int can_hit(object *ob1,object *ob2, rv_vector *rv) {
  * This could be a lot smarter - if there are few monsters around,
  * then disease might not be as bad. Likewise, if the monster is damaged,
  * the right type of healing spell could be useful.
- *
- * @param monster
- * monster trying to cast a spell.
- * @param spell_ob
- * spell considered.
- * @return
- * 1 is monster should cast spell sp, 0 else.
- * @todo improve logic, take enemy into consideration.
  */
+
 static int monster_should_cast_spell(object *monster, object *spell_ob)
 {
     if (spell_ob->subtype == SP_BOLT || spell_ob->subtype == SP_BULLET ||
@@ -801,23 +728,13 @@ static int monster_should_cast_spell(object *monster, object *spell_ob)
     return 0;
 }
 
-/** Maximum number of spells to consider when choosing a spell for a monster. */
+
 #define MAX_KNOWN_SPELLS 20
 
-/**
- * Selects a spell to cast for a monster.
- *
- * Returns a randomly selected spell.    This logic is still
+/* Returns a randomly selected spell.    This logic is still
  * less than ideal.  This code also only seems to deal with
  * wizard spells, as the check is against sp, and not grace.
- * can monsters know cleric spells?
- *
- * @param monster
- * monster trying to cast a spell.
- * @return
- * spell to cast, NULL if none suitable found.
- * @note
- * Will only consider the first MAX_KNOWN_SPELLS spells found.
+ * can mosnters know cleric spells?
  */
 static object *monster_choose_random_spell(object *monster) {
     object *altern[MAX_KNOWN_SPELLS];
@@ -841,23 +758,13 @@ static object *monster_choose_random_spell(object *monster) {
     return altern[RANDOM()%i];
 }
 
-/**
- * Tries to make a (part of a) monster cast a spell.
- *
- * Handles sp/gr limits, and confusion.
- *
- * @param head
- * head of the monster.
- * @param part
- * part of the monster that we use to cast.
- * @param pl
- * target.
- * @param dir
- * direction to cast.
- * @param rv
- * vector describing where the enemy is.
- * @return
- * 1 if monster casted a spell, 0 else.
+/* This checks to see if the monster should cast a spell/ability.
+ * it returns true if the monster casts a spell, 0 if he doesn't.
+ * head is the head of the monster.
+ * part is the part of the monster we are checking against.
+ * pl is the target.
+ * dir is the direction to case.
+ * rv is the vector which describes where the enemy is.
  */
 
 static int monster_cast_spell(object *head, object *part,object *pl,int dir, rv_vector *rv) {
@@ -927,22 +834,7 @@ static int monster_cast_spell(object *head, object *part,object *pl,int dir, rv_
     return cast_spell(part,part,dir, spell_item, NULL);
 }
 
-/**
- * Tries to make a (part of a) monster apply a spell.
- *
- * @param head
- * head of the monster.
- * @param part
- * part of the monster that we use to cast.
- * @param pl
- * target.
- * @param dir
- * direction to cast.
- * @param rv
- * vector describing where the enemy is.
- * @return
- * 1 if monster applied a scroll, 0 else.
- */
+
 static int monster_use_scroll(object *head, object *part,object *pl,int dir, rv_vector *rv) {
     object *scroll;
     object *owner;
@@ -984,8 +876,7 @@ static int monster_use_scroll(object *head, object *part,object *pl,int dir, rv_
     return 1;
 }
 
-/**
- * monster_use_skill()-implemented 95-04-28 to allow monster skill use.
+/* monster_use_skill()-implemented 95-04-28 to allow monster skill use.
  * Note that monsters do not need the skills SK_MELEE_WEAPON and
  * SK_MISSILE_WEAPON to make those respective attacks, if we
  * required that we would drastically increase the memory
@@ -995,22 +886,8 @@ static int monster_use_scroll(object *head, object *part,object *pl,int dir, rv_
  *
  * At the moment this is only useful for throwing, perhaps for
  * stealing. TODO: This should be more integrated in the game. -MT, 25.11.01
- *
- * Will switch between at most 2 skills.
- *
- * @param head
- * head of the monster.
- * @param part
- * part of the monster that may use a skill.
- * @param pl
- * target.
- * @param dir
- * direction to cast.
- * @return
- * 1 if monster used a skill, 0 else.
- * @todo
- * improve skill logic? Fix comments.
- */
+ */  
+
 static int monster_use_skill(object *head, object *part, object *pl,int dir) {
     object *skill, *owner;
 
@@ -1047,20 +924,8 @@ static int monster_use_skill(object *head, object *part, object *pl,int dir) {
     return do_skill(head, part, head->chosen_skill,dir,NULL);
 }
 
-/**
- * Monster will use a ranged attack (HORN, WAND, ...).
- *
- * @param head
- * head of the monster.
- * @param part
- * part of the monster that can do a range attack.
- * @param pl
- * target.
- * @param dir
- * direction to fire.
- * @return
- * 1 if monster casted a spell, 0 else.
- */
+/* Monster will use a ranged spell attack. */
+
 static int monster_use_range(object *head,object *part,object *pl,int dir)
     {
     object *wand, *owner;
@@ -1128,22 +993,6 @@ static int monster_use_range(object *head,object *part,object *pl,int dir)
 	return 0;
     }
 
-/**
- * Tries to make a (part of a) monster fire a bow.
- *
- * Handles sp/gr limits, and confusion.
- *
- * @param head
- * head of the monster.
- * @param part
- * part of the monster that we use to cast.
- * @param pl
- * target.
- * @param dir
- * direction to cast.
- * @return
- * 1 if monster fired something, 0 else.
- */
 static int monster_use_bow(object *head, object *part, object *pl, int dir) {
     object *owner;
 
@@ -1163,18 +1012,13 @@ static int monster_use_bow(object *head, object *part, object *pl, int dir) {
 
 }
 
-/**
- * Checks if using weapon 'item' would be better for 'who'.
- * This is a very simplistic check - also checking things
+/* Checks if putting on 'item' will make 'who' do more
+ * damage.  This is a very simplistic check - also checking things
  * like speed and ac are also relevant.
  *
- * @param who
- * creature considering to apply item.
- * @param item
- * item to check.
- * @return
- * 1 if item is a better object, 0 else.
+ * return true if item is a better object.
  */
+
 static int check_good_weapon(object *who, object *item) {
     object *other_weap;
     int val=0, i;
@@ -1205,18 +1049,6 @@ static int check_good_weapon(object *who, object *item) {
 
 }
 
-/**
- * Checks if using armor 'item' would be better for 'who'.
- * This is a very simplistic check - also checking things
- * like speed and ac are also relevant.
- *
- * @param who
- * creature considering to apply item.
- * @param item
- * item to check.
- * @return
- * 1 if item is a better object, 0 else.
- */
 static int check_good_armour(object *who, object *item) {
     object *other_armour;
     int val=0,i;
@@ -1252,25 +1084,20 @@ static int check_good_armour(object *who, object *item) {
 
 }
 
-/**
- * Checks for items that monster can pick up.
+/*
+ * monster_check_pickup(): checks for items that monster can pick up.
  *
- * Vick's (vick(at)bern.docs.uu.se) fix 921030 for the sweeper blob.
+ * Vick's (vick@bern.docs.uu.se) fix 921030 for the sweeper blob.
  * Each time the blob passes over some treasure, it will
  * grab it a.s.a.p.
  *
- * Eneq((at)csd.uu.se): This can now be defined in the archetypes, added code
+ * Eneq(@csd.uu.se): This can now be defined in the archetypes, added code
  * to handle this.
  *
  * This function was seen be continueing looping at one point (tmp->below
  * became a recursive loop.  It may be better to call monster_check_apply
  * after we pick everything up, since that function may call others which
  * affect stacking on this space.
- *
- * @param monster
- * monster that can pick up items.
- * @todo
- * check tmp->next, shouldn't it be tmp->below?
  */
 
 static void monster_check_pickup(object *monster) {
@@ -1839,13 +1666,10 @@ static int do_talk_npc(object* op, object* npc, object* override, const char* tx
 }
 
 void npc_say(object *npc, char *cp) {
-    char buf[MAX_BUF], name[MAX_BUF];
-    query_name(npc, name, MAX_BUF);
-    snprintf(buf, sizeof(buf), "%s says:", name);
-    ext_info_map(NDI_NAVY|NDI_UNIQUE, npc->map, MSG_TYPE_DIALOG, MSG_TYPE_DIALOG_NPC,
-		 buf, buf);
-    ext_info_map(NDI_NAVY|NDI_UNIQUE, npc->map, MSG_TYPE_DIALOG, MSG_TYPE_DIALOG_NPC,
-		 cp, cp);
+    char buf[MAX_BUF];
+    snprintf(buf, sizeof(buf), "%s says:", query_name(npc));
+    new_info_map(NDI_NAVY|NDI_UNIQUE, npc->map, buf);
+    new_info_map(NDI_NAVY|NDI_UNIQUE, npc->map, cp);
 }
 
 static int talk_to_npc(object *op, object *npc, const char *txt) {
@@ -1881,9 +1705,7 @@ static int do_talk_wall(object* pl, object* npc, object* override, const char* t
     if (!cp)
 	return 0;
 
-    ext_info_map(NDI_NAVY | NDI_UNIQUE, npc->map, 
-		 MSG_TYPE_DIALOG, MSG_TYPE_DIALOG_MAGIC_MOUTH,
-		 cp, cp);
+    new_info_map(NDI_NAVY | NDI_UNIQUE, npc->map,cp);
     use_trigger(npc);
     quest_apply_items(npc, pl->contr);
     free(cp);
@@ -1931,12 +1753,8 @@ object *find_mon_throw_ob(object *op) {
     }
 
 #ifdef DEBUG_THROW
-    {
-        char what[MAX_BUF];
-        query_name(tmp, what, MAX_BUF);
     LOG(llevDebug,"%s chooses to throw: %s (%d)\n",op->name,
-	!(tmp)?"(nothing)":what,tmp?tmp->count:-1);
-    }
+	!(tmp)?"(nothing)":query_name(tmp),tmp?tmp->count:-1);
 #endif
 
     return tmp;
@@ -2052,11 +1870,8 @@ int can_detect_enemy (object *op, object *enemy, rv_vector *rv) {
 	    make_visible(enemy);
 	    /* inform players of new status */
 	    if(enemy->type==PLAYER && player_can_view(enemy,op)) 
-		draw_ext_info_format(NDI_UNIQUE,0, enemy,
-			     MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-			     "You are discovered by %s!",
-			     "You are discovered by %s!",
-			     op->name);
+		new_draw_info_format(NDI_UNIQUE,0, enemy,
+					"You are discovered by %s!",op->name);
 		return 1; /* detected enemy */ 
 	}
 	else if (enemy->invisible) {
@@ -2069,13 +1884,8 @@ int can_detect_enemy (object *op, object *enemy, rv_vector *rv) {
 	     */
 	    if ((RANDOM() % 50) <= hide_discovery) {
 		if (enemy->type == PLAYER) {
-            char name[MAX_BUF];
-            query_name(op, name, MAX_BUF);
-		    draw_ext_info_format(NDI_UNIQUE,0, enemy,
-			 MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-			 "You see %s noticing your position.", 
-			 "You see %s noticing your position.", 
-			 name);
+		    new_draw_info_format(NDI_UNIQUE,0, enemy, 
+			 "You see %s noticing your position.", query_name(op));
 		}
 		return 1;
 	    }
@@ -2155,10 +1965,8 @@ int can_see_enemy (object *op, object *enemy) {
 	if(has_carried_lights(enemy)) { 
 	    if(enemy->hide) { 
 		make_visible(enemy);
-		draw_ext_info(NDI_UNIQUE,0, enemy,
-		      MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-		      "Your light reveals your hiding spot!",
-		      NULL);
+		new_draw_info(NDI_UNIQUE,0, enemy,
+			      "Your light reveals your hiding spot!");
 	    }
 	    return 1;
 	} else if (enemy->hide) return 0; 

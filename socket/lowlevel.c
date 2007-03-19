@@ -119,7 +119,6 @@ int SockList_ReadPacket(int fd, SockList *sl, int len)
 {
     int stat,toread;
     extern int errno;
-    char err[MAX_BUF];
 
     /* Sanity check - shouldn't happen */
     if (sl->len < 0) {
@@ -152,11 +151,11 @@ int SockList_ReadPacket(int fd, SockList *sl, int len)
 	    }
 #else
             if (errno == ECONNRESET) {
-                    LOG(llevDebug, "ReadPacket got error %s, returning -1\n", strerror_local(errno, err, sizeof(err)));
+                    LOG(llevDebug, "ReadPacket got error %s, returning -1\n", strerror_local(errno));
                     return -1;
             }
   	    if (errno != EAGAIN && errno !=EWOULDBLOCK) {
-		    LOG(llevDebug, "ReadPacket got error %s, returning 0\n", strerror_local(errno, err, sizeof(err)));
+		    LOG(llevDebug, "ReadPacket got error %s, returning 0\n", strerror_local(errno));
             }
 #endif
 	    return 0;	/*Error */
@@ -211,7 +210,7 @@ int SockList_ReadPacket(int fd, SockList *sl, int len)
 	    }
 #else
 	if (errno != EAGAIN && errno !=EWOULDBLOCK) {
-		LOG(llevDebug, "ReadPacket got error %s, returning 0\n", strerror_local(errno, err, sizeof(err)));
+		LOG(llevDebug, "ReadPacket got error %s, returning 0\n", strerror_local(errno));
 	    }
 #endif
 	    return 0;	/*Error */
@@ -315,9 +314,8 @@ void write_socket_buffer(socket_struct *ns)
 		LOG(llevError,"New socket write failed (wsb) (%d).\n", WSAGetLastError());
 #else
 	if (errno !=EWOULDBLOCK) {
-        char err[MAX_BUF];
 		LOG(llevError,"New socket write failed (wsb) (%d: %s).\n",
-		    errno, strerror_local(errno, err, sizeof(err)));
+		    errno, strerror_local(errno));
 #endif
 		ns->status=Ns_Dead;
 		return;
@@ -350,7 +348,6 @@ static void Write_To_Socket(socket_struct *ns, const unsigned char *buf, int len
 {
     int amt=0;
     const unsigned char *pos=buf;
-    char err[MAX_BUF];
 
     if (ns->status == Ns_Dead || !buf) {
 	LOG(llevDebug,"Write_To_Socket called with dead socket\n");
@@ -381,7 +378,7 @@ static void Write_To_Socket(socket_struct *ns, const unsigned char *buf, int len
 #else
 	if (errno !=EWOULDBLOCK) {
 		LOG(llevError,"New socket write failed WTS (%d: %s).\n", /* ---WIN32 */
-		    errno, strerror_local(errno, err, sizeof(err)));
+		    errno, strerror_local(errno));
 #endif
 		ns->status=Ns_Dead;
 		return;

@@ -33,7 +33,7 @@ void emergency_save( int x )
     {
     }
  
-void clean_tmp_files( void )
+void clean_tmp_files( )
     {
     }
  
@@ -53,7 +53,7 @@ void set_darkness_map( mapstruct* m)
     {
     }
  
-int ob_move_on(object* op, object* victim, object* originator)
+void move_apply( object* ob, object* obt, object* obx )
     {
     }
  

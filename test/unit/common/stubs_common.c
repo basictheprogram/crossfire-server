@@ -9,29 +9,15 @@ void fix_auto_apply(mapstruct * m)
 {
 }
 
-void draw_ext_info(int flags, int pri, const object *pl, uint8 type, uint8 subtype, const char *txt, const char *txt2)
+void new_draw_info(int a, int b, const object *ob, const char *txt)
     {
     fprintf(logfile, "%s\n", txt);
     }
-
-void draw_ext_info_format(
-        int flags, int pri, const object *pl, uint8 type, 
-        uint8 subtype, 
-        const char* new_format, 
-        const char* old_format, 
-        ...)
-{
-    va_list ap;
-    va_start(ap, old_format);
-    vfprintf(logfile, old_format, ap);
-    va_end(ap);
-}
-
-void ext_info_map(int color, const mapstruct *map, uint8 type, uint8 subtype, const char *str1, const char *str2)
-{
-    fprintf(logfile, "ext_info_map: %s\n", str2);
-}
-
+void new_info_map(int color, const mapstruct *map, const char *str)
+    {
+    fprintf(logfile, "new_info_map: %s\n", str);
+    }
+ 
 void move_teleporter( object* ob)
     {
     }
@@ -56,7 +42,7 @@ void emergency_save( int x )
     {
     }
  
-void clean_tmp_files( void )
+void clean_tmp_files( )
     {
     }
  
@@ -76,7 +62,7 @@ void set_darkness_map( mapstruct* m)
     {
     }
  
-int ob_move_on(object* op, object* victim, object* originator)
+void move_apply( object* ob, object* obt, object* obx )
     {
     }
  
@@ -100,12 +86,12 @@ void monster_check_apply( object* ob, object* obt )
 void trap_adjust( object* ob, int x )
     {
     }
-    
+
 int execute_event(object* op, int eventcode, object* activator, object* third, const char* message, int fix)
     {
     return 0;
     }
-
+    
 int execute_global_event(int eventcode, ...)
     {
     return 0;

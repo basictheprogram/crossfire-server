@@ -6,7 +6,7 @@
 /*
     CrossFire, A Multiplayer game for X-windows
 
-    Copyright (C) 2006 Mark Wedel & Crossfire Development Team
+    Copyright (C) 2002 Mark Wedel & Crossfire Development Team
     Copyright (C) 1992 Frank Tore Johansen
 
     This program is free software; you can redistribute it and/or modify
@@ -93,8 +93,7 @@ static void generate_monster_inv(object *gen) {
     int i;
     int nx, ny;
     object *op,*head=NULL;
-    const char *code;
-    
+
     int qty=0;
     /* Code below assumes the generator is on a map, as it tries
      * to place the monster on the map.  So if the generator
@@ -114,7 +113,7 @@ static void generate_monster_inv(object *gen) {
     qty=rndm(0,qty-1);
     for (op=gen->inv;qty;qty--)
         op=op->below;
-    i=find_multi_free_spot_within_radius(op, gen, &nx, &ny);
+    i=find_multi_free_spot_around(op, gen, &nx, &ny);
     if (i==-1)
         return;
     head=object_create_clone(op);
@@ -122,10 +121,6 @@ static void generate_monster_inv(object *gen) {
     unflag_inv (head,FLAG_IS_A_TEMPLATE);
     if (rndm(0, 9))
         generate_artifact(head, gen->map->difficulty);
-    code = get_ob_key_value(gen, "generator_code");
-    if(code){
-        set_ob_key_value(head, "generator_code", code, 1);
-    }
     insert_ob_in_map_at(head,gen->map,gen,0,nx,ny);
     if (QUERY_FLAG(head, FLAG_FREED)) return;
     fix_multipart_object(head);
@@ -139,7 +134,6 @@ static void generate_monster_arch(object *gen) {
     int nx, ny;
     object *op,*head=NULL,*prev=NULL;
     archetype *at=gen->other_arch;
-    const char *code;
 
     if(gen->other_arch==NULL) {
 	LOG(llevError,"Generator without other_arch: %s\n",gen->name);
@@ -153,7 +147,7 @@ static void generate_monster_arch(object *gen) {
 	LOG(llevError,"Generator (%s) not on a map?\n", gen->name);
 	return;
     }
-    i=find_multi_free_spot_within_radius(&at->clone, gen, &nx, &ny);
+    i=find_multi_free_spot_around(&at->clone, gen, &nx, &ny);
     if (i==-1) return;
     while(at!=NULL) {
 	op=arch_to_object(at);
@@ -164,10 +158,6 @@ static void generate_monster_arch(object *gen) {
 	    op->head=head,prev->more=op;
 
 	if (rndm(0, 9)) generate_artifact(op, gen->map->difficulty);
-    code = get_ob_key_value(gen, "generator_code");
-    if(code){
-        set_ob_key_value(head, "generator_code", code, 1);
-    }
 	insert_ob_in_map(op,gen->map,gen,0);
 	if (QUERY_FLAG(op, FLAG_FREED)) return;
 	if(HAS_RANDOM_ITEMS(op))
@@ -181,59 +171,14 @@ static void generate_monster_arch(object *gen) {
 }
 
 static void generate_monster(object *gen) {
-    sint8 children;
-    sint8 max_children;
-    sint8 x, y;
-    object *tmp;
-    const char *code;
-    const char *value;
 
     if(GENERATE_SPEED(gen)&&rndm(0, GENERATE_SPEED(gen)-1))
         return;
-        /* See if generator has a generator_max limit set */
-    value = get_ob_key_value(gen, "generator_max");
-    if(value){
-        max_children = (sint8)strtol_local((char *)value, NULL, 10);
-        if( max_children < 1 )
-            return;
-        code = get_ob_key_value(gen, "generator_code");
-        if( code ){
-                /* Generator has a limit and has created some,
-                 * so count how many already exist
-                 */
-            children = 0;
-            for(x = 0; x < MAP_WIDTH(gen->map); x++){
-                for(y = 0; y < MAP_HEIGHT(gen->map); y++){
-                    for(tmp = get_map_ob(gen->map,x,y);
-                        tmp!=NULL; tmp=tmp->above){
-                        value = get_ob_key_value(tmp, "generator_code");
-                        if(value && value == code){
-                            children++;
-                        }
-                    }
-                }
-            }
-                /* and return without generating if there are already enough */
-            if( children >= max_children+1 )
-                return;
-        } else {
-                /* Generator has a limit, but hasn't created anything yet,
-                 * so no need to count, just set code and go
-                 */
-            value = get_ob_key_value(gen, "generator_name");
-            if( value ){
-                set_ob_key_value( gen, "generator_code", value, 1 );
-            } else if(gen->name) {
-                set_ob_key_value( gen, "generator_code", gen->name, 1 );
-            } else {
-                set_ob_key_value( gen, "generator_code", "generator", 1 );
-            }
-        }
-    }
     if (QUERY_FLAG(gen,FLAG_CONTENT_ON_GEN))
         generate_monster_inv(gen);
     else
         generate_monster_arch(gen);
+
 }
 
 static void remove_force(object *op) {
@@ -246,55 +191,15 @@ static void remove_force(object *op) {
 	case FORCE_CONFUSION:
 	    if(op->env!=NULL) {
 		CLEAR_FLAG(op->env, FLAG_CONFUSED);
-		draw_ext_info(NDI_UNIQUE, 0,op->env,
-			      MSG_TYPE_ATTRIBUTE, MSG_TYPE_ATTRIBUTE_BAD_EFFECT_END,
-			      "You regain your senses.", NULL);
+		new_draw_info(NDI_UNIQUE, 0,op->env, "You regain your senses.\n");
 	    }
-        break;
-
-    case FORCE_TRANSFORMED_ITEM:
-            /* The force is into the item that was created */
-            if (op->env != NULL && op->inv != NULL) {
-                object* inv = op->inv;
-                object* pl = get_player_container(op);
-                remove_ob(inv);
-                inv->weight = (inv->nrof ? (sint32)(op->env->weight / inv->nrof) : op->env->weight);
-                if (op->env->env) {
-                    insert_ob_in_ob(inv, op->env->env);
-                    if (pl) {
-                        char name[HUGE_BUF];
-                        query_short_name(inv, name, HUGE_BUF);
-                        esrv_send_item(pl, inv);
-                        draw_ext_info_format(NDI_UNIQUE, 0,pl,
-                            MSG_TYPE_ITEM, MSG_TYPE_ITEM_CHANGE,
-                            "Your %s recovers its original form.",
-                            "Your %s recovers its original form.",
-                            name);
-                    }
-                }
-                else {
-                    /* Object on map */
-                    inv->x = op->env->x;
-                    inv->y = op->env->y;
-                    insert_ob_in_map(inv, op->env->map, NULL, 0);
-                }
-                inv = op->env;
-                remove_ob(op);
-                free_object(op);
-                if (inv->env && inv->env->type == PLAYER)
-                    esrv_del_item(inv->env->contr, inv->count);
-                remove_ob(inv);
-            }
-            return;
 
 	default:
-        break;
-    }
-
-    if(op->env!=NULL) {
-        CLEAR_FLAG(op, FLAG_APPLIED);
-        change_abil(op->env,op);
-        fix_object(op->env);
+	    if(op->env!=NULL) {
+		CLEAR_FLAG(op, FLAG_APPLIED);
+		change_abil(op->env,op);
+		fix_player(op->env);
+	    }
     }
     remove_ob(op);
     free_object(op);
@@ -306,7 +211,7 @@ static void remove_blindness(object *op) {
   CLEAR_FLAG(op, FLAG_APPLIED);
   if(op->env!=NULL) { 
      change_abil(op->env,op);
-     fix_object(op->env);
+     fix_player(op->env);
   }
   remove_ob(op);
   free_object(op);
@@ -319,15 +224,13 @@ static void poison_more(object *op) {
     return;
   }
   if(op->stats.food==1) {
-    /* need to remove the object before fix_player is called, else fix_object
+    /* need to remove the object before fix_player is called, else fix_player
      * will not do anything.
      */
     if(op->env->type==PLAYER) {
       CLEAR_FLAG(op, FLAG_APPLIED);
-      fix_object(op->env);
-      draw_ext_info(NDI_UNIQUE, 0,op->env, 
-		    MSG_TYPE_ATTRIBUTE, MSG_TYPE_ATTRIBUTE_BAD_EFFECT_END,
-		    "You feel much better now.", NULL);
+      fix_player(op->env);
+      new_draw_info(NDI_UNIQUE, 0,op->env,"You feel much better now.");
     }
     remove_ob(op);
     free_object(op);
@@ -335,10 +238,7 @@ static void poison_more(object *op) {
   }
   if(op->env->type==PLAYER) {
     op->env->stats.food--;
-    /* Not really the start of a bad effect, more the continuing effect */
-    draw_ext_info(NDI_UNIQUE, 0,op->env, 
-		  MSG_TYPE_ATTRIBUTE, MSG_TYPE_ATTRIBUTE_BAD_EFFECT_START,
-		  "You feel very sick...", NULL);
+    new_draw_info(NDI_UNIQUE, 0,op->env,"You feel very sick...");
   }
   (void)hit_player(op->env,
                    op->stats.dam,
@@ -350,11 +250,10 @@ static void move_gate(object *op) { /* 1 = going down, 0 = goind up */
     object *tmp;
 
     if(op->stats.wc < 0 || (int)op->stats.wc  >= NUM_ANIMATIONS(op)) {
-        char buf[HUGE_BUF];
 	LOG(llevError,"Gate error: animation was %d, max=%d\n",op->stats.wc,
 	    NUM_ANIMATIONS(op));
-	dump_object(op, buf, sizeof(buf));
-	LOG(llevError,"%s\n",buf);
+	dump_object(op);
+	LOG(llevError,"%s\n",errmsg);
 	op->stats.wc=0;
     }
 
@@ -430,11 +329,8 @@ static void move_gate(object *op) { /* 1 = going down, 0 = goind up */
 		if(QUERY_FLAG(tmp, FLAG_ALIVE)) {
 		    hit_player(tmp, random_roll(1, op->stats.dam, tmp, PREFER_LOW), op, AT_PHYSICAL, 1);
 		    if(tmp->type==PLAYER) 
-			draw_ext_info_format(NDI_UNIQUE, 0, tmp,
-					     MSG_TYPE_VICTIM, MSG_TYPE_VICTIM_WAS_HIT,
-					     "You are crushed by the %s!",
-					     "You are crushed by the %s!",
-					     op->name);
+			new_draw_info_format(NDI_UNIQUE, 0, tmp,
+					     "You are crushed by the %s!",op->name);
 		} else 
 		    /* If the object is not alive, and the object either can
 		     * be picked up or the object rolls, move the object
@@ -577,7 +473,7 @@ static void move_hole(object *op) { /* 1 = opening, 0 = closing */
 	    op->move_on = MOVE_WALK;
 	    for (tmp=op->above; tmp!=NULL; tmp=next) {
 		next=tmp->above;
-        ob_move_on(op,tmp,tmp);
+		move_apply(op,tmp,tmp);
 	    }
 	}
 	SET_ANIMATION(op, op->stats.wc);
@@ -696,6 +592,215 @@ object *fix_stopped_arrow (object *op)
     op->owner=NULL; /* So that stopped arrows will be saved */
     update_object (op,UP_OBJ_FACE);
     return op;
+}
+
+/** stop_arrow() - what to do when a non-living flying object
+ * has to stop. Sept 96 - I added in thrown object code in
+ * here too. -b.t.
+ *
+ * Returns a pointer to the stopped object (which will have been removed
+ * from maps or inventories), or NULL if was destroyed.
+ */
+
+static void stop_arrow (object *op)
+{
+    /* Lauwenmark: Handle for plugin stop event */
+    execute_event(op, EVENT_STOP,NULL,NULL,NULL,SCRIPT_FIX_NOTHING);
+    if (op->inv) {
+	object *payload = op->inv;
+	remove_ob (payload);
+	clear_owner(payload);
+        insert_ob_in_map (payload, op->map, payload,0);
+        remove_ob (op);
+	free_object (op);
+    } else {
+        op = fix_stopped_arrow (op);
+        if (op)
+            merge_ob (op, NULL);
+    }
+}
+
+/** Move an arrow along its course.  op is the arrow or thrown object.
+ */
+
+void move_arrow(object *op) {
+    object *tmp;
+    sint16 new_x, new_y;
+    int was_reflected, mflags;
+    mapstruct *m;
+
+    if(op->map==NULL) {
+	LOG (llevError, "BUG: Arrow had no map.\n");
+	remove_ob(op);
+	free_object(op);
+	return;
+    }
+
+    /* we need to stop thrown objects at some point. Like here. */ 
+    if(op->type==THROWN_OBJ) {
+	/* If the object that the THROWN_OBJ encapsulates disappears,
+	 * we need to have this object go away also - otherwise, you get
+	 * left over remnants on the map.  Where this currently happens
+	 * is if the player throws a bomb - the bomb explodes on its own,
+	 * but this object sticks around.  We could handle the cleanup in the
+	 * bomb code, but there are potential other cases where that could happen,
+	 * and it is easy enough to clean it up here.
+	 */
+        if (op->inv == NULL) {
+	    remove_ob(op);
+	    free_object(op);
+            return;
+	}
+	if(op->last_sp-- < 0) { 
+	    stop_arrow (op);
+	    return; 
+	}
+    }
+
+    /* if the arrow is moving too slow.. stop it.  0.5 was chosen as lower
+       values look rediculous. */
+    if (op->speed < 0.5 && op->type==ARROW) {
+	stop_arrow(op);
+	return;
+    }
+
+    /* Calculate target map square */
+    new_x = op->x + DIRX(op);
+    new_y = op->y + DIRY(op);
+    was_reflected = 0;
+
+    m = op->map;
+    mflags = get_map_flags(m, &m, new_x, new_y, &new_x, &new_y);
+
+    if (mflags & P_OUT_OF_MAP) {
+	stop_arrow(op);
+	return;
+    }
+
+    /* only need to look for living creatures if this flag is set */
+    if (mflags & P_IS_ALIVE) {
+	for (tmp = get_map_ob(m, new_x, new_y); tmp != NULL; tmp=tmp->above)
+	     if (QUERY_FLAG(tmp, FLAG_ALIVE)) break;
+
+    
+	/* Not really fair, but don't let monsters hit themselves with
+	 * their own arrow - this can be because they fire it then
+	 * move into it.
+	 */
+
+	if (tmp != NULL && tmp != op->owner) {
+	    /* Found living object, but it is reflecting the missile.  Update
+	     * as below. (Note that for living creatures there is a small
+	     * chance that reflect_missile fails.)
+	     */
+
+	    if (QUERY_FLAG (tmp, FLAG_REFL_MISSILE)  &&
+		(rndm(0, 99)) < (90-op->level/10)) {
+
+		int number = op->face->number;
+	    
+		op->direction = absdir (op->direction + 4);
+		op->state = 0;
+		if (GET_ANIM_ID (op)) {
+		    number += 4;
+		    if (number > GET_ANIMATION (op, 8))
+			number -= 8;
+		    op->face = &new_faces[number];
+		}
+		was_reflected = 1;   /* skip normal movement calculations */
+	    }
+	     else {
+		/* Attack the object. */
+		op = hit_with_arrow (op, tmp);
+		if (op == NULL)
+		    return;
+	     }
+	} /* if this is not hitting its owner */
+    } /* if there is something alive on this space */
+
+
+    if (OB_TYPE_MOVE_BLOCK(op, GET_MAP_MOVE_BLOCK(m, new_x, new_y))) {
+	int retry=0;
+
+	/* if the object doesn't reflect, stop the arrow from moving
+	 * note that this code will now catch cases where a monster is
+	 * on a wall but has reflecting - the arrow won't reflect.
+	 * Mapmakers shouldn't put monsters on top of wall in the first
+	 * place, so I don't consider that a problem.
+	 */
+	if(!QUERY_FLAG(op, FLAG_REFLECTING) || !(rndm(0, 19))) {
+	    stop_arrow (op);
+	    return;
+	} else {
+	    /* If one of the major directions (n,s,e,w), just reverse it */
+	    if(op->direction&1) {
+		op->direction=absdir(op->direction+4);
+		retry=1;
+	    }
+	    /* There were two blocks with identical code -
+	     * use this retry here to make this one block
+	     * that did the same thing.
+	     */
+	    while (retry<2) {
+		int left, right, mflags;
+		mapstruct *m1;
+		sint16	x1, y1;
+
+		retry++;
+
+		/* Need to check for P_OUT_OF_MAP: if the arrow is tavelling
+		 * over a corner in a tiled map, it is possible that
+		 * op->direction is within an adjacent map but either
+		 * op->direction-1 or op->direction+1 does not exist.
+		 */
+		mflags = get_map_flags(op->map,&m1, op->x+freearr_x[absdir(op->direction-1)],
+		       op->y+freearr_y[absdir(op->direction-1)], &x1, &y1);
+		left = (mflags & P_OUT_OF_MAP) ? 0 : OB_TYPE_MOVE_BLOCK(op, (GET_MAP_MOVE_BLOCK(m1, x1, y1)));
+
+		mflags = get_map_flags(op->map,&m1, op->x+freearr_x[absdir(op->direction+1)],
+		   op->y+freearr_y[absdir(op->direction+1)], &x1, &y1);
+		right = (mflags & P_OUT_OF_MAP) ? 0 : OB_TYPE_MOVE_BLOCK(op, (GET_MAP_MOVE_BLOCK(m1, x1, y1)));
+
+		if(left==right)
+		    op->direction=absdir(op->direction+4);
+		else if(left)
+		    op->direction=absdir(op->direction+2);
+		else if(right)
+		    op->direction=absdir(op->direction-2);
+
+		mflags = get_map_flags(op->map,&m1, op->x+DIRX(op),op->y+DIRY(op), &x1, &y1);
+
+		/* If this space is not out of the map and not blocked, valid space -
+		 * don't need to retry again.
+		 */
+		if (!(mflags & P_OUT_OF_MAP) && 
+		  !OB_TYPE_MOVE_BLOCK(op, GET_MAP_MOVE_BLOCK(m1, x1, y1))) break;
+
+	    }
+	    /* Couldn't find a direction to move the arrow to - just
+	     * top it from moving.
+	     */
+	    if (retry==2) {
+		stop_arrow (op);
+		return;
+	    }
+	    /* update object image for new facing */
+	    /* many thrown objects *don't* have more than one face */
+	    if(GET_ANIM_ID(op))
+		SET_ANIMATION(op, op->direction);
+	} /* object is reflected */
+    } /* object ran into a wall */
+
+    /* Move the arrow. */
+    remove_ob (op);
+    op->x = new_x;
+    op->y = new_y;
+
+    /* decrease the speed as it flies. 0.05 means a standard bow will shoot
+     * about 17 squares. Tune as needed.
+     */
+    op->speed -= 0.05;
+    insert_ob_in_map (op, m, op,0);
 }
 
 /** This routine doesnt seem to work for "inanimate" objects that
@@ -823,7 +928,7 @@ void move_player_changer(object *op) {
 	for(walk=op->inv;walk!=NULL;walk=walk->below)
 	    apply_changes_to_player(player,walk);
 
-    fix_object(player);
+	fix_player(player);
 	esrv_send_inventory(op->above,op->above);
 	esrv_update_item(UPD_FACE, op->above, op->above);
 	
@@ -1056,8 +1161,7 @@ void move_creator(object *creator) {
  * At that time, it writes the contents of its own message
  * field to the player.  The marker will decrement hp to
  * 0 and then delete itself every time it grants a mark.
- * unless hp was zero to start with, in which case it is infinite.
- */
+ * unless hp was zero to start with, in which case it is infinite.*/
 void move_marker(object *op) {
     object *tmp,*tmp2;
   
@@ -1102,9 +1206,7 @@ void move_marker(object *op) {
 
 		insert_ob_in_ob(force,tmp);
 		if(op->msg)
-		    draw_ext_info(NDI_UNIQUE|NDI_NAVY,0,tmp, 
-				  MSG_TYPE_MISC, MSG_SUBTYPE_NONE,
-				  op->msg, op->msg);
+		    new_draw_info(NDI_UNIQUE|NDI_NAVY,0,tmp,op->msg);
 
 		if(op->stats.hp > 0) { 
 		    op->stats.hp--;
@@ -1161,37 +1263,141 @@ int process_object(object *op) {
     }
     /* Lauwenmark: Handle for plugin time event */
     execute_event(op, EVENT_TIME,NULL,NULL,NULL,SCRIPT_FIX_NOTHING);
-    return ob_process(op);
-}
-void legacy_move_detector(object *op)
-{
-    move_detector(op);
-}
-void legacy_remove_force(object *op)
-{
-    remove_force(op);
-}
-void legacy_move_timed_gate(object *op)
-{
-    move_timed_gate(op);
-}
-void legacy_animate_trigger(object *op)
-{
-    animate_trigger(op);
-}
-void legacy_remove_blindness(object *op)
-{
-    remove_blindness(op);
-}
-void legacy_poison_more(object* op)
-{
-    poison_more(op);
-}
-void legacy_move_gate(object *op)
-{
-    move_gate(op);
-}
-void legacy_move_hole(object *op)
-{
-    move_hole(op);
+    switch(op->type) {
+	case TRANSPORT:
+	    /* Transports are directed by players - thus, there
+	     * speed is reduced when the player moves them about.
+	     * So give them back there speed here, since process_objects()
+	     * has decremented it.
+	     */
+	    if (op->speed_left < 0.0) op->speed_left += 1.0;
+	    return 1;
+
+	case SPELL_EFFECT:
+	    move_spell_effect(op);
+	    return 1;
+
+	case ROD:
+	case HORN:
+	    regenerate_rod(op);
+	    return 1;
+
+	case FORCE:
+	case POTION_EFFECT:
+	    remove_force(op);
+	    return 1;
+
+	case BLINDNESS:
+	    remove_blindness(op);
+	    return 0;
+
+	case POISONING:
+	    poison_more(op);
+	    return 0;
+
+	case DISEASE:
+	    move_disease(op);
+	    return 0;
+
+	case SYMPTOM:
+	    move_symptom(op);
+	    return 0;
+
+	case THROWN_OBJ:
+	case ARROW:
+	    move_arrow(op);
+	    return 0;
+
+	case LIGHTNING: /* It now moves twice as fast */
+	    move_bolt(op);
+	    return 0;
+
+	case DOOR:
+	    remove_door(op);
+	    return 0;
+
+	case LOCKED_DOOR:
+	    remove_door2(op);
+	    return 0;
+
+	case TELEPORTER:
+	    move_teleporter(op);
+	    return 0;
+
+	case GOLEM:
+	    move_golem(op);
+	    return 0;
+
+	case EARTHWALL:
+	    hit_player(op, 2, op, AT_PHYSICAL, 1);
+	    return 0;
+
+	case FIREWALL:
+	    move_firewall(op);
+	    if (op->stats.maxsp)
+		animate_turning(op);
+	    return 0;
+
+	case MOOD_FLOOR:
+	    do_mood_floor(op, op);
+	    return 0;
+
+	case GATE:
+	    move_gate(op);
+	    return 0;
+
+	case TIMED_GATE:
+	    move_timed_gate(op);
+	    return 0;
+
+	case TRIGGER:
+	case TRIGGER_BUTTON:
+	case TRIGGER_PEDESTAL:
+	case TRIGGER_ALTAR:
+	    animate_trigger(op);
+	    return 0;
+
+	case DETECTOR:
+	    move_detector(op);
+
+	case DIRECTOR:
+	    if (op->stats.maxsp)
+		animate_turning(op);
+	    return 0;
+
+	case HOLE:
+	    move_hole(op);
+	    return 0;
+
+	case DEEP_SWAMP:
+	    move_deep_swamp(op);
+	    return 0;
+
+	case RUNE:
+	case TRAP:
+	    move_rune(op);
+	    return 0;
+
+	case PLAYERMOVER:
+	    move_player_mover(op);
+	    return 0;
+
+	case CREATOR:
+	    move_creator(op);
+	    return 0;
+
+	case MARKER:
+	    move_marker(op);
+	    return 0;
+
+	case PLAYER_CHANGER:
+	    move_player_changer(op);
+	    return 0;
+
+	case PEACEMAKER:
+	    move_peacemaker(op);
+	    return 0;
+    }
+
+    return 0;
 }

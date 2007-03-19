@@ -96,7 +96,7 @@ static const int season_timechange[5][HOURS_PER_DAY] = {
 /* 0  1   2  3  4  5  6  7  8  9  10 11 12 13 14 1  2  3  4  5   6   7
 	8    9  10  11  12  13 */
   {0, 0,  0, 0, 0, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 1, 1,
-	1, 1, 1, 1, 1, 1},
+	1, 1, 1, 1, 1, 1}, 
   {0, 0,  0, 0, 0, 0, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 1, 1,
 	1, 1, 1, 1, 1, 0},
   {0, 0,  0, 0, 0, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
@@ -144,7 +144,7 @@ static weather_avoids_t weather_avoids[] = {
     {"lava", 0, NULL},
     {"permanent_lava", 0, NULL},
     {NULL, 0, NULL}
-};
+}; 
 
 /*
  * this table is identical to the one above, except these are tiles to avoid
@@ -281,7 +281,7 @@ static const weather_grow_t weather_tile[] = {
     {"palms", "pstone_1", 1, 0.01, 0.1, 0, 30, 5, 99, 0, 4000, 0},
     {"large_stones", NULL, 1, 0.0, 9.9, 0, 100, -50, 50, 6000, 8000, 0},
     {"earth", NULL, 1, 0.0, 1.0, 0, 70, -30, 15, 0, 6000, 0},
-    {"medium_stones", NULL, 1, 1.0, 3.0, 70, 100, -30, 10,  0, 4000, 0}, /*unsure*/
+    {"medium_stones", NULL, 1, 1.0, 3.0, 70, 100, -30, 10,  0, 4000, 0}, /*unsure*/ 
     {"earth", NULL, 1, 0.1, 0.9, 20, 80, -30, 30, 0, 4999, 0}, /* tundra */
     {"swamp", NULL, 1, 1.0, 9.9, 50, 100, -30, 10, 0, 4000, 0},/* cold marsh */
     {"earth", NULL, 1, 0.0, 99.9, 0, 100, -99, 99, 0, 99999, 0}, /* debug */
@@ -454,7 +454,7 @@ static void write_skymap(void)
     FILE *fp;
     int x, y;
 
-    snprintf(filename, sizeof(filename), "%s/skymap", settings.localdir);
+    sprintf(filename, "%s/skymap", settings.localdir);
     if ((fp = fopen(filename, "w")) == NULL) {
 	LOG(llevError, "Cannot open %s for writing\n", filename);
 	return;
@@ -475,7 +475,7 @@ static void write_pressuremap(void)
     FILE *fp;
     int x, y;
 
-    snprintf(filename, sizeof(filename), "%s/pressuremap", settings.localdir);
+    sprintf(filename, "%s/pressuremap", settings.localdir);
     if ((fp = fopen(filename, "w")) == NULL) {
 	LOG(llevError, "Cannot open %s for writing\n", filename);
 	return;
@@ -494,11 +494,11 @@ static void read_pressuremap(void)
     FILE *fp;
     int x, y;
 
-    snprintf(filename, sizeof(filename), "%s/pressuremap", settings.localdir);
-    LOG(llevDebug, "Reading pressure data from %s...\n", filename);
+    sprintf(filename, "%s/pressuremap", settings.localdir);
+    LOG(llevDebug, "Reading pressure data from %s...", filename);
     if ((fp = fopen(filename, "r")) == NULL) {
 	LOG(llevError, "Cannot open %s for reading\n", filename);
-	LOG(llevDebug, "Initializing pressure maps...\n");
+	LOG(llevDebug, "Initializing pressure maps...");
 	init_pressure();
 	write_pressuremap();
 	LOG(llevDebug, "Done\n");
@@ -559,7 +559,7 @@ static void write_winddirmap(void)
     FILE *fp;
     int x, y;
 
-    snprintf(filename, sizeof(filename), "%s/winddirmap", settings.localdir);
+    sprintf(filename, "%s/winddirmap", settings.localdir);
     if ((fp = fopen(filename, "w")) == NULL) {
 	LOG(llevError, "Cannot open %s for writing\n", filename);
 	return;
@@ -578,11 +578,11 @@ static void read_winddirmap(void)
     FILE *fp;
     int x, y, d;
 
-    snprintf(filename, sizeof(filename), "%s/winddirmap", settings.localdir);
-    LOG(llevDebug, "Reading wind direction data from %s...\n", filename);
+    sprintf(filename, "%s/winddirmap", settings.localdir);
+    LOG(llevDebug, "Reading wind direction data from %s...", filename);
     if ((fp = fopen(filename, "r")) == NULL) {
 	LOG(llevError, "Cannot open %s for reading\n", filename);
-	LOG(llevDebug, "Initializing wind maps...\n");
+	LOG(llevDebug, "Initializing wind maps...");
 	init_wind();
 	write_winddirmap();
 	LOG(llevDebug, "Done\n");
@@ -610,7 +610,7 @@ static void write_windspeedmap(void)
     FILE *fp;
     int x, y;
 
-    snprintf(filename, sizeof(filename), "%s/windspeedmap", settings.localdir);
+    sprintf(filename, "%s/windspeedmap", settings.localdir);
     if ((fp = fopen(filename, "w")) == NULL) {
 	LOG(llevError, "Cannot open %s for writing\n", filename);
 	return;
@@ -629,11 +629,11 @@ static void read_windspeedmap(void)
     FILE *fp;
     int x, y, d;
 
-    snprintf(filename, sizeof(filename), "%s/windspeedmap", settings.localdir);
-    LOG(llevDebug, "Reading wind speed data from %s...\n", filename);
+    sprintf(filename, "%s/windspeedmap", settings.localdir);
+    LOG(llevDebug, "Reading wind speed data from %s...", filename);
     if ((fp = fopen(filename, "r")) == NULL) {
 	LOG(llevError, "Cannot open %s for reading\n", filename);
-	LOG(llevDebug, "Initializing wind maps...\n");
+	LOG(llevDebug, "Initializing wind maps...");
 	init_wind();
 	write_windspeedmap();
 	LOG(llevDebug, "Done\n");
@@ -674,7 +674,7 @@ static void write_gulfstreammap(void)
     FILE *fp;
     int x, y;
 
-    snprintf(filename, sizeof(filename), "%s/gulfstreammap", settings.localdir);
+    sprintf(filename, "%s/gulfstreammap", settings.localdir);
     if ((fp = fopen(filename, "w")) == NULL) {
 	LOG(llevError, "Cannot open %s for writing\n", filename);
 	return;
@@ -698,11 +698,11 @@ static void read_gulfstreammap(void)
     FILE *fp;
     int x, y;
 
-    snprintf(filename, sizeof(filename), "%s/gulfstreammap", settings.localdir);
-    LOG(llevDebug, "Reading gulf stream data from %s...\n", filename);
+    sprintf(filename, "%s/gulfstreammap", settings.localdir);
+    LOG(llevDebug, "Reading gulf stream data from %s...", filename);
     if ((fp = fopen(filename, "r")) == NULL) {
 	LOG(llevError, "Cannot open %s for reading\n", filename);
-	LOG(llevDebug, "Initializing gulf stream maps...\n");
+	LOG(llevDebug, "Initializing gulf stream maps...");
 	init_gulfstreammap();
 	write_gulfstreammap();
 	LOG(llevDebug, "Done\n");
@@ -768,7 +768,7 @@ static void init_gulfstreammap(void)
 		break;
 	    case 4:
 	    case 5:
-	    case 6:
+	    case 6:		
 		for (tx=0; tx < GULF_STREAM_WIDTH; tx++) {
 		    gulf_stream_speed[tx][y] = rndm(GULF_STREAM_BASE_SPEED,
 			GULF_STREAM_BASE_SPEED+10);
@@ -810,7 +810,7 @@ static void init_gulfstreammap(void)
 		break;
 	    case 4:
 	    case 5:
-	    case 6:
+	    case 6:		
 		for (tx=0; tx < GULF_STREAM_WIDTH; tx++) {
 		    gulf_stream_speed[tx][y] = rndm(GULF_STREAM_BASE_SPEED,
 			GULF_STREAM_BASE_SPEED+10);
@@ -836,7 +836,7 @@ static void write_humidmap(void)
     FILE *fp;
     int x, y;
 
-    snprintf(filename, sizeof(filename), "%s/humidmap", settings.localdir);
+    sprintf(filename, "%s/humidmap", settings.localdir);
     if ((fp = fopen(filename, "w")) == NULL) {
 	LOG(llevError, "Cannot open %s for writing\n", filename);
 	return;
@@ -855,11 +855,11 @@ static void read_humidmap(void)
     FILE *fp;
     int x, y, d;
 
-    snprintf(filename, sizeof(filename), "%s/humidmap", settings.localdir);
-    LOG(llevDebug, "Reading humidity data from %s...\n", filename);
+    sprintf(filename, "%s/humidmap", settings.localdir);
+    LOG(llevDebug, "Reading humidity data from %s...", filename);
     if ((fp = fopen(filename, "r")) == NULL) {
 	LOG(llevError, "Cannot open %s for reading\n", filename);
-	LOG(llevDebug, "Initializing humidity and elevation maps...\n");
+	LOG(llevDebug, "Initializing humidity and elevation maps...");
 	init_humid_elev();
 	write_elevmap();
 	write_humidmap();
@@ -889,7 +889,7 @@ static void write_elevmap(void)
     FILE *fp;
     int x, y;
 
-    snprintf(filename, sizeof(filename), "%s/elevmap", settings.localdir);
+    sprintf(filename, "%s/elevmap", settings.localdir);
     if ((fp = fopen(filename, "w")) == NULL) {
 	LOG(llevError, "Cannot open %s for writing\n", filename);
 	return;
@@ -908,8 +908,8 @@ static void read_elevmap(void)
     FILE *fp;
     int x, y;
 
-    snprintf(filename, sizeof(filename), "%s/elevmap", settings.localdir);
-    LOG(llevDebug, "Reading elevation data from %s...\n", filename);
+    sprintf(filename, "%s/elevmap", settings.localdir);
+    LOG(llevDebug, "Reading elevation data from %s...", filename);
     if ((fp = fopen(filename, "r")) == NULL) {
 	LOG(llevError, "Cannot open %s for reading\n", filename);
 	/* initializing these is expensive, and should have been done
@@ -937,7 +937,7 @@ static void write_watermap(void)
     FILE *fp;
     int x, y;
 
-    snprintf(filename, sizeof(filename), "%s/watermap", settings.localdir);
+    sprintf(filename, "%s/watermap", settings.localdir);
     if ((fp = fopen(filename, "w")) == NULL) {
 	LOG(llevError, "Cannot open %s for writing\n", filename);
 	return;
@@ -956,8 +956,8 @@ static void read_watermap(void)
     FILE *fp;
     int x, y, d;
 
-    snprintf(filename, sizeof(filename), "%s/watermap", settings.localdir);
-    LOG(llevDebug, "Reading water data from %s...\n", filename);
+    sprintf(filename, "%s/watermap", settings.localdir);
+    LOG(llevDebug, "Reading water data from %s...", filename);
     if ((fp = fopen(filename, "r")) == NULL) {
 	LOG(llevError, "Cannot open %s for reading\n", filename);
 	/* initializing these is expensive, and should have been done
@@ -1111,7 +1111,7 @@ static void write_temperaturemap(void)
     FILE *fp;
     int x, y;
 
-    snprintf(filename, sizeof(filename), "%s/temperaturemap", settings.localdir);
+    sprintf(filename, "%s/temperaturemap", settings.localdir);
     if ((fp = fopen(filename, "w")) == NULL) {
 	LOG(llevError, "Cannot open %s for writing\n", filename);
 	return;
@@ -1130,8 +1130,8 @@ static void read_temperaturemap(void)
     FILE *fp;
     int x, y;
 
-    snprintf(filename, sizeof(filename), "%s/temperaturemap", settings.localdir);
-    LOG(llevDebug, "Reading temperature data from %s...\n", filename);
+    sprintf(filename, "%s/temperaturemap", settings.localdir);
+    LOG(llevDebug, "Reading temperature data from %s...", filename);
     if ((fp = fopen(filename, "r")) == NULL) {
 	LOG(llevError, "Cannot open %s for reading\n", filename);
 	init_temperature();
@@ -1170,7 +1170,7 @@ static void write_rainfallmap(void)
     FILE *fp;
     int x, y;
 
-    snprintf(filename, sizeof(filename), "%s/rainfallmap", settings.localdir);
+    sprintf(filename, "%s/rainfallmap", settings.localdir);
     if ((fp = fopen(filename, "w")) == NULL) {
 	LOG(llevError, "Cannot open %s for writing\n", filename);
 	return;
@@ -1189,8 +1189,8 @@ static void read_rainfallmap(void)
     FILE *fp;
     int x, y;
 
-    snprintf(filename, sizeof(filename), "%s/rainfallmap", settings.localdir);
-    LOG(llevDebug, "Reading rainfall data from %s...\n", filename);
+    sprintf(filename, "%s/rainfallmap", settings.localdir);
+    LOG(llevDebug, "Reading rainfall data from %s...", filename);
     if ((fp = fopen(filename, "r")) == NULL) {
 	LOG(llevError, "Cannot open %s for reading\n", filename);
 	init_rainfall();
@@ -1315,8 +1315,8 @@ void init_weather(void)
     read_rainfallmap();
 
     LOG(llevDebug, "Done reading weathermaps\n");
-    snprintf(filename, sizeof(filename), "%s/wmapcurpos", settings.localdir);
-    LOG(llevDebug, "Reading current weather position from %s...\n", filename);
+    sprintf(filename, "%s/wmapcurpos", settings.localdir);
+    LOG(llevDebug, "Reading current weather position from %s...", filename);
     if ((fp = fopen(filename, "r")) == NULL) {
 	LOG(llevError, "Can't open %s.\n", filename);
 	wmperformstartx = -1;
@@ -1329,18 +1329,6 @@ void init_weather(void)
 	wmperformstartx = -1;
     if (wmperformstarty > settings.worldmaptilesy)
 	wmperformstarty = 0;
-}
-
-/**
- * Frees all memory allocated by the weather system.
- */
-void free_weather(void)
-{
-    int y;
-    for (y=0; y < WEATHERMAPTILESY; y++) {
-        FREE_AND_CLEAR(weathermap[y]);
-    }
-    FREE_AND_CLEAR(weathermap);
 }
 
 /*
@@ -1360,7 +1348,7 @@ static void perform_weather(void)
 
     if (!settings.dynamiclevel)
 	return;
-
+    
     /* move right to left, top to bottom */
     if (wmperformstartx+1 == settings.worldmaptilesx) {
 	wmperformstartx = 0;
@@ -1369,23 +1357,23 @@ static void perform_weather(void)
 	wmperformstartx++;
     if (wmperformstarty == settings.worldmaptilesy)
        wmperformstartx = wmperformstarty = 0;
-
-    snprintf(filename, sizeof(filename), "world/world_%d_%d",
+    
+    sprintf(filename, "world/world_%d_%d",
 	wmperformstartx+settings.worldmapstartx,
 	wmperformstarty+settings.worldmapstarty);
 
     m = ready_map_name(filename, 0);
     if (m == NULL)
 	return; /* hrmm */
-
+    
     /* for now, all we do is decay stuff.  more to come */
     decay_objects(m);
     weather_effect(filename);
 
     /* done */
-    save_map(m, 2); /* write the overlay */
+    new_save_map(m, 2); /* write the overlay */
     m->in_memory = MAP_IN_MEMORY; /*reset this*/
-    snprintf(filename, sizeof(filename), "%s/wmapcurpos", settings.localdir);
+    sprintf(filename, "%s/wmapcurpos", settings.localdir);
     if ((fp = fopen(filename, "w")) == NULL) {
 	LOG(llevError, "Cannot open %s for writing\n", filename);
 	return;
@@ -1451,14 +1439,14 @@ void weather_effect(const char *filename)
  * x and y are the coordinates inside the current map m. If grow is
  * 1, we use the growth table, rather than the avoidance table.
  *
- * Returns the object pointer for any snow item it found, so you can
+ * Returns the object pointer for any snow item it found, so you can 
  * destroy/melt it.
  */
 
 static object *avoid_weather(int *av, mapstruct *m, int x, int y, int *gs, int grow)
 {
     int avoid, gotsnow, i;
-
+ 
     object *tmp, *snow;
     avoid = 0;
     gotsnow = 0;
@@ -1503,7 +1491,7 @@ static object *avoid_weather(int *av, mapstruct *m, int x, int y, int *gs, int g
     }
     *gs = gotsnow;
     *av = avoid;
-
+ 
     return snow;
 }
 
@@ -1796,7 +1784,7 @@ static void singing_in_the_rain(mapstruct *m, int wx, int wy)
 			at = find_archetype("mountain2_rivlets"); break;}
 		else if (tmp && (!strcmp(tmp->arch->name, "mountain4"))){
 			at = find_archetype("mountain2_rivlets"); break;}
-		if (sky == SKY_LIGHT_RAIN || sky == SKY_RAIN) {
+		if (sky == SKY_LIGHT_RAIN || sky == SKY_RAIN) {		
 			switch (rndm(0, SKY_HAIL-sky)) {
 		    case 0: at = find_archetype("rain1"); break;
 		    case 1: at = find_archetype("rain2"); break;
@@ -2354,7 +2342,7 @@ static const char *weathermap_to_worldmap_corner(int wx, int wy, int *x, int *y,
     int spwtx, spwty;
     int tx, ty, nx, ny;
 	static char mapname[ MAX_BUF ];
-
+    
     spwtx = (settings.worldmaptilesx * settings.worldmaptilesizex) / WEATHERMAPTILESX;
     spwty = (settings.worldmaptilesy * settings.worldmaptilesizey) / WEATHERMAPTILESY;
     switch (dir) {
@@ -2371,7 +2359,7 @@ static const char *weathermap_to_worldmap_corner(int wx, int wy, int *x, int *y,
 	ty = (wy*spwty)-1;
     else
 	ty = wy;
-
+    
     nx = (tx / settings.worldmaptilesizex) + settings.worldmapstartx;
     ny = (ty / settings.worldmaptilesizey) + settings.worldmapstarty;
     snprintf(mapname, MAX_BUF, "world/world_%d_%d", nx, ny);
@@ -2447,7 +2435,7 @@ static int humid_tile(int x, int y)
     }
     humid = (weathermap[x][y].humid * 2 +
 	weathermap[ox][oy].humid * weathermap[ox][oy].windspeed +
-	weathermap[x][y].water + rndm(0, 10)) /
+	weathermap[x][y].water + rndm(0, 10)) / 
 	(weathermap[ox][oy].windspeed+3) + rndm(0, 5);
     if (humid < 0)
 	humid = 1;
@@ -3008,7 +2996,7 @@ static void write_weather_images(void)
     for (x=0; x < 10; x++)
 	scale[x] = 255.0l / (max[x] - min[x]);
 
-    snprintf(filename, sizeof(filename), "%s/weather.ppm", settings.localdir);
+    sprintf(filename, "%s/weather.ppm", settings.localdir);
     if ((fp = fopen(filename, "w")) == NULL) {
 	LOG(llevError, "Cannot open %s for writing\n", filename);
 	return;
@@ -3075,7 +3063,7 @@ static void write_weather_images(void)
     }
     fclose(fp);
 
-    snprintf(filename, sizeof(filename), "%s/todtick", settings.localdir);
+    sprintf(filename, "%s/todtick", settings.localdir);
     if ((fp = fopen(filename, "w")) == NULL) {
 	LOG(llevError, "Cannot open %s for writing\n", filename);
 	return;

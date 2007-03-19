@@ -6,7 +6,6 @@
 /*
     CrossFire, A Multiplayer game for X-windows
 
-    Copyright (C) 2006 Mark Wedel & Crossfire Development Team
     Copyright (C) 1992 Frank Tore Johansen
 
     This program is free software; you can redistribute it and/or modify
@@ -23,7 +22,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    The authors can be reached via e-mail at crossfire-devel@real-time.com
+    The author can be reached via e-mail to mark@pyramid.com.
 
     This file was made after an idea by vidarl@ifi.uio.no
 */
@@ -41,6 +40,7 @@
  */
 
 extern void	move_apply(object *, object *, object *);
+extern void	draw_info(int, int, object *, const char *);
 extern void	emergency_save(int);
 extern void	clean_tmp_files(void);
 extern void	fix_auto_apply(mapstruct *);
@@ -64,5 +64,5 @@ extern void	weather_effect(const char *);
 extern object *	find_skill_by_number(object *, int);
 extern int execute_event(object *, int, object *, object *, const char *, int);
 extern int execute_global_event(int , ...);
-extern int ob_move_on(object* op, object* victim, object* originator);
+
 #endif /* FUNCPOINT_H */

@@ -1,6 +1,8 @@
 Changes in top level SVN tree.  A few notes when putting entries in this
 file:
-1) Please include a date in the form yyyy-mm-dd (ISO standard)
+1) Please include a date in the form yyyy-mm-dd (yes, us americans are
+screwed up relative to most the world, but some consistent date format
+is needed for this file.)
 2) You don't need to go into exacting detail of the changes.  This file
 is mostly meant to give an idea to others what has changed - you don't
 need to recreate the code here.  If you change fixes a reported bug
@@ -15,9 +17,9 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
-server/monster.c: documentation and indent, no functional change.
-Nicolas Weeger 2007-03-18
 
+Changes for 1.10.0:
+------------------------------------------------------------------------------
 Implement feature request #1528522: Initial items should be applied/worn.
  server/player.c
 ---
@@ -26,11 +28,6 @@ Implement feature request #1528522: Initial items should be applied/worn.
  server/c_wiz.c: update DM's view when using nodm.
 ---
  server/apply.c: update player's view when turning on/off a lamp.
----
- server/spell_util.c: ignore sp/gr/time cost for DM casting spells.
----
- common/object.c: when inserting an object, need to fix 'map' too, if not
- set later, will crash.
 ---
 Implement feature request #1680229: dmhide - glowing things.
  common/map.c: totally ignore hidden DMs for map update.
@@ -54,111 +51,11 @@ Fix bug #1657675: multi-tile buildable object bug (note: one .x11 image though).
  code now uses multi-tile aware function to generate object, and correctly
  checks all relevant spots for building.
  server/build_map.c
----
-plugins/template/create_plugin.sh: plugin generation script.
-plugins/template/include/plugin_template.h: remove unused file, fix comment.
----
-Random map functions for plugins.
- plugins/common/include/plugin_common.h
- plugins/common/plugin_common.c
----
-Give access to random map generation to plugins.
- include/sproto.h
- server/plugins.c
----
-Allow one to give a prebuilt layout (.#<> and such) for random map generation.
- random_maps/random_map.c rproto.h standalone.c
- server/server.c
----
-plugins/template/plugin_template.c: use cf_log instead of printf, fix missing
- CF_PLUGIN (Win32 specific).
----
-server/c_object.c: missing ;, missing buffer reinitialisation.
-server/login.c: wrong function call.
----
-lib/races: remove obsolete player races.
-lib/treasures: remove lists put into individual .trs files.
 Nicolas Weeger 2007-03-17
-
-types/Makefile.am: Build object files in their own directories instead of in types/
----
-server/login.c: Make error messages for invalid usernames more useful.
----
-server/c_object.c: Change examine to use "Those are" instead of "That is" for
-   more than one object.
-Alex Schultz 2007-03-16
-
-Apply patch #1660388: Code-cleanup: () -> (void) courtesy Stefan Huehner.
- server/timers.c weather.c ob_methods.c
- test/unit/common/stubs_common.c
- test/unit/crossedit/stubs_crossedit.c
- test/unit/random_maps/stubs_random.c
- test/unit/socket/stubs_socket.c
- test/toolkit/toolkit_common.c
- common/init.c treasure.c
- crossedit/stubs.c
- types/altar/altar.c
- types/arrow/arrow.c
- types/book/book.c
- types/button/button.c
- types/check_inv/check_inv.c
- types/container/container.c
- types/converter/converter.c
- types/deep_swamp/deep_swamp.c
- types/director/director.c
- types/exit/exit.c
- types/hole/hole.c
- types/identify_altar/identify_altar.c
- types/item_transformer/item_transformer.c
- types/pedestal/pedestal.c
- types/player_mover/player_mover.c
- types/power_crystal/power_crystal.c
- types/rune/rune.c
- types/shop_mat/shop_mat.c
- types/sign/sign.c
- types/spell_effect/spell_effect.c
- types/spinner/spinner.c
- types/thrown_object/thrown_object.c
- types/transport/transport.c
- types/trap/trap.c
- types/trapdoor/trapdoor.c
- types/trigger/trigger.c
- types/trigger_altar/trigger_altar.c
- types/trigger_button/trigger_button.c
- types/trigger_pedestal/trigger_pedestal.c
-Ryo 2007-03-13
-
-Win32 compilation fixes.
- common/shstr.c: missing Windows include.
- plugins/cfanim/include/cfanim_proto.h: missing CF_PLUGIN export.
- plugins/cfpython/include/cfpython_proto.h
- plugins/cfpython/include/cfpython.h: DEBUG fix (Python doesn't provide the
-  good debug library).
-plugins/common/hashtable.c: missing Windows include.
----
-utils/mapper.c: new "warnnnopath" option to display exits without slaying field.
-Ryo 2007-03-08
 
 Fix bug #1673713: event_attack in (sword etc) weapon doesn't work.
  server/attack.c: fix EVENT_ATTACK weirdness.
----
-Fix compilation warnings, mostly missing #include.
- common/exp.c holy.c item.c living.c map.c porting.c readable.c recipe.c shstr.c
-  treasure.c utils.c: missing #includes.
- common/object.c: don't declare variables in the middle of code. Missing #include.
- include/libproto.h: missing find_multi_free_spot_within_radius.
- include/sockproto.h: missing send_exp_table.
- lib/races: fix dwarf player archetype (was using old one).
- plugins/cfpython/cfpython.c: unused variable.
- random_maps/maze_gen.c random_map.c room_gen_onion.c square_spiral.c: missing #include.
- server/plugins.c: unused variable.
- server/ob_methods.c: missing include.
- server/ob_types.c: missing include.
- server/time.c: unused variable.
- socket/image.c: use right type for faceset.
- types/*.c: add missing #include <sproto.h>.
- types/legacy/legacy_describe.c: unused variable.
----
+ ---
 Implement feature request #1560416: give warning when spell is about to expire.
 Player will be warned when left duration is one fifth, then one twenty-fifth.
 Two new functions are introduced, check_spell_expiry() and store_spell_expiry().
@@ -168,17 +65,6 @@ Two new functions are introduced, check_spell_expiry() and store_spell_expiry().
 Implement feature request #1675158: dmhide - "detect monster" will reveal DM.
  spell_effect.c: detection doesn't concern DMs.
 Ryo 2007-03-06
-
-Some documentation, no functional change.
- include/define.h face.h gods.h living.h
-Ryo 2007-03-05
-
-Implement feature request #1560396: flag to set fixed buying/selling prices.
-Three keys are used, "price_adjustment", "price_adjustment_sell" and "price_adjustment_buy".
-price_adjustment overrides the 2 other keys. Value should be numeric/decimal, anything that
-atof() will recognize as a float.
- server/shop.c
-Ryo 2007-03-05
 
 Add Object.Owner (read/write) and Crossfire.GetFriendlyList.
  plugins/cfpython/include/cfpython_object_private.h
@@ -196,26 +82,13 @@ Give access to friendlylist to plugins, through cfapi_friendlylist_get_next().
 ---
 common/object.c: let set_owner accept owner NULL (-> clear_owner()).
 ---
-Implement feature request #1669443: dmhide - players can still send 'tell.
+Implement request feature #1669443: dmhide - players can still send 'tell.
 server/c_chat.c: DM are now shown as not logger with regard to tell/reply.
 ---
 server/c_object.c: call EVENT_PICKUP which was forgotten somewhere along the way.
 server/plugins.c: don't remove/free removed/freed objects, log mistake. This closes
  bug #1670465: server doesn't have check to see if it is removing removed
 Ryo 2007-03-04
-
-Fix some potential / real crashes under Windows.
- common/readable.c: wrong field cleared. Set to NULL after clear. Wrong buffer size.
----
- socket/info.c: old_format is sometimes NULL, use new_format.
----
-Fix a potential crash related to map swapping: swap_map can delete map.
- include/sproto.h
- server/c_wiz.c swap.c
-Ryo 2007-03-03
-
-utils/mapper.c: display map name before loading it, makes it easier to debug maps :)
-Ryo 2007-03-02
 
 Add cf_object_set_float_property.
  plugins/common/include/plugin_common.h
@@ -229,64 +102,19 @@ Fix wrong type for speed.
  server/plugins.c
 Ryo 2007-02-28
 
-include/typesproto.h, types/*/*.c: Make functions static where possible and
-   reasonable.
-Alex Schultz 2007-02-24
-
-server/player.c: wrong call order.
 plugins/cfpython/cfpython.c: fix crash when Python and server are compiled with
  different versions of MS's DLLs.
 Ryo 2007-02-24
 
-Fix some comments from // to /* */
- common/map.c
- include/ob_types.h
- server/c_wiz.c gods.c pets.c server.c
-----
-Some Win32 compilation fixes.
- server/apply.c player.c plugins.c
-Ryo 2007-02-23
-
-Rebuild prototypes.
-  include/{sproto.h, typesproto.h}
----
-Move arrow and thrown object code into types/
-  server/time.c, types/{arrow/arrow.c, thrown_object/thrown_object.c,
-  common/projectiles.c, legacy/process.c}
----
-Change move_arrow calls to ob_process.
-  server/{player.c, skills.c}
-Alex Schultz 2007-02-19
-
-Fix uninitialized variables.
+Fix uninitialized variables (merge from trunk).
  server/weather.c: wrong temperature initialisation.
- socket/init.c: init newsocket->want_pickup
 Ryo 2007-02-18
 
-Replace "type_to_archetype" by "get_archetype_by_type_subtype".
- common/arch.c map.c
- include/libproto.h
- test/unit/common/check_arch.c
+
+Fix mishandling of weapon/shield/armour restriction. Fix crash with NULL value.
+(merge from trunk)
+ server/gods.c
 Ryo 2007-02-18
-
-Whitespace formatting (indents and tab removal) and long-line cleanup
- server/c_new.c
- socket/request.c
-Aaron Baugher 2007-02-18
-
-Implement feature request 1025952: GTK Client - Save Pickup options.
-New setup command, 'want_pickup', which makes server send 'pickup xxx' when
- player joins.
-Modified files;
- doc/Developers/protocol
- include/newserver.h sockproto.h
- server/login.c
- socket/request.c
-Ryo 2007-02-18
-
-Make containers with an other_arch face display it when opened.
- server/apply.c
-Aaron Baugher 2007-02-15
 
 New server settings: allow_denied_spells_writing, for inscription.
  common/init.c
@@ -294,327 +122,30 @@ New server settings: allow_denied_spells_writing, for inscription.
  server/init.c skills.c
 Ryo 2007-02-15
 
-Whitespace and long-line cleanup
- socket/item.c
- socket/image.c
-Aaron Baugher 2007-02-15
-
 server/shop.c: handle "no money" case when player tries to exit shop.
 ---
 Fix a crash with object handling by plugins.
  cfpython/cfpython_map.c: don't assume op exists after inserting in map.
-Ryo 2007-02-15
+ Ryo 2007-02-15
 
-Remove static buffers from path_combine and path_combine_and_normalize.
- common/path.c map.c
- include/libproto.h path.h
- server/server.c
- utils/mapper.c
----
- common/map.c: add buffer's size to prevent overflows.
-Ryo 2007-02-14
+Make armour handling coherent between gods, monsters and such.
+Cloaks and bracers are not armour. Merge from trunk.
+ common/item.c utils.c: fix tests with macros.
+ include/define.h: update macro, new IS_SHIELD.
+ server/apply.c monster.c player.c: use macros.
+Ryo 2007-02-15
 
 Invalidate player's view if teleporting. Call update_ob_speed when changing speed.
  server/plugins.c
 Ryo 2007-02-12
 
-Remove unused field object::refcount from unit testing
-    test/unit/check_object.c
-gros 2007-02-12
-
 lib/smooth updated in conjunction with arch update (revision 5421).
 Kevin Bulgrien 2007-02-11
 
-Remove unused field object::refcount.
- common/object.c
- include/object.c plugins.h
- server/plugins.c
-Fix speed logic, implementing feature request #1624544: Armour speed limit
- common/living.c
-Fix missing call, resulting in corrupted output.
- server/c_object.c
-Fix mishandling of weapon/shield/armour restriction. Fix crash with NULL value.
- server/gods.c
-Ryo 2007-02-11
-
-Formatting clean-up:
- server/apply.c: fixed indentation, untabified, broke long lines
-Aaron Baugher 2007-02-11
-
-
-Make armour handling coherent between gods, monsters and such.
-Cloaks and bracers are not armour.
- common/item.c utils.c: fix tests with macros.
- include/define.h: update macro, new IS_SHIELD.
- server/apply.c monster.c player.c: use macros.
-Ryo 2007-02-11
-
-Remove last static buffers, use safe string functions.
- common/readable.c
- include/libproto.h
----
-Remove obsolete long_desc(), replaced by ob_describe(), get rid of static buffer.
- include/sproto.h
- server/c_object.c ob_methods.c skills.c spell_effect.c
- types/book/book.c
- types/identify_altar/identify_altar.c
----
-Fix compilation warnings.
- include/global.h: remove duplicate DELETE_STRING (FREE_AND_CLEAR_STR), cast to void*.
- plugins/cfpython/include/cfpython.h: Python defines HAVE_GETTIMEOFDAY, but we do too.
- plugins/cfpython/cfpython.c: explicit cast to wanted type.
- plugins/common/hashtable.c: add missing include for malloc().
----
-Remove static buffer for strerror_local().
- common/anim.c image.c map.c porting.c
- include/libproto.h
- server/c_misc.c deamon.c hiscore.c init.c login.c resurrection.c
- socket/init.c loop.c lowlevel.c
----
-Remove some static variables. Return values from server.
- plugins/cfpython/cfpython_object.c
- plugins/cfanim/include/cfanim_proto.h
- plugins/common/include/plugin_common.h
- plugins/common/plugin_common.c
- server/plugins.c
----
-Update cf_object_[gs]et key to use parameter instead of void* return.
- include/plugin.h
- plugins/cfpython/cfpython_object.c
- plugins/cfanim/include/cfanim_proto.h
- plugins/common/include/plugin_common.h
- plugins/common/plugin_common.c
- server/plugins.c
----
-Remove static variables from plugin API, use parameters instead.
- plugins/common/plugin_common.c
- server/plugins.c
-Ryo 2007-10-11
-
-Remove "sstable" command for players, which is called "ssdumptable" for DMs.
- include/sproto.h
- server/commands.c c_mist.c
----
-Remove static buffer fur ss_dump_table. Use SS_ flags. Use LOG instead of direct fprintf.
- common/shstr.c
- include/libproto.h
- server/c_misc.c
----
-include/global.h: errmsg isn't used anymore.
----
-Remove errmsg use for ss_dump_statistics.
- common/shstr.c
- include/libproto.h
- server/c_misc.c
----
-Fix get_split_ob not returning failure message (was through errmsg).
- common/object.c
- include/libproto.h
- server/apply.c c_object.c player.c plugins.c skills.c spell_effect.c
-Ryo 2007-02-11
-
-Remove errmsg use for dump_object and dump_arch. Merge dump_object and dump_object2.
- common/anim.c arch.c object.c
- crossedit/Attr.c
- include/libproto.h
- server/c_misc.c c_wiz.c server.c time.c
- test/unit/common/check_object.c
-Ryo 2007-02-11
-
-server/weather.c: Fix possible buffer overflows.
-server/gods.c: Use correct format specifier in sprintf().
-server/spell_util.c: Fix return statements with no value in non-void
-   function.
-server/time.c, include/libproto.h: Make log_time() static.
-server/apply.c: Fix return statements with no value in non-void function.
-common/living.c: Fix incorrect "extern" definition for "levels".
-server/c_range.c: Fix possible buffer overflows.
-server/server.c: Fix possible buffer overflows.
-common/map.c: Fix possible buffer overflows; Reduce memory used by
-   load_map_header().
-common/readable: Improve performance by minimizing string copies.
-server/c_object.c: Fix possible buffer overflows.
-common/item.c: Fix possible buffer overflows; improve performance by
-   minimizing string copies; fix bugs because of missing braces; make sure
-   all strings are \0-terminated.
-Andreas Kirschbaum 2007-02-10
-
-Misc LOG fixes (mostly add missing newline), no functional change.
- common/anim.c arch.c holy.c image.c init.c [also fix missing init value] porting.c readable.c
-  recipe.c region.c treasure.c
- server/init.c weather.c
-Ryo 2007-02-10
-
-Implement feature request #1653770: Sockpuppeting fix (no exp when perm exp is hit).
-Implement feature request #1560385: Players killing other players should get no exp.
-Two new settings are added, pk_max_experience and pk_max_experience_percent. Check
- settings file to see how they work.
-Also, experience gained for killing a player never exceed experience that player can lose
- considering permanent experience.
-Modified files:
- common/init.c
- include/global.h
- lib/settings
- server/attack.c init.c
----
- common/porting.c: add missing variable type.
-Ryo 2007-02-10
-
-Use const char* instead of char*, use thread-safe strerror_r, fix potential memory leak.
- common/porting.c
- include/libproto.h
----
-Remove static buffer from get_string_move_type().
- common/loader.l
----
- common/object.c: don't use global errmsg variable for errors, just LOG() them.
----
-Remove static buffer from create_template_pathname().
- common/map.c
- include/libproto.h
- server/server.c
----
-Remove static buffer from create_pathname().
- common/map.c
- include/libproto.h
- server/plugins.c server.c
- utils/mapper.c
----
-Remove static buffer from create_overlay_pathname().
- common/map.c
- include/libproto.h
- server/c_wiz.c plugins.c
----
-Remove static buffer from create_items_path(), and play it safe with length.
- common/map.c
----
-Remove static buffer for query_base_name().
- common/button.c item.c object.c
- include/libproto.h
- server/alchemy.c apply.c c_objects.c c_range.c player.c plugins.c shop.c
- socket/info.c item.c
- types/item_transformer/item_transformer.c
----
-Remove static buffer for get_ob_diff().
- common/object.c loader.l
- include/libproto.h
- server/c_wiz.c
-Ryo 2007-02-10
-
-No functional changes, just compilation warnings / Doxygen stuff.
----
-Add missing includes.
- types/book/book.c
- types/identify_altar/identify_altar.c (also fix missing argument)
- types/item_transformer/item_transformer.c
- types/transport/transport.c
----
-Add newline at end.
- types/common/common_apply.c
- types/trigger/trigger.c
----
-Add Doxygen path info to distinguish files.
- common/button.c
- random_maps/exit.c
- server/alchemy.c apply.c rune.c spell_effect.c
- types/button/button.c
- types/exit/exit.c
- types/rune/rune.c
- types/spell_effect/spell_effect.c
- utils/bwp.c
-Ryo 2007-02-09
-
-Remove static buffer from ob_describe(). Make op some parameter const.
- include/ob_methods.h sproto.h typesproto.h
- server/c_object.c ob_methods.c
- types/common/describe.c
- types/legacy/megacy_describe.c
-Ryo 2007-02-09
-
-Doxyfile: Adjust Doxyfile options to create more information in the
-  documentation.
-Alex Schultz 2007-02-09
-
-Remove static buffer from query_short_name().
- common/item.c object.c
- include/libproto.h
- server/gods.c player.c plugins.c skills.c spell_effect.c
-Ryo 2007-02-09
-
-common/item.c: fix documentation.
---
-Remove some more static buffers.
- common/item.c info.c readable.c
- include/libproto.h
- server/plugins.c spell_effect.c
- types/common/describe.c
-Ryo 2007-02-09
-
 Fix a few compiler warnings.  Most were just unused variables, but
 some in server/c_object.c had returns without values.
-Files: server/c_object.c server/monster.c server/player.c server/weather.c
+Files: server/c_object.c server/monster.c server/player.c server/weather.c 
 MSW 2007-02-08
-
-Remove static buffer for query_name().
- common/item.c
- include/libproto.h
- server/apply.c attack.c build_map.c c_object.c c_range.c c_wiz.c gods.c monster.c move.c player.c plugins.c
-  server.c shop.c skill_util.c spell_attack.c spell_util.c
- common/living.c object.c readable.c
- socket/item.c
- types/common/describe.c
- types/converter/converter.c
- types/example.c
- types/item_transformer/item_transformer.c
- types/legacy/apply.c legacy_describe.c
- types/transport/transport.c
-Ryo 2007-02-08
-
-More generator enhancements:
-
-Added a generator_max field to generators.  If this field is set, the
-generator will only create this many objects on the map at one time.
-It sets a generator_code key/value in itself and any objects it creates,
-so it can identify them when counting.  This code is taken from the new
-generator_name field if it exists, or the "name" field otherwise.
- server/time.c: added the scan for child objects to generate_monster,
-    and setting the code to child objects in the generate_monster_*
-    routines.
-Aaron Baugher 2007-02-08
-
-common/button.c: fix memory leak if map is NULL.
----
-Some static buffer removal, replaced by buffer + size parameters.
- common/item.c: use const char* for constants. Remove some static buffers.
-  Remove unused function.
- common/holy.c readable.c: adjust to functions.
- include/libproto.h: new function prototypes.
- server/apply.c c_object.c: changes to function calls.
-Ryo 2007-02-08
-
-
-Enhancing generator ability:
-Add a "generator_radius" field to generators; objects are created randomly
-within this radius of the generator.
- server/time.c: changed calls to find free spot
- common/object.c: added function find_multi_free_spot_within_radius,
-    which is called from server/time.c
-Aaron Baugher 2007-02-08
-
-
-Makefile.am, Makefile.in (and Makefiles in subdirs): Put types in list of
-   SUBDIRS before server so that compilation happens in correct order -
-   server area requires types to be up to date.
-MSW 2007-02-07
-
-Make players change place with pets from party members instead of pushing
-them away.
----
-server/player.c: In move_player_attack() check for pets from party members
-   in addition to own pets.
-server/move.c: In push_ob() check for pets from party members in addition
-   to own pets.
-Andreas Kirschbaum 2007-02-07
 
 Implement feature request #1652066: Python: get user's savebed location and x,y coords.
 ---
@@ -627,179 +158,14 @@ Python properties:
  plugins/cfpython/cfpython_object.c
 Ryo 2007-02-06
 
-utils/mapper.c: new command-line option "-addmap=<map>", to add a map to process.
- Now also take into account player_changer a an exit. Flag "rowmaps" to generate
- maps with random tiles instead of items.
-Ryo 2007-02-04
-
 plugins/cfpython/cfpython_object.c: Fix missing braces.
 Alex Schultz 2007-02-03
 
-plugins/cflogger/cflogger.c: Add missing return value in store_time().
-plugins/cflogger/cflogger.c: Add missing call to va_end().
-Andreas Kirschbaum 2007-01-29
-
-utils/bwp.c: fix sort (sort by object's name). Fix memory leaks.
-Ryo 2007-01-28
-
-Implement feature request #822087: Apply below.
-'apply' now has a new flag, '-b', that specified an item on the ground.
- lib/help/apply: updated.
- server/c_object.c: look for item on ground/in container.
-Ryo 2007-01-21
-
-Refactoring of move_apply -> move_on for several object classes.
-Removed obsolete server/swamp.c file.
-See types/ChangeLog for details.
-    server/apply.c
-    server/swamp.c
-    server/time.c
-Yann Chachkoff 2007-01-21
-
-Some changes to the mapper.
- utils/mapper.c: some code cleaning. New tags.
- utils/templates/map.template map_with_exit.template: use new tags, legend.
-Ryo 2007-01-21
-
-server/spell_util.c: Consider all stats when swapping random stats due to
-   a failed spell.
-Andreas Kirschbaum 2007-01-21
-
-Implement feature request #656195: More effects of confusion.
-Three effects can happen:
- * one item is transformed temporarily to flowers
- * 2 random statistics are temporarily swapped
- * a random spell is cast.
-A new force type is introduced, FORCE_TRANSFORMED_ITEM, which does some
-magic when it expires.
-Modified files:
- include/spells.h
- server/spell_util.c time.c
-Ryo 2007-01-20
-
-Partially revert patch from 2006-31-12: girdles are not armours for wearing restrictions.
- server/apply.c player.c
-Ryo 2007-01-20
-
-configure.ac: add --disable-logger flag to not build cflogger plugin, courtesy gros.
-----
-Implement partially feature request #656194: It should be possible to curse and bless.
-Added 2 new spells, 'curse item' and 'bless item', that work on marked item.
-Also changed the spell name matching logic, to always return if a perfect match is found.
- include/spells.h sproto.h
- server/spell_effect.c spell_util.c
-Ryo 2007-01-15
-
-types/{dummy.c, Makefile.in, Makefile.am}, include/typesproto.h: Remove dummy
-   file now that it's no longer necessary
-Alex Schultz 2007-01-14
-
-Implement feature request #817585: altars don't take group of same logical item.
-Checking logic is now modified to take into account other items apart last dropped item.
-This is mainly done by changing check_altar_sacrifice().
- common/button.c: improve check_altar_sacrifice().
- include/libproto.h: update prototype for check_altar_sacrifice().
- server/apply.c: don't remove items, we don't care what we should remove.
-
-----
-Implement feature request #778211: allow avatars and holy servants to be random.
-Changed determine_holy_arch to return one random item instead of first matching one.
- server/gods.c
-----
-Rename 'new_save_map' to 'save_map'.
- common/map.c
- crossedit/Edit.c
- include/libproto.h
- random_maps/standalone.c
- server/c_wiz.c server.c swap.c weather.c
-----
- common/map.c: fix memory leak.
- server/skill_util.c: give a dummy name if skill doesn't have it. Avoids crashing later on :)
-Ryo 2007-01-14
-
-Apply long standing patch #1382884: change to player wraith race courtesy Anton Oussik.
- lib/attackmess: new attack messages for feeding.
- lib/treasures: give feeding skill to wraith.
- server/attack.c: feeding skill, life stealing.
- server/skill_util.c: new skill.
- server/player.c: wraiths don't regenerate hp.
- server/apply.c: wraiths don't get anything by eating food.
- include/libproto.h: new functions.
- include/attack.h: new attack message type.
- include/skills.h: new skill.
- common/player.c: wraith-related functions.
-Ryo 2007-01-14
-
-Apply patch #1631685: Monster flag set on all monster parts courtesy Aaron Baugher.
- common/arch.c
-Ryo 2007-01-14
-
-Object types refactoring: TRIGGER.
-    See types ChangeLog for details.
-----
-Object types refactoring: TRANSPORT, BOOK, POWER_CRYSTAL, BOOK.
-    See types ChangeLog for details.
-Modified files:
-    include/ob_methods.h include/ob_types.h
-    server/ob_methods.c server/ob_types.c
-    server/apply.c server/c_object.c server/time.c
-Added files:
-    types/transport/transport.c types/power_crystal/power_crystal.c
-    types/book/book.c types/item_transformer/item_transformer.c
-    types/legacy/apply.c types/legacy/legacy_describe.c types/legacy/process.c
-    types/common/describe.c
-Removed files:
-    server/egoitem.c
-Yann Chachkoff 2007-01-14
-
-New util: mapper.c, which generates HTML pages to browse maps.
-See the file itself for information and such.
-----
- Moved structures outside a .c so other programs can access it.
- include/image.h: new file, client-side image structures.
- socket/image.c: moved data to include.
-----
- utils/mapper.c: new program, map browser generator.
- utils/templates/*.template: template files for mapper.
-Ryo 2007-01-13
-
-Some Win32 fixes: binmode for Perl, binary mode for opened files.
- common/porting.c
- lib/adm/collect_images.pl
- lib/collect.pl.in
- socket/item.c: variables should be declared at function start.
-Ryo 2007-01-13
+lib/formulae: Fix formula for "low boots of steel".
+Andreas Kirschbaum 2007-02-26
 
 server/gods.c: Clean up follower_remove_given_items()
 Alex Schultz 2007-01-10
-
-Win32 compilation fixes: variables should be declared at function start.
- socket/item.c
- server/gods.c resurrection.c
-Ryo 2007-01-09
-
-New plugin: 'cflogger', which logs things to a sqlite3 database.
-Warning: the database size may grow a lot, you'll have to check manually.
-Logged events:
- * players join/leave/creation/quit
- * map load/unload/reset/enter/leave
- * kills, whenever a player is concerned
- * ingame/real time links
-Note that the plugin is not yet part of the autobuild process.
-
-Added files:
- cflogger/include/cflogger.h cflogger_proto.h Makefile.[am|in]
- cflogger/cflogger.c Makefile.[am|in]
-Ryo 2007-01-07
-
-common/loader.l: Remove call to yylex_destroy() - at least on my linux
-   box, I get an unresolved symbol during link time (maybe different
-   versions of flex?)
-MSW 2007-01-04
-
-Make some commands DM only, and not visible to players.
- server/commands.c
-Ryo 2007-01-04
 
 server/gods.c: Apply patch #1627442 by Aaron Baugher, to fix bug #1551735. Works
   by using a key_value of "divine_giver_name" to objects that are given by a god.
@@ -809,9 +175,6 @@ Fix a logic mistake: code should be called unless cursed and good only, not if g
  only set (since t->item is never NULL). This would make empty spellbooks and crash.
  common/treasure.c
 Ryo 2007-01-03
-
-include/book.h: Doxygenify header file and add licence. No functional changes.
-Alex Schultz 2007-01-03
 
 Check len of client-sent commands.
  socket/item.c: a few checks.
@@ -823,93 +186,15 @@ Implement feature request #1443844: Lock in 1.9.0 is ethernal.
  server/c_object.c commands.c
 Ryo 2007-01-02
 
-Massive doxygenation of code. Reformat indentation. No functional change.
- include/artifact.h
-Ryo 2007-01-02
-
-Implement feature request #1555532: Disallow enchanting armour/weapons while wearing/wielding it.
-Weapon/armour will be unequipped (unless cursed) if that would mean the player can't wear it anymore.
- server/apply.c
-Ryo 2007-01-02
-
-Fixed some mistakes in the alchemical formulae
- lib/formulae
-Yann Chachkoff 2007-01-02
-
-Removed unused defines, documentation fixes, no functional change.
- common/treasure.c: add some links for GT_xxx.
- include/treasure.h: add anchor 'GT_xxx'.
-Ryo 2007-01-01
-
-server/player.c: fix wrong message displayed. Make sp test coherent with draining for rod/horn.
-Ryo 2007-01-01
-
-Implement feature request #656191: Add blessings and curses to scrolls.
-----
-New flags: 'blessed', 'known_blessed'.
- common/item.c
- common/loader.l: new flag, and fix mistake on array size.
- include/define.h
-----
-Randomly set blessed/cursed on scrolls and spellbooks.
- common/treasure.c
-----
-Blessed/cursed/damned effect for scrolls and books.
- server/apply.c: effects, and also there should be a failure even if settings is no.
-----
- server/spell_effect.c: add a check to be done.
-Ryo 2007-01-01
-
-Implement feature request #1536177: "Orc Knuckle" requires no dice.
-If there is an "dice" archetype in server arches, this command will
-require the player to have at least 4 dice to play. There is a 5%
-chance to lose one dice at each play. Dice can be made through alchemy
-(finding the recipe is left as an exercise to the player).
-Note that the check is on the name 'dice', so you can have multiple
-archetypes for that name, they'll be all taken into account.
- server/c_chat.c: change command.
- lib/formulae: add recipe.
-----
- ChangeLog: fix date info (it's not american, but ISO)
-Ryo 2007-01-01
-
-Corrected garbage being displayed when examining an object, caused by an uninitialized buffer.
- server/c_object.c
-Yann Chachkoff 2007-01-01
-
 server/{player.c, gods.c, apply.c, monster.c}: Fix bug #1543130 and make
   handling of can_use_armour and can_use_shield consistant.
 Alex Schultz 2006-12-31
-
-Some memory fixes.
- common/arch.c: split code to make free_arch().
- common/exp.c: free levels memory.
- common/init.c: add free_globals().
- common/loader.l: add free_loader() to clean allocated memory.
- common/object.c: call free_arch() instead of free() to free temporary archetype.
- common/treasure.c: clear correctly the artifacts.
- include/libproto.h: new functions.
- include/sproto.h: new functions.
- server/init.c: call cleanup() instead of exit() when doing dumps. Free some memory.
- server/server.c: call some free_xxx() stuff.
- server/weather.c: add free_weather().
-----
-Use const char* instead of char*
- common/apply.c gods.c
-Ryo 2006-12-31
 
 Implemented proposal #1497089: fix for some random items.
 lib/artifacts, lib/formulae
 Changed the title of several treasures from Gaea to Vitality, and from
 Ruggilli to Blazing Fires, to match better the personality of those gods.
 Yann Chachkoff 2006-12-30
-
-Some memory fixes.
- common/arch.c: arch should free after object, since free_object2() checks the archetype.
- common/loader.l: when doing line mode (from artifact loading), we should clear the buffer,
-  else it is lost, resulting in 16kb memory leak (not nice!).
- common/object.c: warning about archetype needed for free_object2().
-Ryo 2006-12-30
 
 Fix for bug #1539120: talisman of Evocation grants wrong skill.
 Changed the name of the "Talisman of Evocation" artifact to "Talisman of Creation",
@@ -923,12 +208,9 @@ Yann Chachkoff 2006-12-30
 Partial fix for bug #1612838: Problem with item_power code
 server/apply.c
 Now armours get +3*magic increase to their item_power field.
+
 Corrected stupid mistakes made when fixing bug #1528525
 Yann Chachkoff 2006-12-30
-
-Another Win32 compilation fix.
- common/player.c: variable definition is a function start.
-Ryo 2006-12-30
 
 Fix for bug #1573294: Flesh displays speed +x and gives lot identification exp.
 common/item.c
@@ -941,33 +223,11 @@ Changed the behavior of create_one_treasure, that will now not generate a
 treasure whose base object is cursed or damned when the GT_ONLY_GOOD flag is set.
 Yann Chachkoff 2006-12-30
 
-Fix for Win32 compilation.
-plugins/common/hashtable.c: missing #include for Windows.
-Ryo 2009-12-29
-
 common/c_misc.c lib/settings
 Fix for bug #1622609: Specific flags no longer displayed with 'who command
 Replaced [] by <> in the who output command, as [] are reserved for the various
 formatting tags.
 Yann Chachkoff 2006-12-29
-
-Massive doxygenation of code. Reformat indentation. No functional change.
- common/object.c path.c player.c porting.c quest.c readable.c recipe.c re-cmp.c
-  region.c shstr.c time.c treasure.c utils.c
- doc/Developers/programming_guide: add rule for function comments.
-Ryo 2006-12-29
-
-Fix previous broken commit.
- common/arch.c
-Massive doxygenation of code. Reformat indentation. No functional change.
- common/friend.c glue.c holy.c image.c info.c init.c item.c links.c living.c loader.l
-  logger.c los.c map.c
-Ryo 2006-12-28
-
-Massive doxygenation of code. Reformat indentation. No functional change.
- Doxyfile: extract also static and private stuff.
- common/anim.c arch.c button.c exp.c
-Ryo 2006-12-27
 
 Fix for bug #1622575: Range attack switches to punching on contact,
  applied patch courtesy Aaron Baugher
@@ -986,14 +246,6 @@ Make method/property coherent for Python objects.
  plugins/cfpython/cfpython_archetype.c cfpython_party.c cfpython_region.c
  plugins/cfpython/include/cfpython_archetype_private.h cfpython_party_private.h cfpython_region_private.h
 Ryo 2006-12-26
-
-Implemented FR #1539153: Blessed weapons should have an owner.
-Added option personalized_blessings to activate that feature.
- server/apply.c
- server/gods.c
- server/init.c
- include/global.h
-Yann Chachkoff 2006-12-26
 
 Fix for bug #1527978: summon fog spell is somewhat broken.
 Summon now occurs either randomly around (when casting on oneself),
@@ -1017,9 +269,6 @@ Fix wrong return values for plugin calls. Add "Crossfire.Object.Subtype" propert
  server/plugins.c: fix wrong return values.
 Ryo 2006-12-26
 
-types/example.c: Add quick example file.
-Alex Schultz 2006-12-26
-
 server/player.c: Added a supplementary check on attacked objects, so that an
     alive object that has its FLAG_MONSTER set is always a preferred target over
     an alive object without that flag.
@@ -1035,24 +284,12 @@ lib/{Makefile.in,adm/map_info,collect.pl.in,Makefile.am}: ignore .svn rather
     than CVS.
 Andreas Kirschbaum 2006-12-24
 
-server/c_chat.c: In command_tell() do not crash when extendedTextInfos are
-    enabled.
-Andreas Kirschbaum 2006-12-22
-
 common/loader.l: Fix some problems related to curse spell monster
   handling.  Specifically, coordinates of custom monsters was not
   being saved (always set to 0,0), which caused crashes for multipart
   monsters upon load.  Also, speed was being set to 0, resulting in
   customized monsters not having any speed.
 MSW 2006-12-21
-
-server/shop.c: Remove unused switch statement.
-Alex Schultz 2006-12-17
-
-No change, just remove unused code in #if 0
- server/commands.c
- server/shop.c
-Ryo 2006-12-17
 
 Fix a crash due to non-checking of parameters.
  socket/item.c
@@ -1111,19 +348,16 @@ Ryo 2006-11-26
 
 Fix bug #1539207: "Max speed" attribute does not work
  common/living.c: armor's max_speed should always be taken into account.
-Ryo 2006-11-26
+ Ryo 2006-11-26
 
-Fix indentation and comments, cosmetic changes only.
- common/living.c
- server/pets.c:
-Ryo 2006-11-26
+include/newclient.h: Grab/merge copy from 2.x head - some code brought
+  back from the 2.x head in the build_map.c file is using the MSG_TYPE
+  declarations.
+MSW 2006-11-19
 
 Fix bug #1599307:
 server/shop.c: In pay_from_container() handle non-standard MONEY objects when
    buying items.
-Andreas Kirschbaum 2006-11-19
-
-socket/info.c: In draw_ext_info() do not crash for out of memory.
 Andreas Kirschbaum 2006-11-19
 
 server/rune.c: If skill is NULL in dispel_rune(), just return as server
@@ -1134,24 +368,8 @@ server/spell_util.c: Fix bug in that runes that hold other spells (glyphs,
    then the relevant skill object.
 MSW 2006-11-18
 
-Documentation tweaks.
- include/object.h: doxygen-like comments.
- Doxyfile: created with some defaults.
-Ryo 2006-11-18
-
-Rename fix_player to fix_object, since it works for other items.
- common/item.c living.c object.c
- include/define.h libproto.h skills.h
- server/apply.c attack.c c_misc.c c_object.c c_wiz.c disease.c gods.c
-  login.c player.c plugins.c shop.c skills.c skill_util.c spell_attack.c
-  spell_effect.c time.c
-Ryo 2006-11-18
-
-
 Fix bug #598649: Building apartments use multiple materials per tile
 server/build_map.c: don't redo same floor.
-----
-socket/info.c: fix spurious logic, fix indent.
 Ryo 2006-11-18
 
 Tentative fix for bug #1519089: item cannot afford in container can be taken from store.
@@ -1188,40 +406,8 @@ socket/loop.c: Fix replyinfo, in that it was using incorrect length parameter
 MSW 2006-11-02
 
 Fix for bug #1547517: DM issue with containers
-server/apply.c: move_apply shouldn't exit if opened container.
+ server/apply.c: move_apply shouldn't exit if opened container.
 Ryo 2006-10-29
-
-Update code so everything uses draw_ext_info(), and remove new_draw_info().
-For the most part, everything is just a simple update of function name/
-parameters.  In some places, there was some other cleanup, like
-inconsistent whitespace being made consistent.  A few places were
-changed to use the varargs version, so no longer needed a local snprintf.
-Many places where used to remove the hard formatting (combine several
-calls into one so that the client can do the word wrap/formatting, since
-assuming the width of the client never was really accurate)
-Dead code was removed, rather than being updated.
-For old clients, it will continue to use the old protocol commands, so
-this doesn't break client compatibility in any way.
---
-Files affected:
-common/arch.c, common/button.c, common/living.c, common/los.c. common/map.c,
-common/quest.cm common/time.c, common/treasure.c
-crossedit/stubs.c
-random_maps/standalone.c
-include/funcpoint.h, include/newclient.h, include/sockproto.h
-server/alchemy.c, server/apply.c, server/attack.c, server/build_map.c,
-server/c_chat.c, server/c_wiz.c, server/c_new.c, server/c_object.c,
-server/c_range.c, server/c_party.c, server/commands.c, server/disease.c,
-server/gods.c, server/hiscore.c, server/login.c, server/monster.c,
-server/move.c, server/pets.c, server/player.c, server/plugins.c
-server/resurrection.c, server/rune.c, server/server.c, server/skill_util.c,
-server/skills.c, server/spell_attack.c, server/spell_effect.c,
-server/spell_util.c, server/swamp.c, server/time.c
-socket/info.c, socket/item.c, socket/request.c
-test/unit/common/stubs_common.c
-test/unit/crossedit/stubs_crossedit.c, test/unit/random_maps/stubs_random.c
---
-MSW 2006-10-28
 
 Implement feature request #1551406: Add player's name to disease symptoms
  server/disease.c: add player's name.
@@ -1307,12 +493,6 @@ server/rune.c: Cleanup spring_trap() and clean some questionable logic.
 server/attack.c: Cause spell traps to be triggered when containers with traps
    are destroyed by a spell effect.
 Alex Schultz 2006-09-25
-
-doc/Makefile.am, server/Makefile.am, utils/crossloop.in, utils/crossloop.pl.in,
-   utils/crossloop.tmpl.in, utils/crossloop.web.in, utils/crossloop.pl.tmpl.in,
-   doc/crossfire-server.man: Rename crossfire binary to crossfire-server. Make
-   changes to account for that in crossloop and the man page.
-Alex Schultz 2006-09-20
 
 server/plugins.c: Change cfapi_object_say() to use either command_say() or
    npc_say() depending on if the object is a player. Fixes bug #1534889.

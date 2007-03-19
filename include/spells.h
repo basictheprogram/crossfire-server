@@ -129,7 +129,6 @@ extern const char* const spellpathnames[NRSPELLPATHS];
 #define SP_AURA		    46
 #define SP_TOWN_PORTAL	    47
 #define SP_PARTY_SPELL      48
-#define SP_ITEM_CURSE_BLESS 49
 
 /* Potion subtypes */
 #define POT_SPELL	    1
@@ -140,7 +139,6 @@ extern const char* const spellpathnames[NRSPELLPATHS];
 /* This is for the force subtypes */
 #define FORCE_CONFUSION		1
 #define FORCE_CHANGE_ABILITY	2
-#define FORCE_TRANSFORMED_ITEM  3
 
 #define PATH_TIME_MULT(op,spell) (((op->path_attuned & spell->path_attuned) ? 0.8 : 1) * \
 				((op->path_repelled & spell->path_attuned) ? 1.25 : 1))

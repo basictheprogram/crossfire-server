@@ -5,7 +5,7 @@
 /*
     CrossFire, A Multiplayer game for X-windows
 
-    Copyright (C) 2001-2006 Mark Wedel & Crossfire Development Team
+    Copyright (C) 2001 Mark Wedel & Crossfire Development Team
     Copyright (C) 1992 Frank Tore Johansen
 
     This program is free software; you can redistribute it and/or modify
@@ -146,8 +146,7 @@ int find_or_create_connection_for_map( object* pl, short x, short y, object* run
 
     if ( !rune )
         {
-        draw_ext_info( NDI_UNIQUE, 0, pl, MSG_TYPE_APPLY, MSG_TYPE_APPLY_BUILD,
-		      "You need to put a marking rune with the group name.", NULL);
+        new_draw_info( NDI_UNIQUE, 0, pl, "You need to put a marking rune with the group name." );
         return -1;
         }
 
@@ -163,8 +162,7 @@ int find_or_create_connection_for_map( object* pl, short x, short y, object* run
         connected = find_unused_connected_value( pl->map );
         if ( connected == -1 )
             {
-            draw_ext_info( NDI_UNIQUE, 0, pl, MSG_TYPE_APPLY, MSG_TYPE_APPLY_BUILD,
-			  "Could not create more groups.", NULL);
+            new_draw_info( NDI_UNIQUE, 0, pl, "Could not create more groups." );
             return -1;
             }
 
@@ -475,7 +473,7 @@ void apply_builder_floor(object* pl, object* material, short x, short y )
     decrease_ob( material );
 
     /* And tell player about the fix */
-    draw_ext_info( NDI_UNIQUE, 0, pl, MSG_TYPE_APPLY, MSG_TYPE_APPLY_BUILD, message, NULL);
+    new_draw_info( NDI_UNIQUE, 0, pl, message );
     }
 
 /**
@@ -547,7 +545,7 @@ void apply_builder_wall( object* pl, object* material, short x, short y )
     decrease_ob( material );
 
     /* And tell player what happened */
-    draw_ext_info( NDI_UNIQUE, 0, pl, MSG_TYPE_APPLY, MSG_TYPE_APPLY_BUILD, message, NULL);
+    new_draw_info( NDI_UNIQUE, 0, pl, message );
     }
 
 /**
@@ -566,13 +564,12 @@ void apply_builder_item( object* pl, object* item, short x, short y )
     object* floor;
     object* con_rune;
     int connected;
-    char name[MAX_BUF];
 
     /* Find floor */
     floor = GET_MAP_OB( pl->map, x, y );
     if ( !floor )
         {
-        draw_ext_info( NDI_UNIQUE, 0, pl, MSG_TYPE_APPLY, MSG_TYPE_APPLY_BUILD,"Invalid square.", NULL);
+        new_draw_info( NDI_UNIQUE, 0, pl, "Invalid square." );
         return;
         }
 
@@ -581,8 +578,7 @@ void apply_builder_item( object* pl, object* item, short x, short y )
 
     if ( !floor )
         {
-        draw_ext_info( NDI_UNIQUE, 0, pl, MSG_TYPE_APPLY, MSG_TYPE_APPLY_BUILD, 
-		      "This square has no floor, you can't build here.", NULL);
+        new_draw_info( NDI_UNIQUE, 0, pl, "This square has no floor, you can't build here." );
         return;
         }
     /* Create item, set flag, insert in map */
@@ -594,8 +590,7 @@ void apply_builder_item( object* pl, object* item, short x, short y )
 
     if ( !can_build_over(pl->map, tmp, x, y) )
         {
-        draw_ext_info( NDI_UNIQUE, 0, pl, MSG_TYPE_APPLY, MSG_TYPE_APPLY_BUILD,
-            "You can't build here.", NULL);
+        new_draw_info( NDI_UNIQUE, 0, pl, "You can't build here." );
         return;
         }
 
@@ -650,11 +645,7 @@ void apply_builder_item( object* pl, object* item, short x, short y )
     if ( connected != 0 )
         add_button_link( tmp, pl->map, connected );
 
-    query_name( tmp, name, MAX_BUF );
-    draw_ext_info_format( NDI_UNIQUE, 0, pl, MSG_TYPE_APPLY, MSG_TYPE_APPLY_BUILD,
-			 "You build the %s", 
-			 "You build the %s", 
-			 name);
+    new_draw_info_format( NDI_UNIQUE, 0, pl, "You build the %s", query_name( tmp ) );
     decrease_ob_nr( item, 1 );
     }
 
@@ -667,7 +658,6 @@ void apply_builder_remove( object* pl, int dir )
     {
     object* item;
     short x, y;
-    char name[MAX_BUF];
 
     x = pl->x + freearr_x[ dir ];
     y = pl->y + freearr_y[ dir ];
@@ -676,11 +666,10 @@ void apply_builder_remove( object* pl, int dir )
     item = GET_MAP_OB( pl->map, x, y );
     if ( !item )
         {
-	    /* Should not happen with previous tests, but we never know */
-	    draw_ext_info( NDI_UNIQUE, 0, pl, MSG_TYPE_APPLY, MSG_TYPE_APPLY_BUILD, 
-			  "Invalid square.", NULL);
+        /* Should not happen with previous tests, but we never know */
+        new_draw_info( NDI_UNIQUE, 0, pl, "Invalid square." );
 	    LOG( llevError, "apply_builder_remove: (null) square at (%d, %d, %s)\n", x, y, pl->map->path );
-	    return;
+        return;
         }
 
     if ( item->type == FLOOR || QUERY_FLAG(item,FLAG_IS_FLOOR) )
@@ -688,8 +677,7 @@ void apply_builder_remove( object* pl, int dir )
 
     if ( !item )
         {
-        draw_ext_info( NDI_UNIQUE, 0, pl, MSG_TYPE_APPLY, MSG_TYPE_APPLY_BUILD,
-		      "Nothing to remove.", NULL);
+        new_draw_info( NDI_UNIQUE, 0, pl, "Nothing to remove." );
         return;
         }
 
@@ -697,8 +685,7 @@ void apply_builder_remove( object* pl, int dir )
     switch ( item->type )
         {
         case WALL:
-            draw_ext_info( NDI_UNIQUE, 0, pl, MSG_TYPE_APPLY, MSG_TYPE_APPLY_BUILD,
-			  "Can't remove a wall with that, build a floor.", NULL);
+            new_draw_info( NDI_UNIQUE, 0, pl, "Can't remove a wall with that, build a floor." );
             return;
 
         case DOOR:
@@ -718,11 +705,7 @@ void apply_builder_remove( object* pl, int dir )
 
         default:
             /* Remove generic item */
-            query_name( item, name, MAX_BUF );
-            draw_ext_info_format( NDI_UNIQUE, 0, pl, MSG_TYPE_APPLY, MSG_TYPE_APPLY_BUILD,
-				 "You remove the %s", 
-				 "You remove the %s", 
-				 name );
+            new_draw_info_format( NDI_UNIQUE, 0, pl, "You remove the %s", query_name( item ) );
             remove_ob( item );
             free_object( item );
         }
@@ -745,15 +728,13 @@ void apply_map_builder( object* pl, int dir )
 
     /*if ( !player->map->unique )
         {
-	    draw_ext_info( NDI_UNIQUE, 0, player, MSG_TYPE_APPLY, MSG_TYPE_APPLY_BUILD,
-			  "You can't build outside a unique map.", NULL);
+	    new_draw_info( NDI_UNIQUE, 0, player, "You can't build outside a unique map." );
 	    return;
         }*/
 
     if ( dir == 0 )
         {
-	    draw_ext_info( NDI_UNIQUE, 0, pl, MSG_TYPE_APPLY, MSG_TYPE_APPLY_BUILD,
-			  "You can't build or destroy under yourself.", NULL);
+	    new_draw_info( NDI_UNIQUE, 0, pl, "You can't build or destroy under yourself." );
 	    return;
         }
 
@@ -762,8 +743,7 @@ void apply_map_builder( object* pl, int dir )
 
     if ( ( 1 > x ) || ( 1 > y ) || ( ( MAP_WIDTH( pl->map ) - 2 ) < x ) || ( ( MAP_HEIGHT( pl->map ) - 2 ) < y ) )
         {
-        draw_ext_info( NDI_UNIQUE, 0, pl, MSG_TYPE_APPLY, MSG_TYPE_APPLY_BUILD,
-		      "Can't build on map edge.", NULL);
+        new_draw_info( NDI_UNIQUE, 0, pl, "Can't build on map edge..." );
         return;
         }
 
@@ -779,8 +759,7 @@ void apply_map_builder( object* pl, int dir )
         {
         /* Nothing, meaning player is standing next to an undefined square... */
 	    LOG( llevError, "apply_map_builder: undefined square at (%d, %d, %s)\n", x, y, pl->map->path );
-        draw_ext_info( NDI_UNIQUE, 0, pl, MSG_TYPE_APPLY, MSG_TYPE_APPLY_BUILD,
-		      "You'd better not build here, it looks weird.", NULL);
+        new_draw_info( NDI_UNIQUE, 0, pl, "You'd better not build here, it looks weird." );
         return;
         }
 
@@ -790,8 +769,7 @@ void apply_map_builder( object* pl, int dir )
         while ( tmp ) {
             if ( !QUERY_FLAG( tmp, FLAG_IS_BUILDABLE ) && ( ( tmp->type != SIGN )
                 || ( strcmp( tmp->arch->name, "rune_mark" ) ) ) ) {
-                draw_ext_info( NDI_UNIQUE, 0, pl, MSG_TYPE_APPLY, MSG_TYPE_APPLY_BUILD,
-                    "You can't build here.", NULL);
+		new_draw_info( NDI_UNIQUE, 0, pl, "You can't build here." );
                 return;
             }
             tmp = tmp->above;
@@ -816,15 +794,13 @@ void apply_map_builder( object* pl, int dir )
         tmp = find_marked_object(pl);
         if ( !tmp )
             {
-	        draw_ext_info( NDI_UNIQUE, 0, pl, MSG_TYPE_APPLY, MSG_TYPE_APPLY_BUILD,
-			      "You need to mark raw materials to use.", NULL);
+	        new_draw_info( NDI_UNIQUE, 0, pl, "You need to mark raw materials to use." );
 	        return;
             }
 
         if ( tmp->type != MATERIAL )
             {
-	        draw_ext_info( NDI_UNIQUE, 0, pl, MSG_TYPE_APPLY, MSG_TYPE_APPLY_BUILD,
-			      "You can't use the marked item to build.", NULL);
+	        new_draw_info( NDI_UNIQUE, 0, pl, "You can't use the marked item to build." );
 	        return;
             }
 	    
@@ -843,16 +819,14 @@ void apply_map_builder( object* pl, int dir )
                 return;
 
             default:
-                draw_ext_info( NDI_UNIQUE, 0, pl, MSG_TYPE_APPLY, MSG_TYPE_APPLY_BUILD,
-			      "Don't know how to apply this material, sorry.", NULL);
-		LOG( llevError, "apply_map_builder: invalid material subtype %d\n", tmp->subtype );
+                new_draw_info( NDI_UNIQUE, 0, pl, "Don't know how to apply this material, sorry." );
+	            LOG( llevError, "apply_map_builder: invalid material subtype %d\n", tmp->subtype );
                 return;
             }
         }
 
     /* Here, it means the builder has an invalid type */
-    draw_ext_info( NDI_UNIQUE, 0, pl, MSG_TYPE_APPLY, MSG_TYPE_APPLY_BUILD,
-		  "Don't know how to apply this tool, sorry.", NULL);
+    new_draw_info( NDI_UNIQUE, 0, pl, "Don't know how to apply this tool, sorry." );
     LOG( llevError, "apply_map_builder: invalid builder subtype %d\n", builder->subtype );
     }
     
@@ -870,8 +844,7 @@ int adjust_sign_msg( object* pl, short x, short y, object* tmp )
     book = get_msg_book( pl, x, y );
     if ( !book )
         {
-	draw_ext_info( NDI_UNIQUE, 0, pl, MSG_TYPE_APPLY, MSG_TYPE_APPLY_BUILD,
-		      "You need to put a book or scroll with the message.", NULL);
+	new_draw_info( NDI_UNIQUE, 0, pl, "You need to put a book or scroll with the message." );
 	return -1;
 	}
 	

@@ -6,7 +6,7 @@
 /*****************************************************************************/
 /*  CrossFire, A Multiplayer game for X-windows                              */
 /*                                                                           */
-/*  Copyright (C) 2000-2006 Mark Wedel & Crossfire Development Team          */
+/*  Copyright (C) 2000 Mark Wedel                                            */
 /*  Copyright (C) 1992 Frank Tore Johansen                                   */
 /*                                                                           */
 /*  This program is free software; you can redistribute it and/or modify     */
@@ -23,7 +23,6 @@
 /*  along with this program; if not, write to the Free Software              */
 /*  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                */
 /*                                                                           */
-/*  The authors can be reached via e-mail to crossfire-devel@real-time.com   */
 /*****************************************************************************/
 /* This is the server-side plugin management part.                           */
 /*****************************************************************************/
@@ -33,14 +32,6 @@
 /* Joris Bontje                    (jbontje@suespammers.org);                */
 /* Philip Currlin                  (?);                                      */
 /*****************************************************************************/
-
-/**
- * @file
- * Plugin API.
- *
- * @todo
- * describe "wrappers" for functions, conventions used (parameters + return value).
- */
 
 /*****************************************************************************/
 /* First, the headers. We only include plugin.h, because all other includes  */
@@ -53,7 +44,7 @@
 #include <timers.h>
 #endif
 
-#define NR_OF_HOOKS 82
+#define NR_OF_HOOKS 80
 
 static const hook_entry plug_hooks[NR_OF_HOOKS] =
 {
@@ -137,8 +128,6 @@ static const hook_entry plug_hooks[NR_OF_HOOKS] =
     {cfapi_timer_create,            77, "cfapi_system_timer_create"},
     {cfapi_timer_destroy,           78, "cfapi_system_timer_destroy"},
     {cfapi_friendlylist_get_next,   79, "cfapi_friendlylist_get_next"},
-    {cfapi_set_random_map_variable, 80, "cfapi_set_random_map_variable"},
-    {cfapi_generate_random_map,     81, "cfapi_generate_random_map"},
 };
 int plugin_number = 0;
 crossfire_plugin* plugins_list = NULL;
@@ -635,43 +624,31 @@ void plugins_display_list(object *op)
 {
     crossfire_plugin* cp;
 
-    draw_ext_info(NDI_UNIQUE, 0, op, MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_DEBUG,
-		  "List of loaded plugins:\n-----------------------", NULL);
+    new_draw_info(NDI_UNIQUE, 0, op, "List of loaded plugins:");
+    new_draw_info(NDI_UNIQUE, 0, op, "-----------------------");
 
     if (plugins_list == NULL)
         return;
 
     for (cp = plugins_list; cp != NULL; cp = cp->next) {
-        draw_ext_info_format(NDI_UNIQUE, 0, op, MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_DEBUG,
-			     "%s, %s",
-			     "%s, %s",
-			     cp->id, cp->fullname);
+        new_draw_info_format(NDI_UNIQUE, 0, op, "%s, %s", cp->id, cp->fullname);
     }
 }
 
 /* SYSTEM-RELATED HOOKS */
 
-/**
- * Finds an animation.
- * @param type
- * will be CFAPI_INT.
- * @return
- * NULL.
- */
 void* cfapi_system_find_animation(int *type, ...)
 {
     va_list args;
-    const char* anim;
-    int* num;
-
+    static int rv;
+    char* anim;
     va_start(args, type);
-    anim = va_arg(args, const char*);
-    num = va_arg(args, int*);
+    anim = va_arg(args, char*);
     va_end(args);
 
-    *num = find_animation(anim);
+    rv = find_animation(anim);
     *type = CFAPI_INT;
-    return NULL;
+    return &rv;
 }
 
 void* cfapi_system_strdup_local(int *type, ...)
@@ -750,31 +727,23 @@ void* cfapi_system_remove_string(int *type, ...)
     *type = CFAPI_NONE;
     return NULL;
 }
-/**
- * Checks if a file exists.
- * @param type
- * will be CFAPI_INT.
- * @return
- * NULL.
- */
 void* cfapi_system_check_path(int* type, ...)
 {
     va_list args;
-    const char* name;
+    static int rv;
+    char* name;
     int prepend_dir;
-    int* ret;
 
     va_start(args, type);
 
     name = va_arg(args, char*);
     prepend_dir = va_arg(args, int);
-    ret = va_arg(args, int*);
 
-    *ret = check_path(name, prepend_dir);
+    rv = check_path(name, prepend_dir);
 
     va_end(args);
     *type = CFAPI_INT;
-    return NULL;
+    return &rv;
 }
 
 void* cfapi_system_re_cmp(int* type, ...)
@@ -857,74 +826,46 @@ void *cfapi_get_time(int *type, ...)
     return NULL;
 }
 
-/**
- * @param type
- * unused
- * @return
- * always 0
- *
- * Additional parameters:
- * - ob : ::object* for which to create a timer
- * - delay : long, ticks or seconds
- * - mode : int, either ::TIMER_MODE_SECONDS or ::TIMER_MODE_CYCLES
- * - timer : int* that will contain timer's id
- *
- * @see cftimer_create().
- */
 void *cfapi_timer_create(int *type, ...)
 {
     va_list args;
     int res;
+    static int rv;
     object* ob;
     long delay;
     int mode;
-    int* timer;
 
     va_start(args, type);
     ob = va_arg(args, object*);
     delay = va_arg(args, long);
     mode = va_arg(args, int);
-    timer = va_arg(args, int*);
     va_end(args);
     *type = CFAPI_INT;
 
-    *timer = cftimer_find_free_id();
-    if ( *timer != TIMER_ERR_ID )
+    rv = cftimer_find_free_id();
+    if ( rv != TIMER_ERR_ID )
     {
-        res = cftimer_create(*timer, delay, ob, mode);
+        res = cftimer_create(rv, delay, ob, mode);
         if ( res != TIMER_ERR_NONE )
-            *timer = res;
+            rv = res;
     }
-    return 0;
+    return &rv;
 }
 
-/**
- * @param type
- * unused
- * @return
- * always 0
- *
- * Additional parameters:
- * - timer: int that should be destroyed
- * - err: int* which will contain the return code of cftimer_destroy().
- *
- * @see cftimer_destroy().
- */
 void *cfapi_timer_destroy(int *type, ...)
 {
     va_list args;
     int id;
-    int* err;
+    static int rv;
 
     va_start(args, type);
     id = va_arg(args, int);
-    err = va_arg(args, int*);
     va_end(args);
     *type = CFAPI_INT;
 
-    *err = cftimer_destroy(id);
+    rv = cftimer_destroy(id);
 
-    return 0;
+    return &rv;
 }
 
 /* Logging hook */
@@ -1013,7 +954,6 @@ void* cfapi_map_create_path(int* type, ...)
     int ctype;
     const char* str;
     char* rv;
-    static char name[MAX_BUF];
     va_start(args, type);
 
     ctype = va_arg(args, int);
@@ -1023,13 +963,11 @@ void* cfapi_map_create_path(int* type, ...)
     switch (ctype)
     {
     case 0:
-        create_pathname(str, name, MAX_BUF);
-        rv = name;
+        rv = (char*)create_pathname(str);
         break;
 
     case 1:
-        create_overlay_pathname(str, name, MAX_BUF);
-        rv = name;
+        rv = (char*)create_overlay_pathname(str);
         break;
 
     /*case 2:
@@ -1361,8 +1299,7 @@ void* cfapi_map_message(int* type, ...)
     color = va_arg(args, int);
     va_end(args);
 
-    /* function should be extended to take message types probably */
-    ext_info_map(color, map, MSG_TYPE_MISC, MSG_SUBTYPE_NONE, string, string);
+    new_info_map(color, map, string);
     *type = CFAPI_NONE;
     return NULL;
 }
@@ -1464,47 +1401,27 @@ void* cfapi_object_move(int* type, ...)
     return &rv;
 }
 
-/**
- * Gets a key/value value for an object.
- *
- * @param type
- * will contain CFAPI_SSTRING.
- * @return
- * NULL.
- * @see get_ob_key_value().
- */
 void* cfapi_object_get_key(int* type, ...)
 {
     va_list args;
-    const char* keyname;
-    const char** value;
+    char* rv;
+    char* keyname;
     object* op;
 
     va_start(args, type);
     op = va_arg(args, object*);
-    keyname = va_arg(args, const char*);
-    value = va_arg(args, const char**);
+    keyname = va_arg(args, char*);
     va_end(args);
 
-    *value = get_ob_key_value(op, keyname);
-    *type = CFAPI_SSTRING;
-    return NULL;
+    rv = (char*)get_ob_key_value(op, keyname);
+    *type = CFAPI_STRING;
+    return rv;
 }
-
-/**
- * Write a key/value for an object.
- * @param type
- * will contain CFAPI_SSTRING.
- * @return
- * NULL.
- * @see set_ob_key_value().
- */
 void* cfapi_object_set_key(int* type, ...)
 {
     va_list args;
-    const char* keyname;
-    const char* value;
-    int* ret;
+    char* keyname;
+    char* value;
     object* op;
     int add_key;
 
@@ -1513,11 +1430,10 @@ void* cfapi_object_set_key(int* type, ...)
     keyname = va_arg(args, char*);
     value = va_arg(args, char*);
     add_key = va_arg(args, int);
-    ret = va_arg(args, int*);
     va_end(args);
 
-    *ret = set_ob_key_value(op, keyname, value, add_key);
-    *type = CFAPI_SSTRING;
+    set_ob_key_value(op, keyname, value, add_key);
+    *type = CFAPI_NONE;
     return NULL;
 }
 void* cfapi_object_get_property(int* type, ...)
@@ -1528,7 +1444,6 @@ void* cfapi_object_get_property(int* type, ...)
     void* rv;
     static int ri;
     static float rf;
-    static char name[MAX_BUF];
 
     va_start(args, type);
 
@@ -1588,9 +1503,13 @@ void* cfapi_object_get_property(int* type, ...)
             *type = CFAPI_INT;
             break;
 
+        case CFAPI_OBJECT_PROP_REFCOUNT:
+            rv = &op->refcount;
+            *type = CFAPI_INT;
+            break;
+
         case CFAPI_OBJECT_PROP_NAME:
-            query_name(op, name, MAX_BUF);
-            rv = name;
+            rv = query_name(op);
             *type = CFAPI_STRING;
             break;
 
@@ -1886,8 +1805,7 @@ void* cfapi_object_get_property(int* type, ...)
             break;
 
         case CFAPI_OBJECT_PROP_SHORT_NAME:
-            query_short_name(op, name, MAX_BUF);
-            rv = name;
+            rv = (char*)query_short_name(op);
             *type = CFAPI_STRING;
             break;
 
@@ -1895,8 +1813,7 @@ void* cfapi_object_get_property(int* type, ...)
             {
                 int i;
                 i = va_arg(args, int);
-                query_base_name(op, i, name, MAX_BUF);
-                rv = name;
+                rv = (char*)query_base_name(op, i);
                 *type = CFAPI_STRING;
             }
             break;
@@ -2292,7 +2209,7 @@ void* cfapi_object_set_property(int* type, ...)
                     }
                     else {
                         sum_weight(tmp);
-                        fix_object(tmp);
+                        fix_player(tmp);
                     }
                     if (tmp)
                         esrv_send_item(tmp, op);
@@ -2427,7 +2344,7 @@ void* cfapi_object_set_property(int* type, ...)
                             tmp = NULL;
                     } else {
                         sum_weight(tmp);
-                        fix_object(tmp);
+                        fix_player(tmp);
                     }
                     if (tmp)
                         esrv_send_item(tmp, op);
@@ -2695,14 +2612,6 @@ void* cfapi_object_set_property(int* type, ...)
     return NULL;
 }
 
-/**
- * Applies an object below.
- *
- * @param type
- * will be CFAPI_NONE.
- * @return
- * always NULL.
- */
 void* cfapi_object_apply_below(int* type, ...)
 {
     va_list args;
@@ -2719,34 +2628,25 @@ void* cfapi_object_apply_below(int* type, ...)
     return NULL;
 }
 
-/**
- * Applies an object.
- *
- * @param type
- * will be CFAPI_INT.
- * @return
- * always NULL.
- */
 void* cfapi_object_apply(int* type, ...)
 {
     va_list args;
     object* applied;
     object* applier;
     int aflags;
-    int* ret;
+    static int rv;
 
     va_start(args, type);
 
     applied = va_arg(args, object*);
     applier = va_arg(args, object*);
     aflags  = va_arg(args, int);
-    ret = va_arg(args, int*);
 
     va_end(args);
 
     *type = CFAPI_INT;
-    *ret = manual_apply(applier, applied, aflags);
-    return NULL;
+    rv = manual_apply(applier, applied, aflags);
+    return &rv;
 }
 void* cfapi_object_identify(int* type, ...)
 {
@@ -2768,7 +2668,6 @@ void* cfapi_object_describe(int* type, ...)
     va_list args;
     object* op;
     object* owner;
-    static char desc[VERY_BIG_BUF];
 
     va_start(args, type);
 
@@ -2777,8 +2676,7 @@ void* cfapi_object_describe(int* type, ...)
     va_end(args);
 
     *type = CFAPI_STRING;
-    describe_item(op, owner, desc, VERY_BIG_BUF);
-    return desc;
+    return describe_item(op, owner);
 }
 void* cfapi_object_drain(int* type, ...)
 {
@@ -2810,7 +2708,7 @@ void* cfapi_object_fix(int* type, ...)
 
     va_end(args);
 
-    fix_object(op);
+    fix_player(op);
 
     *type = CFAPI_NONE;
     return NULL;
@@ -2986,20 +2884,16 @@ void* cfapi_object_create(int* type, ...)
         {
             char* sval;
             object* op;
-            char name[MAX_BUF];
-
             sval = va_arg(args, char*);
 
             op = create_archetype(sval);
 
-            query_name(op, name, MAX_BUF);
-            if (strncmp(name, ARCH_SINGULARITY, ARCH_SINGULARITY_LEN) == 0) {
+            if (strncmp(query_name(op), ARCH_SINGULARITY, ARCH_SINGULARITY_LEN) == 0) {
                 free_object(op);
                 /* Try with archetype names... */
                 op = create_archetype_by_object_name(sval);
 
-                query_name(op, name, MAX_BUF);
-                if (strncmp(name, ARCH_SINGULARITY, ARCH_SINGULARITY_LEN) == 0) {
+                if (strncmp(query_name(op), ARCH_SINGULARITY, ARCH_SINGULARITY_LEN) == 0) {
                     free_object(op);
                     *type = CFAPI_NONE;
                     va_end(args);
@@ -3086,7 +2980,7 @@ void* cfapi_object_split(int* type, ...)
 
     va_end(args);
     *type = CFAPI_POBJECT;
-    return get_split_ob(op, nr, NULL, 0);
+    return get_split_ob(op, nr);
 }
 void* cfapi_object_merge(int* type, ...)
 {
@@ -3331,14 +3225,12 @@ void* cfapi_object_forget_spell(int* type, ...)
     object* op;
     object* sp;
     va_list args;
-    char name[MAX_BUF];
 
     va_start(args, type);
     op = va_arg(args, object*);
     sp = va_arg(args, object*);
     va_end(args);
-    query_name(sp, name, MAX_BUF);
-    do_forget_spell(op, name);
+    do_forget_spell(op, query_name(sp));
     *type = CFAPI_NONE;
     return NULL;
 }
@@ -3467,11 +3359,9 @@ void* cfapi_object_find_archetype_inside(int* type, ...)
         rv = present_arch_in_ob(find_archetype(str), op);
         if (rv == NULL) {
             object* tmp;
-            char name[MAX_BUF];
             /* Search by query_name instead */
             for (tmp = op->inv; tmp; tmp = tmp->below) {
-                query_name(tmp, name, MAX_BUF);
-                if (!strncmp(name, str, strlen(str)))
+                if (!strncmp(query_name(tmp), str, strlen(str)))
                     rv = tmp;
                 if (!strncmp(tmp->name, str, strlen(str)))
                     rv = tmp;
@@ -3571,10 +3461,7 @@ void* cfapi_object_speak(int* type, ...)
     sprintf(buf, "%s says: ", op->name);
     strncat(buf, msg, MAX_BUF-strlen(buf)-1);
     buf[MAX_BUF-1]=0;
-
-    /* Maybe no always NPC? */
-    ext_info_map(NDI_WHITE, op->map, MSG_TYPE_DIALOG, MSG_TYPE_DIALOG_NPC, buf, buf);
-
+    new_info_map(NDI_WHITE, op->map, buf);
     communicate(op, msg);
     *type = CFAPI_NONE;
     return NULL;
@@ -3611,8 +3498,7 @@ void* cfapi_player_message(int* type, ...)
     buf   = va_arg(args, char*);
     va_end(args);
 
-    draw_ext_info(flags, pri, pl, MSG_TYPE_MISC, MSG_SUBTYPE_NONE,
-		  buf, buf);
+    new_draw_info(flags, pri, pl, buf);
     *type = CFAPI_NONE;
     return NULL;
 }
@@ -3858,6 +3744,7 @@ void* cfapi_region_get_property(int* type, ...)
 void *cfapi_friendlylist_get_next(int *type, ...)
 {
     object* ob;
+    object* next;
     va_list args;
     objectlink* link;
 
@@ -3883,64 +3770,6 @@ void *cfapi_friendlylist_get_next(int *type, ...)
     return NULL;
 
 }
-
-/*
- * Random-map related stuff.
- */
-
-/**
- * Wrapper for set_random_map_variable().
- *
- * @param type
- * unused.
- * @return
- * NULL.
- */
-void* cfapi_set_random_map_variable(int *type, ...) {
-
-    va_list args;
-    RMParms* rp;
-    const char* buf;
-    int* ret;
-
-    va_start(args, type);
-    rp = va_arg(args, RMParms*);
-    buf = va_arg(args, const char*);
-    ret = va_arg(args, int*);
-    va_end(args);
-
-    *ret = set_random_map_variable(rp, buf);
-
-    return NULL;
-}
-
-/**
- * Wrapper for generate_random_map().
- *
- * @param type
- * unused.
- * @return
- * NULL.
- */
-void* cfapi_generate_random_map(int *type, ...) {
-    va_list args;
-    const char* name;
-    RMParms* rp;
-    char** use_layout;
-    mapstruct** ret;
-
-    va_start(args, type);
-    name = va_arg(args, const char*);
-    rp = va_arg(args, RMParms*);
-    use_layout = va_arg(args, char**);
-    ret = va_arg(args, mapstruct**);
-    va_end(args);
-
-    *ret = generate_random_map(name, rp, use_layout);
-
-    return NULL;
-}
-
 
 /*****************************************************************************/
 /* NEW PLUGIN STUFF ENDS HERE                                                */

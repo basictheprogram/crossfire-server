@@ -223,8 +223,7 @@ static int remove_symptoms(object *disease) {
 	remove_ob(symptom);
 	free_object(symptom);
     }
-    if(victim)
-        fix_object(victim);
+    if(victim) fix_player(victim);
     return 0;
 }
 
@@ -360,17 +359,12 @@ int infect_object(object *victim, object *disease, int force) {
 	    sprintf(buf,"You infect %s with your disease, %s!",victim->name,new_disease->name);
 
 	 if(victim->type == PLAYER)
-	    draw_ext_info(NDI_UNIQUE | NDI_RED, 0, new_disease->owner, 
-			  MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_DID_HIT,
-			  buf, buf);
+	    new_draw_info(NDI_UNIQUE | NDI_RED, 0, new_disease->owner, buf);
 	 else
-	    draw_ext_info(0, 4, new_disease->owner, MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_DID_HIT,
-			  buf, buf);
+	    new_draw_info(0, 4, new_disease->owner, buf);
     }
     if(victim->type==PLAYER) 
-	 draw_ext_info(NDI_UNIQUE | NDI_RED,0,victim, MSG_TYPE_ATTRIBUTE,
-		       MSG_TYPE_ATTRIBUTE_BAD_EFFECT_START,
-		       "You suddenly feel ill.", NULL);
+	 new_draw_info(NDI_UNIQUE | NDI_RED,0,victim,"You suddenly feel ill.");
 
     return 1;
 
@@ -496,7 +490,7 @@ static int do_symptoms(object *disease) {
 	symptom->other_arch = disease->other_arch;
     }
     SET_FLAG(symptom,FLAG_APPLIED);
-    fix_object(victim);
+    fix_player(victim);
     return 1;
 }
 
@@ -573,9 +567,7 @@ int move_symptom(object *symptom) {
             insert_ob_in_map(new_ob,victim->map,victim,0);
         }
     }
-    draw_ext_info(NDI_UNIQUE | NDI_RED,0,victim,
-		  MSG_TYPE_ATTRIBUTE, MSG_TYPE_ATTRIBUTE_BAD_EFFECT_START,
-		  symptom->msg, symptom->msg);
+    new_draw_info(NDI_UNIQUE | NDI_RED,0,victim,symptom->msg);
 
     return 1;
 }
@@ -642,14 +634,42 @@ int cure_disease(object *sufferer,object *caster) {
     if (cure) {
 	/* Only draw these messages once */
 	if (caster)
-	    draw_ext_info_format(NDI_UNIQUE,0,caster, MSG_TYPE_SPELL, MSG_TYPE_SPELL_HEAL,
-				 "You cure a disease!", NULL);
-
-	draw_ext_info(NDI_UNIQUE,0,sufferer,
-		      MSG_TYPE_ATTRIBUTE, MSG_TYPE_ATTRIBUTE_BAD_EFFECT_END,
-		      "You no longer feel diseased.", NULL);
+	    new_draw_info_format(NDI_UNIQUE,0,caster,"You cure a disease!");
+	new_draw_info(NDI_UNIQUE,0,sufferer,"You no longer feel diseased.");
     }
   return 1;
 }
 
+
+#if 0
+/*
+ * reduce_symptoms is no longer used - should perhaps be removed.
+ * MSW 2006-06-02
+ */
+
+/* reduces disease progression:  reduce_symptoms 
+ * return true if we actually reduce a disease.
+ */
+
+static int reduce_symptoms(object *sufferer, int reduction) {
+    object *walk;
+    int success=0;
+
+    for(walk=sufferer->inv;walk;walk=walk->below) {
+	 if(walk->type==SYMPTOM) {
+	    if(walk->value > 0) {
+		success=1;
+		walk->value = MAX(0,walk->value - 2*reduction);
+		/* give the disease time to modify this symptom,
+		 * and reduce its severity.  */
+		walk->speed_left = 0;
+	    }
+	 }
+    }
+    if (success)
+	  new_draw_info(NDI_UNIQUE,0,sufferer,"Your illness seems less severe.");
+    return success;
+}
+  
+#endif
 

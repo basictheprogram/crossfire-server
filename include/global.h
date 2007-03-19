@@ -142,11 +142,6 @@ typedef signed long long 	sint64;
 
 /* pull in book structures */
 #include "book.h"
-
-/* ob_methods and ob_types subsystem */
-#include "ob_methods.h"
-#include "ob_types.h"
-
 /*
  * So far only used when dealing with artifacts.
  * (now used by alchemy and other code too. Nov 95 b.t).
@@ -227,6 +222,7 @@ EXTERN archetype *map_archeytpe;
 EXTERN char first_map_path[MAX_BUF];	/* The start-level */
 EXTERN char first_map_ext_path[MAX_BUF]; /* Path used for per-race start maps */
 
+EXTERN char errmsg[HUGE_BUF];
 EXTERN long ob_count;
 /*
  * Used in treasure.c
@@ -269,7 +265,6 @@ extern socket_struct *init_sockets;
 #ifndef __CEXTRACT__
 #include "libproto.h"
 #include "sockproto.h"
-#include "typesproto.h"
 #endif
 
 
@@ -279,13 +274,15 @@ extern socket_struct *init_sockets;
  * This is generally done as a safety, and having this macro
  * makes the code a bit cleaner when doing so.
  */
-#define FREE_AND_CLEAR(xyz) {free((void*)xyz); xyz=NULL; }
+#define FREE_AND_CLEAR(xyz) {free(xyz); xyz=NULL; }
 #define FREE_AND_CLEAR_STR(xyz) {free_string(xyz); xyz=NULL; }
 
 /* FREE_AND_COPY is for the shared string - it is handy enough
  * to use all over the place.
  */
 #define FREE_AND_COPY(sv,nv) { if (sv) free_string(sv); sv=add_string(nv); }
+
+#define DELETE_STRING(__str_)  free_string(__str_);__str_=NULL;
 
 #ifdef CALLOC
 #undef CALLOC
@@ -396,9 +393,6 @@ typedef struct Settings {
     uint8   armor_speed_linear;         /* If 1, speed improvement is linear, else exponantiel */
     uint8   no_player_stealing;     /* If 1, can not steal from other players */
     uint8   create_home_portals;     /* If 1, can create portals in unique maps (apartments) */
-    uint8   personalized_blessings; /* If 1, blessed weapons get an owner and a willpower value */
-    sint64  pk_max_experience; /* Maximum experience one can get for PKing. Ignore if negative. */
-    int     pk_max_experience_percent; /* Percentage of experience of victim the killer gets. */
     int     allow_denied_spells_writing; /* If set, players can write spells they can't cast. */
 } Settings;
 

@@ -5,7 +5,7 @@
 /*
     CrossFire, A Multiplayer game for X-windows
 
-    Copyright (C) 2002-2006 Mark Wedel & Crossfire Development Team
+    Copyright (C) 2002 Mark Wedel & Crossfire Development Team
     Copyright (C) 1992 Frank Tore Johansen
 
     This program is free software; you can redistribute it and/or modify
@@ -475,17 +475,6 @@ static void attack_message(int dam, int type, object *op, object *hitter) {
 		  break;
 	      }
 	}
-	else if (USING_SKILL(hitter, SK_WRAITH_FEED)) {
-          for (i=0; i < MAXATTACKMESS && attack_mess[ATM_WRAITH_FEED][i].level != -1;
-	       i++)
-	      if (dam < attack_mess[ATM_WRAITH_FEED][i].level) {
-	          sprintf(buf1, "%s %s%s", attack_mess[ATM_WRAITH_FEED][i].buf1,
-			  op->name, attack_mess[ATM_WRAITH_FEED][i].buf2);
-		  sprintf(buf2, "%s", attack_mess[ATM_WRAITH_FEED][i].buf3);
-		  found++;
-		  break;
-	      }
-	}
     }
     if (found) {
 	/* done */
@@ -612,7 +601,7 @@ static void attack_message(int dam, int type, object *op, object *hitter) {
 		    play_sound_player_only(op->contr, SOUND_PLAYER_IS_HIT3,0,0);
 	    }
 	}
-	draw_ext_info(NDI_BLACK, 0,op,MSG_TYPE_VICTIM, MSG_TYPE_VICTIM_WAS_HIT, buf, NULL);
+	new_draw_info(NDI_BLACK, 0,op,buf);
     } /* end of player hitting player */
 
     /* scale down these messages too */
@@ -626,8 +615,7 @@ static void attack_message(int dam, int type, object *op, object *hitter) {
 	    else
 		play_sound_player_only(hitter->contr, SOUND_PLAYER_HITS3,0,0);
 	}
-	draw_ext_info(NDI_BLACK, 0, hitter,MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_DID_HIT, 
-		      buf, NULL);
+	new_draw_info(NDI_BLACK, 0, hitter, buf);
     } else if(get_owner(hitter)!=NULL&&hitter->owner->type==PLAYER) {
       /* look for stacked spells and start reducing the message chances */
         if (hitter->type == SPELL_EFFECT && 
@@ -654,11 +642,9 @@ static void attack_message(int dam, int type, object *op, object *hitter) {
 	       return;
 	} else if (rndm(0, 5) != 0)
 	    return;
+        sprintf(buf,"Your %s%s %s.", hitter->name, buf2, op->name);
 	play_sound_map(op->map, op->x, op->y, SOUND_PLAYER_HITS4);
-	draw_ext_info_format(NDI_BLACK, 0, hitter->owner, MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_PET_HIT,
-		     "Your %s%s %s.", 
-		     "Your %s%s %s.", 
-		     hitter->name, buf2, op->name);
+	new_draw_info(NDI_BLACK, 0, hitter->owner, buf);
     }
 }
 
@@ -772,17 +758,15 @@ static int attack_ob_simple (object *op, object *hitter, int base_dam,
 	if (settings.casting_time == TRUE) {
 	    if ((hitter->type == PLAYER)&&(hitter->casting_time > -1)){
 		hitter->casting_time = -1;
-		draw_ext_info(NDI_UNIQUE, 0,hitter,MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_FUMBLE,
-			      "You attacked and lost your spell!", NULL);
+		new_draw_info(NDI_UNIQUE, 0,hitter,"You attacked and lost "
+		    "your spell!");
 	    }
 	    if ((op->casting_time > -1)&&(hitdam > 0)){
 		op->casting_time = -1;
 		if (op->type == PLAYER)  {
-		    draw_ext_info(NDI_UNIQUE, 0,op,MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_FUMBLE,
-				  "You were hit and lost your spell!", NULL);
-		    draw_ext_info_format(NDI_ALL|NDI_UNIQUE,5,NULL, 
-			 MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_FUMBLE,
-			"%s was hit by %s and lost a spell.",
+		    new_draw_info(NDI_UNIQUE, 0,op,"You were hit and lost "
+			"your spell!");
+		    new_draw_info_format(NDI_ALL|NDI_UNIQUE,5,NULL,
 			"%s was hit by %s and lost a spell.",
 			op_name,hitter->name);
 		}
@@ -806,9 +790,9 @@ static int attack_ob_simple (object *op, object *hitter, int base_dam,
             if (op->hide && QUERY_FLAG (hitter, FLAG_ALIVE)) {
                 make_visible (op);
                 if (op->type == PLAYER)
-                    draw_ext_info (NDI_UNIQUE, 0, op, MSG_TYPE_VICTIM, MSG_TYPE_VICTIM_WAS_HIT,
-			   "You were hit by a wild attack. You are no longer hidden!",
-			    NULL);
+                    new_draw_info (NDI_UNIQUE, 0, op,
+                                   "You were hit by a wild attack. "
+                                   "You are no longer hidden!");
             }
 
             /* thrown items (hitter) will have various effects
@@ -835,8 +819,7 @@ static int attack_ob_simple (object *op, object *hitter, int base_dam,
 	    && QUERY_FLAG (hitter, FLAG_ALIVE))
 	{
 	    if (op->attacktype & AT_ACID && hitter->type==PLAYER)
-		draw_ext_info(NDI_UNIQUE, 0,hitter, MSG_TYPE_VICTIM, MSG_TYPE_VICTIM_WAS_HIT,
-			      "You are splashed by acid!\n", NULL);
+		new_draw_info(NDI_UNIQUE, 0,hitter,"You are splashed by acid!\n");
 	    hit_player(hitter, random_roll(0, (op->stats.dam), hitter,
 				      PREFER_LOW),op, op->attacktype, 1);
 	    if (was_destroyed (op, op_tag)
@@ -1081,7 +1064,6 @@ static int hit_player_attacktype(object *op, object *hitter, int dam,
 	uint32 attacknum, int magic) {
   
     int doesnt_slay = 1;
-    char name_hitter[MAX_BUF], name_op[MAX_BUF];
 
     /* Catch anyone that may be trying to send us a bitmask instead of the number */
     if (attacknum >= NROFATTACKS) {
@@ -1214,16 +1196,11 @@ static int hit_player_attacktype(object *op, object *hitter, int dam,
                    objects */
 		if(rndm(0, dam+4) >
 		    random_roll(0, 39, op, PREFER_HIGH)+2*tmp->magic) {
-		    if(op->type == PLAYER) {
+		    if(op->type == PLAYER)
 			/* Make this more visible */
-                query_name(hitter, name_hitter, MAX_BUF);
-                query_name(tmp, name_op, MAX_BUF);
-			draw_ext_info_format(NDI_UNIQUE|NDI_RED,0, op, 
-			     MSG_TYPE_VICTIM, MSG_TYPE_VICTIM_WAS_HIT,
-			     "The %s's acid corrodes your %s!",
-			     "The %s's acid corrodes your %s!",
-			     name_hitter, name_op);
-            }
+			new_draw_info_format(NDI_UNIQUE|NDI_RED,0, op,
+				 "The %s's acid corrodes your %s!",
+				 query_name(hitter), query_name(tmp));
 		    flag = 1;
 		    tmp->magic--;
 		    if(op->type == PLAYER)
@@ -1231,7 +1208,7 @@ static int hit_player_attacktype(object *op, object *hitter, int dam,
 		}
 	    }
 	    if(flag)
-            fix_object(op); /* Something was corroded */
+	      fix_player(op); /* Something was corroded */
 	}
       }
       break;
@@ -1318,21 +1295,17 @@ static int hit_player_attacktype(object *op, object *hitter, int dam,
 	deathstrike_player(op, hitter, &dam);
 	break;
     case ATNR_CHAOS:
-        query_name(op, name_op, MAX_BUF);
-        query_name(hitter, name_hitter, MAX_BUF);
 	LOG(llevError,
 	    "%s was hit by %s with non-specific chaos.\n",
-	    name_op,
-	    name_hitter);
+	    query_name(op),
+	    query_name(hitter));
 	dam = 0;
 	break;
     case ATNR_COUNTERSPELL: 
-        query_name(op, name_op, MAX_BUF);
-        query_name(hitter, name_hitter, MAX_BUF);
 	LOG(llevError,
 	    "%s was hit by %s with counterspell attack.\n",
-	    name_op,
-	    name_hitter);
+	    query_name(op),
+	    query_name(hitter));
 	dam = 0;
 	/* This should never happen.  Counterspell is handled
 	 * seperately and filtered out.  If this does happen,
@@ -1360,33 +1333,20 @@ static int hit_player_attacktype(object *op, object *hitter, int dam,
 	 *
 	 * life stealing doesn't do a lot of damage, but it gives the
 	 * damage it does do to the player.  Given that,
-	 * it only does 1/30'th normal damage (hence the divide by
-	 * 3000). Wraith get 1/2 of the damage, and therefore divide
-	 * by 200. This number may need tweaking for game balance.
+	 * it only does 1/10'th normal damage (hence the divide by
+	 * 1000).
 	 */
-
-	int dam_modifier = is_wraith_pl(hitter) ? 200 : 3000;
-	 
-	/* You can't steal life from something undead or not alive. */
-	if (op->type == GOLEM || (QUERY_FLAG(op, FLAG_UNDEAD)) ||
-	  !(QUERY_FLAG(op, FLAG_ALIVE)) || (op->type == DOOR))
-	  return 0;
+	/* You can't steal life from something undead */
+	if ((op->type == GOLEM) || (QUERY_FLAG(op, FLAG_UNDEAD))) return 0;
 	/* If drain protection is higher than life stealing, use that */
 	if (op->resist[ATNR_DRAIN] >= op->resist[ATNR_LIFE_STEALING])
-	  dam = (dam*(100 - op->resist[ATNR_DRAIN])) / dam_modifier;
-	else dam = (dam*(100 - op->resist[ATNR_LIFE_STEALING])) / dam_modifier;
+	  dam = (dam*(100 - op->resist[ATNR_DRAIN])) / 3000;
+	else dam = (dam*(100 - op->resist[ATNR_LIFE_STEALING])) / 3000;
 	/* You die at -1 hp, not zero. */
 	if (dam > (op->stats.hp+1)) dam = op->stats.hp+1;
 	new_hp = hitter->stats.hp + dam;
 	if (new_hp > hitter->stats.maxhp) new_hp = hitter->stats.maxhp;
 	if (new_hp > hitter->stats.hp) hitter->stats.hp = new_hp;
-
-	/* Wraith also get food through life stealing */
-	if (is_wraith_pl(hitter)) {
-	  if (hitter->stats.food+dam >= 999) hitter->stats.food = 999;
-	  else hitter->stats.food += dam;
-	  fix_object(hitter);
-	}
       }
     }
     return dam;
@@ -1472,15 +1432,9 @@ static int kill_object(object *op,int dam, object *hitter, int type)
 
     /* Player killed something */
     if(owner->type==PLAYER) {
-        char name_op[MAX_BUF], name_hitter[MAX_BUF];
-        query_name(op, name_op, MAX_BUF);
-        if (hitter)
-            query_name(hitter, name_hitter, MAX_BUF);
-        else
-            name_hitter[0] = '\0';
 	log_kill(owner->name,
-		 name_op,op->type,
-                (owner!=hitter) ? name_hitter : NULL,
+		 query_name(op),op->type,
+                (owner!=hitter) ? query_name(hitter) : NULL,
                 (owner!=hitter) ? hitter->type : 0);
 
 	/* Log players killing other players - makes it easier to detect
@@ -1491,14 +1445,12 @@ static int kill_object(object *op,int dam, object *hitter, int type)
 	    time_t t=time(NULL);
 	    struct tm *tmv;
 	    char buf[256];
-        char name[MAX_BUF];
 
 	    tmv = localtime(&t);
 	    strftime(buf, 256,"%a %b %d %H:%M:%S %Y", tmv);
-        query_name(op, name, MAX_BUF);
 
 	    LOG(llevInfo,"%s PLAYER_KILL_PLAYER: %s (%s) killed %s\n",
-		buf, owner->name, owner->contr->socket.host, name);
+		buf, owner->name, owner->contr->socket.host, query_name(op));
 	}
 
 	/* try to filter some things out - basically, if you are
@@ -1507,21 +1459,13 @@ static int kill_object(object *op,int dam, object *hitter, int type)
 	 */
 	if ( owner->level < op->level * 2|| op->stats.exp>1000) {
 	    if(owner!=hitter) {
-            char killed[MAX_BUF], with[MAX_BUF];
-            query_name(op, killed, MAX_BUF);
-            query_name(hitter, with, MAX_BUF);
-		draw_ext_info_format(NDI_BLACK, 0, owner, MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_DID_KILL,
-		     "You killed %s with %s.",
-		     "You killed %s with %s.",
-		     killed, with);
+		new_draw_info_format(NDI_BLACK, 0, owner,
+			"You killed %s with %s.",query_name(op),
+			 query_name(hitter));
 	    }
 	    else {
-            char killed[MAX_BUF];
-            query_name(op, killed, MAX_BUF);
-		draw_ext_info_format(NDI_BLACK, 0, owner, MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_DID_KILL,
-		     "You killed %s.",
-		     "You killed %s.",
-		     killed);
+		new_draw_info_format(NDI_BLACK, 0, owner, 
+			"You killed %s.",query_name(op));
 	    }
 	    /* Only play sounds for melee kills */
 	    if (hitter->type == PLAYER)
@@ -1573,11 +1517,8 @@ static int kill_object(object *op,int dam, object *hitter, int type)
 
     /* Pet (or spell) killed something. */
     if(owner != hitter ) {
-        char name_op[MAX_BUF], name_hitter[MAX_BUF];
-        query_name(op, name_op, MAX_BUF);
-        query_name(hitter, name_hitter, MAX_BUF);
 	(void) sprintf(buf,"%s killed %s with %s%s%s.",owner->name,
-	       name_op,name_hitter, battleg? " (duel)":"", pk? " (pk)":"");
+	       query_name(op),query_name(hitter), battleg? " (duel)":"", pk? " (pk)":"");
     }
     else {
 	(void) sprintf(buf,"%s killed %s%s%s%s.",hitter->name,op->name,
@@ -1588,8 +1529,7 @@ static int kill_object(object *op,int dam, object *hitter, int type)
     if (!skop) skop = hitter->chosen_skill;
     if (!skill && skop) skill=skop->skill;
 
-    draw_ext_info(NDI_ALL, op->type==PLAYER?1:10, NULL, MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_PLAYER,
-		  buf, NULL);
+    new_draw_info(NDI_ALL, op->type==PLAYER?1:10, NULL, buf);
 
 
     /* If you didn't kill yourself, and your not the wizard */
@@ -1601,16 +1541,11 @@ static int kill_object(object *op,int dam, object *hitter, int type)
 	/* Really don't give much experience for killing other players */
 	if (op->type==PLAYER) {
 	    if (battleg) {
-		draw_ext_info(NDI_UNIQUE, 0,owner, MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_DID_KILL,
-			      "Your foe has fallen!\nVICTORY!!!", NULL);
+		new_draw_info(NDI_UNIQUE, 0,owner, "Your foe has fallen!");
+		new_draw_info(NDI_UNIQUE, 0,owner, "VICTORY!!!");
 	    }
-	    else {
-            exp = settings.pk_max_experience_percent * exp / 100;
-            if (settings.pk_max_experience >= 0)
-                exp = MIN(settings.pk_max_experience, exp);
-            /* Never exceed what victim can lose considering permanent exp. */
-            exp = check_exp_loss(op, exp);
-        }
+	    else
+		exp = MIN(5000000, MAX(0, exp/10));
 	}
 
 	/* Don't know why this is set this way - doesn't make
@@ -1635,11 +1570,7 @@ static int kill_object(object *op,int dam, object *hitter, int type)
 
 	    partylist *party=owner->contr->party;
 #ifdef PARTY_KILL_LOG
-        {
-            char name[MAX_BUF];
-            query_name(owner, name, MAX_BUF);
-            add_kill_to_party(party, name, query_name(op), exp);
-        }
+	    add_kill_to_party(party, query_name(owner), query_name(op), exp);
 #endif
 	    for(pl=first_player;pl!=NULL;pl=pl->next) {
 		if(party && pl->ob->contr->party==party && on_same_map(pl->ob, owner)) {
@@ -1673,9 +1604,7 @@ static int kill_object(object *op,int dam, object *hitter, int type)
 	    if(owner1!= NULL && owner1->type == PLAYER) {
 		play_sound_player_only(owner1->contr, SOUND_PET_IS_KILLED,0,0);
 		/* Maybe we should include the owner that killed this, maybe not */
-		draw_ext_info_format(NDI_UNIQUE, 0,owner1,MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_PET_DIED,
-				     "Your pet, the %s, is killed by %s.",
-				     "Your pet, the %s, is killed by %s.",
+		new_draw_info_format(NDI_UNIQUE, 0,owner1,"Your pet, the %s, is killed by %s.",
 				     op->name,hitter->name);
 	    }
 	    remove_friendly_object(op);
@@ -2044,23 +1973,15 @@ static void poison_player(object *op, object *hitter, int dam)
 		tmp->stats.Dex= MAX(-(dam/6+1), -10);
 		tmp->stats.Int= MAX(-dam/7, -10);
 		SET_FLAG(tmp,FLAG_APPLIED);
-        fix_object(op);
-		draw_ext_info(NDI_UNIQUE, 0,op, 
-			      MSG_TYPE_ATTRIBUTE, MSG_TYPE_ATTRIBUTE_BAD_EFFECT_START,
-			      "You suddenly feel very ill.", NULL);
+		fix_player(op);
+		new_draw_info(NDI_UNIQUE, 0,op,"You suddenly feel very ill.");
 	    }
 	    if (hitter->type == PLAYER)
-		draw_ext_info_format(NDI_UNIQUE, 0, hitter,
-		     MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_DID_HIT,
-		     "You poison %s.",
-		     "You poison %s.",
+		new_draw_info_format(NDI_UNIQUE, 0, hitter, "You poison %s.",
 		     op->name);
 	    else if (get_owner(hitter) != NULL && hitter->owner->type == PLAYER)
-		draw_ext_info_format(NDI_UNIQUE, 0, hitter->owner,
-		     MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_PET_HIT,
-		     "Your %s poisons %s.",
-		     "Your %s poisons %s.",
-		     hitter->name, op->name);
+		new_draw_info_format(NDI_UNIQUE, 0, hitter->owner,
+		     "Your %s poisons %s.", hitter->name, op->name);
 	}
 	tmp->speed_left=0;
     }
@@ -2077,13 +1998,12 @@ static void slow_player(object *op,object *hitter,int dam)
     if((tmp=present_arch_in_ob(at,op)) == NULL) {
       tmp = arch_to_object(at);
       tmp = insert_ob_in_ob(tmp,op);
-      draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_ATTRIBUTE, MSG_TYPE_ATTRIBUTE_BAD_EFFECT_START,
-		    "The world suddenly moves very fast!", NULL);
+      new_draw_info(NDI_UNIQUE, 0,op,"The world suddenly moves very fast!");
     } else
       tmp->stats.food++;
     SET_FLAG(tmp, FLAG_APPLIED);
     tmp->speed_left=0;
-    fix_object(op);
+    fix_player(op);
 }
 
 void confuse_player(object *op, object *hitter, int dam)
@@ -2110,15 +2030,13 @@ void confuse_player(object *op, object *hitter, int dam)
 	tmp->duration = maxduration;
     
     if(op->type == PLAYER && !QUERY_FLAG(op,FLAG_CONFUSED))
-	draw_ext_info(NDI_UNIQUE, 0,op,MSG_TYPE_ATTRIBUTE, MSG_TYPE_ATTRIBUTE_BAD_EFFECT_START,
-		      "You suddenly feel very confused!", NULL);
+	new_draw_info(NDI_UNIQUE, 0,op,"You suddenly feel very confused!");
     SET_FLAG(op, FLAG_CONFUSED);
 }
 
 void blind_player(object *op, object *hitter, int dam)
 {
     object *tmp,*owner;
-    char victim[MAX_BUF];
 
     /* Save some work if we know it isn't going to affect the player */
     if (op->resist[ATNR_BLIND]==100) return;
@@ -2135,16 +2053,13 @@ void blind_player(object *op, object *hitter, int dam)
 
       tmp = insert_ob_in_ob(tmp,op);
       change_abil(op,tmp);   /* Mostly to display any messages */
-      fix_object(op);        /* This takes care of some other stuff */
+      fix_player(op);        /* This takes care of some other stuff */
 
       if(hitter->owner) owner = get_owner(hitter);
       else owner = hitter;
 
-      query_name(op, victim, MAX_BUF);
-      draw_ext_info_format(NDI_UNIQUE,0,owner, MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_DID_HIT,
-	  "Your attack blinds %s!",
-	  "Your attack blinds %s!",
-	   victim);
+      new_draw_info_format(NDI_UNIQUE,0,owner,
+	  "Your attack blinds %s!",query_name(op));
     } 
     tmp->stats.food += dam;
     if(tmp->stats.food > 10) tmp->stats.food = 10;

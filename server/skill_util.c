@@ -57,8 +57,8 @@ static int attack_melee_weapon(object *op, int dir, const char *string, object *
 
 const char *skill_names[NUM_SKILLS];
 
-/**
- * This just sets up the ::skill_names table above. The index into the array is set up by the
+/* init_skills basically just sets up the skill_names table
+ * above.  The index into the array is set up by the
  * subtypes.
  */
 void init_skills(void) {
@@ -66,80 +66,63 @@ void init_skills(void) {
     archetype *at;
 
     for (i=0; i<NUM_SKILLS; i++)
-        skill_names[i] = NULL;
+	skill_names[i] = NULL;
 
     for(at = first_archetype;at!=NULL;at=at->next) {
-        if (at->clone.type == SKILL) {
-            if (skill_names[at->clone.subtype] != NULL) {
-                LOG(llevError, "init_skills: multiple skill using same subtype %d, %s, %s\n",
-                    at->clone.subtype, skill_names[at->clone.subtype], at->clone.skill);
-            } else {
-                skill_names[at->clone.subtype] = add_refcount(at->clone.skill);
-            }
-        }
+	if (at->clone.type == SKILL) {
+	    if (skill_names[at->clone.subtype] != NULL) {
+		LOG(llevError, "init_skills: multiple skill using same subtype %d, %s, %s\n",
+		    at->clone.subtype, skill_names[at->clone.subtype], at->clone.skill);
+	    } else {
+		skill_names[at->clone.subtype] = add_refcount(at->clone.skill);
+	    }
+	}
     }
 
     /* This isn't really an error if there is no skill subtype set, but
      * checking for this may catch some user errors.
-     * On the other hand, it'll crash later on, which is not nice. Thus giving a dummy name.
      */
     for (i=1; i<NUM_SKILLS; i++) {
-        if (!skill_names[i]) {
-            LOG(llevError, "init_skills: skill subtype %d doesn't have a name?\n", i);
-            skill_names[i] = add_string("dummy skill");
-        }
+	if (!skill_names[i])
+	    LOG(llevError, "init_skills: skill subtype %d doesn't have a name?\n",
+		i);
     }
 }
 
 
-/**
- * This function goes through the player inventory and sets
+/* This function goes through the player inventory and sets
  * up the last_skills[] array in the player object.
- * The last_skills[] is used to more quickly lookup skills - 
+ * the last_skills[] is used to more quickly lookup skills - 
  * mostly used for sending exp.
- *
- * @param op
- * player to link skills for. Must be a player.
  */
 void link_player_skills(object *op)
 {
     object *tmp;
 
     for (tmp=op->inv; tmp; tmp=tmp->below) {
-        if (tmp->type == SKILL) {
-            /* This is really a warning, hence no else below */
-            if (op->contr->last_skill_ob[tmp->subtype] && op->contr->last_skill_ob[tmp->subtype] != tmp) {
-                LOG(llevError,"Multiple skills with the same subtype? %s, %s\n",
-                    op->contr->last_skill_ob[tmp->subtype]->skill, tmp->skill);
-            }
-            if (tmp->subtype >= NUM_SKILLS) {
-                LOG(llevError,"Invalid subtype number %d (range 0-%d)\n",
-                    tmp->subtype, NUM_SKILLS);
-            } else {
-                op->contr->last_skill_ob[tmp->subtype] = tmp;
-                op->contr->last_skill_exp[tmp->subtype] = -1;
-            }
-        }
+	if (tmp->type == SKILL) {
+	    /* This is really a warning, hence no else below */
+	    if (op->contr->last_skill_ob[tmp->subtype] && op->contr->last_skill_ob[tmp->subtype] != tmp) {
+		LOG(llevError,"Multiple skills with the same subtype? %s, %s\n",
+		    op->contr->last_skill_ob[tmp->subtype]->skill, tmp->skill);
+	    }
+	    if (tmp->subtype >= NUM_SKILLS) {
+		LOG(llevError,"Invalid subtype number %d (range 0-%d)\n",
+		    tmp->subtype, NUM_SKILLS);
+	    } else {
+		op->contr->last_skill_ob[tmp->subtype] = tmp;
+		op->contr->last_skill_exp[tmp->subtype] = -1;
+	    }
+	}
     }
 }
 
-/**
- * This returns the skill pointer of the given name (the
+/* This returns the skill pointer of the given name (the
  * one that accumlates exp, has the level, etc).
  *
  * It is presumed that the player will be needing to actually
  * use the skill, so thus if use of the skill requires a skill
  * tool, this code will equip it.
- *
- * @param who
- * Player to get skill.
- * @param name
- * skill to find. Needs not to be a shared string.
- * @return
- * pointer to skill object, or NULL if player doesn't have it.
- *
- * @todo
- * check if name shouldn't be made a shared string.
  */
 object *find_skill_by_name(object *who, const char *name)
 {
@@ -152,38 +135,35 @@ object *find_skill_by_name(object *who, const char *name)
      * 'hi', we don't want to match if the user passed 'high'
      */
     for (tmp=who->inv; tmp!=NULL; tmp=tmp->below) {
-        if (tmp->type == SKILL && !strncasecmp(name, tmp->skill, strlen(name)) &&
-          strlen(tmp->skill) >= strlen(name))
-            skill = tmp;
+	if (tmp->type == SKILL && !strncasecmp(name, tmp->skill, strlen(name)) &&
+	    strlen(tmp->skill) >= strlen(name)) skill = tmp;
 
-        /* Try to find appropriate skilltool.  If the player has one already
-        * applied, we try to keep using that one.
-        */
-        else if (tmp->type == SKILL_TOOL && !strncasecmp(name, tmp->skill, strlen(name)) &&
-          strlen(tmp->skill) >= strlen(name)) {
-            if (QUERY_FLAG(tmp, FLAG_APPLIED))
-                skill_tool = tmp;
-            else if (!skill_tool || !QUERY_FLAG(skill_tool, FLAG_APPLIED))
-                skill_tool = tmp;
-        }
+	/* Try to find appropriate skilltool.  If the player has one already
+	 * applied, we try to keep using that one.
+	 */
+	else if (tmp->type == SKILL_TOOL && !strncasecmp(name, tmp->skill, strlen(name)) &&
+	    strlen(tmp->skill) >= strlen(name)) {
+	    if (QUERY_FLAG(tmp, FLAG_APPLIED)) skill_tool = tmp;
+	    else if (!skill_tool || !QUERY_FLAG(skill_tool, FLAG_APPLIED))
+		skill_tool = tmp;
+	}
     }
     /* If this is a skill that can be used without a tool, return it */
-    if (skill && QUERY_FLAG(skill, FLAG_CAN_USE_SKILL))
-        return skill;
+    if (skill && QUERY_FLAG(skill, FLAG_CAN_USE_SKILL)) return skill;
 
     /* Player has a tool to use the skill.  IF not applied, apply it -
      * if not successful, return null.  If they do have the skill tool
      * but not the skill itself, give it to them.
      */
     if (skill_tool) {
-        if (!QUERY_FLAG(skill_tool, FLAG_APPLIED)) {
-            if (apply_special(who, skill_tool, 0)) return NULL;
-        }
-        if (!skill) {
-            skill = give_skill_by_name(who, skill_tool->skill);
-            link_player_skills(who);
-        }
-        return skill;
+	if (!QUERY_FLAG(skill_tool, FLAG_APPLIED)) {
+	    if (apply_special(who, skill_tool, 0)) return NULL;
+	}
+	if (!skill) {
+	    skill = give_skill_by_name(who, skill_tool->skill);
+	    link_player_skills(who);
+	}
+	return skill;
     }
     return NULL;
 }
@@ -342,15 +322,13 @@ int do_skill (object *op, object *part, object *skill, int dir, const char *stri
 	     */
 	    if(QUERY_FLAG(skill,FLAG_APPLIED)) { 
 		CLEAR_FLAG(skill,FLAG_APPLIED);
-		draw_ext_info(NDI_UNIQUE,0,op,MSG_TYPE_SKILL, MSG_TYPE_SKILL_SUCCESS,
-			      "You come to earth.", NULL);
+		new_draw_info(NDI_UNIQUE,0,op,"You come to earth.");
 	    }
 	    else {
 		SET_FLAG(skill,FLAG_APPLIED);
-		draw_ext_info(NDI_UNIQUE,0,op,MSG_TYPE_SKILL, MSG_TYPE_SKILL_SUCCESS,
-			      "You rise into the air!.", NULL);
+		new_draw_info(NDI_UNIQUE,0,op,"You rise into the air!.");
 	    }
-        fix_object(op);
+	    fix_player(op);
 	    success=1;
 	    break;
 
@@ -396,10 +374,6 @@ int do_skill (object *op, object *part, object *skill, int dir, const char *stri
 	    (void) attack_hth(op,dir,"clawed", skill);
 	    break;
 
-	case SK_WRAITH_FEED:
-	    (void) attack_hth(op,dir,"fed upon", skill);
-	    break;
-
 	case SK_ONE_HANDED_WEAPON:
 	case SK_TWO_HANDED_WEAPON:
 	    (void) attack_melee_weapon(op,dir,NULL, skill);
@@ -442,14 +416,12 @@ int do_skill (object *op, object *part, object *skill, int dir, const char *stri
 	    break;
 
 	case SK_SET_TRAP:
-	    draw_ext_info(NDI_UNIQUE, 0,op,MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
-			  "This skill is not currently implemented.", NULL);
+	    new_draw_info(NDI_UNIQUE, 0,op,"This skill is not currently implemented.");
 	    break;
 
 	case SK_USE_MAGIC_ITEM:
 	case SK_MISSILE_WEAPON:
-	    draw_ext_info(NDI_UNIQUE, 0,op,MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
-			  "There is no special attack for this skill.", NULL);
+	    new_draw_info(NDI_UNIQUE, 0,op,"There is no special attack for this skill.");
 	    break;
 
 	case SK_PRAYING:
@@ -465,18 +437,13 @@ int do_skill (object *op, object *part, object *skill, int dir, const char *stri
 	case SK_PYROMANCY:
 	case SK_SUMMONING:
 	case SK_CLIMBING:
-	    draw_ext_info(NDI_UNIQUE, 0,op,MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
-			  "This skill is already in effect.", NULL);
+	    new_draw_info(NDI_UNIQUE, 0,op,"This skill is already in effect.");
 	    break;
 
 	default:
-        {
-            char name[MAX_BUF];
-            query_name(op, name, MAX_BUF);
-            LOG(llevDebug,"%s attempted to use unknown skill: %d\n"
-                ,name, op->chosen_skill->stats.sp);
-            break;
-        }
+	    LOG(llevDebug,"%s attempted to use unknown skill: %d\n"
+                ,query_name(op), op->chosen_skill->stats.sp);
+	    break;
     }
 
     /* For players we now update the speed_left from using the skill. 
@@ -712,38 +679,29 @@ void show_skills(object *op, const char* search) {
 	     * crash the server numerous times.
 	     */
 	    if (num_skills_found >= NUM_SKILLS) {
-		draw_ext_info(NDI_RED, 0, op, MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
-		      "Your character has too many skills. "
-		      "Something isn't right - contact the server admin", NULL);
+		new_draw_info(NDI_RED, 0, op, "Your character has too many skills.");
+		new_draw_info(NDI_RED, 0, op, "Something isn't right - contact the server admin");
 		break;
 	    }
 	}
     }
 
-    draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_SKILL, MSG_TYPE_SKILL_LIST,
-		  "Player skills:", NULL);
-
+    clear_win_info(op);
+    new_draw_info(NDI_UNIQUE, 0,op,"Player skills:");
     if (num_skills_found > 1) qsort(skills, num_skills_found, MAX_BUF, (int (*)(const void*, const void*))strcmp);
 
     for (i=0; i<num_skills_found; i++) {
-	draw_ext_info(NDI_UNIQUE, 0, op, MSG_TYPE_SKILL, MSG_TYPE_SKILL_LIST,
-		      skills[i], skills[i]);
+	new_draw_info(NDI_UNIQUE, 0, op, skills[i]);
     }
 
-    draw_ext_info_format(NDI_UNIQUE, 0, op, MSG_TYPE_SKILL, MSG_TYPE_SKILL_LIST,
-	"You can handle %d weapon improvements.",
-	"You can handle %d weapon improvements.",
-	 op->level/5+5);
+    new_draw_info_format(NDI_UNIQUE, 0, op, 
+	"You can handle %d weapon improvements.",op->level/5+5);
 
     cp = determine_god(op);
-    draw_ext_info_format(NDI_UNIQUE, 0, op, MSG_TYPE_SKILL, MSG_TYPE_SKILL_LIST,
-			 "You worship %s.", 
-			 "You worship %s.", 
-			 cp?cp:"no god at current time");
+    new_draw_info_format(NDI_UNIQUE, 0, op, 
+	"You worship %s.", cp?cp:"no god at current time");
 
-    draw_ext_info_format(NDI_UNIQUE,0,op, MSG_TYPE_SKILL, MSG_TYPE_SKILL_LIST,
-			 "Your equipped item power is %d out of %d\n",
-			 "Your equipped item power is %d out of %d\n",
+    new_draw_info_format(NDI_UNIQUE,0,op, "Your equipped item power is %d out of %d\n",
 			 op->contr->item_power, op->level);
 }
 
@@ -769,10 +727,8 @@ int use_skill(object *op, const char *string) {
 	    break;
     }
     if (!skop) {
-	draw_ext_info_format(NDI_UNIQUE, 0, op, MSG_TYPE_SKILL, MSG_TYPE_SKILL_MISSING,
-		     "Unable to find skill %s",
-		     "Unable to find skill %s",
-		     string);
+	new_draw_info_format(NDI_UNIQUE, 0, op, 
+		     "Unable to find skill %s", string);
 	return 0;
     }
 
@@ -892,9 +848,7 @@ static int do_skill_attack(object *tmp, object *op, const char *string, object *
 		    skill = find_best_player_hth_skill(op);
 
 		    if (!skill) {
-			draw_ext_info(NDI_BLACK, 0, op,
-				      MSG_TYPE_SKILL, MSG_TYPE_SKILL_MISSING,
-				      "You have no unarmed combat skills!", NULL);
+			new_draw_info(NDI_BLACK, 0, op, "You have no unarmed combat skills!");
 			return 0;
 		    }
 		}
@@ -902,11 +856,7 @@ static int do_skill_attack(object *tmp, object *op, const char *string, object *
 	    if (skill != op->chosen_skill) {
 		/* now try to ready the new skill */
 		if(!change_skill(op,skill,1)) {  /* oh oh, trouble! */
-		    draw_ext_info_format(NDI_UNIQUE, 0, tmp, 
-					 MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
-					 "Couldn't change to skill %s",
-					 "Couldn't change to skill %s",
-					 skill->name);
+		    new_draw_info_format(NDI_UNIQUE, 0, tmp, "Couldn't change to skill %s", skill->name);
 		    return 0;
 		}
 	    }
@@ -931,10 +881,8 @@ static int do_skill_attack(object *tmp, object *op, const char *string, object *
 		    op->current_weapon=NULL;
 		    return 0;
 		} else {
-            char weapon[MAX_BUF];
-            query_name(tmp, weapon, MAX_BUF);
 		    op->current_weapon = tmp;
-		    op->current_weapon_script=add_string(weapon);
+		    op->current_weapon_script=add_string(query_name(tmp));
 		}
 	    }
 
@@ -959,23 +907,12 @@ static int do_skill_attack(object *tmp, object *op, const char *string, object *
     /* print appropriate  messages to the player */
  
     if(success && string!=NULL && tmp && !QUERY_FLAG(tmp,FLAG_FREED)) {
-        char op_name[MAX_BUF];
-	if(op->type==PLAYER) {
-        query_name(tmp, op_name, MAX_BUF);
-	    draw_ext_info_format(NDI_UNIQUE, 0,op,
-			 MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_DID_HIT,
-			 "You %s %s!",
-			 "You %s %s!",
-			 string,op_name);
-    }
-	else if(tmp->type==PLAYER) {
-        query_name(op, op_name, MAX_BUF);
-	    draw_ext_info_format(NDI_UNIQUE, 0,tmp,
-			 MSG_TYPE_VICTIM, MSG_TYPE_VICTIM_WAS_HIT,
-			 "%s %s you!",
-			 "%s %s you!",
-			 op_name,string);
-    }
+	if(op->type==PLAYER)
+	    new_draw_info_format(NDI_UNIQUE, 0,op,
+		 "You %s %s!",string,query_name(tmp));
+	else if(tmp->type==PLAYER)
+	    new_draw_info_format(NDI_UNIQUE, 0,tmp,
+		 "%s %s you!",query_name(op),string);
     }
     return success;
 }                         
@@ -1033,8 +970,7 @@ int skill_attack (object *tmp, object *pl, int dir, const char *string, object *
     }
     if (!tmp) {
 	if(pl->type==PLAYER)
-	    draw_ext_info(NDI_UNIQUE, 0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-			  "There is nothing to attack!", NULL);
+	    new_draw_info(NDI_UNIQUE, 0,pl,"There is nothing to attack!");
 	return 0;
     }
 
@@ -1055,17 +991,12 @@ static int attack_hth(object *pl, int dir, const char *string, object *skill) {
 	for(weapon=pl->inv;weapon;weapon=weapon->below) {
 	    if (weapon->type==WEAPON && QUERY_FLAG(weapon, FLAG_APPLIED)) {
 		if (apply_special(pl, weapon, AP_UNAPPLY | AP_NOPRINT)) {
-            char weaponname[MAX_BUF];
-            query_name(weapon, weaponname, MAX_BUF);
-		    draw_ext_info_format(NDI_UNIQUE, 0,pl,
-				 MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
+		    new_draw_info_format(NDI_UNIQUE, 0,pl,
 				  "You are unable to unwield %s in order to attack with %s.",
-				  "You are unable to unwield %s in order to attack with %s.",
-				  weaponname, skill->name);
+				  query_name(weapon), skill->name);
 		    return 0;
 		} else {
-		    draw_ext_info(NDI_UNIQUE, 0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
-				  "You unwield your weapon in order to attack.", NULL);
+		    new_draw_info(NDI_UNIQUE, 0,pl,"You unwield your weapon in order to attack.");
 		    break;
 		}
 	    }
@@ -1088,8 +1019,7 @@ static int attack_melee_weapon(object *op, int dir, const char *string, object *
 
     if(!QUERY_FLAG(op, FLAG_READY_WEAPON)) {
 	if(op->type==PLAYER)
-	    draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
-			  "You have no ready weapon to attack with!", NULL);
+	    new_draw_info(NDI_UNIQUE, 0,op,"You have no ready weapon to attack with!");
 	return 0;
     }
     return skill_attack(NULL,op,dir,string, skill);

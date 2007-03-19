@@ -74,8 +74,6 @@ static void set_uniquedir(char *path) { settings.uniquedir=path; }
 static void set_templatedir(char *path) { settings.templatedir=path; }
 static void set_playerdir(char *path) { settings.playerdir=path; }
 static void set_tmpdir(char *path) { settings.tmpdir=path; }
-static void free_races(void);
-static void free_materials(void);
 
 static void showscoresparm(char *data) { 
     display_high_score(NULL,9999,data); 
@@ -253,7 +251,7 @@ static void load_materials(void)
     int i, value;
 
     sprintf(filename, "%s/materials", settings.datadir);
-    LOG(llevDebug, "Reading material type data from %s...\n", filename);
+    LOG(llevDebug, "Reading material type data from %s...", filename);
     if ((fp = fopen(filename, "r")) == NULL) {
         LOG(llevError, "Cannot open %s for reading\n", filename);
         mt = get_empty_mat();
@@ -337,20 +335,6 @@ static void load_materials(void)
     }
     LOG(llevDebug, "Done.\n");
     fclose(fp);
-
-}
-
-/**
- * Frees all memory allocated to materials.
- */
-static void free_materials(void) {
-    materialtype_t* next;
-    while (materialt) {
-        next = materialt->next;
-        free(materialt);
-        materialt = next;
-    }
-    materialt = NULL;
 }
 
 /**
@@ -725,25 +709,7 @@ static void load_settings(void)
 	    } else {
 		LOG(llevError, "load_settings: unknown value for create_home_portals: %s\n", cp);
         }
-    } else if ( !strcasecmp( buf, "personalized_blessings" ) ) {
-            if (!strcasecmp(cp, "on") || !strcasecmp(cp, "true")) {
-                settings.personalized_blessings = TRUE;
-            } else if (!strcasecmp(cp, "off") || !strcasecmp(cp, "false")) {
-                settings.personalized_blessings = FALSE;
-            } else {
-                LOG(llevError, "load_settings: unknown value for personalized_blessings: %s\n", cp);
-        }
-    } else if ( !strcasecmp( buf, "pk_max_experience" ) ) {
-        sint64 pkme = atoll(cp);
-        if (pkme < 0)
-            pkme = -1;
-        settings.pk_max_experience = pkme;
-    } else if ( !strcasecmp( buf, "pk_max_experience_percent" ) ) {
-        int pkmep = atoi(cp);
-        if (pkmep < 0) {
-            LOG(llevError, "load_settings: pk_max_experience_percent should be positive or zero\n", cp);
-        } else
-            settings.pk_max_experience_percent = pkmep;
+
     } else if ( !strcasecmp( buf, "allow_denied_spells_writing" ) ) {
             if (!strcasecmp(cp, "on") || !strcasecmp(cp, "true")) {
                 settings.allow_denied_spells_writing = TRUE;
@@ -792,7 +758,6 @@ void init(int argc, char **argv) {
     init_commands();	/* Sort command tables */
     read_map_log();	/* Load up the old temp map files */
     init_skills();
-    init_ob_methods();
     cftimer_init();
 
     parse_args(argc, argv, 3);
@@ -807,16 +772,6 @@ void init(int argc, char **argv) {
     metaserver_init();
     reset_sleep();
     init_done=1;
-}
-
-/**
- * Frees all memory allocated around here:
- *  * materials
- * * races
- */
-void free_server(void) {
-    free_materials();
-    free_races();
 }
 
 static void usage(void) {
@@ -879,33 +834,33 @@ static void init_beforeplay(void) {
   switch(settings.dumpvalues) {
   case 1:
     print_monsters();
-    cleanup();
+    exit(0);
   case 2:
     dump_abilities();
-    cleanup();
+    exit(0);
   case 3:
     dump_artifacts();
-    cleanup();
+    exit(0);
   case 4:
     dump_spells();
-    cleanup();
+    exit(0);
   case 5:
-    cleanup();
+    exit(0);
   case 6:
     dump_races();
-    cleanup();
+    exit(0);
   case 7:
     dump_alchemy();
-    cleanup();
+    exit(0);
   case 8:
     dump_gods();
-    cleanup();
+    exit(0);
   case 9:
     dump_alchemy_costs();
-    cleanup();
+    exit(0);
   case 10:
     dump_monster_treasure(settings.dumparg);
-    cleanup();
+    exit(0);
   }
 }
 
@@ -938,7 +893,6 @@ static void init_startup(void) {
 
 static void compile_info(void) {
   int i=0;
-  char err[MAX_BUF];
   printf("Non-standard include files:\n");
 #if !defined (__STRICT_ANSI__) || defined (__sun__)
 #if !defined (Mips)
@@ -994,7 +948,7 @@ static void compile_info(void) {
   exit(0);
 #else
   execl("/bin/uname", "uname", "-a", NULL);
-  LOG(llevError, "Oops, shouldn't have gotten here: execl(/bin/uname) failed: %s\n", strerror_local(errno, err, sizeof(err)));
+  LOG(llevError, "Oops, shouldn't have gotten here: execl(/bin/uname) failed: %s\n", strerror_local(errno));
   exit(-1);
 #endif
 }
@@ -1101,9 +1055,9 @@ static void init_races(void) {
   first_race=NULL;
 
   sprintf(fname,"%s/races",settings.datadir);
-  LOG(llevDebug, "Reading races from %s...\n",fname);
+  LOG(llevDebug, "Reading races from %s...",fname);
   if(! (file=fopen(fname,"r"))) {
-    LOG(llevError, "Cannot open races file %s: %s\n", fname, strerror_local(errno, buf, sizeof(buf)));
+    LOG(llevError, "Cannot open races file %s: %s\n", fname, strerror_local(errno));
     return;
   }
 
@@ -1133,11 +1087,11 @@ static void init_races(void) {
 	if (cp[strlen(cp)-1]=='\n') cp[strlen(cp)-1]='\0';
         /* set creature race to race value */
         if((mon=find_archetype(cp))==NULL)
-           LOG(llevError,"Creature %s in race file lacks archetype\n",cp);
+           LOG(llevError,"\nCreature %s in race file lacks archetype",cp);
         else {
            if(set_race&&(!mon->clone.race||strcmp(mon->clone.race,race))) {
                 if(mon->clone.race) {
-                   LOG(llevDebug," Resetting race to %s from %s for archetype %s\n",
+                   LOG(llevDebug,"\n Resetting race to %s from %s for archetype %s",
                         race,mon->clone.race,mon->name);
                   free_string(mon->clone.race);
                 }
@@ -1150,7 +1104,7 @@ static void init_races(void) {
     }
   }
   fclose(file);
-    LOG(llevDebug,"done races.\n");
+    LOG(llevDebug,"done.\n");
 }
 
 static void dump_races(void)
@@ -1163,26 +1117,6 @@ static void dump_races(void)
         fprintf(stderr,"%s(%d), ",tmp->ob->arch->name,tmp->ob->level);
     }
     fprintf(stderr,"\n");
-}
-
-/**
- * Frees all race-related information.
- */
-static void free_races(void) {
-    racelink* race;
-    objectlink* link;
-    LOG(llevDebug, "Freeing race information.\n");
-    while (first_race) {
-        race = first_race->next;
-        while (first_race->member) {
-            link = first_race->member->next;
-            free(first_race->member);
-            first_race->member = link;
-        }
-        free_string(first_race->name);
-        free(first_race);
-        first_race = race;
-    }
 }
 
 static void add_to_racelist(const char *race_name, object *op) {

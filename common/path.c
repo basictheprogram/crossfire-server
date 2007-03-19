@@ -1,33 +1,5 @@
 /* $Id$ */
 
-/*
-    CrossFire, A Multiplayer game for X-windows
-
-    Copyright (C) 2006 Mark Wedel & Crossfire Development Team
-    Copyright (C) 1992 Frank Tore Johansen
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-    The authors can be reached via e-mail at crossfire-devel@real-time.com
-*/
-
-/**
- * @file path.c
- * Contains file path manipulation functions.
- */
-
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -56,32 +28,17 @@
 #define llevError stderr
 #endif
 
-/**
- * Combines 2 paths, which can be relative.
- *
- * @param src
- * path we're starting from.
- * @param dst
- * path we're doing to.
- * @param path
- * buffer containing the combined path.
- * @param size
- * size of path.
- * @return
- * path.
- *
- * @note
- * this doesn't handle the '..', check path_normalize().
- */
-char *path_combine(const char *src, const char *dst, char* path, int size) {
+
+char *path_combine(const char *src, const char *dst) {
     char *p;
+    static char path[HUGE_BUF];
 
     if (*dst == '/') {
         /* absolute destination path => ignore source path */
-        snprintf(path, size, dst);
+        strcpy(path, dst);
     } else {
         /* relative destination path => add after last '/' of source */
-        snprintf(path, size, src);
+        strcpy(path, src);
         p = strrchr(path, '/');
         if (p != NULL) {
             p++;
@@ -90,7 +47,7 @@ char *path_combine(const char *src, const char *dst, char* path, int size) {
             if (*src == '/')
                 *p++ = '/';
         }
-        snprintf(p, size - (p - path), dst);
+        strcpy(p, dst);
     }
 
 #if defined(DEBUG_PATH)
@@ -99,14 +56,6 @@ char *path_combine(const char *src, const char *dst, char* path, int size) {
     return(path);
 }
 
-/**
- * Cleans specified path. Removes .. and things like that.
- *
- * @param path
- * path to clear. It will be modified in place.
- * @note
- * there shouldn't be any buffer overflow, as we just remove stuff.
- */
 void path_normalize(char *path) {
     char *p; /* points to the beginning of the path not yet processed; this is
                 either a path component or a path separator character */
@@ -181,23 +130,10 @@ void path_normalize(char *path) {
 #endif
 }
 
-/**
- * Combines the 2 paths.
- *
- * @param src
- * path we're starting from.
- * @param dst
- * path we're getting to.
- * @param path
- * buffer that will contain combined paths.
- * @param size
- * length of path.
- * @return
- * path
- */
-char *path_combine_and_normalize(const char *src, const char *dst, char* path, int size) {
+char *path_combine_and_normalize(const char *src, const char *dst) {
+    char *path;
 
-    path_combine(src, dst, path, size);
+    path = path_combine(src, dst);
     path_normalize(path);
     return(path);
 }
@@ -234,10 +170,10 @@ static void check_normalize(const char *path, const char *exp0) {
 }
 
 static void check_combine_and_normalize(const char *src, const char *dst, const char *exp) {
-    char res[HUE_BUF];
+    const char *res;
 
     fprintf(stderr, "path_combine_and_normalize(%s, %s) = ", src, dst);
-    path_combine_and_normalize(src, dst, res, sizeof(res));
+    res = path_combine_and_normalize(src, dst);
     fprintf(stderr, "%s", res);
     if (strcmp(res, exp) != 0) {
         fprintf(stderr, ", should be %s\n", exp);
