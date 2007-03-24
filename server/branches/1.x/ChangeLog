@@ -17,7 +17,12 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
-=======
+Fix Win32 compilation.
+ common/player.c: don't declare variables in the middle of the code
+ lib/collect.pl.in: use binmode for files
+ socket/item.c: idem
+Nicolas Weeger 2007-03-24
+
 server/c_wiz.c: fix missing treasure generation for create command in some cases.
 Nicolas Weeger 2007-03-24
 

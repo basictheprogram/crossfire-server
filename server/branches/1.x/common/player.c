@@ -34,6 +34,9 @@
  */
 void free_player(player *pl) {
 
+    client_spell *info;
+    client_spell* next;
+
     if (first_player!=pl) {
         player *prev=first_player;
         while(prev!=NULL&&prev->next!=NULL&&prev->next!=pl)
@@ -54,8 +57,7 @@ void free_player(player *pl) {
     if (pl->stack_items)
         free( pl->stack_items );
 
-    client_spell *info = pl->spell_state;
-    client_spell* next;
+    info = pl->spell_state;
     while ( info )
     {
         next = info->next;
