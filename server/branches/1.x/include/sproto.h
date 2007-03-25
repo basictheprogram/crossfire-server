@@ -292,6 +292,7 @@ int command_stack_list(object *op, char *params);
 int command_stack_clear(object *op, char *params);
 int command_diff(object *op, char *params);
 int command_insert_into(object *op, char *params);
+int command_follow(object* op, char* params);
 /* commands.c */
 void init_commands(void);
 command_function find_oldsocket_command(char *cmd);
