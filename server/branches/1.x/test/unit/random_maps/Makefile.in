@@ -250,7 +250,6 @@ EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
-GREP = @GREP@
 GUNZIP = @GUNZIP@
 GZIP = @GZIP@
 HAVE_CHECK_FALSE = @HAVE_CHECK_FALSE@
@@ -295,6 +294,7 @@ PYTHON_PLUGIN_TRUE = @PYTHON_PLUGIN_TRUE@
 PY_INCLUDES = @PY_INCLUDES@
 PY_LIBS = @PY_LIBS@
 RANLIB = @RANLIB@
+SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -302,15 +302,17 @@ TAR = @TAR@
 UNCOMPRESS = @UNCOMPRESS@
 VERSION = @VERSION@
 X11LIBS = @X11LIBS@
-XMKMF = @XMKMF@
 XSLTENGINE = @XSLTENGINE@
 X_CFLAGS = @X_CFLAGS@
 X_EXTRA_LIBS = @X_EXTRA_LIBS@
 X_LIBS = @X_LIBS@
 X_PRE_LIBS = @X_PRE_LIBS@
+ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 ac_ct_F77 = @ac_ct_F77@
+ac_ct_RANLIB = @ac_ct_RANLIB@
+ac_ct_STRIP = @ac_ct_STRIP@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
 am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
 am__fastdepCXX_FALSE = @am__fastdepCXX_FALSE@
@@ -330,33 +332,26 @@ check_xslt_forcedprogfound = @check_xslt_forcedprogfound@
 check_xslt_sablotronfound = @check_xslt_sablotronfound@
 check_xslt_xsltprocfound = @check_xslt_xsltprocfound@
 datadir = @datadir@
-datarootdir = @datarootdir@
-docdir = @docdir@
-dvidir = @dvidir@
 exec_prefix = @exec_prefix@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
 host_os = @host_os@
 host_vendor = @host_vendor@
-htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
 libdir = @libdir@
 libexecdir = @libexecdir@
-localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 no_x = @no_x@
 oldincludedir = @oldincludedir@
-pdfdir = @pdfdir@
 pkgconfdir = @pkgconfdir@
 pkgstatedir = @pkgstatedir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
-psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
@@ -369,10 +364,10 @@ LDADD = ../../../common/libcross.a libstubs.a ../../../socket/libsocket.a ../../
 CHECK_ROOT = ../../
 CHECK_FOLDER = unit/random_maps
 CHECK_PARENT_NAME = Unit
-LOGDIR = $(top_srcdir)/test/logs/$(CHECK_FOLDER)
+LOGDIR = $(top_builddir)/test/logs/$(CHECK_FOLDER)
 INCLUDES = -I${top_srcdir}/include -I${top_srcdir}/test/include
 BUILT_SOURCES = $(LOGDIR)
-AM_CPPFLAGS = -DRESSOURCES=\"$(srcdir)/../../resources\" -DLOGDIR=\"$(top_srcdir)/test/logs\" -DSOURCE_ROOT=\"$(srcdir)/../../../\"
+AM_CPPFLAGS = -DRESSOURCES=\"$(srcdir)/../../resources\" -DLOGDIR=\"$(top_builddir)/test/logs\" -DSOURCE_ROOT=\"$(srcdir)/../../../\"
 @PROCESS_XSLT_TRUE@CHECK_HTML = logreport template-copy
 @PROCESS_XSLT_TRUE@CHECK_TXT = textlog
 TESTS = check_decor check_door check_exit check_expand2x check_floor check_maze_gen check_monster check_random_map check_reader check_rogue_layout check_room_gen_onion check_room_gen_spiral check_snake check_special check_square_spiral check_standalone check_style check_test check_treasure check_wall
@@ -893,6 +888,9 @@ clean-unit:
 
 check-local: check-html
 clean-local: clean-unit
+
+clean-local:
+	$(RM) .autorun.xml
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
