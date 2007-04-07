@@ -1759,6 +1759,7 @@ static void subtract_player_exp(object *op, sint64 exp, const char *skill, int f
  * skill_name is the skill that should get the exp added.
  * flag is what to do if player doesn't have the skill.
  * these last two values are only used for players.
+ * @see share_exp() for a party-aware version.
  */
  
 void change_exp(object *op, sint64 exp, const char *skill_name, int flag) {
@@ -1870,3 +1871,58 @@ int did_make_save(const object *op, int level, int bonus)
     return 1;
 }
     
+/**
+ * Gives experience to a player/monster, sharing it with party if applicable.  This
+ * does bounds checking to make sure we don't overflow the max exp.
+ *
+ * The exp passed is typically not modified much by this function -
+ * it is assumed the caller has modified the exp as needed.
+ *
+ * This is merely a wrapper for change_exp().
+ *
+ * @param op
+ * victim to alter.
+ * @param exp
+ * experience to gain (positive) or lose (negative).
+ * @param skill
+ * skill to change. Can be NULL.
+ * @param flag
+ * @li if experience gain, what to do if player doesn't have the skill
+ * @li if experience loss, whether to remove from all skills or only specified skill
+ * @note
+ * flag only applies to op, not other players in same party.
+ */
+void share_exp(object *op, sint64 exp, const char *skill, int flag) {
+    int shares=0,count=0;
+    player *pl;
+    partylist *party;
+
+    if(op->type!=PLAYER || op->contr->party==NULL) {
+        change_exp(op,exp, skill, 0);
+        return;
+    }
+
+    party = op->contr->party;
+
+    for(pl=first_player;pl!=NULL;pl=pl->next) {
+        if(party && pl->ob->contr->party==party && on_same_map(pl->ob, op)) {
+            count++;
+            shares += (pl->ob->level+4);
+        }
+    }
+    if(count==1 || shares>exp)
+        change_exp(op,exp, skill, flag);
+    else {
+        int share=exp/shares,given=0,nexp;
+        for(pl=first_player;pl!=NULL;pl=pl->next) {
+            if(party && pl->ob->contr->party==party && on_same_map(pl->ob, op)) {
+                nexp=(pl->ob->level+4)*share;
+                change_exp(pl->ob,nexp, skill, SK_EXP_TOTAL);
+                given+=nexp;
+            }
+        }
+        exp-=given;
+        /* give any remainder to the player */
+        change_exp(op,exp, skill, flag);
+    }
+}

@@ -1560,40 +1560,13 @@ static int kill_object(object *op,int dam, object *hitter, int type)
 	 */
 	if (battleg) exp = 0;
 
-	if(owner->type!=PLAYER || owner->contr->party==NULL) {
-	    change_exp(owner,exp, skill, 0);
-	}
-	else {
-	    int shares=0,count=0;
-
-	    player *pl;
-
-	    partylist *party=owner->contr->party;
 #ifdef PARTY_KILL_LOG
-	    add_kill_to_party(party, query_name(owner), query_name(op), exp);
+        if (owner->type == PLAYER && owner->contr->party !=NULL )
+        {
+            add_kill_to_party(party, query_name(owner), query_name(op), exp);
+        }
 #endif
-	    for(pl=first_player;pl!=NULL;pl=pl->next) {
-		if(party && pl->ob->contr->party==party && on_same_map(pl->ob, owner)) {
-		    count++;
-		    shares+=(pl->ob->level+4);
-		}
-	    }
-	    if(count==1 || shares>exp)
-		change_exp(owner,exp, skill, SK_EXP_TOTAL);
-	    else {
-		int share=exp/shares,given=0,nexp;
-		for(pl=first_player;pl!=NULL;pl=pl->next) {
-		    if(party && pl->ob->contr->party==party && on_same_map(pl->ob, owner)) {
-			nexp=(pl->ob->level+4)*share;
-			change_exp(pl->ob,nexp, skill, SK_EXP_TOTAL);
-			given+=nexp;
-		    }
-		}
-		exp-=given;
-		/* give any remainder to the player */
-		change_exp(owner,exp, skill, SK_EXP_ADD_SKILL);
-	    }
-	} /* else part of a party */
+        share_exp(owner, exp, skill, SK_EXP_TOTAL);
 
     } /* end if person didn't kill himself */
 

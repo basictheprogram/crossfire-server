@@ -1517,7 +1517,7 @@ int mood_change(object *op, object *caster, object *spell) {
 		add_friendly_object(head);
 		head->attack_movement = PETMOVE;
 		done_one = 1;
-		change_exp(op, head->stats.exp / 2, head->skill, SK_EXP_ADD_SKILL);
+		share_exp(op, head->stats.exp / 2, head->skill, SK_EXP_ADD_SKILL);
 		head->stats.exp = 0;
 	    }
 
