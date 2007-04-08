@@ -17,6 +17,12 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+New skill: "harvesting", get something from some place - example: fishing.
+(merge from trunk, revisions 5923 and 5933).
+ include/skills.h sproto.h
+ server/c_misc.c skill_util.c
+Nicolas Weeger 2007-04-03
+
  common/init.c: abort() if first map doesn't exist. Better than crashing later on.
 Nicolas Weeger 2007-04-08
 

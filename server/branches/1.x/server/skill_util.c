@@ -439,6 +439,10 @@ int do_skill (object *op, object *part, object *skill, int dir, const char *stri
 	case SK_CLIMBING:
 	    new_draw_info(NDI_UNIQUE, 0,op,"This skill is already in effect.");
 	    break;
+        
+    case SK_HARVESTING:
+        success = do_harvest(op, dir, skill);
+        break;
 
 	default:
 	    LOG(llevDebug,"%s attempted to use unknown skill: %d\n"

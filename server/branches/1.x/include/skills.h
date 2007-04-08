@@ -73,13 +73,14 @@
 #define SK_EVOCATION		35
 #define SK_SORCERY		36
 #define SK_TWO_HANDED_WEAPON	37
+#define SK_HARVESTING           38
 
 /* This is the highest number skill in the table +1
  * This is used to store pointers to the actual skills -
  * to make life easier, we use the value above as index,
  * eg, SK_EVOCATION (35) will be in last_skills[35].
  */
-#define NUM_SKILLS		38
+#define NUM_SKILLS		39
 
 
 /* This is used in the exp functions - basically what to do if
