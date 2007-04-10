@@ -17,11 +17,23 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+<<<<<<< .courant
 New skill: "harvesting", get something from some place - example: fishing.
 (merge from trunk, revisions 5923 and 5933).
  include/skills.h sproto.h
  server/c_misc.c skill_util.c
 Nicolas Weeger 2007-04-03
+=======
+Fix bug #1696810: skill items autoapply. Now skilltool will be used even if
+skill can be used without, to benefit from its bonuses.
+ server/skill_util.c
+Nicolas Weeger 2007-04-10
+
+Fix parameter for Doxygen, no functional change.
+ plugins/common/plugin_common.c
+ plugins/common/include/plugin_common.h
+Nicolas Weeger 2007-04-09
+>>>>>>> .fusion-droit.r5992
 
  common/init.c: abort() if first map doesn't exist. Better than crashing later on.
 Nicolas Weeger 2007-04-08
