@@ -92,7 +92,7 @@ void init_skills(void) {
 
 /* This function goes through the player inventory and sets
  * up the last_skills[] array in the player object.
- * the last_skills[] is used to more quickly lookup skills - 
+ * the last_skills[] is used to more quickly lookup skills -
  * mostly used for sending exp.
  */
 void link_player_skills(object *op)
@@ -291,7 +291,7 @@ int change_skill (object *who, object *new_skill, int flag)
         return 1;
     }
 
-    if (!new_skill || who->chosen_skill) 
+    if (!new_skill || who->chosen_skill)
 	if (who->chosen_skill) apply_special(who, who->chosen_skill, AP_UNAPPLY | (flag & AP_NOPRINT));
 
     /* Only goal in this case was to unapply a skill */
@@ -322,8 +322,8 @@ void clear_skill(object *who)
 
 /**
  * Main skills use function-similar in scope to cast_spell().
- * We handle all requests for skill use outside of some combat here. 
- * We require a separate routine outside of fire() so as to allow monsters 
+ * We handle all requests for skill use outside of some combat here.
+ * We require a separate routine outside of fire() so as to allow monsters
  * to utilize skills.
  * This is changed (2002-11-30) from the old method that returned
  * exp - no caller needed that info, but it also prevented the callers
@@ -364,7 +364,7 @@ int do_skill (object *op, object *part, object *skill, int dir, const char *stri
 	     * equipped, that should transfer to player, when not,
 	     * shouldn't.
 	     */
-	    if(QUERY_FLAG(skill,FLAG_APPLIED)) { 
+	    if(QUERY_FLAG(skill,FLAG_APPLIED)) {
 		CLEAR_FLAG(skill,FLAG_APPLIED);
 		new_draw_info(NDI_UNIQUE,0,op,"You come to earth.");
 	    }
@@ -483,7 +483,7 @@ int do_skill (object *op, object *part, object *skill, int dir, const char *stri
 	case SK_CLIMBING:
 	    new_draw_info(NDI_UNIQUE, 0,op,"This skill is already in effect.");
 	    break;
-        
+
     case SK_HARVESTING:
         success = do_harvest(op, dir, skill);
         break;
@@ -494,22 +494,22 @@ int do_skill (object *op, object *part, object *skill, int dir, const char *stri
 	    break;
     }
 
-    /* For players we now update the speed_left from using the skill. 
-     * Monsters have no skill use time because of the random nature in 
+    /* For players we now update the speed_left from using the skill.
+     * Monsters have no skill use time because of the random nature in
      * which use_monster_skill is called already simulates this.
      * If certain skills should take more/less time, that should be
      * in the code for the skill itself.
      */
-    
+
     if(op->type==PLAYER) op->speed_left -= 1.0;
 
     /* this is a good place to add experience for successfull use of skills.
      * Note that add_exp() will figure out player/monster experience
      * gain problems.
      */
- 
+
     if(success && exp) change_exp(op,exp, skill->skill, SK_SUBTRACT_SKILL_EXP);
-            
+
     return success;
 }
 
@@ -552,22 +552,22 @@ int calc_skill_exp(object *who, object *op, object *skill) {
      * If an object is not alive and magical we set the base exp higher to
      * help out exp awards for skill_ident skills. Also, if
      * an item is type RUNE, we give out exp based on stats.Cha
-     * and level (this was the old system) -b.t. 
-     */ 
+     * and level (this was the old system) -b.t.
+     */
 
-    if(!op) { 		/* no item/creature */ 
+    if(!op) { 		/* no item/creature */
         op_lvl= who->map->difficulty < 1 ? 1: who->map->difficulty;
         op_exp = 0;
     } else if(op->type==RUNE || op->type==TRAP) { /* all traps. If stats.Cha > 1 we use that
 				 * for the amount of experience */
         op_exp = op->stats.Cha>1 ? op->stats.Cha : op->stats.exp;
         op_lvl = op->level;
-    } else { 		/* all other items/living creatures */ 
+    } else { 		/* all other items/living creatures */
         op_exp = op->stats.exp;
 	op_lvl = op->level;
-        if(!QUERY_FLAG(op,FLAG_ALIVE)) { /* for ident/make items */ 
+        if(!QUERY_FLAG(op,FLAG_ALIVE)) { /* for ident/make items */
 	    op_lvl += 5 * abs(op->magic);
-	} 
+	}
     }
 
     if(op_lvl<1) op_lvl = 1;
@@ -588,7 +588,7 @@ int calc_skill_exp(object *who, object *op, object *skill) {
 		    lvl_mult = 1.0;	/* no adjustment */
 	    }
 	    else {
-		if (skill->level) 
+		if (skill->level)
 		    lvl_mult = ((float) skill->arch->clone.level * (float) op_lvl) / ((float) skill->level * 100.0);
 		else
 		    lvl_mult = 1.0;
@@ -598,28 +598,28 @@ int calc_skill_exp(object *who, object *op, object *skill) {
 	    lvl_mult = (float) op_lvl / (float) (skill->level?skill->level:1);
 	}
     }
- 
+
     /* assemble the exp total, and return value */
- 
+
     value =  base * lvl_mult;
     if (value < 1) value=1;	/* Always give at least 1 exp point */
-    
+
 #ifdef SKILL_UTIL_DEBUG
       LOG(llevDebug,"calc_skill_exp(): who: %s(lvl:%d)  op:%s(lvl:%d)\n",
 		who->name,skill->level,op->name,op_lvl);
 #endif
-    return ( (int) value); 
+    return ( (int) value);
 }
 
 /* Learn skill. This inserts the requested skill in the player's
  * inventory. The skill field of the scroll should have the
  * exact name of the requested skill.
- * This one actually teaches the player the skill as something 
+ * This one actually teaches the player the skill as something
  * they can equip.
  * Return 0 if the player knows the skill, 1 if the
  * player learns the skill, 2 otherwise.
  */
- 
+
 int
 learn_skill (object *pl, object *scroll) {
     object *tmp;
@@ -671,12 +671,12 @@ static int clipped_percent(sint64 a, sint64 b)
     return 0;
 
   rv = (int)((100.0f * ((float)a) / ((float)b) ) + 0.5f);
-  
+
   if (rv < 0)
     return 0;
   else if (rv > 100)
     return 100;
-  
+
   return rv;
 }
 
@@ -690,7 +690,7 @@ static int clipped_percent(sint64 a, sint64 b)
  * just dumped this as we found it, this would be a bit
  * simpler.
  */
- 
+
 void show_skills(object *op, const char* search) {
     object *tmp=NULL;
     char buf[MAX_BUF];
@@ -742,21 +742,21 @@ void show_skills(object *op, const char* search) {
 	new_draw_info(NDI_UNIQUE, 0, op, skills[i]);
     }
 
-    new_draw_info_format(NDI_UNIQUE, 0, op, 
+    new_draw_info_format(NDI_UNIQUE, 0, op,
 	"You can handle %d weapon improvements.",op->level/5+5);
 
     cp = determine_god(op);
-    new_draw_info_format(NDI_UNIQUE, 0, op, 
+    new_draw_info_format(NDI_UNIQUE, 0, op,
 	"You worship %s.", cp?cp:"no god at current time");
 
     new_draw_info_format(NDI_UNIQUE,0,op, "Your equipped item power is %d out of %d\n",
 			 op->contr->item_power, op->level);
 }
 
-/* use_skill() - similar to invoke command, it executes the skill in the 
- * direction that the user is facing. Returns false if we are unable to 
+/* use_skill() - similar to invoke command, it executes the skill in the
+ * direction that the user is facing. Returns false if we are unable to
  * change to the requested skill, or were unable to use the skill properly.
- * This is tricky because skills can have spaces.  We basically roll 
+ * This is tricky because skills can have spaces.  We basically roll
  * our own find_skill_by_name so we can try to do better string matching.
  */
 
@@ -770,12 +770,12 @@ int use_skill(object *op, const char *string) {
 	if (skop->type == SKILL && QUERY_FLAG(skop, FLAG_CAN_USE_SKILL) &&
 	    !strncasecmp(string, skop->skill, MIN(strlen(string), strlen(skop->skill))))
 	    break;
-	else if (skop->type == SKILL_TOOL && 
+	else if (skop->type == SKILL_TOOL &&
 	    !strncasecmp(string, skop->skill, MIN(strlen(string), strlen(skop->skill))))
 	    break;
     }
     if (!skop) {
-	new_draw_info_format(NDI_UNIQUE, 0, op, 
+	new_draw_info_format(NDI_UNIQUE, 0, op,
 		     "Unable to find skill %s", string);
 	return 0;
     }
@@ -794,14 +794,14 @@ int use_skill(object *op, const char *string) {
 	while(*string==0x20) string++;
 	if(strlen(string)==0) string = NULL;
     }
-   
+
 #ifdef SKILL_UTIL_DEBUG
     LOG(llevDebug,"use_skill() got skill: %s\n",sknum>-1?skills[sknum].name:"none");
 #endif
 
     /* Change to the new skill, then execute it. */
     if(do_skill(op,op,skop, op->facing,string)) return 1;
- 
+
     return 0;
 }
 
@@ -866,9 +866,9 @@ static object *find_best_player_hth_skill(object *op)
  * string is passed along to describe what messages to describe
  * the damage.
  */
- 
+
 static int do_skill_attack(object *tmp, object *op, const char *string, object *skill) {
-    int success; 
+    int success;
 
    /* For Players only: if there is no ready weapon, and no "attack" skill
     * is readied either then try to find a skill for the player to use.
@@ -942,18 +942,18 @@ static int do_skill_attack(object *tmp, object *op, const char *string, object *
     }
 
     /* lose invisiblity/hiding status for running attacks */
- 
+
     if(op->type==PLAYER && op->contr->tmp_invis) {
 	op->contr->tmp_invis=0;
 	op->invisible=0;
 	op->hide=0;
 	update_object(op,UP_OBJ_FACE);
     }
- 
+
     success = attack_ob(tmp,op);
- 
+
     /* print appropriate  messages to the player */
- 
+
     if(success && string!=NULL && tmp && !QUERY_FLAG(tmp,FLAG_FREED)) {
 	if(op->type==PLAYER)
 	    new_draw_info_format(NDI_UNIQUE, 0,op,
@@ -963,7 +963,7 @@ static int do_skill_attack(object *tmp, object *op, const char *string, object *
 		 "%s %s you!",query_name(op),string);
     }
     return success;
-}                         
+}
 
 
 /* skill_attack() - Core routine for use when we attack using a skills
@@ -977,20 +977,20 @@ static int do_skill_attack(object *tmp, object *op, const char *string, object *
  *
  * Initial implementation by -bt thomas@astro.psu.edu
  */
- 
+
 int skill_attack (object *tmp, object *pl, int dir, const char *string, object *skill) {
     sint16 tx,ty;
     mapstruct *m;
     int mflags;
- 
+
     if(!dir) dir=pl->facing;
     tx=freearr_x[dir];
     ty=freearr_y[dir];
- 
+
     /* If we don't yet have an opponent, find if one exists, and attack.
      * Legal opponents are the same as outlined in move_player_attack()
      */
- 
+
     if(tmp==NULL) {
 	m = pl->map;
 	tx = pl->x + freearr_x[dir];
