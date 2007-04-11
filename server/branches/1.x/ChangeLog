@@ -220,7 +220,7 @@ Kevin Bulgrien 2007-02-11
 
 Fix a few compiler warnings.  Most were just unused variables, but
 some in server/c_object.c had returns without values.
-Files: server/c_object.c server/monster.c server/player.c server/weather.c 
+Files: server/c_object.c server/monster.c server/player.c server/weather.c
 MSW 2007-02-08
 
 Implement feature request #1652066: Python: get user's savebed location and x,y coords.
