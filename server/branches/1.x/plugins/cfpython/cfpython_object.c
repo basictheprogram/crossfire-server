@@ -165,6 +165,12 @@ static PyObject* Object_GetTitle(Crossfire_Object* whoptr, void* closure)
     return Py_BuildValue("s",( char* )cf_object_get_property( whoptr->obj, CFAPI_OBJECT_PROP_TITLE ));
 }
 
+static PyObject* Object_GetCount(Crossfire_Object* whoptr, void* closure)
+{
+    EXISTCHECK(whoptr);
+    return Py_BuildValue("i",*( int* )cf_object_get_property( whoptr->obj, CFAPI_OBJECT_PROP_COUNT));
+}
+
 static PyObject* Object_GetMap(Crossfire_Object* whoptr, void* closure)
 {
     mapstruct* m;
@@ -768,14 +774,10 @@ static PyObject* Object_GetOwner(Crossfire_Object* whoptr, void* closure)
     return Crossfire_Object_wrap(cf_object_get_property(whoptr->obj, CFAPI_OBJECT_PROP_OWNER));
 }
 
-static int Object_SetOwner(Crossfire_Object* whoptr, PyObject* value, void* closure)
+static PyObject* Object_GetEnemy(Crossfire_Object* whoptr, void* closure)
 {
-    Crossfire_Object* ob;
-    EXISTCHECK_INT(whoptr);
-    if (!PyArg_Parse(value,"O!",&Crossfire_ObjectType,&ob))
-        return -1;
-    cf_object_set_object_property(whoptr->obj, CFAPI_OBJECT_PROP_OWNER, ob->obj);
-    return 0;
+    EXISTCHECK(whoptr);
+    return Crossfire_Object_wrap(cf_object_get_property(whoptr->obj, CFAPI_OBJECT_PROP_ENEMY));
 }
 
 /** Setters */
@@ -860,6 +862,7 @@ static int Object_SetTitle(Crossfire_Object* whoptr, PyObject* value, void* clos
     cf_object_set_string_property(whoptr->obj, CFAPI_OBJECT_PROP_TITLE, val);
     return 0;
 }
+
 static int Object_SetMap(Crossfire_Object* whoptr, PyObject* value, void* closure)
 {
     Crossfire_Map* val;
@@ -1294,6 +1297,7 @@ static int Object_SetInvisible(Crossfire_Object* whoptr, PyObject* value, void* 
     cf_object_set_int_property(whoptr->obj, CFAPI_OBJECT_PROP_INVISIBLE, val);
     return 0;
 }
+
 static int Object_SetFlying(Crossfire_Object* whoptr, PyObject* value, void* closure)
 {
     int val;
@@ -1305,6 +1309,7 @@ static int Object_SetFlying(Crossfire_Object* whoptr, PyObject* value, void* clo
     /*cf_object_set_flag(whoptr->obj, FLAG_FLYING, val);*/
     return 0;
 }
+
 static int Object_SetUnpaid(Crossfire_Object* whoptr, PyObject* value, void* closure)
 {
     int val;
@@ -1622,6 +1627,26 @@ static int Object_SetNoSave(Crossfire_Object* whoptr, PyObject* value, void* clo
         return -1;
 
     cf_object_set_long_property(whoptr->obj, CFAPI_OBJECT_PROP_NO_SAVE, val);
+    return 0;
+}
+
+static int Object_SetOwner(Crossfire_Object* whoptr, PyObject* value, void* closure)
+{
+    Crossfire_Object* ob;
+    EXISTCHECK_INT(whoptr);
+    if (!PyArg_Parse(value,"O!",&Crossfire_ObjectType,&ob))
+        return -1;
+    cf_object_set_object_property(whoptr->obj, CFAPI_OBJECT_PROP_OWNER, ob->obj);
+    return 0;
+}
+
+static int Object_SetEnemy(Crossfire_Object* whoptr, PyObject* value, void* closure)
+{
+    Crossfire_Object* ob;
+    EXISTCHECK_INT(whoptr);
+    if (!PyArg_Parse(value,"O!",&Crossfire_ObjectType,&ob))
+        return -1;
+    cf_object_set_object_property(whoptr->obj, CFAPI_OBJECT_PROP_ENEMY, ob->obj);
     return 0;
 }
 

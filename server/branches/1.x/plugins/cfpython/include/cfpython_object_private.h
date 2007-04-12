@@ -28,6 +28,7 @@
 static PyObject* Object_GetName(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetNamePl(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetTitle(Crossfire_Object* whoptr, void* closure);
+static PyObject* Object_GetCount(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetMap(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetCha(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetCon(Crossfire_Object* whoptr, void* closure);
@@ -141,6 +142,7 @@ static PyObject* Object_GetMoveOff(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetMoveSlow(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetMoveSlowPenalty(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetOwner(Crossfire_Object* whoptr, void* closure);
+static PyObject* Object_GetEnemy(Crossfire_Object* whoptr, void* closure);
 
 static int Object_SetMessage(Crossfire_Object* whoptr, PyObject* value, void* closure);
 static int Object_SetName(Crossfire_Object* whoptr, PyObject* value, void* closure);
@@ -214,7 +216,7 @@ static int Object_SetValue(Crossfire_Object* whoptr, PyObject* value, void* clos
 static int Object_SetFace(Crossfire_Object* whoptr, PyObject* value, void* closure);
 static int Object_SetNoSave(Crossfire_Object* whoptr, PyObject* value, void* closure);
 static int Object_SetOwner(Crossfire_Object* whoptr, PyObject* value, void* closure);
-
+static int Object_SetEnemy(Crossfire_Object* whoptr, PyObject* value, void* closure);
 
 static PyObject* Crossfire_Object_Remove( Crossfire_Object* who, PyObject* args );
 static PyObject* Crossfire_Object_Apply( Crossfire_Object* who, PyObject* args );
@@ -260,6 +262,7 @@ static PyGetSetDef Object_getseters[] = {
     { "Name",       (getter)Object_GetName,     (setter)Object_SetName, NULL, NULL },
     { "NamePl",     (getter)Object_GetNamePl,   (setter)Object_SetNamePl, NULL, NULL },
     { "Title",      (getter)Object_GetTitle,    (setter)Object_SetTitle, NULL, NULL },
+    { "Count",      (getter)Object_GetCount,    NULL, NULL, NULL },
     { "Map",        (getter)Object_GetMap,      (setter)Object_SetMap, NULL, NULL },
     { "Cha",        (getter)Object_GetCha,      (setter)Object_SetCha, NULL, NULL },
     { "Con",        (getter)Object_GetCon,      (setter)Object_SetCon, NULL, NULL },
@@ -373,6 +376,7 @@ static PyGetSetDef Object_getseters[] = {
     { "MoveSlow",       (getter)Object_GetMoveSlow,     NULL, NULL, NULL },
     { "MoveSlowPenalty",(getter)Object_GetMoveSlowPenalty,  NULL, NULL, NULL },
     { "Owner",          (getter)Object_GetOwner,        (setter)Object_SetOwner, NULL, NULL },
+    { "Enemy",          (getter)Object_GetEnemy,        (setter)Object_SetEnemy, NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 };
 
