@@ -17,6 +17,9 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+server/monster.c: make monsters use the same 'say' format than players.
+Nicolas Weeger 2007-04-12
+
 Add 'Object.Enemy' and 'Object.Count' properties.
  plugins/cfpython/cfpython_object.c
  plugins/cfpython/include/cfpython_object_private.h
