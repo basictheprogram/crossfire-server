@@ -94,7 +94,6 @@ void teardown(void)
  * get_ob_key_link
  * get_ob_key_value
  * set_ob_key_value
- * find_best_weapon_used_match
  * item_matched_string
  */
 /** This is the test to check the behaviour of the method
@@ -372,7 +371,6 @@ START_TEST (test_reset_object)
   fail_unless(ob1->msg == NULL,"Field msg of ob1 was not NULLified by reset_object");
   fail_unless(ob1->materialname == NULL,"Field materialname of ob1 was not NULLified by reset_object");
   fail_unless(ob1->lore == NULL,"Field lore of ob1 was not NULLified by reset_object");
-  fail_unless(ob1->current_weapon_script == NULL,"Field current_weapon_script of ob1 was not NULLified by reset_object");
 }
 END_TEST
 
@@ -397,7 +395,6 @@ START_TEST (test_clear_object)
   fail_unless(ob1->msg == NULL,"Field msg of ob1 was not cleaned by clear_object");
   fail_unless(ob1->materialname == NULL,"Field materialname of ob1 was not cleaned by clear_object");
   fail_unless(ob1->lore == NULL,"Field lore of ob1 was not cleaned by clear_object");
-  fail_unless(ob1->current_weapon_script == NULL,"Field current_weapon_script of ob1 was not cleaned by clear_object");
   fail_unless(query_refcount(reference)==1,
               "The number of references to string should drop back to 1 but was %d",query_refcount(reference));
 }
@@ -427,7 +424,6 @@ START_TEST (test_copy_object)
   fail_unless(ob1->msg==ob2->msg,"Field msg of ob1 should match ob2");
   fail_unless(ob1->materialname==ob2->materialname,"Field materialname of ob1 should match ob2");
   fail_unless(ob1->lore==ob2->lore,"Field lore of ob1 should match ob2");
-  fail_unless(ob1->current_weapon_script==ob2->current_weapon_script,"Field current_weapon_script of ob1 should match ob2");
   fail_unless(query_refcount(reference)==1, "refcount of marker string is not dropped to 1 after copy object, some string field were not cleaned. refcount: %d",query_refcount(reference));
 }
 END_TEST
@@ -1028,17 +1024,6 @@ START_TEST (test_set_ob_key_value)
 }
 END_TEST
 
-
-/** This is the test to check the behaviour of the method
- *  object *find_best_weapon_used_match(object *pl, const char *params);
- */
-START_TEST (test_find_best_weapon_used_match)
-{
-    /*TESTME*/
-}
-END_TEST
-
-
 /** This is the test to check the behaviour of the method
  *  int item_matched_string(object *pl, object *op, const char *name);
  */
@@ -1118,7 +1103,6 @@ Suite *object_suite(void)
   tcase_add_test(tc_core, test_get_ob_key_link);
   tcase_add_test(tc_core, test_get_ob_key_value);
   tcase_add_test(tc_core, test_set_ob_key_value);
-  tcase_add_test(tc_core, test_find_best_weapon_used_match);
   tcase_add_test(tc_core, test_item_matched_string);
 
   return s;
