@@ -154,6 +154,7 @@ void free_all_god(void) {
 	if (god->name) free_string(god->name);
 	free(god);
     }
+    first_god = NULL;
 }
 
 
