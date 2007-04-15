@@ -29,7 +29,22 @@
 #define PLUGIN_PYTHON_H
 
 /* First the required header files - only the CF module interface and Python */
-#include <Python.h>
+#ifdef WIN32
+    #ifdef _DEBUG
+        #undef _DEBUG
+        #include <Python.h>
+        #define _DEBUG
+    #else
+        #include <Python.h>
+    #endif
+#else /* WIN32 */
+    #include <Python.h>
+#endif
+
+/* Python can define HAVE_GETTIMEOFDAY, but we have our own later on. */
+#ifdef HAVE_GETTIMEOFDAY
+#undef HAVE_GETTIMEOFDAY
+#endif
 
 /* include compile.h from python. Python.h doesn't pull it in with versions
  * 2.3 and older, and it does have protection from double-imports.
@@ -65,6 +80,7 @@ typedef struct _cfpcontext
     PyObject*   who;
     PyObject*   activator;
     PyObject*   third;
+    PyObject*   event;
     char        message[1024];
     int         fix;
     int         event_code;

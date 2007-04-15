@@ -17,6 +17,21 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Merge all plugin changes from trunk.
+This includes defining sstring (can be useful anyway), and generate_random_map
+ definition.
+ server/plugins.c server.c
+ include/plugin.h sproto.h
+ plugins/common/include/plugin_common.h
+ plugins/common/plugin_common.c
+ plugins/cfpython/cfpython.c cfpython_map.c cfpython_object.c
+ plugins/cfpython/include/cfpython.h cfpython_object_private.h
+  cfpython_proto.h cfpython_map_private.h
+ plugins/cfanim/cfanim.c
+ plugins/cfanim/include/cfanim.h cfanim_proto.h
+ random_maps/random_map.c rproto.h standalone.c
+Nicolas Weeger 2007-04-15
+
 Correctly clear god information.
  common/holy.c
 Nicolas Weeger 2007-04-14

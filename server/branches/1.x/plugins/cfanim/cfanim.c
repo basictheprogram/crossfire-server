@@ -32,12 +32,6 @@
 #include <cfanim.h>
 #include <stdarg.h>
 
-f_plug_api gethook;
-f_plug_api registerGlobalEvent;
-f_plug_api unregisterGlobalEvent;
-f_plug_api systemDirectory;
-f_plug_api reCmp;
-
 CFPContext* context_stack;
 CFPContext* current_context;
 CFanimation *first_animation=NULL;
@@ -168,7 +162,7 @@ int runsay(struct CFanimation_struct* animation, long int id, void* parameters)
 {
     if (parameters)
     {
-        cf_object_speak(animation->victim, parameters);
+        cf_object_say(animation->victim, parameters);
         free (parameters);
     }
     else
@@ -285,7 +279,7 @@ int runghosted(struct CFanimation_struct* animation, long int id, void* paramete
         corpse->y=animation->victim->y;
         corpse->type=0;
         corpse->contr=NULL;
-        cf_map_insert_object_there(animation->victim->map, corpse, NULL, 0);
+        cf_map_insert_object_there(corpse, animation->victim->map, NULL, 0);
         animation->wizard=1;
         animation->invisible=1;
         animation->corpse=corpse;
@@ -358,7 +352,7 @@ int runteleport(struct CFanimation_struct* animation, long int id, void* paramet
     teleport_params* teleport=(teleport_params*)parameters;
     if (!parameters)
         return 0;
-    cf_object_teleport(animation->victim, cf_map_get_map(teleport->mapname),
+    cf_object_teleport(animation->victim, cf_map_get_map(teleport->mapname, 0),
                        teleport->mapx, teleport->mapy);
     free(parameters);
     return 1;
@@ -655,11 +649,12 @@ int start_animation (object* who,object* activator,char* file, char* options)
     char*   value;
     int     errors_found=0;
     CFanimation* current_anim;
+    char    path[1024];
 
-    fichier = fopen(cf_get_maps_directory(file),"r");
+    fichier = fopen(cf_get_maps_directory(file, path, sizeof(path)),"r");
     if (fichier == NULL)
     {
-        cf_log(llevDebug, "CFAnim: Unable to open %s\n", cf_get_maps_directory(file));
+        cf_log(llevDebug, "CFAnim: Unable to open %s\n", path);
         return 0;
     }
     while (fgets(buffer,HUGE_BUF,fichier))
@@ -780,7 +775,7 @@ int start_animation (object* who,object* activator,char* file, char* options)
     }
     if (buffer[0]=='\0')
     {
-        cf_log(llevDebug, "CFAnim: Errors occurred during the parsing of %s\n", cf_get_maps_directory(file));
+        cf_log(llevDebug, "CFAnim: Errors occurred during the parsing of %s\n", path);
         return 0;
     }
     if (!(current_anim=create_animation()))
@@ -953,9 +948,7 @@ CFPContext* popContext()
 
 CF_PLUGIN int initPlugin(const char* iversion, f_plug_api gethooksptr)
 {
-    gethook = gethooksptr;
-
-    cf_init_plugin( gethook );
+    cf_init_plugin( gethooksptr );
     cf_log(llevDebug, "CFAnim 2.0a init\n");
 
     /* Place your initialization code here */
@@ -965,21 +958,30 @@ CF_PLUGIN int initPlugin(const char* iversion, f_plug_api gethooksptr)
 CF_PLUGIN void* getPluginProperty(int* type, ...)
 {
     va_list args;
-    char* propname;
+    const char* propname;
+    char* buf;
+    int size;
 
     va_start(args, type);
-    propname = va_arg(args, char *);
+    propname = va_arg(args, const char *);
 
     if (!strcmp(propname, "Identification"))
     {
+        buf = va_arg(args, char*);
+        size = va_arg(args, int);
         va_end(args);
-        return PLUGIN_NAME;
+        snprintf(buf, size, PLUGIN_NAME);
+        return NULL;
     }
     else if (!strcmp(propname, "FullName"))
     {
+        buf = va_arg(args, char*);
+        size = va_arg(args, int);
         va_end(args);
-        return PLUGIN_VERSION;
+        snprintf(buf, size, PLUGIN_VERSION);
+        return NULL;
     }
+    va_end(args);
     return NULL;
 }
 
@@ -994,13 +996,9 @@ CF_PLUGIN int postInitPlugin(void)
     int rtype = 0;
 
     cf_log(llevDebug, "CFAnim 2.0a post init\n");
-    registerGlobalEvent =   gethook(&rtype,hooktype,"cfapi_system_register_global_event");
-    unregisterGlobalEvent = gethook(&rtype,hooktype,"cfapi_system_unregister_global_event");
-    systemDirectory       = gethook(&rtype,hooktype,"cfapi_system_directory");
-    reCmp                 = gethook(&rtype,hooktype,"cfapi_system_re_cmp");
     initContextStack();
     /* Pick the global events you want to monitor from this plugin */
-    registerGlobalEvent(NULL,EVENT_CLOCK,PLUGIN_NAME,globalEventListener);
+    cf_system_register_global_event(EVENT_CLOCK,PLUGIN_NAME,globalEventListener);
     return 0;
 }
 
@@ -1021,6 +1019,7 @@ CF_PLUGIN void* globalEventListener(int* type, ...)
     context->who         = NULL;
     context->activator   = NULL;
     context->third       = NULL;
+    context->event       = NULL;
     rv = context->returnvalue = 0;
     switch(context->event_code)
     {
@@ -1115,15 +1114,17 @@ CF_PLUGIN void* eventListener(int* type, ...)
     va_start(args,type);
 
     context->who         = va_arg(args, object*);
-    context->event_code  = va_arg(args,int);
+    /*context->event_code  = va_arg(args,int);*/
     context->activator   = va_arg(args, object*);
     context->third       = va_arg(args, object*);
     buf                  = va_arg(args, char*);
     if (buf !=0)
         strcpy(context->message,buf);
     context->fix         = va_arg(args, int);
-    strcpy(context->script,cf_get_maps_directory(va_arg(args, char*)));
-    strcpy(context->options,va_arg(args, char*));
+    context->event       = va_arg(args, object*);
+    context->event_code  = context->event->subtype;
+    cf_get_maps_directory(context->event->slaying, context->script, sizeof(context->script));
+    strcpy(context->options,context->event->name);
     context->returnvalue = 0;
     va_end(args);
 

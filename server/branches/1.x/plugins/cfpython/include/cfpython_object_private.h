@@ -28,7 +28,6 @@
 static PyObject* Object_GetName(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetNamePl(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetTitle(Crossfire_Object* whoptr, void* closure);
-static PyObject* Object_GetCount(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetMap(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetCha(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetCon(Crossfire_Object* whoptr, void* closure);
@@ -50,6 +49,8 @@ static PyObject* Object_GetDam(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetLuck(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetMessage(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetExp(Crossfire_Object* whoptr, void* closure);
+static PyObject* Object_GetPermExp(Crossfire_Object* whoptr, void* closure);
+static PyObject* Object_GetExpMul(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetSlaying(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetCursed(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetDamned(Crossfire_Object* whoptr, void* closure);
@@ -82,7 +83,6 @@ static PyObject* Object_GetDM(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetWasDM(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetApplied(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetUnpaid(Crossfire_Object* whoptr, void* closure);
-static PyObject* Object_GetFlying(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetMonster(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetFriendly(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetGenerator(Crossfire_Object* whoptr, void* closure);
@@ -115,8 +115,6 @@ static PyObject* Object_GetCanCastSpell(Crossfire_Object* whoptr, void* closure)
 static PyObject* Object_GetReflectSpells(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetReflectMissiles(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetUnique(Crossfire_Object* whoptr, void* closure);
-static PyObject* Object_GetCanPickUp(Crossfire_Object* whoptr, void* closure);
-static PyObject* Object_GetCanPassThru(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetRunAway(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetScared(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetUndead(Crossfire_Object* whoptr, void* closure);
@@ -143,8 +141,13 @@ static PyObject* Object_GetMoveSlow(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetMoveSlowPenalty(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetOwner(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetEnemy(Crossfire_Object* whoptr, void* closure);
+static PyObject* Object_GetCount(Crossfire_Object* whoptr, void* closure);
+static PyObject* Object_GetGodGiven(Crossfire_Object* whoptr, void* closure);
+static PyObject* Object_GetIsPet(Crossfire_Object* whoptr, void* closure);
+static PyObject* Object_GetAttackMovement(Crossfire_Object* whoptr, void* closure);
 
 static int Object_SetMessage(Crossfire_Object* whoptr, PyObject* value, void* closure);
+static int Object_SetExp(Crossfire_Object* whoptr, PyObject* value, void* closure);
 static int Object_SetName(Crossfire_Object* whoptr, PyObject* value, void* closure);
 static int Object_SetNamePl(Crossfire_Object* whoptr, PyObject* value, void* closure);
 static int Object_SetTitle(Crossfire_Object* whoptr, PyObject* value, void* closure);
@@ -184,7 +187,6 @@ static int Object_SetAttackType(Crossfire_Object* whoptr, PyObject* value, void*
 static int Object_SetUnaggressive(Crossfire_Object* whoptr, PyObject* value, void* closure);
 static int Object_SetPickable(Crossfire_Object* whoptr, PyObject* value, void* closure);
 static int Object_SetInvisible(Crossfire_Object* whoptr, PyObject* value, void* closure);
-static int Object_SetFlying(Crossfire_Object* whoptr, PyObject* value, void* closure);
 static int Object_SetUnpaid(Crossfire_Object* whoptr, PyObject* value, void* closure);
 static int Object_SetFriendly(Crossfire_Object* whoptr, PyObject* value, void* closure);
 static int Object_SetCanSeeInvisible(Crossfire_Object* whoptr, PyObject* value, void* closure);
@@ -203,7 +205,6 @@ static int Object_SetKnownMagical(Crossfire_Object* whoptr, PyObject* value, voi
 static int Object_SetReflectSpells(Crossfire_Object* whoptr, PyObject* value, void* closure);
 static int Object_SetReflectMissiles(Crossfire_Object* whoptr, PyObject* value, void* closure);
 static int Object_SetUnique(Crossfire_Object* whoptr, PyObject* value, void* closure);
-static int Object_SetCanPassThru(Crossfire_Object* whoptr, PyObject* value, void* closure);
 static int Object_SetRunAway(Crossfire_Object* whoptr, PyObject* value, void* closure);
 static int Object_SetScared(Crossfire_Object* whoptr, PyObject* value, void* closure);
 static int Object_SetUndead(Crossfire_Object* whoptr, PyObject* value, void* closure);
@@ -217,13 +218,15 @@ static int Object_SetFace(Crossfire_Object* whoptr, PyObject* value, void* closu
 static int Object_SetNoSave(Crossfire_Object* whoptr, PyObject* value, void* closure);
 static int Object_SetOwner(Crossfire_Object* whoptr, PyObject* value, void* closure);
 static int Object_SetEnemy(Crossfire_Object* whoptr, PyObject* value, void* closure);
+static int Object_SetGodGiven(Crossfire_Object* whoptr, PyObject* value, void* closure);
+static int Object_SetIsPet(Crossfire_Object* whoptr, PyObject* value, void* closure);
+static int Object_SetAttackMovement(Crossfire_Object* whoptr, PyObject* value, void* closure);
 
 static PyObject* Crossfire_Object_Remove( Crossfire_Object* who, PyObject* args );
 static PyObject* Crossfire_Object_Apply( Crossfire_Object* who, PyObject* args );
 static PyObject* Crossfire_Object_Drop( Crossfire_Object* who, PyObject* args );
 static PyObject* Crossfire_Object_Fix( Crossfire_Object* who, PyObject* args );
 static PyObject* Crossfire_Object_Say( Crossfire_Object* who, PyObject* args );
-static PyObject* Crossfire_Object_Speak( Crossfire_Object* who, PyObject* args );
 static PyObject* Crossfire_Object_Pickup( Crossfire_Object* who, PyObject* args );
 static PyObject* Crossfire_Object_Take( Crossfire_Object* who, PyObject* args );
 static PyObject* Crossfire_Object_Teleport( Crossfire_Object* who, PyObject* args );
@@ -262,7 +265,6 @@ static PyGetSetDef Object_getseters[] = {
     { "Name",       (getter)Object_GetName,     (setter)Object_SetName, NULL, NULL },
     { "NamePl",     (getter)Object_GetNamePl,   (setter)Object_SetNamePl, NULL, NULL },
     { "Title",      (getter)Object_GetTitle,    (setter)Object_SetTitle, NULL, NULL },
-    { "Count",      (getter)Object_GetCount,    NULL, NULL, NULL },
     { "Map",        (getter)Object_GetMap,      (setter)Object_SetMap, NULL, NULL },
     { "Cha",        (getter)Object_GetCha,      (setter)Object_SetCha, NULL, NULL },
     { "Con",        (getter)Object_GetCon,      (setter)Object_SetCon, NULL, NULL },
@@ -282,7 +284,9 @@ static PyGetSetDef Object_getseters[] = {
     { "WC",         (getter)Object_GetWC,       (setter)Object_SetWC, NULL, NULL },
     { "Dam",        (getter)Object_GetDam,      (setter)Object_SetDam, NULL, NULL },
     { "Luck",       (getter)Object_GetLuck,     NULL, NULL, NULL },
-    { "Exp",        (getter)Object_GetExp,      NULL, NULL, NULL },
+    { "Exp",        (getter)Object_GetExp,      (setter)Object_SetExp, NULL, NULL },
+    { "ExpMul",     (getter)Object_GetExpMul,   NULL, NULL, NULL },
+    { "PermExp",    (getter)Object_GetPermExp,  NULL, NULL, NULL },
     { "Message",    (getter)Object_GetMessage,  (setter)Object_SetMessage, NULL, NULL },
     { "Slaying",    (getter)Object_GetSlaying,  (setter)Object_SetSlaying, NULL, NULL },
     { "Cursed",     (getter)Object_GetCursed,   (setter)Object_SetCursed, NULL, NULL },
@@ -316,7 +320,6 @@ static PyGetSetDef Object_getseters[] = {
     { "WasDungeonMaster",(getter)Object_GetWasDM, NULL, NULL, NULL },
     { "Applied",    (getter)Object_GetApplied,  NULL, NULL, NULL },
     { "Unpaid",     (getter)Object_GetUnpaid,   (setter)Object_SetUnpaid, NULL, NULL },
-    { "Flying",     (getter)Object_GetFlying,   (setter)Object_SetFlying, NULL, NULL },
     { "Monster",    (getter)Object_GetMonster,  NULL, NULL, NULL },
     { "Friendly",   (getter)Object_GetFriendly, (setter)Object_SetFriendly, NULL, NULL },
     { "Generator",  (getter)Object_GetGenerator,NULL, NULL, NULL },
@@ -349,8 +352,6 @@ static PyGetSetDef Object_getseters[] = {
     { "ReflectSpells",  (getter)Object_GetReflectSpells,(setter)Object_SetReflectSpells, NULL, NULL },
     { "ReflectMissiles",(getter)Object_GetReflectMissiles,(setter)Object_SetReflectMissiles, NULL, NULL },
     { "Unique",         (getter)Object_GetUnique,       (setter)Object_SetUnique, NULL, NULL },
-    { "CanPickUp",      (getter)Object_GetCanPickUp,    NULL, NULL, NULL },
-    { "CanPassThru",    (getter)Object_GetCanPassThru,  (setter)Object_SetCanPassThru, NULL, NULL },
     { "RunAway",        (getter)Object_GetRunAway,      (setter)Object_SetRunAway, NULL, NULL },
     { "Scared",         (getter)Object_GetScared,       (setter)Object_SetScared, NULL, NULL },
     { "Undead",         (getter)Object_GetUndead,       (setter)Object_SetUndead, NULL, NULL },
@@ -377,6 +378,10 @@ static PyGetSetDef Object_getseters[] = {
     { "MoveSlowPenalty",(getter)Object_GetMoveSlowPenalty,  NULL, NULL, NULL },
     { "Owner",          (getter)Object_GetOwner,        (setter)Object_SetOwner, NULL, NULL },
     { "Enemy",          (getter)Object_GetEnemy,        (setter)Object_SetEnemy, NULL, NULL },
+    { "Count",          (getter)Object_GetCount,        NULL, NULL, NULL },
+    { "GodGiven",       (getter)Object_GetGodGiven,     (setter)Object_SetGodGiven, NULL, NULL },
+    { "IsPet",          (getter)Object_GetIsPet,     (setter)Object_SetIsPet, NULL, NULL },
+    { "AttackMovement", (getter)Object_GetAttackMovement, (setter)Object_SetAttackMovement, NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 };
 

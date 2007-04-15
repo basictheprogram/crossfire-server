@@ -64,18 +64,12 @@
 #define PYTHON_CACHE_SIZE 16    /* number of python scripts to store the bytecode of at a time */
 
 typedef struct {
-    char *file;
+    sstring file;
     PyCodeObject *code;
     time_t cached_time, used_time;
 } pycode_cache_entry;
 
 static pycode_cache_entry pycode_cache[PYTHON_CACHE_SIZE];
-
-f_plug_api gethook;
-f_plug_api registerGlobalEvent;
-f_plug_api unregisterGlobalEvent;
-f_plug_api systemDirectory;
-f_plug_api reCmp;
 
 static void set_exception(const char *fmt, ...);
 static PyObject* createCFObject(PyObject* self, PyObject* args);
@@ -86,20 +80,7 @@ static PyObject* setReturnValue(PyObject* self, PyObject* args);
 static PyObject* matchString(PyObject* self, PyObject* args);
 static PyObject* findPlayer(PyObject* self, PyObject* args);
 static PyObject* readyMap(PyObject* self, PyObject* args);
-static PyObject* getCostFlagTrue(PyObject* self, PyObject* args);
-static PyObject* getCostFlagBuy(PyObject* self, PyObject* args);
-static PyObject* getCostFlagSell(PyObject* self, PyObject* args);
-static PyObject* getCostFlagNoBargain(PyObject* self, PyObject* args);
-static PyObject* getCostFlagIdentified(PyObject* self, PyObject* args);
-static PyObject* getCostFlagNotCursed(PyObject* self, PyObject* args);
-static PyObject* getDirectionNorthEast(PyObject* self, PyObject* args);
-static PyObject* getDirectionEast(PyObject* self, PyObject* args);
-static PyObject* getDirectionSouthEast(PyObject* self, PyObject* args);
-static PyObject* getDirectionSouth(PyObject* self, PyObject* args);
-static PyObject* getDirectionSouthWest(PyObject* self, PyObject* args);
-static PyObject* getDirectionWest(PyObject* self, PyObject* args);
-static PyObject* getDirectionNorthWest(PyObject* self, PyObject* args);
-static PyObject* getDirectionNorth(PyObject* self, PyObject* args);
+static PyObject* createMap(PyObject* self, PyObject* args);
 static PyObject* getMapDirectory(PyObject* self, PyObject* args);
 static PyObject* getUniqueDirectory(PyObject* self, PyObject* args);
 static PyObject* getTempDirectory(PyObject* self, PyObject* args);
@@ -113,6 +94,7 @@ static PyObject* getWhoIsThird(PyObject* self, PyObject* args);
 static PyObject* getWhatIsMessage(PyObject* self, PyObject* args);
 static PyObject* getScriptName(PyObject* self, PyObject* args);
 static PyObject* getScriptParameters(PyObject* self, PyObject* args);
+static PyObject* getEvent(PyObject* self, PyObject* args);
 static PyObject* getPrivateDictionary(PyObject* self, PyObject* args);
 static PyObject* getSharedDictionary(PyObject* self, PyObject* args);
 static PyObject* getArchetypes(PyObject* self, PyObject* args);
@@ -126,6 +108,7 @@ static PyObject* unregisterGEvent(PyObject* self, PyObject* args);
 static PyObject* CFPythonError;
 static PyObject* getTime(PyObject* self, PyObject* args);
 static PyObject* destroyTimer(PyObject* self, PyObject* args);
+static PyObject* getMapHasBeenLoaded(PyObject* self, PyObject* args);
 
 /** Set up an Python exception object. */
 static void set_exception(const char *fmt, ...)
@@ -147,6 +130,7 @@ static PyMethodDef CFPythonMethods[] = {
     {"WhatIsMessage",       getWhatIsMessage,       METH_VARARGS},
     {"ScriptName",          getScriptName,          METH_VARARGS},
     {"ScriptParameters",    getScriptParameters,    METH_VARARGS},
+    {"WhatIsEvent",         getEvent,               METH_VARARGS},
     {"MapDirectory",        getMapDirectory,        METH_VARARGS},
     {"UniqueDirectory",     getUniqueDirectory,     METH_VARARGS},
     {"TempDirectory",       getTempDirectory,       METH_VARARGS},
@@ -154,21 +138,8 @@ static PyMethodDef CFPythonMethods[] = {
     {"LocalDirectory",      getLocalDirectory,      METH_VARARGS},
     {"PlayerDirectory",     getPlayerDirectory,     METH_VARARGS},
     {"DataDirectory",       getDataDirectory,       METH_VARARGS},
-    {"DirectionNorth",      getDirectionNorth,      METH_VARARGS},
-    {"DirectionNorthEast",  getDirectionNorthEast,  METH_VARARGS},
-    {"DirectionEast",       getDirectionEast,       METH_VARARGS},
-    {"DirectionSouthEast",  getDirectionSouthEast,  METH_VARARGS},
-    {"DirectionSouth",      getDirectionSouth,      METH_VARARGS},
-    {"DirectionSouthWest",  getDirectionSouthWest,  METH_VARARGS},
-    {"DirectionWest",       getDirectionWest,       METH_VARARGS},
-    {"DirectionNorthWest",  getDirectionNorthWest,  METH_VARARGS},
-    {"CostFlagTrue",        getCostFlagTrue,        METH_VARARGS},
-    {"CostFlagBuy",         getCostFlagBuy,         METH_VARARGS},
-    {"CostFlagSell",        getCostFlagSell,        METH_VARARGS},
-    {"CostFlagNoBargain",   getCostFlagNoBargain,   METH_VARARGS},
-    {"CostFlagIdentified",  getCostFlagIdentified,  METH_VARARGS},
-    {"CostFlagNotCursed",   getCostFlagNotCursed,   METH_VARARGS},
     {"ReadyMap",            readyMap,               METH_VARARGS},
+    {"CreateMap",           createMap,              METH_VARARGS},
     {"FindPlayer",          findPlayer,             METH_VARARGS},
     {"MatchString",         matchString,            METH_VARARGS},
     {"GetReturnValue",      getReturnValue,         METH_VARARGS},
@@ -188,6 +159,7 @@ static PyMethodDef CFPythonMethods[] = {
     {"UnregisterGlobalEvent",unregisterGEvent,      METH_VARARGS},
     {"GetTime",             getTime,                METH_VARARGS},
     {"DestroyTimer",        destroyTimer,           METH_VARARGS},
+    {"MapHasBeenLoaded",    getMapHasBeenLoaded,    METH_VARARGS},
     {NULL, NULL, 0}
 };
 
@@ -203,7 +175,7 @@ static PyObject* registerGEvent(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "i", &eventcode))
         return NULL;
 
-    registerGlobalEvent(NULL, eventcode, PLUGIN_NAME, globalEventListener);
+    cf_system_register_global_event(eventcode, PLUGIN_NAME, globalEventListener);
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -214,7 +186,7 @@ static PyObject* unregisterGEvent(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "i", &eventcode))
         return NULL;
 
-    unregisterGlobalEvent(NULL, EVENT_TELL, PLUGIN_NAME);
+    cf_system_unregister_global_event(EVENT_TELL, PLUGIN_NAME);
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -265,12 +237,12 @@ static PyObject* matchString(PyObject* self, PyObject* args)
 {
     char *premiere;
     char *seconde;
-    char *result;
+    const char *result;
     int val;
     if (!PyArg_ParseTuple(args, "ss", &premiere, &seconde))
         return NULL;
 
-    result = reCmp( &val, premiere, seconde );
+    result = cf_re_cmp(premiere, seconde);
     if (result != NULL)
         return Py_BuildValue("i", 1);
     else
@@ -297,14 +269,29 @@ static PyObject* readyMap(PyObject* self, PyObject* args)
 {
     char* mapname;
     mapstruct* map;
+    int flags = 0;
 
-    if (!PyArg_ParseTuple(args, "s", &mapname))
+    if (!PyArg_ParseTuple(args, "s|i", &mapname, &flags))
         return NULL;
 
-    map = cf_map_get_map(mapname);
+    map = cf_map_get_map(mapname, flags);
 
     return Crossfire_Map_wrap(map);
 }
+
+static PyObject* createMap(PyObject* self, PyObject* args)
+{
+    int sizex, sizey;
+    mapstruct* map;
+
+    if (!PyArg_ParseTuple(args, "ii", &sizex, &sizey))
+        return NULL;
+
+    map = cf_get_empty_map(sizex, sizey);
+
+    return Crossfire_Map_wrap(map);
+}
+
 static PyObject* getCostFlagTrue(PyObject* self, PyObject* args)
 {
     int i = F_TRUE;
@@ -347,110 +334,47 @@ static PyObject* getCostFlagNotCursed(PyObject* self, PyObject* args)
         return NULL;
     return Py_BuildValue("i", i);
 }
-static PyObject* getDirectionNorthEast(PyObject* self, PyObject* args)
-{
-    int i = 2;
-    if (!PyArg_ParseTuple(args, "", NULL))
-        return NULL;
-    return Py_BuildValue("i", i);
-}
-static PyObject* getDirectionEast(PyObject* self, PyObject* args)
-{
-    int i = 3;
-    if (!PyArg_ParseTuple(args, "", NULL))
-        return NULL;
-    return Py_BuildValue("i", i);
-}
-static PyObject* getDirectionSouthEast(PyObject* self, PyObject* args)
-{
-    int i = 4;
-    if (!PyArg_ParseTuple(args, "", NULL))
-        return NULL;
-    return Py_BuildValue("i", i);
-}
-static PyObject* getDirectionSouth(PyObject* self, PyObject* args)
-{
-    int i = 5;
-    if (!PyArg_ParseTuple(args, "", NULL))
-        return NULL;
-    return Py_BuildValue("i", i);
-}
-static PyObject* getDirectionSouthWest(PyObject* self, PyObject* args)
-{
-    int i = 6;
-    if (!PyArg_ParseTuple(args, "", NULL))
-        return NULL;
-    return Py_BuildValue("i", i);
-}
-static PyObject* getDirectionWest(PyObject* self, PyObject* args)
-{
-    int i = 7;
-    if (!PyArg_ParseTuple(args, "", NULL))
-        return NULL;
-    return Py_BuildValue("i", i);
-}
-static PyObject* getDirectionNorthWest(PyObject* self, PyObject* args)
-{
-    int i = 8;
-    if (!PyArg_ParseTuple(args, "", NULL))
-        return NULL;
-    return Py_BuildValue("i", i);
-}
-static PyObject* getDirectionNorth(PyObject* self, PyObject* args)
-{
-    int i = 1;
-    if (!PyArg_ParseTuple(args, "", NULL))
-        return NULL;
-    return Py_BuildValue("i", i);
-}
 static PyObject* getMapDirectory(PyObject* self, PyObject* args)
 {
-    int rv;
     if (!PyArg_ParseTuple(args, "", NULL))
         return NULL;
-    return Py_BuildValue("s", systemDirectory(&rv, 0));
+    return Py_BuildValue("s", cf_get_directory(0));
 }
 static PyObject* getUniqueDirectory(PyObject* self, PyObject* args)
 {
-    int rv;
     if (!PyArg_ParseTuple(args, "", NULL))
         return NULL;
-    return Py_BuildValue("s", systemDirectory(&rv, 1));
+    return Py_BuildValue("s", cf_get_directory(1));
 }
 static PyObject* getTempDirectory(PyObject* self, PyObject* args)
 {
-    int rv;
     if (!PyArg_ParseTuple(args, "", NULL))
         return NULL;
-    return Py_BuildValue("s", systemDirectory(&rv, 2));
+    return Py_BuildValue("s", cf_get_directory(2));
 }
 static PyObject* getConfigDirectory(PyObject* self, PyObject* args)
 {
-    int rv;
     if (!PyArg_ParseTuple(args, "", NULL))
         return NULL;
-    return Py_BuildValue("s", systemDirectory(&rv, 3));
+    return Py_BuildValue("s", cf_get_directory(3));
 }
 static PyObject* getLocalDirectory(PyObject* self, PyObject* args)
 {
-    int rv;
     if (!PyArg_ParseTuple(args, "", NULL))
         return NULL;
-    return Py_BuildValue("s", systemDirectory(&rv, 4));
+    return Py_BuildValue("s", cf_get_directory(4));
 }
 static PyObject* getPlayerDirectory(PyObject* self, PyObject* args)
 {
-    int rv;
     if (!PyArg_ParseTuple(args, "", NULL))
         return NULL;
-    return Py_BuildValue("s", systemDirectory(&rv, 5));
+    return Py_BuildValue("s", cf_get_directory(5));
 }
 static PyObject* getDataDirectory(PyObject* self, PyObject* args)
 {
-    int rv;
     if (!PyArg_ParseTuple(args, "", NULL))
         return NULL;
-    return Py_BuildValue("s", systemDirectory(&rv, 6));
+    return Py_BuildValue("s", cf_get_directory(6));
 }
 static PyObject* getWhoAmI(PyObject* self, PyObject* args)
 {
@@ -508,6 +432,18 @@ static PyObject* getScriptParameters(PyObject* self, PyObject* args)
     return Py_BuildValue("s", current_context->options);
 }
 
+static PyObject* getEvent(PyObject* self, PyObject* args)
+{
+    if (!PyArg_ParseTuple(args, "", NULL))
+        return NULL;
+    if (!current_context->event) {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+    Py_INCREF(current_context->event);
+    return current_context->event;
+}
+
 static PyObject* getPrivateDictionary(PyObject* self, PyObject* args)
 {
     PyObject* data;
@@ -557,7 +493,7 @@ static PyObject* getMaps(PyObject* self, PyObject* args)
     map = cf_map_get_first();
     while (map) {
         PyList_Append(list, Crossfire_Map_wrap(map));
-        map = cf_map_get_property(map, CFAPI_MAP_PROP_NEXT);
+        map = cf_map_get_map_property(map, CFAPI_MAP_PROP_NEXT);
     }
     return list;
 }
@@ -643,7 +579,6 @@ static PyObject* registerCommand(PyObject* self, PyObject* args)
 static PyObject* getTime(PyObject* self, PyObject* args)
 {
     PyObject* list;
-    partylist* party;
     timeofday_t tod;
 
     if (!PyArg_ParseTuple(args, "", NULL))
@@ -670,6 +605,14 @@ static PyObject* destroyTimer(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "i", &id))
         return NULL;
     return Py_BuildValue("i", cf_timer_destroy(id));
+}
+
+static PyObject* getMapHasBeenLoaded(PyObject* self, PyObject* args)
+{
+    char* name;
+    if (!PyArg_ParseTuple(args, "s", &name))
+        return NULL;
+    return Crossfire_Map_wrap(cf_map_has_been_loaded(name));
 }
 
 void initContextStack()
@@ -703,16 +646,17 @@ CFPContext* popContext()
 
 void freeContext(CFPContext* context)
 {
+    Py_XDECREF(context->event);
+    Py_XDECREF(context->third);
     Py_XDECREF(context->who);
     Py_XDECREF(context->activator);
-    Py_XDECREF(context->third);
     free(context);
 }
 
 /* Outputs the compiled bytecode for a given python file, using in-memory caching of bytecode */
 static PyCodeObject *compilePython(char *filename) {
     PyObject*   scriptfile;
-    char  *sh_path;
+    sstring sh_path;
     struct  stat stat_buf;
     struct _node *n;
     int i;
@@ -895,7 +839,6 @@ static void initConstants(PyObject* module)
         { "POISON", POISON },
         { "BOOK", BOOK },
         { "CLOCK", CLOCK },
-        { "LIGHTNING", LIGHTNING },
         { "ARROW", ARROW },
         { "BOW", BOW },
         { "WEAPON", WEAPON },
@@ -1021,17 +964,139 @@ static void initConstants(PyObject* module)
         { "ALL", MOVE_ALL },
         { NULL, 0 } };
 
+    static CFConstant cstMessageFlag[] = {
+        { "NDI_BLACK", NDI_BLACK },
+        { "NDI_WHITE", NDI_WHITE },
+        { "NDI_NAVY", NDI_NAVY },
+        { "NDI_RED", NDI_RED },
+        { "NDI_ORANGE", NDI_ORANGE },
+        { "NDI_BLUE", NDI_BLUE },
+        { "NDI_DK_ORANGE", NDI_DK_ORANGE },
+        { "NDI_GREEN", NDI_GREEN },
+        { "NDI_LT_GREEN", NDI_LT_GREEN },
+        { "NDI_GREY", NDI_GREY },
+        { "NDI_BROWN", NDI_BROWN },
+        { "NDI_GOLD", NDI_GOLD },
+        { "NDI_TAN", NDI_TAN },
+        { "NDI_UNIQUE", NDI_UNIQUE },
+        { "NDI_ALL", NDI_ALL },
+        { NULL, 0 } };
+
+    static CFConstant cstCostFlag[] = {
+        { "TRUE", F_TRUE },
+        { "BUY", F_BUY },
+        { "SELL", F_SELL },
+        { "NOBARGAIN", F_NO_BARGAIN },
+        { "IDENTIFIED", F_IDENTIFIED },
+        { "NOTCURSED", F_NOT_CURSED },
+        { NULL, 0 } };
+
+    static CFConstant cstAttackType[] = {
+        { "PHYSICAL", AT_PHYSICAL },
+        { "MAGIC", AT_MAGIC },
+        { "FIRE", AT_FIRE },
+        { "ELECTRICITY", AT_ELECTRICITY },
+        { "COLD", AT_COLD },
+        { "CONFUSION", AT_CONFUSION },
+        { "ACID", AT_ACID },
+        { "DRAIN", AT_DRAIN },
+        { "WEAPONMAGIC", AT_WEAPONMAGIC },
+        { "GHOSTHIT", AT_GHOSTHIT },
+        { "POISON", AT_POISON },
+        { "SLOW", AT_SLOW },
+        { "PARALYZE", AT_PARALYZE },
+        { "TURN_UNDEAD", AT_TURN_UNDEAD },
+        { "FEAR", AT_FEAR },
+        { "CANCELLATION", AT_CANCELLATION },
+        { "DEPLETE", AT_DEPLETE },
+        { "DEATH", AT_DEATH },
+        { "CHAOS", AT_CHAOS },
+        { "COUNTERSPELL", AT_COUNTERSPELL },
+        { "GODPOWER", AT_GODPOWER },
+        { "HOLYWORD", AT_HOLYWORD },
+        { "BLIND", AT_BLIND },
+        { "INTERNAL", AT_INTERNAL },
+        { "LIFE_STEALING", AT_LIFE_STEALING },
+        { "DISEASE", AT_DISEASE },
+        { NULL, 0 } };
+
+    static CFConstant cstAttackTypeNumber[] = {
+        { "PHYSICAL", ATNR_PHYSICAL },
+        { "MAGIC", ATNR_MAGIC },
+        { "FIRE", ATNR_FIRE },
+        { "ELECTRICITY", ATNR_ELECTRICITY },
+        { "COLD", ATNR_COLD },
+        { "CONFUSION", ATNR_CONFUSION },
+        { "ACID", ATNR_ACID },
+        { "DRAIN", ATNR_DRAIN },
+        { "WEAPONMAGIC", ATNR_WEAPONMAGIC },
+        { "GHOSTHIT", ATNR_GHOSTHIT },
+        { "POISON", ATNR_POISON },
+        { "SLOW", ATNR_SLOW },
+        { "PARALYZE", ATNR_PARALYZE },
+        { "TURN_UNDEAD", ATNR_TURN_UNDEAD },
+        { "FEAR", ATNR_FEAR },
+        { "CANCELLATION", ATNR_CANCELLATION },
+        { "DEPLETE", ATNR_DEPLETE },
+        { "DEATH", ATNR_DEATH },
+        { "CHAOS", ATNR_CHAOS },
+        { "COUNTERSPELL", ATNR_COUNTERSPELL },
+        { "GODPOWER", ATNR_GODPOWER },
+        { "HOLYWORD", ATNR_HOLYWORD },
+        { "BLIND", ATNR_BLIND },
+        { "INTERNAL", ATNR_INTERNAL },
+        { "LIFE_STEALING", ATNR_LIFE_STEALING },
+        { "DISEASE", ATNR_DISEASE },
+        { NULL, 0 } };
+
+    static CFConstant cstEventType[] = {
+        { "APPLY", EVENT_APPLY },
+        { "ATTACK", EVENT_ATTACK },
+        { "DEATH", EVENT_DEATH },
+        { "DROP", EVENT_DROP },
+        { "PICKUP", EVENT_PICKUP },
+        { "SAY", EVENT_SAY },
+        { "STOP", EVENT_STOP },
+        { "TIME", EVENT_TIME },
+        { "THROW", EVENT_THROW },
+        { "TRIGGER", EVENT_TRIGGER },
+        { "CLOSE", EVENT_CLOSE },
+        { "TIMER", EVENT_TIMER },
+        { "DESTROY", EVENT_DESTROY },
+        { "BORN", EVENT_BORN },
+        { "CLOCK", EVENT_CLOCK },
+        { "CRASH", EVENT_CRASH },
+        { "PLAYER_DEATH", EVENT_PLAYER_DEATH },
+        { "GKILL", EVENT_GKILL },
+        { "LOGIN", EVENT_LOGIN },
+        { "LOGOUT", EVENT_LOGOUT },
+        { "MAPENTER", EVENT_MAPENTER },
+        { "MAPLEAVE", EVENT_MAPLEAVE },
+        { "MAPRESET", EVENT_MAPRESET },
+        { "REMOVE", EVENT_REMOVE },
+        { "SHOUT", EVENT_SHOUT },
+        { "TELL", EVENT_TELL },
+        { "MUZZLE", EVENT_MUZZLE },
+        { "KICK", EVENT_KICK },
+        { "MAPUNLOAD", EVENT_MAPUNLOAD },
+        { "MAPLOAD", EVENT_MAPLOAD },
+        { NULL, 0 } };
+
     addConstants(module, "Direction", cstDirection);
     addConstants(module, "Type", cstType);
     addConstants(module, "Move", cstMove);
+    addConstants(module, "MessageFlag", cstMessageFlag);
+    addConstants(module, "CostFlag", cstCostFlag);
+    addConstants(module, "AttackType", cstAttackType);
+    addConstants(module, "AttackTypeNumber", cstAttackTypeNumber);
+    addConstants(module, "EventType", cstEventType);
 }
 
 CF_PLUGIN int initPlugin(const char* iversion, f_plug_api gethooksptr)
 {
     PyObject *m, *d;
     int i;
-    gethook = gethooksptr;
-    cf_init_plugin( gethook );
+    cf_init_plugin( gethooksptr );
     cf_log(llevDebug, "CFPython 2.0a init\n");
 
     init_object_assoc_table();
@@ -1084,8 +1149,9 @@ CF_PLUGIN void* getPluginProperty(int* type, ...)
 {
     va_list args;
     const char* propname;
-    int i;
-    static command_array_struct rtn_cmd;
+    int i, size;
+    command_array_struct* rtn_cmd;
+    char* buf;
 
     va_start(args, type);
     propname = va_arg(args, const char *);
@@ -1093,33 +1159,41 @@ CF_PLUGIN void* getPluginProperty(int* type, ...)
     if (!strcmp(propname, "command?")) {
         const char* cmdname;
         cmdname = va_arg(args, const char *);
+        rtn_cmd = va_arg(args, command_array_struct*);
         va_end(args);
 
         for (i = 0; i < NR_CUSTOM_CMD; i++) {
             if (CustomCommand[i].name != NULL) {
                 if (!strcmp(CustomCommand[i].name, cmdname)) {
-                    rtn_cmd.name = CustomCommand[i].name;
-                    rtn_cmd.time = (float)CustomCommand[i].speed;
-                    rtn_cmd.func = runPluginCommand;
+                    rtn_cmd->name = CustomCommand[i].name;
+                    rtn_cmd->time = (float)CustomCommand[i].speed;
+                    rtn_cmd->func = runPluginCommand;
                     current_command = i;
-                    return &rtn_cmd;
+                    return rtn_cmd;
                 }
             }
         }
         return NULL;
     } else if (!strcmp(propname, "Identification")) {
+        buf = va_arg(args, char*);
+        size = va_arg(args, int);
         va_end(args);
-        return PLUGIN_NAME;
+        snprintf(buf, size, PLUGIN_NAME);
+        return NULL;
     } else if (!strcmp(propname, "FullName")) {
+        buf = va_arg(args, char*);
+        size = va_arg(args, int);
         va_end(args);
-        return PLUGIN_VERSION;
+        snprintf(buf, size, PLUGIN_VERSION);
+        return NULL;
     }
+    va_end(args);
     return NULL;
 }
 
 CF_PLUGIN int runPluginCommand(object* op, char* params)
 {
-    char         buf[1024];
+    char         buf[1024], path[1024];
     CFPContext*  context;
     static int rv = 0;
 
@@ -1129,7 +1203,7 @@ CF_PLUGIN int runPluginCommand(object* op, char* params)
         cf_log(llevError, "Illegal call of runPluginCommand, call find_plugin_command first.\n");
         return 1;
     }
-    snprintf(buf, sizeof(buf), "%s.py", cf_get_maps_directory(CustomCommand[current_command].script));
+    snprintf(buf, sizeof(buf), "%s.py", cf_get_maps_directory(CustomCommand[current_command].script, path, sizeof(path)));
 
     context = malloc(sizeof(CFPContext));
     context->message[0] = 0;
@@ -1161,34 +1235,31 @@ CF_PLUGIN int postInitPlugin()
     int hooktype = 1;
     int rtype = 0;
     PyObject*   scriptfile;
+    char path[1024];
 
     cf_log(llevDebug, "CFPython 2.0a post init\n");
-    registerGlobalEvent =   gethook(&rtype, hooktype, "cfapi_system_register_global_event");
-    unregisterGlobalEvent = gethook(&rtype, hooktype, "cfapi_system_unregister_global_event");
-    systemDirectory       = gethook(&rtype, hooktype, "cfapi_system_directory");
-    reCmp                 = gethook(&rtype, hooktype, "cfapi_system_re_cmp");
     initContextStack();
-    registerGlobalEvent(NULL, EVENT_BORN, PLUGIN_NAME, globalEventListener);
+    cf_system_register_global_event(EVENT_BORN, PLUGIN_NAME, globalEventListener);
     /*registerGlobalEvent(NULL, EVENT_CLOCK, PLUGIN_NAME, globalEventListener);*/
     /*registerGlobalEvent(NULL, EVENT_CRASH, PLUGIN_NAME, globalEventListener);*/
-    registerGlobalEvent(NULL, EVENT_PLAYER_DEATH, PLUGIN_NAME, globalEventListener);
-    registerGlobalEvent(NULL, EVENT_GKILL, PLUGIN_NAME, globalEventListener);
-    registerGlobalEvent(NULL, EVENT_LOGIN, PLUGIN_NAME, globalEventListener);
-    registerGlobalEvent(NULL, EVENT_LOGOUT, PLUGIN_NAME, globalEventListener);
-    registerGlobalEvent(NULL, EVENT_MAPENTER, PLUGIN_NAME, globalEventListener);
-    registerGlobalEvent(NULL, EVENT_MAPLEAVE, PLUGIN_NAME, globalEventListener);
-    registerGlobalEvent(NULL, EVENT_MAPRESET, PLUGIN_NAME, globalEventListener);
-    registerGlobalEvent(NULL, EVENT_REMOVE, PLUGIN_NAME, globalEventListener);
-    registerGlobalEvent(NULL, EVENT_SHOUT, PLUGIN_NAME, globalEventListener);
-    registerGlobalEvent(NULL, EVENT_TELL, PLUGIN_NAME, globalEventListener);
-    registerGlobalEvent(NULL, EVENT_MUZZLE, PLUGIN_NAME, globalEventListener);
-    registerGlobalEvent(NULL, EVENT_KICK, PLUGIN_NAME, globalEventListener);
-    registerGlobalEvent(NULL, EVENT_MAPUNLOAD, PLUGIN_NAME, globalEventListener);
-    registerGlobalEvent(NULL, EVENT_MAPLOAD, PLUGIN_NAME, globalEventListener);
+    cf_system_register_global_event(EVENT_PLAYER_DEATH, PLUGIN_NAME, globalEventListener);
+    cf_system_register_global_event(EVENT_GKILL, PLUGIN_NAME, globalEventListener);
+    cf_system_register_global_event(EVENT_LOGIN, PLUGIN_NAME, globalEventListener);
+    cf_system_register_global_event(EVENT_LOGOUT, PLUGIN_NAME, globalEventListener);
+    cf_system_register_global_event(EVENT_MAPENTER, PLUGIN_NAME, globalEventListener);
+    cf_system_register_global_event(EVENT_MAPLEAVE, PLUGIN_NAME, globalEventListener);
+    cf_system_register_global_event(EVENT_MAPRESET, PLUGIN_NAME, globalEventListener);
+    cf_system_register_global_event(EVENT_REMOVE, PLUGIN_NAME, globalEventListener);
+    cf_system_register_global_event(EVENT_SHOUT, PLUGIN_NAME, globalEventListener);
+    cf_system_register_global_event(EVENT_TELL, PLUGIN_NAME, globalEventListener);
+    cf_system_register_global_event(EVENT_MUZZLE, PLUGIN_NAME, globalEventListener);
+    cf_system_register_global_event(EVENT_KICK, PLUGIN_NAME, globalEventListener);
+    cf_system_register_global_event(EVENT_MAPUNLOAD, PLUGIN_NAME, globalEventListener);
+    cf_system_register_global_event(EVENT_MAPLOAD, PLUGIN_NAME, globalEventListener);
 
-    scriptfile = PyFile_FromString(cf_get_maps_directory("python/events/python_init.py"), "r");
+    scriptfile = PyFile_FromString(cf_get_maps_directory("python/events/python_init.py", path, sizeof(path)), "r");
     if (scriptfile != NULL) {
-        PyRun_SimpleFile(PyFile_AsFile(scriptfile), cf_get_maps_directory("python/events/python_init.py"));
+        PyRun_SimpleFile(PyFile_AsFile(scriptfile), cf_get_maps_directory("python/events/python_init.py", path, sizeof(path)));
         Py_DECREF(scriptfile);
     }
 
@@ -1217,8 +1288,9 @@ CF_PLUGIN void* globalEventListener(int* type, ...)
     context->who         = NULL;
     context->activator   = NULL;
     context->third       = NULL;
+    context->event       = NULL;
     rv = context->returnvalue = 0;
-    snprintf(context->script, sizeof(context->script), "%s", cf_get_maps_directory("python/events/python_event.py"));
+    cf_get_maps_directory("python/events/python_event.py", context->script, sizeof(context->script));
     strcpy(context->options, "");
     switch(context->event_code) {
         case EVENT_CRASH:
@@ -1337,13 +1409,13 @@ CF_PLUGIN void* globalEventListener(int* type, ...)
 
     context = popContext();
     rv = context->returnvalue;
-    
+
     /* Invalidate freed map wrapper. */
     if (context->event_code == EVENT_MAPUNLOAD)
-        Handle_Map_Unload_Hook(context->who);
-    
+        Handle_Map_Unload_Hook((Crossfire_Map*)context->who);
+
     freeContext(context);
-    
+
     return &rv;
 }
 
@@ -1352,8 +1424,8 @@ CF_PLUGIN void* eventListener(int* type, ...)
     static int rv = 0;
     va_list args;
     char* buf;
-    char* script_tmp;
     CFPContext* context;
+    object* event;
 
     rv = 0;
 
@@ -1364,22 +1436,23 @@ CF_PLUGIN void* eventListener(int* type, ...)
     va_start(args, type);
 
     context->who         = Crossfire_Object_wrap(va_arg(args, object*));
-    context->event_code  = va_arg(args, int);
     context->activator   = Crossfire_Object_wrap(va_arg(args, object*));
     context->third       = Crossfire_Object_wrap(va_arg(args, object*));
     buf = va_arg(args, char*);
     if (buf != NULL)
         snprintf(context->message, sizeof(context->message), "%s", buf);
     context->fix         = va_arg(args, int);
-    script_tmp = va_arg(args, char*);
-    snprintf(context->script, sizeof(context->script), "%s", cf_get_maps_directory(script_tmp));
-    snprintf(context->options, sizeof(context->options), "%s", va_arg(args, char*));
+    event = va_arg(args, object*);
+    context->event_code  = event->subtype;
+    context->event       = Crossfire_Object_wrap(event);
+    cf_get_maps_directory(event->slaying, context->script, sizeof(context->script));
+    snprintf(context->options, sizeof(context->options), "%s", event->name);
     context->returnvalue = 0;
 
     va_end(args);
-    
-    if ((context->event_code == EVENT_DESTROY) && !strcmp(script_tmp, "cfpython_auto_hook")) {
-        Handle_Destroy_Hook(context->who);
+
+    if ((context->event_code == EVENT_DESTROY) && !strcmp(event->slaying, "cfpython_auto_hook")) {
+        Handle_Destroy_Hook((Crossfire_Object*)context->who);
         freeContext(context);
         return &rv;
     }
