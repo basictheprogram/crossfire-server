@@ -17,6 +17,9 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+common/region.c: don't crash if no regions file found.
+Nicolas Weeger 2007-04-15
+
 server/swap.c: fix crash with map reset (parameter is map, not path).
 Nicolas Weeger 2007-04-15
 
