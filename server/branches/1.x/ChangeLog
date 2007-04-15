@@ -17,6 +17,9 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+server/swap.c: fix crash with map reset (parameter is map, not path).
+Nicolas Weeger 2007-04-15
+
 Merge all plugin changes from trunk.
 This includes defining sstring (can be useful anyway), and generate_random_map
  definition.
