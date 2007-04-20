@@ -403,7 +403,7 @@ int apply_potion(object *op, object *tmp)
 	    return 0;
 	}
 	depl = present_arch_in_ob(at, op);
-	if (depl!=NULL) {
+	if (depl!=NULL && (tmp->level != 0 && tmp->level >= op->level)) {
 	    for (i = 0; i < NUM_STATS; i++)
 		if (get_attr_value(&depl->stats, i)) {
 		    new_draw_info(NDI_UNIQUE,0,op, restore_msg[i]);
