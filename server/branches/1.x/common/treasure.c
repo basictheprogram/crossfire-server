@@ -1255,6 +1255,7 @@ void init_artifacts(void) {
     linked_char *tmp;
     int value, comp;
     artifactlist *al;
+    archetype dummy_archetype;
 
     if (has_been_inited) return;
     else has_been_inited = 1;
@@ -1281,43 +1282,45 @@ void init_artifacts(void) {
 		if (art==NULL) {
 		  art=get_empty_artifact();
 		  nrofartifacts++;
-        }
-	    cp = strchr(cp,' ') + 1;
-	    if (!strcmp(cp,"all")) continue;
+		}
+		cp = strchr(cp,' ') + 1;
+		if (!strcmp(cp,"all")) continue;
+                  do {
+		    nrofallowedstr++;
+		    if ((next=strchr(cp, ','))!=NULL)
+		       *(next++) = '\0';
+		    tmp = (linked_char*) malloc(sizeof(linked_char));
+		    tmp->name = add_string(cp);
+		    tmp->next = art->allowed;
+		    art->allowed = tmp;
+		  } while ((cp=next)!=NULL);
 
-	    do {
-		nrofallowedstr++;
-		if ((next=strchr(cp, ','))!=NULL)
-		    *(next++) = '\0';
-		tmp = (linked_char*) malloc(sizeof(linked_char));
-		tmp->name = add_string(cp);
-		tmp->next = art->allowed;
-		art->allowed = tmp;
-		} while ((cp=next)!=NULL);
-	}
-	else if (sscanf(cp, "chance %d", &value))
-	    art->chance = (uint16) value;
-	else if (sscanf(cp, "difficulty %d", &value))
-	    art->difficulty = (uint8) value;
-	else if (!strncmp(cp, "Object",6)) {
-	    art->item = (object *) calloc(1, sizeof(object));
-	    reset_object(art->item);
-	    if (!load_object(fp, art->item,LO_LINEMODE,0))
-		LOG(llevError,"Init_Artifacts: Could not load object.\n");
-	    art->item->name = add_string((strchr(cp, ' ')+1));
-	    al=find_artifactlist(art->item->type);
-	    if (al==NULL) {
-		al = get_empty_artifactlist();
-		al->type = art->item->type;
-		al->next = first_artifactlist;
-		first_artifactlist = al;
-	    }
-	    art->next = al->items;
-	    al->items = art;
-		art = NULL;
-	}
-	else
-	    LOG(llevError,"Unknown input in artifact file: %s\n", buf);
+        }
+        else if (sscanf(cp, "chance %d", &value))
+            art->chance = (uint16) value;
+        else if (sscanf(cp, "difficulty %d", &value))
+            art->difficulty = (uint8) value;
+        else if (!strncmp(cp, "Object",6)) {
+            art->item = (object *) calloc(1, sizeof(object));
+            reset_object(art->item);
+            art->item->arch = &dummy_archetype;
+            if (!load_object(fp, art->item,LO_LINEMODE,0))
+                LOG(llevError,"Init_Artifacts: Could not load object.\n");
+            art->item->arch = NULL;
+            art->item->name = add_string((strchr(cp, ' ')+1));
+            al=find_artifactlist(art->item->type);
+            if (al==NULL) {
+                al = get_empty_artifactlist();
+                al->type = art->item->type;
+                al->next = first_artifactlist;
+                first_artifactlist = al;
+            }
+            art->next = al->items;
+            al->items = art;
+            art = NULL;
+        }
+        else
+            LOG(llevError,"Unknown input in artifact file: %s\n", buf);
     }
 
     close_and_delete(fp, comp);
@@ -1505,6 +1508,17 @@ void add_abilities(object *op, object *change) {
 	if (op->msg)
 	    free_string(op->msg);
 	op->msg = add_refcount(change->msg);
+    }
+
+    if (change->inv) {
+        object* inv = change->inv;
+        object* copy;
+        while (inv) {
+            copy = get_object();
+            copy_object(inv, copy);
+            insert_ob_in_ob(copy, op);
+            inv = inv->below;
+        }
     }
 }
 

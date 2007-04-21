@@ -472,16 +472,16 @@ static void load_archetypes(void) {
  */
 
 object *arch_to_object(archetype *at) {
-  object *op;
-  if(at==NULL) {
-    if(warn_archetypes)
-      LOG(llevError,"Couldn't find archetype.\n");
-    return NULL;
-  }
-  op=get_object();
-  copy_object(&at->clone,op);
-  op->arch=at;
-  return op;
+    object *op;
+    if(at==NULL) {
+        if(warn_archetypes)
+            LOG(llevError,"Couldn't find archetype.\n");
+        return NULL;
+    }
+    op=get_object();
+    copy_object_with_inv(&at->clone,op);
+    op->arch=at;
+    return op;
 }
 
 /*
