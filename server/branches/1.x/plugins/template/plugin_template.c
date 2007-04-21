@@ -227,6 +227,11 @@ void* globalEventListener(int* type, ...)
                 strcpy(context->message,buf);
             break;
         case EVENT_TELL:
+            context->activator = va_arg(args, object*);
+            buf = va_arg(args, char*);
+            if (buf !=0)
+                strcpy(context->message,buf);
+            context->third = va_arg(args, object*);
             break;
     }
     va_end(args);

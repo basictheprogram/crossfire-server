@@ -173,6 +173,7 @@ static int do_tell(object* op, char* params, int adjust_listen) {
         }
 
 	    new_draw_info(NDI_UNIQUE | NDI_ORANGE, 0, pl->ob, buf);
+            execute_global_event(EVENT_TELL, op, msg, pl->ob);
 
         if (adjust_listen)
             pl->listening = original_listen;
