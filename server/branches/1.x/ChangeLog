@@ -17,6 +17,9 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+server/apply.c: remove legacy spellbook handling.
+Nicolas Weeger 2007-04-22
+
 Second and last part of feature request #1543553: Inventories in artifacts/archetypes.
 It's now possible to put "arch" in archetypes, they'll be correctly handled.
 Like any other object, you can customize it.
