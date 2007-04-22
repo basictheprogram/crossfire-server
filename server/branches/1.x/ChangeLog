@@ -17,6 +17,13 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+server/server.c:  Add some debug to see if objects are on swapped out
+  maps in process_objects()
+socket/loop.c: Hopeful fix for old bug - can be rare cases where
+  next player gets freed, so code tries to process garbage player
+  and crashes.
+MSW 2007-04-21
+
 lib/artifacts: fix bug #1673804: Items "of Occidental Mages" use obsolete
 event_xxx fields.
 Nicolas Weeger 2007-04-21
