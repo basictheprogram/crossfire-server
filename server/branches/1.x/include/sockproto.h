@@ -53,6 +53,7 @@ void SockList_AddChar(SockList *sl, char c);
 void SockList_AddShort(SockList *sl, uint16 data);
 void SockList_AddInt(SockList *sl, uint32 data);
 void SockList_AddInt64(SockList *sl, uint64 data);
+void SockList_AddString(SockList *sl, const char* data);
 int GetInt_String(const unsigned char *data);
 short GetShort_String(const unsigned char *data);
 int SockList_ReadPacket(int fd, SockList *sl, int len);
@@ -96,3 +97,4 @@ void send_tick(player *pl);
 /* sounds.c */
 void play_sound_player_only(player *pl, short soundnum, sint8 x, sint8 y);
 void play_sound_map(const mapstruct *map, int x, int y, short sound_num);
+void send_background_music(player* pl, const char* music);
