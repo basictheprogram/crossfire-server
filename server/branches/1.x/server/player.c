@@ -1108,7 +1108,7 @@ int key_confirm_quit(object *op, char key)
 		delete_map(mp);
 	}
 	
-	delete_character(op->name, 1);
+	delete_character(op->name);
     }
     play_again(op);
     return 1;
@@ -2932,13 +2932,11 @@ void kill_player(object *op)
 	op->direction=0;
 
 	if(!QUERY_FLAG(op,FLAG_WAS_WIZ)&&op->stats.exp) {
-	    delete_character(op->name,0);
 	    if (settings.resurrection == TRUE) {
 		/* save playerfile sans equipment when player dies
 		 * -then save it as player.pl.dead so that future resurrection
 		 * -type spells will work on them nicely
 		 */
-		delete_character(op->name,0);
 		op->stats.hp = op->stats.maxhp;
 		op->stats.food = 999;
 
@@ -2954,7 +2952,7 @@ void kill_player(object *op)
 		/* please see resurrection.c: peterm */
 		dead_player(op);
 	    } else {
-		delete_character(op->name,1);
+		delete_character(op->name);
 	    }
 	}
 	play_again(op);
