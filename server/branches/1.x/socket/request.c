@@ -246,12 +246,14 @@ void set_up_cmd(char *buf, int len, socket_struct *ns)
 	} else if (!strcmp(cmd,"bot")) {
 		ns->is_bot = ( atoi(param) != 0 ? 1 : 0 );
 		safe_strcat(cmdback, ns->is_bot ? "1" : "0", &slen, HUGE_BUF);
-	} else {
-	    /* Didn't get a setup command we understood -
-	     * report a failure to the client.
-	     */
-	    safe_strcat(cmdback, "FALSE", &slen, HUGE_BUF);
-	}
+        } else if (!strcmp(cmd,"inscribe")) {
+            safe_strcat(cmdback, atoi(param) != 0 ? "1" : "0", &slen, HUGE_BUF);
+        } else {
+                /* Didn't get a setup command we understood -
+                 * report a failure to the client.
+                 */
+            safe_strcat(cmdback, "FALSE", &slen, HUGE_BUF);
+        }
     } /* for processing all the setup commands */
     LOG(llevInfo,"SendBack SetupCmd:: %s\n", cmdback);
     Write_String_To_Socket(ns, cmdback, strlen(cmdback));
