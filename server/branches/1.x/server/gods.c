@@ -1184,7 +1184,7 @@ int tailor_god_spell(object *spellop, object *caster) {
              spellop->slaying = NULL;
          }
          if(!caster_is_spell)
-            spellop->slaying = add_string(god->slaying);
+            spellop->slaying = god->slaying ? add_string(god->slaying) : NULL;
 	 else if(caster->slaying)
 	    spellop->slaying = add_string(caster->slaying);
     }
