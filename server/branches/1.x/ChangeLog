@@ -17,6 +17,10 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+server/disease.c: In move_symptom() fix possible buffer overflow when creating
+   symptom names.
+Andreas Kirschbaum 2007-04-25
+
 socket/init.c: Change free calls with FREE_AND_CLEAR - were getting double
    frees - since pointer wasn't reset, was no way for program to know not
    to have the data cleared again.
