@@ -17,6 +17,11 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+socket/init.c: Change free calls with FREE_AND_CLEAR - were getting double
+   frees - since pointer wasn't reset, was no way for program to know not
+   to have the data cleared again.
+MSW 2007-04-24
+
 server/spell_effect.c: In polymorph_item() fix possible access to freed
    object.
 common/los.c: In update_los() fix array out-of-bounds access for clients using

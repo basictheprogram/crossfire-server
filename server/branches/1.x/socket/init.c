@@ -321,13 +321,15 @@ void free_newsocket(socket_struct *ns)
 #endif
     }
     if (ns->stats.range)
-	free(ns->stats.range);
+	FREE_AND_CLEAR(ns->stats.range);
     if (ns->stats.title)
-        free(ns->stats.title);
+        FREE_AND_CLEAR(ns->stats.title);
     if (ns->comment)
-	free(ns->comment);
-    free(ns->host);
-    free(ns->inbuf.buf);
+	FREE_AND_CLEAR(ns->comment);
+    if (ns->host)
+	FREE_AND_CLEAR(ns->host);
+    if (ns->inbuf.buf)
+	FREE_AND_CLEAR(ns->inbuf.buf);
 }
 
 /** Sends the 'goodbye' command to the player, and closes connection. */
