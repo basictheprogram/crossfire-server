@@ -252,7 +252,7 @@ void spring_trap(object *trap,object *victim)
 
     trap->stats.hp--;  /*decrement detcount */
 
-    if(victim && victim->type==PLAYER) 
+    if(victim && victim->type==PLAYER && trap->msg != NULL) 
 	new_draw_info(NDI_UNIQUE, 0,victim,trap->msg);
 
     /*  Flash an image of the trap on the map so the poor sod
