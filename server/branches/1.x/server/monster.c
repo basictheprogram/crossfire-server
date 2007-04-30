@@ -1712,7 +1712,7 @@ static int do_talk_npc(object* op, object* npc, object* override, const char* tx
 }
 
 void npc_say(object *npc, char *cp) {
-    char buf[MAX_BUF];
+    char buf[HUGE_BUF];
     snprintf(buf, sizeof(buf), "%s says: %s", query_name(npc), cp);
     new_info_map(NDI_NAVY|NDI_UNIQUE, npc->map, buf);
 }
