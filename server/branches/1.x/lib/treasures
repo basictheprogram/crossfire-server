@@ -2838,13 +2838,31 @@ treasure drake
     chance 30
   end
 treasure chinese
-  list big_dragon_parts
-    chance 50
+  arch dragon_steak
+      nrof 3
+      chance 45
   more
-#  arch dragon_steak
-#  nrof 2
-#  chance 90
-#  more
+  arch green_dragon_scale
+      chance 40
+      nrof 2
+  more
+  arch dragonclaw
+      chance 15
+      nrof 12
+  more
+  arch dragon_wing
+      chance 15
+      nrof 2
+  more
+  arch dragon_eye
+      chance 15
+  more
+  arch heart
+      chance 5
+  more
+  arch brain
+      chance 1
+  more
   arch abil_icestorm
     nrof 3
   more
@@ -3740,7 +3758,7 @@ treasure acdc
   nrof 2
   chance 90
   more
-  arch dragon_scale
+  arch blue_dragon_scale
   more
   arch wand
   more
