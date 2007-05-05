@@ -17,6 +17,14 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Implement feature request #1657735: Server setting for handling 'incorrect' converters.
+New server setting, 'allow_broken_converters', that controls what to do.
+ common/init.c
+ include/global.h
+ lib/settings
+ server/apply.c init.c
+Nicolas Weeger 2007-05-05
+
 Fix some type issues in plugin. Wrap change_abil(). Add set_resist(). Add duration property.
  include/plugin.h sproto.h
  plugins/common/include/plugin_common.h

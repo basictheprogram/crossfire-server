@@ -395,6 +395,8 @@ typedef struct Settings {
     uint8   no_player_stealing;     /* If 1, can not steal from other players */
     uint8   create_home_portals;     /* If 1, can create portals in unique maps (apartments) */
     int     allow_denied_spells_writing; /* If set, players can write spells they can't cast. */
+    int     allow_broken_converters; /**< If set, converters will work even if price of generated item is higher
+                                       * than the price of converted items. */
 } Settings;
 
 extern Settings settings;

@@ -97,6 +97,7 @@ ARMOR_SPEED_LINEAR,
 1, /* no_player_stealing */
 0, /* create_home_portals */
 0, /* allow_denied_spells_writing */
+    0, /* allow_broken_converters */
 };
 
 /** perhaps not the best place for this, but needs to be

@@ -289,3 +289,6 @@ no_player_stealing       TRUE
 # the below with: create_home_portals TRUE
 create_home_portals      FALSE
 
+# If set to TRUE or ON, converters will work even if the price of generated item is higher
+# than the price of converted items
+allow_broken_converters TRUE
