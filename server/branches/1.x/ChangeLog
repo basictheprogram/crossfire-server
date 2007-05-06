@@ -17,6 +17,9 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+doc/Developers/objects: Mark 'flying' attribute as obsolete.
+Andreas Kirschbaum 2007-05-06
+
 Apply patch #1713563: Reopen log file on SIGHUP, courtesy Kari Pahula.
  common/logger.c
  include/global.h
