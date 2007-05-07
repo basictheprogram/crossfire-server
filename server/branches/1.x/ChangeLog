@@ -17,6 +17,10 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+server/plugins.c: fix plugin unloading which didn't call the closePlugin function.
+server/c_wiz.c: document.
+Nicolas Weeger 2007-05-07
+
 doc/Developers/objects: Mark 'flying' attribute as obsolete.
 Andreas Kirschbaum 2007-05-06
 
