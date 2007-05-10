@@ -748,6 +748,9 @@ void show_skills(object *op, const char* search) {
 	"You can handle %d weapon improvements.",op->level/5+5);
 
     cp = determine_god(op);
+    if (strcmp(cp, "none") == 0)
+        cp = NULL;
+
     new_draw_info_format(NDI_UNIQUE, 0, op,
 	"You worship %s.", cp?cp:"no god at current time");
 
