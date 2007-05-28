@@ -17,6 +17,9 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+lib/formulae: fix bug #1726561: formulae for potion_heal needs supreme potion of life.
+Nicolas Weeger 2007-05-28
+
 server/apply.c: food/drink can't be eaten if no_pick is set.
 Nicolas Weeger 2007-05-26
 
