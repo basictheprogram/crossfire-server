@@ -98,6 +98,8 @@ ARMOR_SPEED_LINEAR,
 0, /* create_home_portals */
 0, /* allow_denied_spells_writing */
     0, /* allow_broken_converters */
+    0, /* log_timestamp */
+    NULL, /* log_timestamp_format */
 };
 
 /** perhaps not the best place for this, but needs to be

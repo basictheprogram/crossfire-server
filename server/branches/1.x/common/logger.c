@@ -52,45 +52,71 @@ void LOG (LogLevel logLevel, const char *format, ...)
 		     * need to be put in this one.
 		     */
 
-  va_list ap;
-  va_start(ap, format);
+    char time_buf[2048];
 
-  buf[0] = '\0';
-  if (logLevel <= settings.debug)
-  {
-    vsprintf(buf, format, ap);
-#ifdef WIN32 /* ---win32 change log handling for win32 */
-	fputs(loglevel_names[logLevel], logfile);    /* wrote to file or stdout */
-  fputs(buf, logfile);    /* wrote to file or stdout */
+    va_list ap;
+    va_start(ap, format);
+
+    buf[0] = '\0';
+    if (logLevel <= settings.debug) {
+        time_buf[0] = '\0';
+        if (settings.log_timestamp == TRUE) {
+            struct tm *time_tmp;
+            time_t now = time((time_t *)NULL);
+
+            time_tmp = localtime(&now);
+            if (time_tmp != NULL) {
+                if (strftime(time_buf, sizeof(time_buf), settings.log_timestamp_format, time_tmp) == 0) {
+                    time_buf[0] = '\0';
+                }
+            }
+        }
+
+        vsprintf(buf, format, ap);
+#ifdef WIN32
+        if (time_buf[0] != 0) {
+            fputs(time_buf, logfile);
+            fputs(" ", logfile);
+        }
+        fputs(loglevel_names[logLevel], logfile);    /* wrote to file or stdout */
+        fputs(buf, logfile);    /* wrote to file or stdout */
 #ifdef DEBUG				/* if we have a debug version, we want see ALL output */
 		fflush(logfile);    /* so flush this! */
 #endif
-  if(logfile != stderr){   /* if was it a logfile wrote it to screen too */ 
-    fputs(loglevel_names[logLevel], stderr); 
-    fputs(buf, stderr); 
-  }
-#else
-  if (reopen_logfile) {
-    reopen_logfile = 0;
-    if (fclose(logfile) != 0) {
-      /* stderr has been closed if -detach was used, but it's better
-       * to try to report about this anyway. */
-      perror("tried to close log file after SIGHUP in logger.c:LOG()");
+        if(logfile != stderr) {   /* if was it a logfile wrote it to screen too */ 
+            fputs(loglevel_names[logLevel], stderr); 
+            fputs(buf, stderr); 
+            if (time_buf[0] != 0) {
+                fputs(time_buf, strerr);
+                fputs(" ", strerr);
+            }
+        }
+#else /* not WIN32 */
+    if (reopen_logfile) {
+        reopen_logfile = 0;
+        if (fclose(logfile) != 0) {
+            /* stderr has been closed if -detach was used, but it's better
+             * to try to report about this anyway. */
+            perror("tried to close log file after SIGHUP in logger.c:LOG()");
+        }
+        if ((logfile = fopen(settings.logfilename, "a")) == NULL) {
+            /* There's likely to be something very wrong with the OS anyway
+             * if reopening fails. */
+            perror("tried to open log file after SIGHUP in logger.c:LOG()");
+            emergency_save(0);
+            clean_tmp_files();
+            exit(1);
+        }
+        setvbuf(logfile, NULL, _IOLBF, 0);
+        LOG(llevInfo,"logfile reopened\n");
     }
-    if ((logfile = fopen(settings.logfilename, "a")) == NULL) {
-      /* There's likely to be something very wrong with the OS anyway
-       * if reopening fails. */
-      perror("tried to open log file after SIGHUP in logger.c:LOG()");
-      emergency_save(0);
-      clean_tmp_files();
-      exit(1);
-    }
-    setvbuf(logfile, NULL, _IOLBF, 0);
-    LOG(llevInfo,"logfile reopened\n");
-  }
 
-  fputs(loglevel_names[logLevel], logfile);
-  fputs(buf, logfile);
+    if (time_buf[0] != 0) {
+        fputs(time_buf, logfile);
+        fputs(" ", logfile);
+    }
+    fputs(loglevel_names[logLevel], logfile);
+    fputs(buf, logfile);
 #endif
   }
   if (!exiting && !trying_emergency_save &&
