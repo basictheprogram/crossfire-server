@@ -17,6 +17,10 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Fix bug #1730874: +dam on bracers not working.
+ common/living.c: bracers can give damage too.
+Nicolas Weeger 2007-06-09
+
 common/utils.c: don't try to decay a non head object, this leads to abort() from remove_ob().
 Nicolas Weeger 2007-06-04
 

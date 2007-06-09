@@ -1107,6 +1107,8 @@ void fix_player(object *op) {
 			else /* To nullify the below effect */
 			    ac+=tmp->stats.ac+tmp->magic;
 		    }
+		    if(tmp->stats.dam && tmp->type == BRACERS)
+                        op->stats.dam+=(tmp->stats.dam+tmp->magic);
 		    if(tmp->stats.wc) wc-=(tmp->stats.wc+tmp->magic);
 		    if(tmp->stats.ac) ac-=(tmp->stats.ac+tmp->magic);
 		    if(ARMOUR_SPEED(tmp)&&ARMOUR_SPEED(tmp)/10.0<max)
