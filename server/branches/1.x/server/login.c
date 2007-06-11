@@ -732,7 +732,8 @@ void check_login(object *op) {
     if ( ! legal_range (op, op->contr->shoottype))
         op->contr->shoottype = range_none;
     
-    fix_player (op);
+    esrv_add_spells(op->contr, NULL);
+    fix_player(op);
     
     /* if it's a dragon player, set the correct title here */
     if (is_dragon_pl(op) && op->inv != NULL) {
@@ -774,7 +775,6 @@ void check_login(object *op) {
      */
     esrv_new_player(op->contr,op->weight+op->carrying);
     esrv_send_inventory(op, op);
-    esrv_add_spells(op->contr, NULL);
 
     CLEAR_FLAG(op, FLAG_FRIENDLY);
 
