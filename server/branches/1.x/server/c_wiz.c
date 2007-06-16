@@ -1297,6 +1297,7 @@ int command_abil(object *op, char *params) {
 int command_reset (object *op, char *params) {
     mapstruct *m;
     object *dummy = NULL, *tmp = NULL;
+    const char* path;
 
     if (params == NULL) {
         new_draw_info(NDI_UNIQUE, 0, op, "Reset what map [name]?");
@@ -1304,8 +1305,10 @@ int command_reset (object *op, char *params) {
     }
 
     if (strcmp(params, ".") == 0)
-        params = op->map->path;
-    m = has_been_loaded(params);
+        path = op->map->path;
+    else
+        path = path_combine_and_normalize(op->map->path, params);
+    m = has_been_loaded(path);
     if (m == NULL) {
         new_draw_info(NDI_UNIQUE, 0, op, "No such map.");
         return 1;
