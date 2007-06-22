@@ -1519,13 +1519,13 @@ static int kill_object(object *op,int dam, object *hitter, int type)
 
     /* Pet (or spell) killed something. */
     if(owner != hitter ) {
-	(void) sprintf(buf,"%s killed %s with %s%s%s.",owner->name,
-	       query_name(op),query_name(hitter), battleg? " (duel)":"", pk? " (pk)":"");
+	(void) sprintf(buf,"%s killed %s with %s%s.",owner->name,
+	       query_name(op),query_name(hitter), battleg? " (duel)": (pk? " (pk)":""));
     }
     else {
-	(void) sprintf(buf,"%s killed %s%s%s%s.",hitter->name,op->name,
+	(void) sprintf(buf,"%s killed %s%s%s.",hitter->name,op->name,
 	       (QUERY_FLAG(hitter, FLAG_MONSTER)) || hitter->type == PLAYER ?
-	       " in hand to hand combat":"", battleg? " (duel)":"", pk? " (pk)":"");
+	       " in hand to hand combat":"", battleg? " (duel)": (pk? " (pk)":""));
     }
     /* These may have been set in the player code section above */
     if (!skop) skop = hitter->chosen_skill;
