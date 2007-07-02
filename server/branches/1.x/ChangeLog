@@ -17,6 +17,9 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+lib/help/skills, lib/Makefile.am: Add help for skills command.
+Andreas Kirschbaum 2007-07-02
+
 Change behavior of shop mats: do not fail if the destination shop mat is
 blocked. This prevents players from being trapped inside shops if the outside
 shop mat has been blocked with earthwalls.
