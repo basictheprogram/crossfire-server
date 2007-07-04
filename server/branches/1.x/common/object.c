@@ -1388,9 +1388,12 @@ void remove_ob(object *op) {
   /* If we get here, we are removing it from a map */
   if (op->map == NULL) return;
 
-  x = op->x;
-  y = op->y;
-  m = get_map_from_coord(op->map, &x, &y);
+    if (op->contr != NULL && !op->contr->hidden)
+        op->map->players--;
+
+    x = op->x;
+    y = op->y;
+    m = get_map_from_coord(op->map, &x, &y);
 
   if (!m) {
     LOG(llevError,"remove_ob called when object was on map but appears to not be within valid coordinates? %s (%d,%d)\n",
@@ -1531,11 +1534,26 @@ object *insert_ob_in_map_at(object *op, mapstruct *m, object *originator, int fl
  * The second argument specifies the map, and the x and y variables
  * in the object about to be inserted specifies the position.
  *
+<<<<<<< .courant
  * originator: Player, monster or other object that caused 'op' to be inserted
  * into 'map'.  May be NULL.
  *
  * flag is a bitmask about special things to do (or not do) when this
  * function is called.  see the object.h file for the INS_ values.
+=======
+ * It will update player count if the op is a player.
+ *
+ * @param op
+ * object to insert. Must be removed. Its coordinates must be valid for the map.
+ * @param m
+ * map to insert into. Must not be NULL.
+ * @param originator
+ * player, monster or other object that caused 'op' to be inserted
+ * into 'm'.  May be NULL.
+ * @param flag
+ * bitmask about special things to do (or not do) when this
+ * function is called. See the object.h file for the INS_ values.
+>>>>>>> .fusion-droit.r6742
  * Passing 0 for flag gives proper default values, so flag really only needs
  * to be set if special handling is needed.
  *
@@ -1753,6 +1771,8 @@ object *insert_ob_in_map (object *op, mapstruct *m, object *originator, int flag
     /* updates flags (blocked, alive, no magic, etc) for this map space */
     update_object(op,UP_OBJ_INSERT);
 
+    if (op->contr && !op->contr->hidden)
+        op->map->players++;
 
     /* Don't know if moving this to the end will break anything.  However,
      * we want to have update_look set above before calling this.

@@ -1089,7 +1089,7 @@ int key_confirm_quit(object *op, char key)
     /* Lauwenmark : Here we handle the REMOVE global event */
     execute_global_event(EVENT_REMOVE, op);
     terminate_all_pets(op);
-    leave_map(op);
+    remove_ob(op);
     op->direction=0;
     new_draw_info_format(NDI_UNIQUE | NDI_ALL, 5, NULL,
 	"%s quits the game.",op->name);
