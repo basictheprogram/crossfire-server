@@ -1533,14 +1533,6 @@ object *insert_ob_in_map_at(object *op, mapstruct *m, object *originator, int fl
  * which represents what is on a map.
  * The second argument specifies the map, and the x and y variables
  * in the object about to be inserted specifies the position.
- *
-<<<<<<< .courant
- * originator: Player, monster or other object that caused 'op' to be inserted
- * into 'map'.  May be NULL.
- *
- * flag is a bitmask about special things to do (or not do) when this
- * function is called.  see the object.h file for the INS_ values.
-=======
  * It will update player count if the op is a player.
  *
  * @param op
@@ -1553,9 +1545,6 @@ object *insert_ob_in_map_at(object *op, mapstruct *m, object *originator, int fl
  * @param flag
  * bitmask about special things to do (or not do) when this
  * function is called. See the object.h file for the INS_ values.
->>>>>>> .fusion-droit.r6742
- * Passing 0 for flag gives proper default values, so flag really only needs
- * to be set if special handling is needed.
  *
  * Return value:
  *   new object if 'op' was merged with other object
