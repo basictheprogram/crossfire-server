@@ -1819,7 +1819,7 @@ static void inline add_face_layer(int low_layer, int high_layer, object *ob, obj
  * through, etc)
  */
 void update_position (mapstruct *m, int x, int y) {
-    object *tmp;
+    object *tmp, *player=NULL;
     uint8 flags = 0, oldflags, light=0;
     object *layers[MAP_LAYERS];
 
@@ -1839,6 +1839,8 @@ void update_position (mapstruct *m, int x, int y) {
         /* DMs just don't do anything when hidden, including no light. */
         if (QUERY_FLAG(tmp, FLAG_WIZ) && tmp->contr->hidden)
             continue;
+
+	if (tmp->type == PLAYER) player=tmp;
 
         /* This could be made additive I guess (two lights better than
          * one).  But if so, it shouldn't be a simple additive - 2
@@ -1899,6 +1901,8 @@ void update_position (mapstruct *m, int x, int y) {
 	    flags |= P_BLOCKSVIEW;
     } /* for stack of objects */
 
+    if (player) flags |= P_PLAYER;
+
     /* we don't want to rely on this function to have accurate flags, but
      * since we're already doing the work, we calculate them here.
      * if they don't match, logic is broken someplace.
@@ -1909,6 +1913,7 @@ void update_position (mapstruct *m, int x, int y) {
 	    m->path, x, y,
             (oldflags & ~P_NEED_UPDATE), flags);
     }
+
     SET_MAP_FLAGS(m, x, y, flags);
     SET_MAP_MOVE_BLOCK(m, x, y, move_block & ~move_allow);
     SET_MAP_MOVE_ON(m, x, y, move_on);
@@ -1916,8 +1921,14 @@ void update_position (mapstruct *m, int x, int y) {
     SET_MAP_MOVE_SLOW(m, x, y, move_slow);
     SET_MAP_LIGHT(m,x,y,light);
 
+    /* Note that player may be NULL here, which is fine - if no player, need
+     * to clear any value that may be set.
+     */
+    SET_MAP_PLAYER(m, x, y, player);
+
     /* Note it is intentional we copy everything, including NULL values. */
     memcpy(GET_MAP_FACE_OBJS(m, x, y), layers, sizeof(object*) * MAP_LAYERS);
+
 }
 
 

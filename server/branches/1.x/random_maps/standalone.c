@@ -241,6 +241,10 @@ void esrv_update_spells(player *pl)
     {
     }
 
+void esrv_update_item(int flags, object *pl, object *op)
+{
+}
+
 void monster_check_apply( object* ob, object* obt )
     {
     }
@@ -258,3 +262,4 @@ int execute_global_event(int eventcode, ...)
     {
     return 0;
     }
+
