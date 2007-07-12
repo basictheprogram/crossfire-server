@@ -1627,6 +1627,16 @@ object *insert_ob_in_map (object *op, mapstruct *m, object *originator, int flag
 	    more->ox = more->x;
 	    more->oy = more->y;
 	    more->map = get_map_from_coord(m, &more->x, &more->y);
+
+	    /* 2007-07-11 - Saw core dump on metalforge which I think may be caused
+	     * by this, so put in check.  The caller (summon_object) seems
+	     * to be doing the correct things regarding calling ob_blocked,
+	     * so this may not be the cause, but putting this check in
+	     * will help find it - Mark Wedel
+	     */
+	    if (!more->map) {
+		LOG (llevError, "BUG: insert_ob_in_map(): get_map_from_coord returned null map\n");
+	    }
 	} else if (!more->map) {
 	    /* For backwards compatibility - when not dealing with tiled maps,
 	     * more->map should always point to the parent.

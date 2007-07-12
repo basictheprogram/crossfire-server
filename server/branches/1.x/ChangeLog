@@ -17,6 +17,13 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+lib/Makefile.in: Rebuilt
+server/skills.c: Fix crash - using incorrect map pointer in call
+  to get_map_ob
+common/object.c: Add some debugging to maybe help track down a crash
+  on metalforge.
+MSW 2007-07-11
+
 Tentative fix for bug #1746208: Critical crash with 'printlos'.
  common/los.c: use safe string functions. Use 0/100 for view instead of 0-100.
 Nicolas Weeger 2007-07-11

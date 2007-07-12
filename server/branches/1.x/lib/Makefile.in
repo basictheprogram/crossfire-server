@@ -251,16 +251,17 @@ dist_help_DATA = help/apply help/applymode \
 	help/cast help/drop help/dropall \
 	help/golem help/invoke \
 	help/keys help/killpets \
-	help/listen \
+	help/listen help/maps \
 	help/mark help/melee help/mode \
 	help/motd help/mouse help/move \
 	help/news help/output \
 	help/output-count help/output-sync \
-	help/party help/peaceful \
+	help/party help/party_rejoin help/peaceful \
 	help/petmode help/pickup help/quests \
 	help/quit help/range help/rename \
 	help/rules \
 	help/save help/shout help/showpets \
+	help/skills \
 	help/sort_inventory help/spells \
 	help/statistics help/take help/traps \
 	help/unbind help/usekeys \
