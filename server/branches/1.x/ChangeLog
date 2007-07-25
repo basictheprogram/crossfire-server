@@ -17,6 +17,9 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+server/plugins.c: sanity checks on parameters for usual crashing culprit.
+Nicolas Weeger 2007-07-25
+
 Add support for using png files for html handbook and spoiler - png support
 is common enough in browsers now days that don't need to convert to gif.
 Reduces tool requirements to build documents (as it is a simple copy

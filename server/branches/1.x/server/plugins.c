@@ -3361,6 +3361,20 @@ void* cfapi_object_insert(int* type, ...)
     va_start(args, type);
 
     op = va_arg(args, object*);
+    if (!op) {
+        LOG(llevError, "cfapi_object_insert: called with NULL object!\n");
+        va_end(args);
+        return NULL;
+    }
+    if (QUERY_FLAG(op, FLAG_FREED)) {
+        LOG(llevError, "cfapi_object_insert: called with FREED object!\n");
+        va_end(args);
+        return NULL;
+    }
+    if (!QUERY_FLAG(op, FLAG_REMOVED)) {
+        LOG(llevError, "cfapi_object_insert: called with not removed object %s!\n", op->name);
+        remove_ob(op);
+    }
     itype = va_arg(args, int);
 
     switch (itype) {
@@ -3371,7 +3385,13 @@ void* cfapi_object_insert(int* type, ...)
         x = va_arg(args, int);
         y = va_arg(args, int);
         robj = va_arg(args, object**);
-        *robj = insert_ob_in_map_at(op, map, orig, flag, x, y);
+        if (!map) {
+            LOG(llevError, "cfapi_object_insert (0): called with NULL map, object %s!\n", op->name);
+            free_object(op);
+            *robj = NULL;
+        }
+        else
+            *robj = insert_ob_in_map_at(op, map, orig, flag, x, y);
         *type = CFAPI_POBJECT;
         break;
 
@@ -3380,20 +3400,38 @@ void* cfapi_object_insert(int* type, ...)
         orig = va_arg(args, object*);
         flag = va_arg(args, int);
         robj = va_arg(args, object**);
-        *robj = insert_ob_in_map(op, map, orig, flag);
+        if (!map) {
+            LOG(llevError, "cfapi_object_insert (1): called with NULL map, object %s!\n", op->name);
+            free_object(op);
+            *robj = NULL;
+        }
+        else
+            *robj = insert_ob_in_map(op, map, orig, flag);
         *type = CFAPI_POBJECT;
         break;
 
     case 2:
         arch_string = va_arg(args, char*);
-        replace_insert_ob_in_map(arch_string, op);
+        if (!arch_string) {
+            LOG(llevError, "cfapi_object_insert (2): called with NULL arch_string, object %s!\n", op->name);
+            free_object(op);
+            *robj = NULL;
+        }
+        else
+            replace_insert_ob_in_map(arch_string, op);
         *type = CFAPI_NONE;
         break;
 
     case 3:
         orig = va_arg(args, object*);
         robj = va_arg(args, object**);
-        *robj = insert_ob_in_ob(op, orig);
+        if (!orig) {
+            LOG(llevError, "cfapi_object_insert (3): called with NULL orig, object %s!\n", op->name);
+            free_object(op);
+            *robj = NULL;
+        }
+        else
+            *robj = insert_ob_in_ob(op, orig);
         if (orig->type == PLAYER) {
             esrv_send_item(orig, op);
         }
