@@ -651,7 +651,7 @@ void walk_on_deep_swamp(object *op, object *victim);
 void move_deep_swamp(object *op);
 /* swap.c */
 void read_map_log(void);
-void swap_map(mapstruct *map);
+int swap_map(mapstruct *map);
 void check_active_maps(void);
 void swap_below_max(char *except_level);
 int players_on_map(mapstruct *m, int show_all);

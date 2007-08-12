@@ -295,15 +295,10 @@ int command_overlay_save(object *op, char *params) {
         return 1;
     }
 
-    new_save_map(op->map, 2);
-    // No need to save again the map and reset it. OVerlay saving is non destructive.
-    // new_save_map(op->map, 0);
-    // This fixes bug #1553636 (Crashbug: reset/swaped map after use of "overlay_save")
-    // Ryo 2006-10-22
-    new_draw_info(NDI_UNIQUE, 0, op, "Current map has been saved as an"
-        " overlay.");
-
-    //ready_map_name(op->map->path, 0);
+    if (new_save_map(op->map, SAVE_MODE_OVERLAY) < 0)
+    new_draw_info(NDI_UNIQUE, 0, op, "Overlay save error!");
+    else
+    new_draw_info(NDI_UNIQUE, 0, op, "Current map has been saved as an overlay.");
 
     return 1;
 }
@@ -1298,6 +1293,7 @@ int command_reset (object *op, char *params) {
     mapstruct *m;
     object *dummy = NULL, *tmp = NULL;
     const char* path;
+    int res = 0;
 
     if (params == NULL) {
         new_draw_info(NDI_UNIQUE, 0, op, "Reset what map [name]?");
@@ -1357,7 +1353,7 @@ int command_reset (object *op, char *params) {
             op->map = NULL;
             tmp = op;
         }
-        swap_map(m);
+        res = swap_map(m);
     }
 
     if (m->in_memory == MAP_SWAPPED) {
@@ -1372,7 +1368,9 @@ int command_reset (object *op, char *params) {
             free_object(dummy);
         }
         return 1;
-    } else {
+    }
+
+    if (res < 0 || m->in_memory != MAP_SWAPPED) {
         player *pl;
         int playercount = 0;
 
@@ -1382,8 +1380,10 @@ int command_reset (object *op, char *params) {
             free_object(dummy);
         }
 
-        new_draw_info(NDI_UNIQUE, 0, op,
-            "Reset failed, couldn't swap map, the following players are on it:");
+        if (res < 0)
+            new_draw_info_format(NDI_UNIQUE, 0, op, "Reset failed, error code: %d.", res);
+
+        new_draw_info(NDI_UNIQUE, 0, op, "Reset failed, couldn't swap map, the following players are on it:");
         for (pl = first_player; pl != NULL; pl = pl->next) {
             if (pl->ob->map == m && pl->ob != op) {
                 new_draw_info_format(NDI_UNIQUE, 0, op, "%s", pl->ob->name);

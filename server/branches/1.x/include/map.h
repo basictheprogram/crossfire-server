@@ -111,11 +111,42 @@ extern const char *map_layer_name[MAP_LAYERS];
 #define MAP_STYLE	    0x8
 #define MAP_OVERLAY	    0x10
 
+/**
+ * Flags for save_object() and save_objects().
+ * Can be combined for various effects.
+ */
+#define SAVE_FLAG_SAVE_UNPAID   1   /**< If set, unpaid items will be saved. */
+#define SAVE_FLAG_NO_REMOVE     2   /**< If set, objects are not removed while saving. */
+
+/*
+ * How save_map() should save the map. Can't be combined.
+ */
+#define SAVE_MODE_NORMAL    0   /**< No special handling. */
+#define SAVE_MODE_INPLACE   1   /**< Map is saved from where it was loaded.*/
+#define SAVE_MODE_OVERLAY   2   /**< Map is persisted as an overlay. */
+
+
 /* Values for in_memory below.  Should probably be an enumerations */
 #define MAP_IN_MEMORY 1
 #define MAP_SWAPPED 2
 #define MAP_LOADING 3
 #define MAP_SAVING 4
+
+/**
+ * @defgroup SAVE_ERROR_xxx Save error values
+ * Those values are returned by save_map(), save_object() and save_objects().
+ *
+ * Values under -10 are returned by swap_map() only.
+ */
+/*@{*/
+#define SAVE_ERROR_OK                0   /**< No error. */
+#define SAVE_ERROR_RCREATION        -1  /**< Couldn't create the regular save file. */
+#define SAVE_ERROR_UCREATION        -2  /**< Couldn't create the file for unique objects. */
+#define SAVE_ERROR_WRITE            -3  /**< Write error. */
+#define SAVE_ERROR_NO_PATH          -4  /**< Map had no path set. */
+#define SAVE_ERROR_NOT_IN_MEMORY    -10 /**< Map to swap isn't in memory. */
+#define SAVE_ERROR_PLAYER           -11 /**< Player on map to save. */
+/*@}*/
 
 /* GET_MAP_FLAGS really shouldn't be used very often - get_map_flags should
  * really be used, as it is multi tile aware.  However, there are some cases

@@ -591,9 +591,20 @@ void load_objects (mapstruct *m, FILE *fp, int mapflags) {
  * Modified by MSW 2001-07-01 to do in a single pass - reduces code,
  * and we only save the head of multi part objects - this is needed
  * in order to do map tiling properly.
+ *
+ * @param m
+ * map to save.
+ * @param fp
+ * file where regular objects are saved.
+ * @param fp2
+ * file to save unique objects.
+ * @param flag
+ * combination of @ref SAVE_FLAG_xxx "SAVE_FLAG_xxx" flags.
+ * @return
+ * one of @ref SAVE_ERROR_xxx "SAVE_ERROR_xxx" value.
  */
-void save_objects (mapstruct *m, FILE *fp, FILE *fp2, int flag) {
-    int i, j = 0,unique=0;
+int save_objects (mapstruct *m, FILE *fp, FILE *fp2, int flag) {
+    int i, j = 0,unique=0, res;
     object *op,  *otmp;
     /* first pass - save one-part objects */
     for(i = 0; i < MAP_WIDTH(m); i++)
@@ -613,16 +624,20 @@ void save_objects (mapstruct *m, FILE *fp, FILE *fp2, int flag) {
 		if (op->head || op->owner)
 		    continue;
 
-		if (unique || QUERY_FLAG(op, FLAG_UNIQUE))
-		    save_object( fp2 , op, 3);
-		else
-		    if (flag == 0 ||
-			(flag == 2 && (!QUERY_FLAG(op, FLAG_OBJ_ORIGINAL) &&
-			 !QUERY_FLAG(op, FLAG_UNPAID))))
-		    	save_object(fp, op, 3);
+                if (unique || QUERY_FLAG(op, FLAG_UNIQUE))
+                    res = save_object( fp2 , op, SAVE_FLAG_SAVE_UNPAID | SAVE_FLAG_NO_REMOVE);
+                else
+                    if (flag == 0 ||
+                    (flag == SAVE_FLAG_NO_REMOVE && (!QUERY_FLAG(op, FLAG_OBJ_ORIGINAL) &&
+                    !QUERY_FLAG(op, FLAG_UNPAID))))
+                        res = save_object(fp, op, SAVE_FLAG_SAVE_UNPAID | SAVE_FLAG_NO_REMOVE);
 
-	    } /* for this space */
-	} /* for this j */
+                if (res != 0)
+                    return res;
+            } /* for this space */
+        } /* for this j */
+
+    return 0;
 }
 
 /*
@@ -1222,16 +1237,17 @@ static void load_unique_objects(mapstruct *m) {
  * The temporary filename will be stored in the mapstructure.
  * If the map is unique, we also save to the filename in the map
  * (this should have been updated when first loaded)
+ * @return
+ * one of @ref SAVE_ERROR_xxx "SAVE_ERROR_xxx" values.
  */
-
 int new_save_map(mapstruct *m, int flag) {
     FILE *fp, *fp2;
     char filename[MAX_BUF],buf[MAX_BUF], shop[MAX_BUF];
-    int i;
+    int i, res;
     
     if (flag && !*m->path) {
-	LOG(llevError,"Tried to save map without path.\n");
-	return -1;
+        LOG(llevError,"Tried to save map without path.\n");
+        return SAVE_ERROR_NO_PATH;
     }
     
     if (flag || (m->unique) || (m->template)) {
@@ -1271,8 +1287,8 @@ int new_save_map(mapstruct *m, int flag) {
 	fp = fopen(filename, "w");
 
     if(fp == NULL) {
-	LOG(llevError, "Cannot write %s: %s\n", filename, strerror_local(errno));
-	return -1;
+        LOG(llevError, "Cannot open regular objects file %s: %s\n", filename, strerror_local(errno));
+        return SAVE_ERROR_RCREATION;
     }
     
     /* legacy */
@@ -1327,29 +1343,45 @@ int new_save_map(mapstruct *m, int flag) {
      * player)
      */
     fp2 = fp; /* save unique items into fp2 */
-    if ((flag == 0 || flag == 2) && !m->unique && !m->template) {
-	sprintf (buf,"%s.v00",create_items_path (m->path));
-	if ((fp2 = fopen (buf, "w")) == NULL) {
-	    LOG(llevError, "Can't open unique items file %s\n", buf);
-	}
-    if (flag == 2) {
-        // 2 is non destructive save, so map is still valid.
-	    save_objects(m, fp, fp2, 2);
-        m->in_memory = MAP_IN_MEMORY;
-    }
-	else
-	    save_objects (m, fp, fp2, 0);
-	if (fp2 != NULL) {
-	    if (ftell (fp2) == 0) {
-		fclose (fp2);
-		unlink (buf);
-	    } else {
-		fclose (fp2);
-		chmod (buf, SAVE_MODE);
-	    }
-	}
+    if ((flag == SAVE_MODE_NORMAL || flag == SAVE_MODE_OVERLAY) && !m->unique && !m->template) {
+        snprintf(buf, sizeof(buf), "%s.v00", create_items_path (m->path));
+        if ((fp2 = fopen (buf, "w")) == NULL) {
+            LOG(llevError, "Can't open unique items file %s\n", buf);
+            return SAVE_ERROR_UCREATION;
+        }
+        if (flag == SAVE_MODE_OVERLAY) {
+            /* SO_FLAG_NO_REMOVE is non destructive save, so map is still valid. */
+            res = save_objects(m, fp, fp2, SAVE_FLAG_NO_REMOVE);
+            if (res < 0) {
+                LOG(llevError, "Save error during object save: %d\n", res);
+                return res;
+            }
+            m->in_memory = MAP_IN_MEMORY;
+        }
+        else {
+            res = save_objects (m, fp, fp2, 0);
+            if (res < 0) {
+                LOG(llevError, "Save error during object save: %d\n", res);
+                return res;
+            }
+            free_all_objects(m);
+        }
+        if (fp2 != NULL) {
+            if (ftell (fp2) == 0) {
+                fclose (fp2);
+                unlink (buf);
+            } else {
+                fclose (fp2);
+                chmod (buf, SAVE_MODE);
+            }
+        }
     } else { /* save same file when not playing, like in editor */
-	save_objects(m, fp, fp, 0);
+        res = save_objects(m, fp, fp, 0);
+        if (res < 0) {
+            LOG(llevError, "Save error during object save: %d\n", res);
+            return res;
+        }
+        free_all_objects(m);
     }
 
     if (m->compressed && (m->unique || m->template || flag))
@@ -1357,8 +1389,8 @@ int new_save_map(mapstruct *m, int flag) {
     else
 	fclose(fp);
 
-    chmod (filename, SAVE_MODE);
-    return 0;
+    chmod(filename, SAVE_MODE);
+    return SAVE_ERROR_OK;
 }
 
 
