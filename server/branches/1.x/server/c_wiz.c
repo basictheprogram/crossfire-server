@@ -1381,7 +1381,7 @@ int command_reset (object *op, char *params) {
         }
 
         if (res < 0)
-            new_draw_info_format(NDI_UNIQUE, 0, op, "Reset failed, error code: %d.", res);
+            new_draw_info_format(NDI_UNIQUE | NDI_RED, 0, op, "Reset failed, error code: %d.", res);
 
         new_draw_info(NDI_UNIQUE, 0, op, "Reset failed, couldn't swap map, the following players are on it:");
         for (pl = first_player; pl != NULL; pl = pl->next) {
