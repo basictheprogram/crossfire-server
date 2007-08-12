@@ -197,20 +197,24 @@ static void check_output_buffers(const object *pl, const char *buf)
 void new_draw_info(int flags, int pri, const object *pl, const char *buf)
 {
 
-    if (flags & NDI_ALL) {
-	player	*tmppl;
+    if ((flags & NDI_ALL) || (flags & NDI_ALL_DMS)) {
+        player *tmppl;
 	int i;
 
-	for (tmppl=first_player; tmppl!=NULL; tmppl=tmppl->next)
-		new_draw_info((flags & ~NDI_ALL), pri, tmppl->ob, buf);
+        for (tmppl=first_player; tmppl!=NULL; tmppl=tmppl->next) {
+            if ((flags & NDI_ALL_DMS) && !QUERY_FLAG(tmppl->ob, FLAG_WIZ))
+                continue;
+            new_draw_info((flags & ~NDI_ALL & ~NDI_ALL_DMS), pri, tmppl->ob, buf);
+        }
 
-	for (i=1; i<socket_info.allocated_sockets; i++) {
-	    if (init_sockets[i].status == Ns_Old && init_sockets[i].old_mode != Old_Listen && pri< 10) {
-		cs_write_string(&init_sockets[i], buf, strlen(buf));
-		/* Most messages don't have a newline, so add one */
-		cs_write_string(&init_sockets[i], "\n", 1);
+	if (!flags & NDI_ALL_DMS)
+            for (i=1; i<socket_info.allocated_sockets; i++) {
+	        if (init_sockets[i].status == Ns_Old && init_sockets[i].old_mode != Old_Listen && pri< 10) {
+	            cs_write_string(&init_sockets[i], buf, strlen(buf));
+		    /* Most messages don't have a newline, so add one */
+		    cs_write_string(&init_sockets[i], "\n", 1);
+		}
 	    }
-	}
 
 	return;
     }
