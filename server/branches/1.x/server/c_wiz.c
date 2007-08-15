@@ -419,8 +419,6 @@ int command_generate (object *op, char *params)
             ;
         if (tmp != NULL) {
             tmp = insert_ob_in_ob(tmp, op);
-            if (op->type == PLAYER)
-                esrv_send_item(op, tmp);
         }
     }
 
@@ -804,7 +802,6 @@ int command_create(object *op, char *params) {
         /* Multipart objects can't be in inventory, put'em on floor. */
         if (!tmp->more) {
             tmp = insert_ob_in_ob(tmp, op);
-            esrv_send_item(op, tmp);
         }
         else {
             insert_ob_in_map_at(tmp, op->map, op, 0, op->x, op->y);
@@ -887,7 +884,6 @@ int command_create(object *op, char *params) {
             if (at->clone.randomitems != NULL && !at_spell)
                 create_treasure(at->clone.randomitems, head, GT_APPLY,
                           op->map->difficulty, 0);
-            esrv_send_item(op, head);
         }
 
         /* free the one we used to copy */
@@ -966,7 +962,7 @@ int command_mon_aggr(object *op, char *params) {
  * This function is severely broken - it has tons of hardcoded values,
  */
 int command_possess(object *op, char *params) {
-    object *victim, *curinv, *nextinv;
+    object *victim;
     player *pl;
     int i;
     char buf[MAX_BUF];
@@ -989,14 +985,6 @@ int command_possess(object *op, char *params) {
         return 1;
     }
 
-    /* clear out the old inventory */
-    curinv = op->inv;
-    while (curinv != NULL) {
-        nextinv = curinv->below;
-        esrv_del_item(op->contr, curinv->count);
-        curinv = nextinv;
-    }
-
     /* make the switch */
     pl = op->contr;
     victim->contr = pl;
@@ -1004,13 +992,6 @@ int command_possess(object *op, char *params) {
     victim->type = PLAYER;
     SET_FLAG(victim, FLAG_WIZ);
 
-    /* send the inventory to the client */
-    curinv = victim->inv;
-    while (curinv != NULL) {
-        nextinv = curinv->below;
-        esrv_send_item(victim, curinv);
-        curinv = nextinv;
-    }
     /* basic patchup */
     /* The use of hard coded values is terrible.  Note
      * that really, to be fair, this shouldn't get changed at
@@ -2091,9 +2072,8 @@ int command_insert_into(object* op, char *params)
         remove_ob(right);
     inserted = insert_ob_in_ob(right,left);
     if (left->type == PLAYER) {
-        if (inserted == right)
-            esrv_send_item(left,right);
-        else
+        if (inserted != right)
+            /* item was merged, so updating name and such. */
             esrv_update_item(UPD_WEIGHT|UPD_NAME|UPD_NROF,left,inserted);
     }
     new_draw_info_format(NDI_UNIQUE, 0, op, "Inserted %s in %s", query_name(inserted),query_name(left));

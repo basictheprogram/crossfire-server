@@ -190,11 +190,12 @@ static void send_changed_object(object *op)
                 tmp = NULL;
         }
         if (tmp)
-            esrv_send_item(tmp, op);
+            /* We don't know what changed, so we send everything. */
+            esrv_update_item(UPD_ALL, tmp, op);
     } else {
         for (tmp = op->above; tmp != NULL; tmp = tmp->above)
             if (tmp->type == PLAYER)
-                esrv_send_item(tmp, op);
+                tmp->contr->socket.update_look = 1;
     }
 }
 
@@ -2530,7 +2531,7 @@ void* cfapi_object_set_property(int* type, ...)
                         fix_player(tmp);
                     }
                     if (tmp)
-                        esrv_send_item(tmp, op);
+                        esrv_update_item(UPD_NROF, tmp, op);
                 }
                 else
                 {
@@ -2538,7 +2539,7 @@ void* cfapi_object_set_property(int* type, ...)
 
                     for (tmp = above; tmp != NULL; tmp = tmp->above)
                         if (tmp->type == PLAYER)
-                            esrv_send_item(tmp, op);
+                            tmp->contr->socket.update_look=1;
                 }
             }
             break;
@@ -3432,9 +3433,6 @@ void* cfapi_object_insert(int* type, ...)
         }
         else
             *robj = insert_ob_in_ob(op, orig);
-        if (orig->type == PLAYER) {
-            esrv_send_item(orig, op);
-        }
         *type = CFAPI_POBJECT;
         break;
     }

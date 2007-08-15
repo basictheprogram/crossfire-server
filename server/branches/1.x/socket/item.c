@@ -651,12 +651,8 @@ void lock_item_cmd(uint8 *data, int len,player *pl)
 
     tmp = merge_ob(op, NULL);
     if (tmp == NULL) {
-	/* object was not merged */
-	esrv_update_item(UPD_FLAGS, pl->ob, op);
-    } else {
-	/* object was merged into tmp */
-	esrv_del_item(pl, tag);
-	esrv_send_item(pl->ob, tmp);
+            /* object was not merged - if it was, merge_ob sent updates for us. */
+        esrv_update_item(UPD_FLAGS, pl->ob, op);
     }
 }
 

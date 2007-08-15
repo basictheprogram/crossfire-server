@@ -1383,13 +1383,16 @@ void remove_ob(object *op) {
     else
       sub_weight(op->env, op->weight+op->carrying);
 
-  /* NO_FIX_PLAYER is set when a great many changes are being
-   * made to players inventory.  If set, avoiding the call
-   * to save cpu time.
-   */
-    if ((otmp=get_player_container(op->env))!=NULL && otmp->contr && 
-        !QUERY_FLAG(otmp,FLAG_NO_FIX_PLAYER))
-        fix_player(otmp);
+        if (op->env->contr != NULL && op->head == NULL)
+            esrv_del_item(op->env->contr, op->count);
+
+        /* NO_FIX_PLAYER is set when a great many changes are being
+         * made to players inventory.  If set, avoiding the call
+         * to save cpu time.
+         */
+        if ((otmp=get_player_container(op->env))!=NULL && otmp->contr &&
+            !QUERY_FLAG(otmp,FLAG_NO_FIX_PLAYER))
+            fix_player(otmp);
 
     if(op->above!=NULL)
         op->above->below=op->below;
@@ -1523,21 +1526,22 @@ void remove_ob(object *op) {
  */
 
 object *merge_ob(object *op, object *top) {
-  if(!op->nrof)
-    return 0;
-  if(top==NULL)
-    for(top=op;top!=NULL&&top->above!=NULL;top=top->above);
-  for(;top!=NULL;top=top->below) {
-    if(top==op)
-      continue;
-    if (can_merge(op,top))
-    {
-      top->nrof+=op->nrof;
-      op->weight = 0; /* Don't want any adjustements now */
-      remove_ob(op);
-      free_object(op);
-      return top;
-    }
+    if(!op->nrof)
+        return 0;
+    if(top==NULL)
+        for(top=op;top!=NULL&&top->above!=NULL;top=top->above);
+    for(;top!=NULL;top=top->below) {
+        if(top==op)
+            continue;
+        if (can_merge(op,top)) {
+            top->nrof+=op->nrof;
+            if (top->env && top->env->contr)
+                esrv_update_item(UPD_NROF, top->env, top);
+            op->weight = 0; /* Don't want any adjustements now */
+            remove_ob(op);
+            free_object(op);
+            return top;
+        }
   }
   return NULL;
 }
@@ -1563,6 +1567,8 @@ object *insert_ob_in_map_at(object *op, mapstruct *m, object *originator, int fl
  * The second argument specifies the map, and the x and y variables
  * in the object about to be inserted specifies the position.
  * It will update player count if the op is a player.
+ *
+ * Player ground window will be updated if needed.
  *
  * @param op
  * object to insert. Must be removed. Its coordinates must be valid for the map.
@@ -1856,8 +1862,23 @@ void replace_insert_ob_in_map(const char *arch_string, object *op) {
  * get_split_ob(ob,nr) splits up ob into two parts.  The part which
  * is returned contains nr objects, and the remaining parts contains
  * the rest (or is removed and freed if that number is 0).
- * On failure, NULL is returned, and the reason put into the
- * global static errmsg array.
+ * On failure, NULL is returned, and the reason LOG()ed.
+ *
+ * This function will send an update to the client if the remaining object
+ * is in a player inventory.
+ *
+ * @param orig_ob
+ * object from which to split.
+ * @param nr
+ * number of elements to split.
+ * @param err
+ * buffer that will contain failure reason if NULL is returned. Can be NULL.
+ * @param size
+ * err's size
+ * @return
+ * split object, or NULL on failure.
+ * @todo
+ * handle case orig_ob->nrof == 0 (meaning 1).
  */
 
 object *get_split_ob(object *orig_ob, uint32 nr) {
@@ -1875,15 +1896,19 @@ object *get_split_ob(object *orig_ob, uint32 nr) {
             remove_ob(orig_ob);
 	free_object2(orig_ob, 1);
     }
-    else if ( ! is_removed) {
-	if(orig_ob->env!=NULL)
-	    sub_weight (orig_ob->env,orig_ob->weight*nr);
-	if (orig_ob->env == NULL && orig_ob->map->in_memory!=MAP_IN_MEMORY) {
-	    strcpy(errmsg, "Tried to split object whose map is not in memory.");
-	    LOG(llevDebug,
-		    "Error, Tried to split object whose map is not in memory.\n");
-	    return NULL;
-	}
+    else if (!is_removed) {
+        if(orig_ob->env!=NULL) {
+            sub_weight (orig_ob->env,orig_ob->weight*nr);
+            if (orig_ob->env->contr)
+                esrv_update_item(UPD_NROF, orig_ob->env, orig_ob);
+        }
+        if (orig_ob->env == NULL && orig_ob->map->in_memory!=MAP_IN_MEMORY) {
+            /* This is a failure, so always log it. */
+            LOG(llevDebug,
+                "Error, tried to split object whose map is not in memory.\n");
+            strcpy(errmsg, "Error, tried to split object whose map is not in memory.\n");
+            return NULL;
+        }
     }
     newob->nrof=nr;
 
@@ -1895,7 +1920,14 @@ object *get_split_ob(object *orig_ob, uint32 nr) {
  * the amount of an object.  If the amount reaches 0, the object
  * is subsequently removed and freed.
  *
- * Return value: 'op' if something is left, NULL if the amount reached 0
+ * This function will send an update to client if op is in a player inventory.
+ *
+ * @param op
+ * object to decrease.
+ * @param i
+ * number to remove.
+ * @return
+ * 'op' if something is left, NULL if the amount reached 0.
  */
 
 object *decrease_ob_nr (object *op, uint32 i)
@@ -1936,14 +1968,11 @@ object *decrease_ob_nr (object *op, uint32 i)
             sub_weight (op->env, op->weight * i);
             op->nrof -= i;
             if (tmp) {
-                esrv_send_item(tmp, op);
+                esrv_update_item(UPD_NROF, tmp, op);
             }
         } else {
             remove_ob (op);
             op->nrof = 0;
-            if (tmp) {
-                esrv_del_item(tmp->contr, op->count);
-            }
         }
     }
     else 
@@ -1956,14 +1985,6 @@ object *decrease_ob_nr (object *op, uint32 i)
             remove_ob (op);
             op->nrof = 0;
         }
-	/* Since we just removed op, op->above is null */
-        for (tmp = above; tmp != NULL; tmp = tmp->above)
-            if (tmp->type == PLAYER) {
-                if (op->nrof)
-                    esrv_send_item(tmp, op);
-                else
-                    esrv_del_item(tmp->contr, op->count);
-            }
     }
 
     if (op->nrof) {
@@ -1994,57 +2015,58 @@ void add_weight (object *op, signed long weight) {
  *   This function inserts the object op in the linked list
  *   inside the object environment.
  *
- * Eneq(@csd.uu.se): Altered insert_ob_in_ob to make things picked up enter 
- * the inventory at the last position or next to other objects of the same
- * type.
- * Frank: Now sorted by type, archetype and magic!
+ * It will send to client where is a player.
  *
- * The function returns now pointer to inserted item, and return value can 
- * be != op, if items are merged. -Tero
+ * @param op
+ * object to insert. Must be removed and not NULL. Must not be multipart.
+ * May become invalid after return, so use return value of the function.
+ * @param where
+ * object to insert into. Must not be NULL. Should be the head part.
+ * @return
+ * pointer to inserted item, which will be different than op if object was merged.
  */
 
 object *insert_ob_in_ob(object *op,object *where) {
   object *tmp, *otmp;
 
-  if(!QUERY_FLAG(op,FLAG_REMOVED)) {
-    dump_object(op);
-    LOG(llevError,"Trying to insert (ob) inserted object.\n%s\n", errmsg);
-    return op;
-  }
-  if(where==NULL) {
-    dump_object(op);
-    LOG(llevError,"Trying to put object in NULL.\n%s\n", errmsg);
-    return op;
-  }
-  if (where->head) {
-    LOG(llevDebug, 
-	"Warning: Tried to insert object wrong part of multipart object.\n");
-    where = where->head;
-  }
-  if (op->more) {
-    LOG(llevError, "Tried to insert multipart object %s (%d)\n",
-        op->name, op->count);
-    return op;
-  }
-  CLEAR_FLAG(op, FLAG_OBJ_ORIGINAL);
-  CLEAR_FLAG(op, FLAG_REMOVED);
-  if(op->nrof) {
-    for(tmp=where->inv;tmp!=NULL;tmp=tmp->below)
-        if ( can_merge(tmp,op) ) {
-	/* return the original object and remove inserted object
-           (client needs the original object) */
-        tmp->nrof += op->nrof;
-	/* Weight handling gets pretty funky.  Since we are adding to
-	 * tmp->nrof, we need to increase the weight.
-	 */
-	add_weight (where, op->weight*op->nrof);
-        SET_FLAG(op, FLAG_REMOVED);
-        free_object(op); /* free the inserted object */
-        op = tmp;
-        remove_ob (op); /* and fix old object's links */
-        CLEAR_FLAG(op, FLAG_REMOVED);
-	break;
-      }
+    if(!QUERY_FLAG(op,FLAG_REMOVED)) {
+        dump_object(op);
+        LOG(llevError,"Trying to insert (ob) inserted object.\n%s\n", errmsg);
+        return op;
+    }
+    if(where==NULL) {
+        dump_object(op);
+        LOG(llevError,"Trying to put object in NULL.\n%s\n", errmsg);
+        return op;
+    }
+    if (where->head) {
+        LOG(llevDebug,
+        "Warning: Tried to insert object wrong part of multipart object.\n");
+        where = where->head;
+    }
+    if (op->more) {
+        LOG(llevError, "Tried to insert multipart object %s (%d)\n",
+            op->name, op->count);
+        return op;
+    }
+    CLEAR_FLAG(op, FLAG_OBJ_ORIGINAL);
+    CLEAR_FLAG(op, FLAG_REMOVED);
+    if(op->nrof) {
+        for(tmp=where->inv;tmp!=NULL;tmp=tmp->below)
+            if ( can_merge(tmp,op) ) {
+                /* return the original object and remove inserted object
+                 * (client needs the original object) */
+                tmp->nrof += op->nrof;
+                if (tmp->env && tmp->env->contr)
+                    esrv_update_item(UPD_NROF, tmp->env, tmp);
+                /* Weight handling gets pretty funky.  Since we are adding to
+                 * tmp->nrof, we need to increase the weight.
+                 */
+                add_weight (where, op->weight*op->nrof);
+                SET_FLAG(op, FLAG_REMOVED);
+                free_object(op); /* free the inserted object */
+                return tmp;
+            }
 
     /* I assume combined objects have no inventory
      * We add the weight - this object could have just been removed
@@ -2056,11 +2078,16 @@ object *insert_ob_in_ob(object *op,object *where) {
   } else
     add_weight (where, (op->weight+op->carrying));
 
-  otmp=get_player_container(where);
-  if (otmp&&otmp->contr!=NULL) {
-    if (!QUERY_FLAG(otmp,FLAG_NO_FIX_PLAYER))
-      fix_player(otmp);
-  }
+    if (where->contr != NULL)
+        esrv_send_item(where, op);
+
+    otmp=get_player_container(where);
+    if (otmp&&otmp->contr!=NULL) {
+        if (!QUERY_FLAG(otmp,FLAG_NO_FIX_PLAYER) && (QUERY_FLAG(op, FLAG_APPLIED) || (op->type == SKILL) || (op->glow_radius != 0)))
+            /* fix_player will only consider applied items, or skills, or items with a glow radius.
+               thus no need to call it if our object hasn't that. */
+            fix_player(otmp);
+    }
 
   op->map=NULL;
   op->env=where;

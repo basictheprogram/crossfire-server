@@ -612,24 +612,18 @@ static void add_value(object *coin_objs[], sint64 value) {
  * @param objects_len the length of objects
  */
 static void insert_objects(object *pl, object *container, object *objects[], int objects_len) {
-    int i;
+    int i, one = 0;
 
     for (i = 0; i < objects_len; i++) {
         if (objects[i]->nrof > 0) {
             object *tmp = insert_ob_in_ob(objects[i], container);
-
-            esrv_send_item(pl, tmp);
-            esrv_send_item(pl, container);
-            if (pl != container) {
-                esrv_update_item(UPD_WEIGHT, pl, container);
-            }
-            if (pl->type != PLAYER) {
-                esrv_send_item(pl, pl);
-            }
+            one = 1;
         } else {
             free_object(objects[i]);
         }
     }
+    if (one)
+        esrv_update_item(UPD_WEIGHT, pl, container);
 }
 
 /* This pays for the item, and takes the proper amount of money off
@@ -863,12 +857,9 @@ int get_payment(object *pl, object *op) {
                     "You paid %s for %s.",
 		    buf,query_name(op));
             tmp=merge_ob(op,NULL);
-            if (pl->type == PLAYER) {
-                if (tmp) {      /* it was merged */
-                    esrv_del_item (pl->contr, c);
-                    op = tmp;
-                }
-                esrv_send_item(pl, op);
+            if (pl->type == PLAYER && !tmp) {
+                /* If item wasn't merged we update it. If merged, merge_ob handled everything for us. */
+                esrv_update_item(UPD_FLAGS | UPD_NAME, pl, op);
             }
         }
     }
@@ -937,28 +928,24 @@ void sell_item(object *op, object *pl) {
 			if (pouch->weight_limit && (pouch->weight_limit-pouch->carrying)/w<n)
 			    n = (pouch->weight_limit-pouch->carrying)/w;
 
-			tmp = get_object();
-			copy_object(&at->clone, tmp);
-			tmp->nrof = n;
-			i -= (uint64)tmp->nrof * (uint64)tmp->value;
-			tmp = insert_ob_in_ob(tmp, pouch);
-			esrv_send_item (pl, tmp);
-			esrv_send_item (pl, pouch);
-			esrv_update_item (UPD_WEIGHT, pl, pouch);
-			esrv_send_item (pl, pl);
-		    }
-		}
-	    }
-	    if (i/at->clone.value > 0) {
-		tmp = get_object();
-		copy_object(&at->clone, tmp);
-		tmp->nrof = i/tmp->value;
-		i -= (uint64)tmp->nrof * (uint64)tmp->value;
-		tmp = insert_ob_in_ob(tmp, pl);
-		esrv_send_item (pl, tmp);
-		esrv_send_item (pl, pl);
-	    }
-	}
+                        tmp = get_object();
+                        copy_object(&at->clone, tmp);
+                        tmp->nrof = n;
+                        i -= (uint64)tmp->nrof * (uint64)tmp->value;
+                        tmp = insert_ob_in_ob(tmp, pouch);
+                        esrv_update_item(UPD_WEIGHT, pl, pl);
+                    }
+                }
+            }
+            if (i/at->clone.value > 0) {
+                tmp = get_object();
+                copy_object(&at->clone, tmp);
+                tmp->nrof = i/tmp->value;
+                i -= (uint64)tmp->nrof * (uint64)tmp->value;
+                tmp = insert_ob_in_ob(tmp, pl);
+                esrv_update_item (UPD_WEIGHT, pl, pl);
+            }
+        }
     }
 
     if (i!=0) 

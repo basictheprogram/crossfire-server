@@ -855,14 +855,6 @@ static void change_object(object *op) { /* Doesn`t handle linked objs yet */
     if(env) {
         tmp->x=env->x,tmp->y=env->y;
 	tmp=insert_ob_in_ob(tmp,env);
-	/* If this object is the players inventory, we need to tell the
-	 * client of the change.  Insert_ob_in_map takes care of the
-	 * updating the client, so we don't need to do that below.
-	 */
-	if ((pl=get_player_container(env))!=NULL) {
-	    esrv_del_item(pl->contr, op->count);
-	    esrv_send_item(pl, tmp);
-	}
     } else {
         j=find_first_free_spot(tmp,op->map,op->x,op->y);
 	if (j==-1)  /* No free spot */
