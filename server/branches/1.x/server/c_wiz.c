@@ -1361,20 +1361,21 @@ int command_reset (object *op, char *params) {
             free_object(dummy);
         }
 
-        if (res < 0)
+        if (res < 0 && res != SAVE_ERROR_PLAYER)
+            /* no need to warn if player on map, code below checks that. */
             new_draw_info_format(NDI_UNIQUE | NDI_RED, 0, op, "Reset failed, error code: %d.", res);
-
-        new_draw_info(NDI_UNIQUE, 0, op, "Reset failed, couldn't swap map, the following players are on it:");
-        for (pl = first_player; pl != NULL; pl = pl->next) {
-            if (pl->ob->map == m && pl->ob != op) {
-                new_draw_info_format(NDI_UNIQUE, 0, op, "%s", pl->ob->name);
-                playercount++;
+        else {
+            new_draw_info(NDI_UNIQUE, 0, op, "Reset failed, couldn't swap map, the following players are on it:");
+            for (pl = first_player; pl != NULL; pl = pl->next) {
+                if (pl->ob->map == m && pl->ob != op) {
+                    new_draw_info(NDI_UNIQUE, 0, op, pl->ob->name);
+                    playercount++;
+                }
             }
-        }
-        if (!playercount)
-            new_draw_info(NDI_UNIQUE, 0, op,
-                "hmm, I don't see any other players on this map, something else is the problem.");
-        return 1;
+            if (!playercount)
+                new_draw_info(NDI_UNIQUE, 0, op, "hmm, I don't see any other players on this map, something else is the problem.");
+            return 1;
+	}
     }
 }
 
