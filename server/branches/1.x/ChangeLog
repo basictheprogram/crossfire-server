@@ -17,6 +17,11 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Remove duplicate void esrv_update_item() that breaks make from top of server
+on fresh autogen.sh && make.
+ test/unit/common/stubs_common.c
+Kevin Bulgrien 2007-08-21
+
 Don't display an evil error message when trying to reset a map with a player on.
  server/c_wiz.c
 Nicolas Weeger 2007-08-20

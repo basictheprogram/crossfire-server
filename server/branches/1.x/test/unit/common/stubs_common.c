@@ -83,10 +83,6 @@ void esrv_update_spells(player *pl)
     {
     }
  
-void esrv_update_item(int flags, object *pl, object *op)
-{
-}
-
 void monster_check_apply( object* ob, object* obt )
     {
     }
