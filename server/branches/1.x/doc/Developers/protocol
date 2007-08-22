@@ -352,7 +352,7 @@ S->C: drawextinfo <color> <type> <subtype> message
 	in newclient.h, and is sent as a string.  The client is free to do
 	whatever it wants with the color information (it may very well ignore it.)
 
-	color   same as color infor from S->C drawinfo
+	color   same as color info from S->C drawinfo
 	type    is an int in decimal representation, giving the type of message
 	subtype is an int in decimal representation, giving subtype
 	        (flavor) of message.
@@ -448,8 +448,7 @@ S->C: item2 <location><tag1><flags1><weight1><face1><name1><anim1>
 	<animspeed1><nrof1><type1><object2....>
 
 	Sends item information to the client.  All parameters are sent as 4
-	byte ints, except for name, anim, animspeed and (in the case of the
-	item2 command) type.
+	byte ints, except for name, anim, animspeed and type.
 
 	The item1 command is an extension of the item command.  It includes
 	additional fields.  It has replaced the item command, which is no
@@ -661,7 +660,7 @@ S->C: anim <num><flags><face1><face2>...
 	<face1>... is the various faces that comprise the animation
 	sequence.  The number of faces can be determined by checking the
 	length of the packet.  These values correspond in the same
-	way as all referances to face do.
+	way as all references to face do.
 
 	Note that how fast the object is animated is contained in the
 	item commands.
@@ -1070,7 +1069,6 @@ S->C: map2 <coord1><len1/type1><data1><len2/type2><data2>...<coord2>
 	able to parse the data a byte (or pairing at a time).
 
 S->C: tick <tickno>
-	This is really only useful when used with the map2 command.
 	<tickno> is an unsigned 32 bit binary value.
 	This just tells the client what the current tick is.  Right now,
 	the client only uses this to know when to animate the images that
