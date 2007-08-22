@@ -17,6 +17,9 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+lib/help/{fire,fire_stop}: Add help for "fire" and "fire_stop" commands.
+Andreas Kirschbaum 2007-08-22
+
 Remove duplicate void esrv_update_item() that breaks make from top of server
 on fresh autogen.sh && make.
  test/unit/common/stubs_common.c
