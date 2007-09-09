@@ -1216,6 +1216,95 @@ int command_drop (object *op, char *params)
     return 0;
 }
 
+/**
+ * Put all contents of the container on the ground below the player or in opened container, except locked items.
+ *
+ * @param container
+ * what to empty.
+ * @param pl
+ * player to drop for.
+ */
+static void empty_container(object* container, object* pl) {
+    object* inv;
+    object* next;
+    int left = 0;
+
+    if (!container->inv)
+        return;
+
+    for (inv = container->inv; inv; inv = next) {
+        next = inv->below;
+        if (QUERY_FLAG(inv, FLAG_INV_LOCKED)) {
+            /* you can have locked items in container. */
+            left++;
+            continue;
+        }
+        drop(pl, inv);
+        if (inv->below == next)
+            /* item couldn't be dropped for some reason. */
+            left++;
+    }
+    esrv_update_item(UPD_WEIGHT, pl, container);
+
+    if (left)
+        draw_ext_info_format(NDI_UNIQUE, 0, pl, MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_SUCCESS, "You empty the %s except %d items.", NULL, query_name(container), left);
+    else
+        draw_ext_info_format(NDI_UNIQUE, 0, pl, MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_SUCCESS, "You empty the %s.", NULL, query_name(container));
+}
+
+/**
+ * 'empty' command.
+ *
+ * @param op
+ * player.
+ * @param params
+ * item specifier.
+ * @return
+ * 0.
+ */
+int command_empty(object *op, char *params) {
+    object* inv;
+    object* container;
+
+    if (!params) {
+        draw_ext_info(NDI_UNIQUE,0,op,MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_ERROR,
+            "Empty what?", NULL);
+        return 0;
+    }
+
+    if (strcmp(params, "all") == 0) {
+        for (inv = op->inv; inv; inv = inv->below)
+            if (inv->type == CONTAINER)
+                empty_container(inv, op);
+        return 0;
+    }
+
+    container = find_best_object_match(op, params);
+    if (!container) {
+        draw_ext_info(NDI_UNIQUE,0,op,MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_ERROR,
+            "No such item.", NULL);
+        return 0;
+    }
+    if (container->type != CONTAINER) {
+        draw_ext_info(NDI_UNIQUE,0,op,MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_ERROR,
+            "This is not a container!", NULL);
+        return 0;
+    }
+    empty_container(container, op);
+
+    return 0;
+}
+
+/**
+ * 'examine' command.
+ *
+ * @param op
+ * player.
+ * @param params
+ * optional item specifier.
+ * @return
+ * 0.
+ */
 int command_examine (object *op, char *params)
 {
   if (!params) {

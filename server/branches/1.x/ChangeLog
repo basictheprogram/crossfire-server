@@ -17,6 +17,15 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Add an 'empty' command, that puts all contents of a (or all) container either
+on ground or in player's opened container.
+ include/sproto.h
+ lib/Makefile.am
+ server/c_object.c commands.c
+Added file:
+ lib/help/empty
+Nicolas Weeger 2007-09-09
+
 Server support for Metaserver2 - brought back from trunk:
 acinclude.m4: Add LIBCURL_CHECK_CONFIG macro, used by configure.
 configure.ac: Add check for pthread, LIBCURL.  Extra
