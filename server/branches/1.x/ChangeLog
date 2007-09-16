@@ -248,7 +248,7 @@ Log player creation.
  lib/settings
  server/c_misc.c init.c
 Nicolas Weeger 2007-05-30
-    
+
 Fix bug #1726632: After useing a # of times on the forge..
 server/alchemy.c: item may change, so its weight too. This leads to invalid carrying.
 Nicolas Weeger 2007-05-30
@@ -312,7 +312,7 @@ Apply patch #1713563: Reopen log file on SIGHUP, courtesy Kari Pahula.
  include/global.h
  server/init.c
 Nicolas Weeger 2007-05-05
-   
+
 Apply patch #1713564, Open log file only once with -detach, courtesy Kari Pahula.
  include/sproto.h
  server/daemon.c init.c
@@ -364,7 +364,7 @@ Return result of cf_object_move(). Add missing property getter.
  plugins/common/include/plugin_common.h
  plugins/common/plugin_common.c
 Add 'Crossfire.Object.Move' method.
- plugins/cfpython/cfpython_object.c 
+ plugins/cfpython/cfpython_object.c
  plugins/cfpython/include/cfpython_object_private.h
 Nicolas Weeger 2007-04-29
 
