@@ -17,6 +17,13 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Add a message when explore mode is disabled. Add help file for this command.
+ lib/Makefile.am
+ server/c_misc.c
+Added file:
+ lib/help/explore
+Nicolas Weeger 2007-09-16
+
 Add an 'empty' command, that puts all contents of a (or all) container either
 on ground or in player's opened container.
  include/sproto.h
