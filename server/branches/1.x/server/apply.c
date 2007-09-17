@@ -2967,7 +2967,6 @@ static int unapply_special (object *who, object *op, int aflags)
     if ( ! (aflags & AP_NO_MERGE)) {
 	object *tmp;
 
-        tag_t del_tag = op->count;
         tmp = merge_ob (op, NULL);
         if (who->type == PLAYER) {
             if (tmp) {  /* it was merged */
