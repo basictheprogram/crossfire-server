@@ -85,33 +85,33 @@ int freedir[SIZEOFFREE]= {
 /** Returns TRUE if every key_values in wants has a partner with the same value in has. */
 static int compare_ob_value_lists_one(const object * wants, const object * has) {
     key_value * wants_field;
-    
+
     /* n-squared behaviour (see get_ob_key_link()), but I'm hoping both
      * objects with lists are rare, and lists stay short. If not, use a
-     * different structure or at least keep the lists sorted... 
+     * different structure or at least keep the lists sorted...
      */
-    
+
     /* For each field in wants, */
     for (wants_field = wants->key_values; wants_field != NULL; wants_field = wants_field->next) {
         key_value * has_field;
-        
+
         /* Look for a field in has with the same key. */
         has_field = get_ob_key_link(has, wants_field->key);
-        
+
         if (has_field == NULL) {
             /* No field with that name. */
             return FALSE;
         }
-        
+
         /* Found the matching field. */
         if (has_field->value != wants_field->value) {
             /* Values don't match, so this half of the comparison is false. */
             return FALSE;
-        } 
-        
+        }
+
         /* If we get here, we found a match. Now for the next field in wants. */
     }
-    
+
     /* If we get here, every field in wants has a matching field in has. */
     return TRUE;
 }
@@ -180,7 +180,7 @@ int can_merge(object *ob1, object *ob2) {
      * are not equal - just if it has been identified, the been_applied
      * flags lose any meaning.
      */
-    
+
     /*TODO is this hack on BEEN_APPLIED really needed? */
     if (QUERY_FLAG(ob1, FLAG_IDENTIFIED))
 	SET_FLAG(ob1, FLAG_BEEN_APPLIED);
@@ -190,14 +190,14 @@ int can_merge(object *ob1, object *ob2) {
 
 
     /* Note: FLAG_INV_LOCKED is ignored for merging purposes */
-    if ((ob1->arch != ob2->arch) || 
-	(ob1->flags[0] != ob2->flags[0]) || 
+    if ((ob1->arch != ob2->arch) ||
+	(ob1->flags[0] != ob2->flags[0]) ||
 	(ob1->flags[1] != ob2->flags[1]) ||
 	(ob1->flags[2] != ob2->flags[2]) ||
 	((ob1->flags[3] & ~0x4) != (ob2->flags[3] & ~0x4)) || /* ignore CLIENT_SENT */
-	(ob1->name != ob2->name) || 
+	(ob1->name != ob2->name) ||
 	(ob1->title != ob2->title) ||
-	(ob1->msg != ob2->msg) || 
+	(ob1->msg != ob2->msg) ||
 	(ob1->weight != ob2->weight) ||
 	(memcmp(&ob1->resist, &ob2->resist, sizeof(ob1->resist))!=0) ||
 	(memcmp(&ob1->stats, &ob2->stats, sizeof(ob1->stats))!=0) ||
@@ -220,7 +220,7 @@ int can_merge(object *ob1, object *ob2) {
 	(ob1->move_slow_penalty != ob2->move_slow_penalty) ||
 	(ob1->map_layer != ob2->map_layer)
 
-	) 
+	)
 	    return 0;
 
     /* Don't merge objects that are applied.  With the new 'body' code,
@@ -291,7 +291,7 @@ object *object_get_env_recursive (object *op) {
  * or find a player.
  */
 /*TODO this function is badly named*/
-object *get_player_container(object *op) { 
+object *get_player_container(object *op) {
     for (;op!=NULL&&op->type!=PLAYER; op=op->env)
       /*TODO this is patching the structure on the flight as side effect. Shoudln't be needed in clean code */
       if (op->env==op)
@@ -488,7 +488,7 @@ void free_all_object_data(void) {
 	op=next;
     }
 #endif
-    LOG(llevDebug,"%d allocated objects, %d free objects, STARMAX=%d\n", 
+    LOG(llevDebug,"%d allocated objects, %d free objects, STARMAX=%d\n",
 	nrofallocobjects, nroffreeobjects,STARTMAX);
 }
 
@@ -541,14 +541,14 @@ void set_owner (object *op, object *owner)
     if(owner==NULL||op==NULL)
 	return;
 
-    /* next line added to allow objects which own objects */ 
+    /* next line added to allow objects which own objects */
     /* Add a check for ownercounts in here, as I got into an endless loop
      * with the fireball owning a poison cloud which then owned the
      * fireball.  I believe that was caused by one of the objects getting
      * freed and then another object replacing it.  Since the ownercounts
      * didn't match, this check is valid and I believe that cause is valid.
      */
-    while (owner->owner && owner!=owner->owner && 
+    while (owner->owner && owner!=owner->owner &&
 	owner->ownercount==owner->owner->count) owner=owner->owner;
 
     /* IF the owner still has an owner, we did not resolve to a final owner.
@@ -614,24 +614,24 @@ void reset_object(object *op) {
 
 /**
  * Zero the key_values on op, decrementing the shared-string
- * refcounts and freeing the links. 
+ * refcounts and freeing the links.
  */
 static void free_key_values(object * op) {
     key_value * i;
     key_value * next = NULL;
-    
+
     if (op->key_values == NULL) return;
-    
+
     for (i = op->key_values; i != NULL; i = next) {
         /* Store next *first*. */
-        next = i->next; 
-        
+        next = i->next;
+
 	if (i->key) FREE_AND_CLEAR_STR(i->key);
 	if (i->value) FREE_AND_CLEAR_STR(i->value);
         i->next = NULL;
         free(i);
     }
-    
+
     op->key_values = NULL;
 }
 
@@ -742,7 +742,7 @@ void copy_object(object *op2, object *op) {
     if(op->msg!=NULL)	    add_refcount(op->msg);
     if(op->custom_name!=NULL)	    add_refcount(op->custom_name);
     if (op->materialname != NULL)   add_refcount(op->materialname);
-    
+
     /* If archetype is a temporary one, we need to update reference count, because
      * that archetype will be freed by free_object when the last object is removed.
      */
@@ -764,7 +764,7 @@ void copy_object(object *op2, object *op) {
 
 	    new_link->next = NULL;
 	    new_link->key = add_refcount(i->key);
-	    if (i->value) 
+	    if (i->value)
 		new_link->value = add_refcount(i->value);
 	    else
 		new_link->value = NULL;
@@ -779,7 +779,7 @@ void copy_object(object *op2, object *op) {
 	    }
 	}
     }
-	
+
     update_ob_speed(op);
 }
 
@@ -962,7 +962,7 @@ void update_ob_speed(object *op) {
 /**
  * This function removes object 'op' from the list of active
  * objects.
- * This should only be used for style maps or other such 
+ * This should only be used for style maps or other such
  * reference maps where you don't want an object that isn't
  * in play chewing up cpu time getting processed.
  * The reverse of this is to call update_ob_speed, which
@@ -1021,7 +1021,7 @@ void update_object(object *op, int action) {
         LOG(llevDebug,"update_object() called for NULL object.\n");
 	return;
     }
-    
+
     if(op->env!=NULL) {
 	/* Animation is currently handled by client, so nothing
 	 * to do in this case.
@@ -1033,7 +1033,7 @@ void update_object(object *op, int action) {
      * going to get freed anyways.
      */
     if (!op->map || op->map->in_memory == MAP_SAVING) return;
-    
+
     /* make sure the object is within map boundaries */
     if (op->x < 0 || op->x >= MAP_WIDTH(op->map) ||
 	op->y < 0 || op->y >= MAP_HEIGHT(op->map)) {
@@ -1043,7 +1043,7 @@ void update_object(object *op, int action) {
 #endif
 	return;
     }
-    
+
     flags = GET_MAP_FLAGS(op->map, op->x, op->y);
     SET_MAP_FLAGS(op->map, op->x, op->y, flags | P_NEED_UPDATE);
     move_slow = GET_MAP_MOVE_SLOW(op->map, op->x, op->y);
@@ -1097,8 +1097,8 @@ void update_object(object *op, int action) {
 	 * all objects with multiple faces, regardless if they are animated.
 	 * (levers have it set for example).
 	 */
-	if (flags & P_PLAYER && 
-	  !QUERY_FLAG(op, FLAG_CLIENT_ANIM_SYNC) && 
+	if (flags & P_PLAYER &&
+	  !QUERY_FLAG(op, FLAG_CLIENT_ANIM_SYNC) &&
 	  !QUERY_FLAG(op, FLAG_CLIENT_ANIM_RANDOM)) {
 	    pl = GET_MAP_PLAYER(op->map, op->x, op->y);
 
@@ -1223,12 +1223,12 @@ static void free_object2(object *ob, int free_inventory) {
             }
         }
     }
-    
+
     if(ob->more!=NULL) {
         free_object2(ob->more, free_inventory);
         ob->more=NULL;
     }
-    
+
     /* Remove object from the active list */
     ob->speed = 0;
     update_ob_speed(ob);
@@ -1265,7 +1265,7 @@ static void free_object2(object *ob, int free_inventory) {
   /* This is a nice idea.  Unfortunately, a lot of the code in crossfire
    * presumes the freed_object will stick around for at least a little
    * bit
-   */ 
+   */
   /* this is necessary so that memory debugging programs will
    * be able to accurately report source of malloc.  If we recycle
    * objects, then some other area may be doing the get_object
@@ -1464,7 +1464,7 @@ void remove_ob(object *op) {
   if(op->below) {
     op->below->above=op->above;
   } else {
-  /* Nothing below, which means we need to relink map object for this space 
+  /* Nothing below, which means we need to relink map object for this space
    * use translated coordinates in case some oddness with map tiling is
    * evident
    */
@@ -1711,10 +1711,10 @@ object *insert_ob_in_map (object *op, mapstruct *m, object *originator, int flag
      * actually on the map, so we can't use them for the linked pointers,
      * nor should the walk on function below use them either.
      */
-    if (originator && originator->contr && originator->contr->transport) 
+    if (originator && originator->contr && originator->contr->transport)
 	originator=originator->contr->transport;
 
-    if (flag & INS_BELOW_ORIGINATOR) { 
+    if (flag & INS_BELOW_ORIGINATOR) {
 	if (originator->map != op->map || originator->x != op->x ||
 	    originator->y != op->y) {
 	    LOG(llevError,"insert_ob_in_map called with INS_BELOW_ORIGINATOR when originator not on same space!\n");
@@ -1740,7 +1740,7 @@ object *insert_ob_in_map (object *op, mapstruct *m, object *originator, int flag
 	     * flag contains INS_ABOVE_FLOOR_ONLY, once we find the last
 	     * floor, we want to insert above that and no further.
 	     * Also, if there are spell objects on this space, we stop processing
-	     * once we get to them.  This reduces the need to traverse over all of 
+	     * once we get to them.  This reduces the need to traverse over all of
 	     * them when adding another one - this saves quite a bit of cpu time
 	     * when lots of spells are cast in one area.  Currently, it is presumed
 	     * that flying non pickable objects are spell objects.
@@ -1750,7 +1750,7 @@ object *insert_ob_in_map (object *op, mapstruct *m, object *originator, int flag
 		if (QUERY_FLAG(top, FLAG_IS_FLOOR) ||
 		    QUERY_FLAG(top, FLAG_OVERLAY_FLOOR)) floor = top;
 
-		if (QUERY_FLAG(top, FLAG_NO_PICK) && 
+		if (QUERY_FLAG(top, FLAG_NO_PICK) &&
 		  (top->move_type & (MOVE_FLY_LOW |MOVE_FLY_HIGH)) &&
 		    !QUERY_FLAG(top, FLAG_IS_FLOOR)) {
 		    /* We insert above top, so we want this object below this */
@@ -1813,7 +1813,7 @@ object *insert_ob_in_map (object *op, mapstruct *m, object *originator, int flag
      * or just updating the P_NEED_UPDATE for spaces within this area
      * of effect may be sufficient.
      */
-    if(MAP_DARKNESS(op->map) && (op->glow_radius != 0)) 
+    if(MAP_DARKNESS(op->map) && (op->glow_radius != 0))
 	update_all_los(op->map, op->x, op->y);
 
 
@@ -1850,7 +1850,7 @@ object *insert_ob_in_map (object *op, mapstruct *m, object *originator, int flag
 
 /**
  * this function inserts an object in the map, but if it
- * finds an object of its own type, it'll remove that one first. 
+ * finds an object of its own type, it'll remove that one first.
  * op is the object to insert it under:  supplies x and the map.
  */
 void replace_insert_ob_in_map(const char *arch_string, object *op) {
@@ -1868,10 +1868,10 @@ void replace_insert_ob_in_map(const char *arch_string, object *op) {
 
     tmp1=arch_to_object(find_archetype(arch_string));
 
-  
+
     tmp1->x = op->x; tmp1->y = op->y;
     insert_ob_in_map(tmp1,op->map,op,0);
-}        
+}
 
 /**
  * get_split_ob(ob,nr) splits up ob into two parts.  The part which
@@ -1971,7 +1971,7 @@ object *decrease_ob_nr (object *op, uint32 i)
             op->nrof = 0;
         }
     }
-    else 
+    else
     {
         /* On a map. */
         if (i < op->nrof) {
@@ -2189,7 +2189,7 @@ object *insert_ob_in_ob(object *op,object *where) {
 #ifdef DEBUG_LIGHTS
       LOG(llevDebug, " insert_ob_in_ob(): got %s to insert in map/op\n",
 	op->name);
-#endif /* DEBUG_LIGHTS */ 
+#endif /* DEBUG_LIGHTS */
       if (MAP_DARKNESS(where->map)) update_all_los(where->map, where->x, where->y);
   }
 
@@ -2251,12 +2251,12 @@ int check_move_on (object *op, object *originator)
 	(op->move_type & ~move_slow & ~move_block) != 0) return 0;
 
     /* The objects have to be checked from top to bottom.
-     * Hence, we first go to the top: 
+     * Hence, we first go to the top:
      */
 
     for (tmp=GET_MAP_OB(op->map, op->x, op->y); tmp!=NULL &&
 	 tmp->above!=NULL; tmp=tmp->above) {
-	/* Trim the search when we find the first other spell effect 
+	/* Trim the search when we find the first other spell effect
 	 * this helps performance so that if a space has 50 spell objects,
 	 * we don't need to check all of them.
 	 */
@@ -2441,10 +2441,10 @@ void set_cheat(object *op) {
 int find_multi_free_spot_around(object *ob, object *gen, int *hx, int *hy) {
     int genx, geny, genx2, geny2, sx, sy, sx2, sy2, ix, iy, nx, ny, i, flag;
     int freecount=0;
-    
+
     if (ob->head)
         ob = ob->head;
-    
+
     get_multi_size(ob, &sx, &sy, &sx2, &sy2);
     get_multi_size(gen, &genx, &geny, &genx2, &geny2);
     /*
@@ -2462,7 +2462,7 @@ int find_multi_free_spot_around(object *ob, object *gen, int *hx, int *hy) {
      * sx, sy, genx, and geny, are now the size of the object, excluding parts left and above
      * the head.
      */
-    
+
     ix = gen->x - sx - genx2;
     iy = gen->y - sy - geny2;
     sx += genx + sx2;
@@ -2472,7 +2472,7 @@ int find_multi_free_spot_around(object *ob, object *gen, int *hx, int *hy) {
      * be placed. sx and sy are now the size of the square to search for placement of the head
      * relative to ix and iy.
      */
-    
+
     /*
      * Loop around the square of possible potitions for the head of ob object:
      */
@@ -2499,7 +2499,7 @@ int find_multi_free_spot_around(object *ob, object *gen, int *hx, int *hy) {
     /* If no free spaces, return. */
     if (!freecount)
         return -1;
-        
+
     /* Choose a random valid position */
     freecount = RANDOM()%freecount;
     for(i = 0; i < (sx+sx+sy+sy); i++) {
@@ -2516,12 +2516,12 @@ int find_multi_free_spot_around(object *ob, object *gen, int *hx, int *hy) {
             nx = ix;
             ny = iy + sy  - (i - (sx + sy + sx));
         }
-        
+
         /* Make sure it's within map. */
         if (nx < 0 || nx >= MAP_WIDTH(gen->map) ||
             ny < 0 || ny >= MAP_HEIGHT(gen->map))
             continue;
-            
+
         /* Check if the spot is free.*/
         flag = ob_blocked(ob,gen->map,nx,ny);
         if (!flag) {
@@ -2554,7 +2554,7 @@ int find_multi_free_spot_around(object *ob, object *gen, int *hx, int *hy) {
  * Note - updated to take an object instead of archetype - this is necessary
  * because arch_blocked (now ob_blocked) needs to know the movement type
  * to know if the space in question will block the object.  We can't use
- * the archetype because that isn't correct if the monster has been 
+ * the archetype because that isn't correct if the monster has been
  * customized, changed states, etc.
  */
 
@@ -2569,7 +2569,7 @@ int find_free_spot(const object *ob, mapstruct *m,int x,int y,int start,int stop
 
 	/* Basically, if we find a wall on a space, we cut down the search size.
 	 * In this way, we won't return spaces that are on another side of a wall.
-	 * This mostly work, but it cuts down the search size in all directions - 
+	 * This mostly work, but it cuts down the search size in all directions -
 	 * if the space being examined only has a wall to the north and empty
 	 * spaces in all the other directions, this will reduce the search space
 	 * to only the spaces immediately surrounding the target area, and
@@ -2618,7 +2618,7 @@ static void permute(int *arr, int begin, int end)
 }
 
 /**
- * new function to make monster searching more efficient, and effective! 
+ * new function to make monster searching more efficient, and effective!
  * This basically returns a randomized array (in the passed pointer) of
  * the spaces to find monsters.  In this way, it won't always look for
  * monsters to the north first.  However, the size of the array passed
@@ -2779,7 +2779,7 @@ int dirdiff(int dir1, int dir2) {
  */
 
 int reduction_dir[SIZEOFFREE][3] = {
-  {0,0,0}, /* 0 */ 
+  {0,0,0}, /* 0 */
   {0,0,0}, /* 1 */
   {0,0,0}, /* 2 */
   {0,0,0}, /* 3 */
@@ -2836,7 +2836,7 @@ int reduction_dir[SIZEOFFREE][3] = {
  * can see a direct way to get it
  * Modified to be map tile aware -.MSW
  */
- 
+
 
 int can_see_monsterP(mapstruct *m, int x, int y,int dir) {
     sint16 dx, dy;
@@ -2864,9 +2864,9 @@ int can_see_monsterP(mapstruct *m, int x, int y,int dir) {
 	can_see_monsterP(m,x,y, reduction_dir[dir][1]) |
 	can_see_monsterP(m,x,y, reduction_dir[dir][2]);
 }
-  
-  
-	
+
+
+
 /**
  * can_pick(picker, item): finds out if an object is possible to be
  * picked up by the picker.  Returnes 1 if it can be
@@ -2947,22 +2947,22 @@ object *find_obj_by_type_subtype(const object *who, int type, int subtype)
 
 /**
  * If ob has a field named key, return the link from the list,
- * otherwise return NULL. 
+ * otherwise return NULL.
  *
  * key must be a passed in shared string - otherwise, this won't
  * do the desired thing.
  */
 key_value * get_ob_key_link(const object * ob, const char * key) {
     key_value * link;
-    
+
     for (link = ob->key_values; link != NULL; link = link->next) {
         if (link->key == key) {
             return link;
         }
     }
-    
+
     return NULL;
-}  
+}
 
 /**
  * Returns the value of op has an extra_field for key, or NULL.
@@ -2974,9 +2974,9 @@ key_value * get_ob_key_link(const object * ob, const char * key) {
 const char * get_ob_key_value(const object * op, const char * const key) {
     key_value * link;
     const char * canonical_key;
-    
+
     canonical_key = find_string(key);
-    
+
     if (canonical_key == NULL) {
         /* 1. There being a field named key on any object
          *    implies there'd be a shared string to find.
@@ -3010,7 +3010,7 @@ const char * get_ob_key_value(const object * op, const char * const key) {
  */
 static int set_ob_key_value_s(object * op, const char * canonical_key, const char * value, int add_key) {
     key_value * field = NULL, *last=NULL;
-    
+
     LOG(llevDebug, "set_ob_value_s: '%s' '%s' %d\n", canonical_key, value, add_key);
 
     for (field=op->key_values; field != NULL; field=field->next) {
@@ -3018,9 +3018,9 @@ static int set_ob_key_value_s(object * op, const char * canonical_key, const cha
 	    last = field;
 	    continue;
 	}
-    
+
 	if (field->value) FREE_AND_CLEAR_STR(field->value);
-	if (value) 
+	if (value)
 	    field->value = add_string(value);
 	else {
 	    /* Basically, if the archetype has this key set,
@@ -3044,7 +3044,7 @@ static int set_ob_key_value_s(object * op, const char * canonical_key, const cha
     /* IF we get here, key doesn't exist */
 
     /* No field, we'll have to add it. */
-    
+
     if (!add_key) {
         return FALSE;
     }
@@ -3055,15 +3055,15 @@ static int set_ob_key_value_s(object * op, const char * canonical_key, const cha
      * should pass in ""
      */
     if (value == NULL) return TRUE;
-    
+
     field = malloc(sizeof(key_value));
-    
+
     field->key = add_refcount(canonical_key);
     field->value = add_string(value);
     /* Usual prepend-addition. */
     field->next = op->key_values;
     op->key_values = field;
-    
+
     return TRUE;
 }
 
@@ -3080,23 +3080,23 @@ int set_ob_key_value(object * op, const char * key, const char * value, int add_
     const char * canonical_key = NULL;
     int floating_ref = FALSE;
     int ret;
-    
+
     /* HACK This mess is to make sure set_ob_value() passes a shared string
-     * to get_ob_key_link(), without leaving a leaked refcount. 
+     * to get_ob_key_link(), without leaving a leaked refcount.
      */
-    
+
     canonical_key = find_string(key);
     if (canonical_key == NULL) {
         canonical_key = add_string(key);
         floating_ref = TRUE;
     }
-    
+
     ret = set_ob_key_value_s(op, canonical_key, value, add_key);
-    
+
     if (floating_ref) {
         free_string(canonical_key);
     }
-    
+
     return ret;
 }
 
@@ -3136,7 +3136,7 @@ int set_ob_key_value(object * op, const char * key, const char * value, int add_
   * base name                  16
   * short name                 18
   * full name                  20
-  * (note, count is extracted from begin of name parameter or 
+  * (note, count is extracted from begin of name parameter or
   *  from pl->contr->count, name has priority)
   */
 int item_matched_string(object *pl, object *op, const char *name)
@@ -3238,7 +3238,7 @@ void fix_multipart_object(object* tmp)
         LOG(llevError, "fix_multipart_object: not on a map!\n");
         return;
     }
-    
+
     /* already multipart - don't do anything more */
     if (tmp->head || tmp->more)
         return;
@@ -3294,7 +3294,7 @@ static void get_multi_size(object *ob, int *sx, int *sy, int *hx, int *hy) {
                 minx = part->clone.x;
             if (part->clone.y < miny)
                 miny = part->clone.y;
-        }  
+        }
     }
     if (sx) *sx = maxx;
     if (sy) *sy = maxy;

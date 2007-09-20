@@ -60,7 +60,7 @@ static void cancellation(object *op)
 
     if (op->invisible)
 	return;
-   
+
     if (QUERY_FLAG (op, FLAG_ALIVE) || op->type == CONTAINER  || op->type == THROWN_OBJ) {
 	/* Recur through the inventory */
 	for(tmp=op->inv;tmp!=NULL;tmp=tmp->below)
@@ -172,26 +172,26 @@ void save_throw_object (object *op, int type, object *originator)
             inv=inv->below;
         }
 
-	/* Hacked the following so that type LIGHTER will work. 
-	 * Also, objects which are potenital "lights" that are hit by 
-	 * flame/elect attacks will be set to glow. "lights" are any 
-	 * object with +/- glow_radius and an "other_arch" to change to. 
-	 * (and please note that we cant fail our save and reach this 
-	 * function if the object doesnt contain a material that can burn. 
+	/* Hacked the following so that type LIGHTER will work.
+	 * Also, objects which are potenital "lights" that are hit by
+	 * flame/elect attacks will be set to glow. "lights" are any
+	 * object with +/- glow_radius and an "other_arch" to change to.
+	 * (and please note that we cant fail our save and reach this
+	 * function if the object doesnt contain a material that can burn.
 	 * So forget lighting magical swords on fire with this!) -b.t.
-	 */ 
+	 */
 	if(type&(AT_FIRE|AT_ELECTRICITY)
-           &&op->other_arch&&QUERY_FLAG(op, FLAG_IS_LIGHTABLE)) { 
+           &&op->other_arch&&QUERY_FLAG(op, FLAG_IS_LIGHTABLE)) {
 		const char *arch=op->other_arch->name;
 
 		op = decrease_ob_nr (op, 1);
                 if (op)
                     fix_stopped_item (op, m, originator);
 		if((op = create_archetype(arch))!=NULL) {
-                   if(env) {  
+                   if(env) {
 			op->x=env->x,op->y=env->y;
 			insert_ob_in_ob(op,env);
-                   } else { 
+                   } else {
                       op->x=x,op->y=y;
                       insert_ob_in_map(op,m,originator,0);
 		   }
@@ -201,7 +201,7 @@ void save_throw_object (object *op, int type, object *originator)
         if(type&AT_CANCELLATION) {          /* Cancellation. */
               cancellation(op);
               fix_stopped_item (op, m, originator);
-              return;  
+              return;
         }
 	if(op->nrof>1) {
 	      op = decrease_ob_nr(op,rndm(0, op->nrof-1));
@@ -217,7 +217,7 @@ void save_throw_object (object *op, int type, object *originator)
                 op=create_archetype("burnout");
 		op->x=env->x,op->y=env->y;
                 insert_ob_in_ob(op,env);
-	      } else { 
+	      } else {
                 replace_insert_ob_in_map("burnout",originator);
 	      }
 	}
@@ -365,9 +365,9 @@ int hit_map(object *op, int dir, int type, int full_hit) {
 	    retflag |=1;
 	    if (was_destroyed (op, op_tag))
 		break;
-	} 
+	}
 	/* Here we are potentially destroying an object.  If the object has
-	 * NO_PASS set, it is also immune - you can't destroy walls.  Note 
+	 * NO_PASS set, it is also immune - you can't destroy walls.  Note
 	 * that weak walls have is_alive set, which prevent objects from
 	 * passing over/through them.  We don't care what type of movement
 	 * the wall blocks - if it blocks any type of movement, can't be
@@ -609,7 +609,7 @@ static void attack_message(int dam, int type, object *op, object *hitter) {
 	new_draw_info(NDI_BLACK, 0, hitter, buf);
     } else if(get_owner(hitter)!=NULL&&hitter->owner->type==PLAYER) {
       /* look for stacked spells and start reducing the message chances */
-        if (hitter->type == SPELL_EFFECT && 
+        if (hitter->type == SPELL_EFFECT &&
 	    (hitter->subtype == SP_EXPLOSION ||
 	     hitter->subtype == SP_BULLET ||
 	     hitter->subtype == SP_CONE)) {
@@ -620,7 +620,7 @@ static void attack_message(int dam, int type, object *op, object *hitter) {
 	   next = get_map_ob(map, hitter->x, hitter->y);
 	   if (next)
 	       while(next) {
-		   if (next->type == SPELL_EFFECT && 
+		   if (next->type == SPELL_EFFECT &&
 		       (next->subtype == SP_EXPLOSION || next->subtype==SP_BULLET ||
 		       next->subtype == SP_CONE))
 		       i*=3;
@@ -768,7 +768,7 @@ static int attack_ob_simple (object *op, object *hitter, int base_dam,
 	if ( ! simple_attack)
         {
             /* If you hit something, the victim should *always* wake up.
-             * Before, invisible hitters could avoid doing this. 
+             * Before, invisible hitters could avoid doing this.
              * -b.t. */
             if (QUERY_FLAG (op, FLAG_SLEEP))
                 CLEAR_FLAG(op,FLAG_SLEEP);
@@ -939,7 +939,7 @@ object *hit_with_arrow (object *op, object *victim)
 
     /* Missile hit victim */
     /* if the speed is > 10, then this is a fast moving arrow, we go straight
-     * through the target 
+     * through the target
      */
     if (hit_something && op->speed <= 10.0)
     {
@@ -1051,9 +1051,9 @@ static void scare_creature(object *target, object *hitter)
  * Note - changed for PR code - we now pass the attack number and not
  * the attacktype.  Makes it easier for the PR code.  */
 
-static int hit_player_attacktype(object *op, object *hitter, int dam, 
+static int hit_player_attacktype(object *op, object *hitter, int dam,
 	uint32 attacknum, int magic) {
-  
+
     int doesnt_slay = 1;
 
     /* Catch anyone that may be trying to send us a bitmask instead of the number */
@@ -1061,19 +1061,19 @@ static int hit_player_attacktype(object *op, object *hitter, int dam,
 	LOG(llevError, "hit_player_attacktype: Invalid attacknumber passed: %u\n", attacknum);
 	return 0;
     }
-    
+
     if (dam < 0) {
 	LOG(llevError,"hit_player_attacktype called with negative damage: %d\n", dam);
 	return 0;
     }
-    
+
     /* AT_INTERNAL is supposed to do exactly dam.  Put a case here so
      * people can't mess with that or it otherwise get confused.  */
     if (attacknum == ATNR_INTERNAL) return dam;
-    
+
     if (hitter->slaying) {
       if(((op->race != NULL) && strstr(hitter->slaying, op->race)) ||
-	 (op->arch && (op->arch->name != NULL) && 
+	 (op->arch && (op->arch->name != NULL) &&
 	  strstr(op->arch->name, hitter->slaying))
 	 ){
 	doesnt_slay = 0;
@@ -1095,25 +1095,25 @@ static int hit_player_attacktype(object *op, object *hitter, int dam,
      * shouldn't need to worry.  However, acid is an exception, since
      * it can still damage your items.  Only include attacktypes if
      * special processing is needed */
-    
-    if ((op->resist[attacknum] >= 100) && 
+
+    if ((op->resist[attacknum] >= 100) &&
 	doesnt_slay && (attacknum != ATNR_ACID))
       return 0;
 
     /* Keep this in order - makes things easier to find */
-    
+
     switch(attacknum) {
     case ATNR_PHYSICAL:
 	/*  here also check for diseases */
 	check_physically_infect(op, hitter);
 	break;
-	
+
 	/* Don't need to do anything for:
-	     magic, 
-	     fire, 
+	     magic,
+	     fire,
 	     electricity,
 	     cold */
-	
+
     case ATNR_CONFUSION:
     case ATNR_POISON:
     case ATNR_SLOW:
@@ -1124,16 +1124,16 @@ static int hit_player_attacktype(object *op, object *hitter, int dam,
     case ATNR_BLIND:
 	{
 	    /* chance for inflicting a special attack depends on the
-	     * difference between attacker's and defender's level 
+	     * difference between attacker's and defender's level
 	     */
 	    int level_diff = MIN(110, MAX(0, op->level - hitter->level));
 
 	    /* First, only creatures/players with speed can be affected.
 	     * Second, just getting hit doesn't mean it always affects
 	     * you.  Third, you still get a saving through against the
-	     * effect.  
+	     * effect.
 	     */
-	    if (op->speed && 
+	    if (op->speed &&
 		(QUERY_FLAG(op, FLAG_MONSTER) || op->type==PLAYER) &&
 		!(rndm(0, (attacknum == ATNR_SLOW?6:3)-1)) &&
 		!did_make_save(op, level_diff,  op->resist[attacknum]/10)) {
@@ -1158,7 +1158,7 @@ static int hit_player_attacktype(object *op, object *hitter, int dam,
 
 	/* Items only get corroded if you're not on a battleground and
          * if your acid resistance is below 50%. */
-	if (!op_on_battleground(op, NULL, NULL) && 
+	if (!op_on_battleground(op, NULL, NULL) &&
 	    (op->resist[ATNR_ACID] < 50))
 	  {
 	    object *tmp;
@@ -1173,7 +1173,7 @@ static int hit_player_attacktype(object *op, object *hitter, int dam,
 		  continue;
 		if(tmp->magic < -4) /* Let's stop at -5 */
 		  continue;
-		if(tmp->type==RING || 
+		if(tmp->type==RING ||
 		   /* removed boots and gloves from exclusion list in
                       PR */
 		   tmp->type==GIRDLE ||
@@ -1209,12 +1209,12 @@ static int hit_player_attacktype(object *op, object *hitter, int dam,
 	 * not much is drained, low rate means a lot is drained.
 	 */
 	int rate;
-	
-	if(op->resist[ATNR_DRAIN] >= 0) 
+
+	if(op->resist[ATNR_DRAIN] >= 0)
 	  rate = 50 + op->resist[ATNR_DRAIN] / 2;
 	else
 	  rate = 5000 / (100 - op->resist[ATNR_DRAIN]);
-	
+
 	/* full protection has no effect.  Nothing else in this
 	 * function needs to get done, so just return.  */
 	if(!rate)
@@ -1223,7 +1223,7 @@ static int hit_player_attacktype(object *op, object *hitter, int dam,
 	if(op->stats.exp <= rate) {
 	    if(op->type == GOLEM)
 		dam = 999; /* Its force is "sucked" away. 8) */
-	    else 
+	    else
 	      /* If we can't drain, lets try to do physical damage */
 		dam = hit_player_attacktype(op, hitter, dam, ATNR_PHYSICAL, magic);
 	} else {
@@ -1245,20 +1245,20 @@ static int hit_player_attacktype(object *op, object *hitter, int dam,
 
 		if (owner && owner != hitter) {
 		    if (op->type != PLAYER || owner->type != PLAYER)
-			change_exp(owner, op->stats.exp/(rate*2), 
+			change_exp(owner, op->stats.exp/(rate*2),
 				      hitter->chosen_skill? hitter->chosen_skill->skill:NULL, SK_EXP_TOTAL);
 		} else if (op->type != PLAYER || hitter->type != PLAYER) {
-		    change_exp(hitter, op->stats.exp/(rate*2), 
+		    change_exp(hitter, op->stats.exp/(rate*2),
 			      hitter->chosen_skill?hitter->chosen_skill->skill:NULL, 0);
 		}
 		change_exp(op,-op->stats.exp/rate, NULL, 0);
-	    } 
+	    }
 	    dam = 1;	/* Drain is an effect.  Still return 1 - otherwise, if you have pure
 			 * drain attack, you won't know that you are actually sucking out EXP,
 			 * as the messages will say you missed
 			 */
 	}
-      } 
+      }
       break;
     case ATNR_TURN_UNDEAD:
       {
@@ -1278,7 +1278,7 @@ static int hit_player_attacktype(object *op, object *hitter, int dam,
 		 (op->resist[ATNR_TURN_UNDEAD]/100)))
 		scare_creature(op, owner);
 	}
-	else 
+	else
 	  dam = 0; /* don't damage non undead - should we damage
                       undead? */
       } break;
@@ -1292,7 +1292,7 @@ static int hit_player_attacktype(object *op, object *hitter, int dam,
 	    query_name(hitter));
 	dam = 0;
 	break;
-    case ATNR_COUNTERSPELL: 
+    case ATNR_COUNTERSPELL:
 	LOG(llevError,
 	    "%s was hit by %s with counterspell attack.\n",
 	    query_name(op),
@@ -1305,11 +1305,11 @@ static int hit_player_attacktype(object *op, object *hitter, int dam,
 	break;
     case ATNR_HOLYWORD:
       {
-	/* This has already been handled by hit_player, 
+	/* This has already been handled by hit_player,
 	 *  no need to check twice  -- DAMN */
-	
+
 	object *owner = get_owner(hitter)==NULL?hitter:get_owner(hitter);
-	
+
 	/* As with turn undead above, give a bonus on the saving throw */
 	if((op->level+(op->resist[ATNR_HOLYWORD]/100)) <
 	   owner->level+turn_bonus[owner->stats.Wis])
@@ -1392,11 +1392,11 @@ static int kill_object(object *op,int dam, object *hitter, int type)
 	op->speed = 0.1;
 	update_ob_speed(op);
 	op->speed_left= -0.05;
-	return maxdam;	    
+	return maxdam;
     }
     if(QUERY_FLAG (op, FLAG_FRIENDLY) && op->type != PLAYER) {
 	remove_friendly_object(op);
-	if (get_owner (op) != NULL && op->owner->type == PLAYER && 
+	if (get_owner (op) != NULL && op->owner->type == PLAYER &&
 	    op->owner->contr->ranges[range_golem] == op) {
 	    op->owner->contr->ranges[range_golem]=NULL;
 	    op->owner->contr->golem_count=0;
@@ -1417,7 +1417,7 @@ static int kill_object(object *op,int dam, object *hitter, int type)
 
     /* is the victim (op) standing on battleground? */
     if (op_on_battleground(op, NULL, NULL)) battleg=1;
-    
+
     /* is this player killing?*/
     if (op->type == PLAYER && owner->type == PLAYER) pk=1;
 
@@ -1455,7 +1455,7 @@ static int kill_object(object *op,int dam, object *hitter, int type)
 			 query_name(hitter));
 	    }
 	    else {
-		new_draw_info_format(NDI_BLACK, 0, owner, 
+		new_draw_info_format(NDI_BLACK, 0, owner,
 			"You killed %s.",query_name(op));
 	    }
 	    /* Only play sounds for melee kills */
@@ -1465,7 +1465,7 @@ static int kill_object(object *op,int dam, object *hitter, int type)
 
 	/* If a player kills another player, not on
 	 * battleground, the "killer" looses 1 luck. Since this is
-	 * not reversible, it's actually quite a pain IMHO. -AV 
+	 * not reversible, it's actually quite a pain IMHO. -AV
 	 * Fix bug in that we were changing the luck of the hitter, not
 	 * player that the object belonged to - so if you killed another player
 	 * with spells, pets, whatever, there was no penalty.
@@ -1485,7 +1485,7 @@ static int kill_object(object *op,int dam, object *hitter, int type)
 	    skop = owner->chosen_skill;
 	}
 	else if (QUERY_FLAG(owner, FLAG_READY_WEAPON)) skill=owner->current_weapon->skill;
-	else 
+	else
 	    LOG(llevError,"kill_object - unable to find skill that killed monster\n");
 
 	/* We have the skill we want to credit to - now find the object this goes
@@ -1547,7 +1547,7 @@ static int kill_object(object *op,int dam, object *hitter, int type)
 	    exp=exp/2;
 
 	/* if op is standing on "battleground" (arena), no way to gain
-	 * exp by killing him 
+	 * exp by killing him
 	 */
 	if (battleg) exp = 0;
 
@@ -1596,31 +1596,31 @@ static int kill_object(object *op,int dam, object *hitter, int type)
 }
 
 /**
- * Find out if this is friendly fire (PVP and attacker is peaceful) or not 
+ * Find out if this is friendly fire (PVP and attacker is peaceful) or not
  *  Returns 0 this is not friendly fire
  */
 
 int friendly_fire(object *op, object *hitter){
     object *owner;
     int friendlyfire;
-	
+
     if (hitter->head) hitter=hitter->head;
 
     friendlyfire = 0;
-	
+
     if(op->type == PLAYER) {
-			
+
 	if(hitter->type == PLAYER && hitter->contr->peaceful == 1)
 	    return 1;
-		    
+
 	if((owner = get_owner(hitter))!=NULL) {
 	    if(owner->type == PLAYER && owner->contr->peaceful == 1)
 		friendlyfire = 2;
 	}
-			
-	if (hitter->type == SPELL || hitter->type == POISONING || 
+
+	if (hitter->type == SPELL || hitter->type == POISONING ||
 	    hitter->type == DISEASE || hitter->type == RUNE)
-	    friendlyfire = 0;			
+	    friendlyfire = 0;
     }
     return friendlyfire;
 }
@@ -1727,7 +1727,7 @@ int hit_player(object *op,int dam, object *hitter, int type, int full_hit) {
      */
     if (type & AT_HOLYWORD) {
         object *god;
-	if ((!hitter->slaying || 
+	if ((!hitter->slaying ||
 	     (!(op->race && strstr(hitter->slaying,op->race)) &&
 	     !(op->name && strstr(hitter->slaying,op->name)))) &&
 	    (!QUERY_FLAG(op,FLAG_UNDEAD) ||
@@ -1766,7 +1766,7 @@ int hit_player(object *op,int dam, object *hitter, int type, int full_hit) {
             full_hit = 1;
 	}
     }
-	
+
     /* if this is friendly fire then do a set % of damage only
      * Note - put a check in to make sure this attack is actually
      * doing damage - otherwise, the +1 in the coe below will make
@@ -1775,7 +1775,7 @@ int hit_player(object *op,int dam, object *hitter, int type, int full_hit) {
     friendlyfire = friendly_fire(op, hitter);
     if (friendlyfire && maxdam){
 	maxdam = ((dam * settings.set_friendly_fire) / 100)+1;
-			
+
 #ifdef ATTACK_DEBUG
 	LOG(llevDebug,"Friendly fire (type:%d setting: %d%) did %d damage dropped to %d\n",
 	friendlyfire, settings.set_friendly_fire, dam, maxdam);
@@ -1855,7 +1855,7 @@ int hit_player(object *op,int dam, object *hitter, int type, int full_hit) {
 	    remove_friendly_object(hitter);
 	remove_ob(hitter);
 	free_object(hitter);
-    } 
+    }
     /* Lets handle creatures that are splitting now */
     else if(type&AT_PHYSICAL&&!QUERY_FLAG(op, FLAG_FREED)&&QUERY_FLAG(op,FLAG_SPLITTING)) {
 	int i;
@@ -1917,7 +1917,7 @@ static void poison_player(object *op, object *hitter, int dam)
 	     * damage should be dependent something--I choose to
 	     * do this:  if it's a monster, the damage from the
 	     * poisoning goes as the level of the monster/2.
-	     * If anything else, goes as damage. 
+	     * If anything else, goes as damage.
 	     */
 
 	    if(QUERY_FLAG(hitter,FLAG_ALIVE))
@@ -1977,15 +1977,15 @@ void confuse_player(object *op, object *hitter, int dam)
 {
     object *tmp;
     int maxduration;
-    
+
     tmp = present_in_ob_by_name(FORCE,"confusion", op);
     if(!tmp) {
 	tmp = create_archetype(FORCE_NAME);
 	tmp = insert_ob_in_ob(tmp,op);
     }
-    
+
     /* Duration added per hit and max. duration of confusion both depend
-     *  on the player's resistance 
+     *  on the player's resistance
      */
     tmp->speed = 0.05;
     tmp->subtype = FORCE_CONFUSION;
@@ -1995,7 +1995,7 @@ void confuse_player(object *op, object *hitter, int dam)
     maxduration = MAX(2, 30*(100-op->resist[ATNR_CONFUSION])/100);
     if( tmp->duration > maxduration)
 	tmp->duration = maxduration;
-    
+
     if(op->type == PLAYER && !QUERY_FLAG(op,FLAG_CONFUSED))
 	new_draw_info(NDI_UNIQUE, 0,op,"You suddenly feel very confused!");
     SET_FLAG(op, FLAG_CONFUSED);
@@ -2009,7 +2009,7 @@ void blind_player(object *op, object *hitter, int dam)
     if (op->resist[ATNR_BLIND]==100) return;
 
     tmp = present_in_ob(BLINDNESS,op);
-    if(!tmp) { 
+    if(!tmp) {
       tmp = create_archetype("blindness");
       SET_FLAG(tmp, FLAG_BLIND);
       SET_FLAG(tmp, FLAG_APPLIED);
@@ -2027,18 +2027,18 @@ void blind_player(object *op, object *hitter, int dam)
 
       new_draw_info_format(NDI_UNIQUE,0,owner,
 	  "Your attack blinds %s!",query_name(op));
-    } 
+    }
     tmp->stats.food += dam;
     if(tmp->stats.food > 10) tmp->stats.food = 10;
 }
 
-void paralyze_player(object *op, object *hitter, int dam) 
+void paralyze_player(object *op, object *hitter, int dam)
 {
     float effect,max;
     /* object *tmp; */
 
     /* This is strange stuff... someone knows for what this is
-     * written? Well, i think this can and should be removed 
+     * written? Well, i think this can and should be removed
     */
 
     /*
@@ -2080,7 +2080,7 @@ void paralyze_player(object *op, object *hitter, int dam)
  * field of the deathstriking object is affected (this includes undead).
  * If no slaying set, only undead are unaffected.
  */
-static void deathstrike_player(object *op, object *hitter, int *dam) 
+static void deathstrike_player(object *op, object *hitter, int *dam)
 {
     int atk_lev, def_lev, kill_lev;
 
@@ -2114,8 +2114,8 @@ static void deathstrike_player(object *op, object *hitter, int *dam)
 	 */
 	if(kill_lev >= def_lev) {
 	    *dam = op->stats.hp+10; /* take all hp. they can still save for 1/2 */
-	    /* I think this doesn't really do much.  Because of 
-	     * integer rounding, this only makes any difference if the 
+	    /* I think this doesn't really do much.  Because of
+	     * integer rounding, this only makes any difference if the
 	     * attack level is double the defender level.
 	     */
 	    *dam *= kill_lev / def_lev;
@@ -2133,7 +2133,7 @@ static void deathstrike_player(object *op, object *hitter, int *dam)
 static void thrown_item_effect (object *hitter, object *victim)
 {
     if(!QUERY_FLAG(hitter,FLAG_ALIVE)) {
-	/* May not need a switch for just 2 types, but this makes it 
+	/* May not need a switch for just 2 types, but this makes it
 	 * easier for expansion.
 	 */
 	switch (hitter->type) {
@@ -2182,7 +2182,7 @@ static int adj_attackroll (object *hitter, object *target) {
   else if(!QUERY_FLAG(hitter,FLAG_ALIVE))
     return 0;
 
-   /* determine the condtions under which we make an attack.  
+   /* determine the condtions under which we make an attack.
     * Add more cases, as the need occurs. */
 
   if(!can_see_enemy(attacker,target)) {
@@ -2217,7 +2217,7 @@ static int adj_attackroll (object *hitter, object *target) {
    * disadantage for the monsters! Too bad, because missiles which
    * fly fast should have a better chance of hitting a slower target.
    */
-  if(hitter->speed<target->speed) 
+  if(hitter->speed<target->speed)
     adjust += ((float) hitter->speed-target->speed);
 #endif
 
@@ -2226,7 +2226,7 @@ static int adj_attackroll (object *hitter, object *target) {
 #endif
 
   return adjust;
-} 
+}
 
 
 /** determine if the object is an 'aimed' missile */
@@ -2243,5 +2243,5 @@ static int is_aimed_missile ( object *op) {
 	    return 1;
     }
     return 0;
-} 
+}
 
