@@ -663,6 +663,7 @@ void remove_door2(object *op);
 object *stop_item(object *op);
 void fix_stopped_item(object *op, mapstruct *map, object *originator);
 object *fix_stopped_arrow(object *op);
+int free_no_drop(object *op);
 void move_arrow(object *op);
 void move_teleporter(object *op);
 void move_player_changer(object *op);

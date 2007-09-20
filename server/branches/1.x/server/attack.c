@@ -900,6 +900,8 @@ object *hit_with_arrow (object *op, object *victim)
         container = op;
         hitter = op->inv;
         remove_ob (hitter);
+        if (free_no_drop(hitter))
+            return NULL;
         insert_ob_in_map(hitter, container->map,hitter,INS_NO_MERGE | INS_NO_WALK_ON);
         break;
         /* Note that we now have an empty THROWN_OBJ on the map.  Code that
@@ -910,6 +912,8 @@ object *hit_with_arrow (object *op, object *victim)
     if (!hitter) {
         container = NULL;
         hitter = op;
+        if (free_no_drop(hitter))
+            return NULL;
     }
 
     /* Try to hit victim */

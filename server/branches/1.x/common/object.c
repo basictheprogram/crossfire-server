@@ -45,7 +45,6 @@ static int compare_ob_value_lists(const object *, const object *);
 static void dump_object2(object *);
 static void free_key_values(object *);
 static void expand_objects(void);
-static void free_object2(object *, int);
 static void permute(int *, int, int);
 static int set_ob_key_value_s(object *, const char *, const char *, int);
 static void get_multi_size(object *, int *, int *, int *, int *);
@@ -1138,7 +1137,7 @@ void update_object(object *op, int action) {
 void free_object(object *ob) {
   free_object2(ob, 0);
 }
-static void free_object2(object *ob, int free_inventory) {
+void free_object2(object *ob, int free_inventory) {
     object *tmp,*op;
 
     if (!QUERY_FLAG(ob,FLAG_REMOVED)) {
