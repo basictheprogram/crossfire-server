@@ -1,5 +1,5 @@
 /* alchemy.c */
-int use_alchemy(object* op);
+int use_alchemy(object *op);
 /* apply.c */
 int transport_can_hold(const object *transport, const object *op, int nrof);
 int apply_transport(object *pl, object *transport, int aflag);
@@ -117,7 +117,6 @@ int command_body(object *op, char *params);
 int command_motd(object *op, char *params);
 int command_rules(object *op, char *params);
 int command_news(object *op, char *params);
-int command_bug(object *op, char *params);
 void malloc_info(object *op);
 void current_region_info(object *op);
 void current_map_info(object *op);
@@ -148,7 +147,6 @@ int command_dumpmap(object *op, char *params);
 int command_dumpallmaps(object *op, char *params);
 int command_printlos(object *op, char *params);
 int command_version(object *op, char *params);
-void bug_report(const char *reportstring);
 int command_output_sync(object *op, char *params);
 int command_output_count(object *op, char *params);
 int command_listen(object *op, char *params);
@@ -169,17 +167,15 @@ int command_explore(object *op, char *params);
 int command_sound(object *op, char *params);
 void receive_player_name(object *op, char k);
 void receive_player_password(object *op, char k);
-int explore_mode(void);
 int command_title(object *op, char *params);
 int command_save(object *op, char *params);
 int command_peaceful(object *op, char *params);
 int command_wimpy(object *op, char *params);
 int command_brace(object *op, char *params);
-int command_style_map_info(object *op, char *params);
 int command_kill_pets(object *op, char *params);
 int command_quests(object *pl, char *params);
 int command_passwd(object *pl, char *params);
-int do_harvest(object* pl, int dir, object* skill);
+int do_harvest(object *pl, int dir, object *skill);
 /* c_move.c */
 int command_east(object *op, char *params);
 int command_north(object *op, char *params);
@@ -227,6 +223,7 @@ int command_rename_item(object *op, char *params);
 int command_lock_item(object *op, char *params);
 /* c_party.c */
 partylist *get_firstparty(void);
+partylist *form_party(object *op, const char *params);
 void remove_party(partylist *target_party);
 void obsolete_parties(void);
 int confirm_party_password(object *op);
@@ -234,7 +231,6 @@ void receive_party_password(object *op, char k);
 void send_party_message(object *op, char *msg);
 int command_gsay(object *op, char *params);
 int command_party(object *op, char *params);
-partylist* form_party(object *op, const char *params);
 int command_party_rejoin(object *op, char *params);
 /* c_range.c */
 int command_invoke(object *op, char *params);
@@ -296,13 +292,14 @@ int command_stack_list(object *op, char *params);
 int command_stack_clear(object *op, char *params);
 int command_diff(object *op, char *params);
 int command_insert_into(object *op, char *params);
-int command_follow(object* op, char* params);
+int command_style_map_info(object *op, char *params);
+int command_follow(object *op, char *params);
 /* commands.c */
 void init_commands(void);
 command_function find_oldsocket_command(char *cmd);
 command_function find_oldsocket_command2(char *cmd);
 /* daemon.c */
-void become_daemon();
+void become_daemon(void);
 /* disease.c */
 int move_disease(object *disease);
 int infect_object(object *victim, object *disease, int force);
@@ -312,7 +309,7 @@ int cure_disease(object *sufferer, object *caster);
 /* egoitem.c */
 int apply_power_crystal(object *op, object *crystal);
 /* hiscore.c */
-void check_score(object *op);
+void check_score(object *op, int quiet);
 void display_high_score(object *op, int max, const char *match);
 /* gods.c */
 object *find_god(const char *name);
@@ -447,8 +444,8 @@ void *cfapi_map_update_position(int *type, ...);
 void *cfapi_map_delete_map(int *type, ...);
 void *cfapi_map_message(int *type, ...);
 void *cfapi_map_get_object_at(int *type, ...);
-void *cfapi_map_change_light(int *type, ...);
 void *cfapi_map_present_arch_by_name(int *type, ...);
+void *cfapi_map_change_light(int *type, ...);
 void *cfapi_object_move(int *type, ...);
 void *cfapi_object_get_key(int *type, ...);
 void *cfapi_object_set_key(int *type, ...);
@@ -491,13 +488,11 @@ void *cfapi_object_transfer(int *type, ...);
 void *cfapi_object_find_archetype_inside(int *type, ...);
 void *cfapi_object_drop(int *type, ...);
 void *cfapi_object_take(int *type, ...);
-void* cfapi_object_change_abil(int* type, ...);
+void *cfapi_object_change_abil(int *type, ...);
 void *cfapi_object_say(int *type, ...);
-void *cfapi_object_speak(int *type, ...);
 void *cfapi_player_find(int *type, ...);
 void *cfapi_player_message(int *type, ...);
 void *cfapi_object_change_exp(int *type, ...);
-/*void *cfapi_player_send_inventory(int *type, ...);*/
 void *cfapi_player_can_pay(int *type, ...);
 void *cfapi_object_teleport(int *type, ...);
 void *cfapi_object_pickup(int *type, ...);
@@ -645,8 +640,8 @@ void spell_failure(object *op, int failure, int power, object *skill);
 int cast_spell(object *op, object *caster, int dir, object *spell_ob, char *stringarg);
 void move_spell_effect(object *op);
 void apply_spell_effect(object *spell, object *victim);
-void store_spell_expiry(object* spell);
-void check_spell_expiry(object* spell);
+void store_spell_expiry(object *spell);
+void check_spell_expiry(object *spell);
 /* swamp.c */
 void walk_on_deep_swamp(object *op, object *victim);
 void move_deep_swamp(object *op);
@@ -678,7 +673,7 @@ void cftimer_process_timers(void);
 int cftimer_create(int id, long delay, object *ob, int mode);
 int cftimer_destroy(int id);
 int cftimer_find_free_id(void);
-void cftimer_init();
+void cftimer_init(void);
 /* weather.c */
 void set_darkness_map(mapstruct *m);
 void tick_the_clock(void);

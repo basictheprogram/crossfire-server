@@ -43,8 +43,9 @@ static void copy_file(const char *filename, FILE *fpout);
  * keep the game running.  Thus, we don't want to free any information.
  */
 void emergency_save(int flag) {
-  player *pl;
 #ifndef NO_EMERGENCY_SAVE
+  player *pl;
+
   trying_emergency_save = 1;
   if(editor)
     return;
@@ -72,19 +73,12 @@ void emergency_save(int flag) {
       LOG(llevError, "(failed) ");
       new_draw_info(NDI_UNIQUE, 0,pl->ob,"Emergency save failed, checking score...");
     }
-    check_score(pl->ob);
+    check_score(pl->ob,0);
   }
   LOG(llevError,"\n");
 #else
   LOG(llevInfo,"Emergency saves disabled, no save attempted\n");
 #endif
-  /* If the game is exiting, remove the player locks */
-  if (!flag) {
-    for(pl=first_player;pl!=NULL;pl=pl->next) {
-      if(pl->ob) {
-      }
-    }
-  }
 }
 
 /**
