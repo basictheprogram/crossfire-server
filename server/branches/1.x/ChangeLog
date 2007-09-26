@@ -17,6 +17,13 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+common/loader.l:  Add artifact_init check to check_loaded_object() - if set
+  don't do processing.  This has been in the trunk for 9 months, without
+  any problems observed.  Fixes bug 1727944 - horn of plenty shoots bullets -
+  what happens now is the artifacts are 'fixed' in check_loaded_objects(),
+  with magic bullet getting added to them.
+MSW 2007-09-25
+
 Add support for periodic updating of hiscore information for players - fixes
 bug 1735262.  Main change was to modify check_score() to take a flag that
 determines if messages related to high score placement should be displayed
