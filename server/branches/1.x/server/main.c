@@ -27,7 +27,9 @@
 */
 
 #include <global.h>
+#ifndef __CEXTRACT__
 #include <sproto.h>
+#endif
 
 int main(int argc, char **argv)
 {
