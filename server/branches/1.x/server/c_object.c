@@ -878,7 +878,9 @@ void put_object_in_sack (object *op, object *sack, object *tmp, uint32 nrof)
 		  query_name(tmp), query_name(sack));
     tmp_tag = tmp->count;
     tmp2 = insert_ob_in_ob(tmp, sack);
-    fix_player(op); /* This is overkill, fix_player() is called somewhere */
+
+    if (!QUERY_FLAG(op, FLAG_NO_FIX_PLAYER))
+	fix_player(op); /* This is overkill, fix_player() is called somewhere */
 		  /* in object.c */
 
     /* If a transport, need to update all the players in the transport
@@ -937,12 +939,14 @@ object *drop_object (object *op, object *tmp, uint32 nrof)
         return NULL;
 
     if (QUERY_FLAG (tmp, FLAG_STARTEQUIP)) {
-      sprintf(buf,"You drop the %s.", query_name(tmp));
-      new_draw_info(NDI_UNIQUE, 0,op,buf);
-      new_draw_info(NDI_UNIQUE, 0,op,"The gods who lent it to you retrieves it.");
-      free_object(tmp);
-      fix_player(op);
-      return NULL;
+	sprintf(buf,"You drop the %s.", query_name(tmp));
+	new_draw_info(NDI_UNIQUE, 0,op,buf);
+	new_draw_info(NDI_UNIQUE, 0,op,"The gods who lent it to you retrieves it.");
+
+	free_object(tmp);
+	if (!QUERY_FLAG(op, FLAG_NO_FIX_PLAYER))
+	    fix_player(op);
+	return NULL;
     }
 
 /*  If SAVE_INTERVAL is commented out, we never want to save
@@ -971,7 +975,6 @@ object *drop_object (object *op, object *tmp, uint32 nrof)
         sell_item(tmp, op);
     }
 
-
     SET_FLAG (op, FLAG_NO_APPLY);
     remove_ob(op);
     insert_ob_in_map(op, op->map, op, INS_NO_MERGE | INS_NO_WALK_ON);
@@ -980,14 +983,13 @@ object *drop_object (object *op, object *tmp, uint32 nrof)
     /* Call this before we update the various windows/players.  At least
      * that we, we know the weight is correct.
      */
+    if (!QUERY_FLAG(op, FLAG_NO_FIX_PLAYER)) {
     fix_player(op); /* This is overkill, fix_player() is called somewhere */
 		    /* in object.c */
 
-    if (op->type == PLAYER)
-    {
-        /* insert_ob_in_map handles the update_look for the player. */
-        /* Need to update the weight for the player */
-        esrv_update_item(UPD_WEIGHT, op, op);
+	/* Need to update weight of player */
+	if (op->type == PLAYER)
+	    esrv_update_item(UPD_WEIGHT, op, op);
     }
     return tmp;
 }
@@ -1092,6 +1094,10 @@ int command_dropall (object *op, char *params) {
 
     if (op->contr) count=op->contr->count;
 
+    /* Set this so we don't call it for _every_ object that
+     * is dropped.
+     */
+    SET_FLAG(op, FLAG_NO_FIX_PLAYER);
     /*
      * This is the default.  Drops everything not locked or considered
      * not something that should be dropped.
@@ -1187,6 +1193,13 @@ int command_dropall (object *op, char *params) {
         }
     }
     op->contr->socket.update_look=1;
+    CLEAR_FLAG(op, FLAG_NO_FIX_PLAYER);
+    /* call it now, once */
+    fix_player(op);
+    /* Need to update weight of player.  Likewise, only do it once */
+    if (op->type == PLAYER)
+	esrv_update_item(UPD_WEIGHT, op, op);
+
     return 0;
 }
 

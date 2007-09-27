@@ -526,7 +526,7 @@
  * warranted.
  */
 
-#define SOCKETBUFSIZE 128*1024
+#define SOCKETBUFSIZE 256*1024
 
 /*
  * Your tmp-directory should be large enough to hold the uncompressed
