@@ -17,6 +17,14 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Bug fix for 1803265 - archetype conflict. Made required updates for the
+Potion of invulnerability to potion of shielding name change.
+--
+server/branches/1.x/lib/formulae
+server/branches/1.x/lib/treasures
+--
+RJT 2007-09-27
+
 Face/animation related plugin functions.
 ---
 Enable a plugin to find a face, and change face or animation. Make property
