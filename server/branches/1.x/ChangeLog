@@ -17,6 +17,23 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Adding the minor, medium and major Potions of Life to the treasure list so
+they can be found in shops, dungeons, et al.
+--
+server/branches/1.x/lib/treasures
+--
+RJT 2007-09-26
+
+Renamed "potion of invulnerability" to "potion of shielding." Hopefully this
+will remove player confusion as to why one takes damage from all attack types
+(except physical) when drinking this potion.
+--
+arch/trunk/potion/potioninv.arc
+maps/trunk/pup_land/begin/adv
+server/trunk/lib/treasures
+---
+RJT 2007-09-26
+
 common/loader.l:  Add artifact_init check to check_loaded_object() - if set
   don't do processing.  This has been in the trunk for 9 months, without
   any problems observed.  Fixes bug 1727944 - horn of plenty shoots bullets -
