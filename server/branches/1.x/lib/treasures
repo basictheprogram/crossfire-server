@@ -2215,7 +2215,7 @@ treasureone shop_potions
   arch potion_cold2
     chance 1
   more
-  arch potion_invulnerability
+  arch potion_shielding
     chance 5
   more
   arch potion_aethereality
