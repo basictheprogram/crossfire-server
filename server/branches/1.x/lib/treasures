@@ -1371,6 +1371,15 @@ treasureone list9
   arch potion_magic
     chance 5
   more
+  arch minor_potion_restoration
+    chance 15
+  more
+  arch medium_potion_restoration
+    chance 10
+  more
+  arch major_potion_restoration
+    chance 5
+  more
   arch potion_restoration
     chance 5
   more
