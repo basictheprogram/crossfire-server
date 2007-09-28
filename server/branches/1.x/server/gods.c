@@ -788,6 +788,7 @@ static int god_enchants_weapon (object *op, object *god, object *tr, object *ski
         new_draw_info_format (NDI_UNIQUE, 0, op,
                 "Your %s now hungers to slay enemies of your god!",
                 weapon->name);
+	weapon->item_power++;
         return 1;
     }
 
@@ -796,6 +797,7 @@ static int god_enchants_weapon (object *op, object *god, object *tr, object *ski
     if ((attacktype & god->attacktype) != god->attacktype) {
         new_draw_info (NDI_UNIQUE, 0, op, "Your weapon suddenly glows!");
         weapon->attacktype = attacktype | god->attacktype;
+	weapon->item_power++;
         return 1;
     }
 
@@ -807,6 +809,7 @@ static int god_enchants_weapon (object *op, object *god, object *tr, object *ski
         weapon->magic++;
         if (op->type == PLAYER)
             esrv_update_item (UPD_NAME, op, weapon);
+	weapon->item_power++;
         return 1;
     }
 
