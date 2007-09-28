@@ -1077,6 +1077,9 @@ mapstruct *load_original_map(const char *filename, int flags) {
 	MAP_DIFFICULTY(m)=calculate_difficulty(m);
     set_map_reset_time(m);
     
+    /* In case other objects press some buttons down */
+    update_buttons(m);
+
     /* Handle for map load event */
     execute_global_event(EVENT_MAPLOAD, m);
     
@@ -1665,8 +1668,7 @@ mapstruct *ready_map_name(const char *name, int flags) {
      */
 
     decay_objects(m); /* start the decay */
-    /* In case other objects press some buttons down */
-    update_buttons(m);
+
     if (m->outdoor)
 	    set_darkness_map(m);
     /* run the weather over this map */
