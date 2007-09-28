@@ -73,7 +73,7 @@ void emergency_save(int flag) {
       LOG(llevError, "(failed) ");
       new_draw_info(NDI_UNIQUE, 0,pl->ob,"Emergency save failed, checking score...");
     }
-    check_score(pl->ob,0);
+    check_score(pl->ob,1);
   }
   LOG(llevError,"\n");
 #else

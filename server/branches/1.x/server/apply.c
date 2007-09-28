@@ -2357,15 +2357,6 @@ static int dragon_eat_flesh(object *op, object *meal) {
 
 static void apply_savebed (object *pl)
 {
-    if(!pl->contr->name_changed||!pl->stats.exp) {
-      new_draw_info(NDI_UNIQUE, 0,pl,"You don't deserve to save your character yet.");
-      return;
-    }
-    if(QUERY_FLAG(pl,FLAG_WAS_WIZ)) {
-      new_draw_info(NDI_UNIQUE, 0,pl,"Since you have cheated you can't save.");
-      return;
-    }
-
     /* Lauwenmark : Here we handle the LOGOUT global event */
     execute_global_event(EVENT_LOGOUT, pl->contr, pl->contr->socket.host);
 
@@ -2373,6 +2364,7 @@ static void apply_savebed (object *pl)
     terminate_all_pets(pl);
     remove_ob(pl);
     pl->direction=0;
+
     new_draw_info_format(NDI_UNIQUE | NDI_ALL | NDI_DK_ORANGE, 5, pl,
 	"%s leaves the game.",pl->name);
     

@@ -278,6 +278,12 @@ void check_score(object *op, int quiet) {
 	}
 	return;
     }
+    if (!op->stats.exp) {
+	if (!quiet)
+	    new_draw_info(NDI_UNIQUE, 0,op, "You don't deserve to save your character yet.");
+	return;
+    }
+
     strncpy(new_score.name,op->name,BIG_NAME);
     new_score.name[BIG_NAME-1] = '\0';
     strncpy(new_score.title,op->contr->own_title,BIG_NAME);
