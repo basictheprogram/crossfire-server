@@ -885,7 +885,7 @@ int summon_object(object *op, object *caster, object *spell_ob, int dir, const c
     }
 
     if (dir) {
-        // Only fail if caster specified a blocked direction.
+        /* Only fail if caster specified a blocked direction. */
         x = freearr_x[dir];
         y = freearr_y[dir];
         if (ob_blocked(&summon_arch->clone, op->map, op->x + x, op->y + y)) {
@@ -949,6 +949,7 @@ int summon_object(object *op, object *caster, object *spell_ob, int dir, const c
 	    tmp->x = op->x + x + tmp->arch->clone.x;
 	    tmp->y = op->y + y + tmp->arch->clone.y;
 	    tmp->map = op->map;
+	    tmp->map = get_map_from_coord(tmp->map, &tmp->x, &tmp->y);
 	}
 	head->direction = freedir[ndir];
 	head->stats.exp = 0;
