@@ -376,31 +376,15 @@ int command_party (object *op, char *params)
     op->contr->party=NULL;
     return 1;
   }
-  if(strcmp(params, "who")==0) {
-    player *pl;
-    tmpparty = op->contr->party;
-    if(op->contr->party==NULL) {
-      new_draw_info(NDI_UNIQUE, 0,op,"You are not a member of any party.");
-      return 1;
-    }
-    new_draw_info_format(NDI_UNIQUE, 0, op,
-	"Members of party: %s.", op->contr->party->partyname);
-    for(pl=first_player;pl!=NULL;pl=pl->next)
-      if(pl->ob->contr->party==op->contr->party) {
-	  if (settings.set_title == TRUE) {
-	      if(pl->ob->contr->own_title[0]!='\0')
-		  sprintf(buf,"%3d %s the %s",
-		      pl->ob->level,pl->ob->name,pl->ob->contr->own_title);
-	      else
-		  sprintf(buf,"%3d %s the %s",
-		      pl->ob->level,pl->ob->name,pl->ob->contr->title);
-	  } else
-	      sprintf(buf,"%3d %s the %s",
-		  pl->ob->level,pl->ob->name,pl->ob->contr->title);
-        new_draw_info(NDI_UNIQUE, 0,op,buf);
-      }
-    return 1;
-  } /* leave */
+    if(strcmp(params, "who")==0) {
+        if(op->contr->party==NULL) {
+            new_draw_info(NDI_UNIQUE, 0,op, 
+                "You are not a member of any party.");
+            return 1;
+        }
+        list_players(op, NULL, op->contr->party);
+        return 1;
+    } /* leave */
 
   if(strncmp(params, "passwd ", 7) == 0) {
     partylist *tmplist;
