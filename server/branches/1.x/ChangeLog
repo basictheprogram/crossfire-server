@@ -17,6 +17,11 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Fix for bug #1693250: loader.c isn't correctly generated.
+ configure.ac: remove AM_MAINTAINER_MODE macro, no one remembers
+  why it was set.
+Nicolas Weeger 2007-10-27
+
 Fix for bug #1815251: Multiple 'the' displayed in party who.
 Moved player listing code to own function, call it from command_who and party who.
 Move 'who' format checking to load_settings().
