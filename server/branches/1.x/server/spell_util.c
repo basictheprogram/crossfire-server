@@ -1394,6 +1394,7 @@ int cast_spell(object *op, object *caster,int dir,object *spell_ob, char *string
 
 	case SP_PARTY_SPELL:
 	    success = cast_party_spell( op, caster, dir, spell_ob, stringarg );
+	    break;
 
 	default:
 	    LOG(llevError,"cast_spell: Unhandled spell subtype %d\n",
