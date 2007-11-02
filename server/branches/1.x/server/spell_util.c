@@ -1392,8 +1392,8 @@ int cast_spell(object *op, object *caster,int dir,object *spell_ob, char *string
 	    success= cast_create_town_portal (op,caster,spell_ob, dir);
 	    break;
 
-    case SP_PARTY_SPELL:
-        success = cast_party_spell( op, caster, dir, spell_ob, stringarg );
+	case SP_PARTY_SPELL:
+	    success = cast_party_spell( op, caster, dir, spell_ob, stringarg );
 
 	default:
 	    LOG(llevError,"cast_spell: Unhandled spell subtype %d\n",
