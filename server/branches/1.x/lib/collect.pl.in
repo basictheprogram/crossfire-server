@@ -259,6 +259,9 @@ line:	while(<ARC>) {
 		$walkon = 0;
 		$nopick = 0;
 		$arch = join "_", @values;
+		$print_editor_folder = 1;
+	    } else {
+		$print_editor_folder = 0;
 	    }
 	    if ($var eq "end") {
 		if ($#lface !=0) {
@@ -279,9 +282,6 @@ line:	while(<ARC>) {
 	    if ($var eq "color_bg") {
 		$lbg = $values[0];
 		next line;
-	    }
-	    if ($var eq "end") {
-		print ARCH "editor_folder $pathto\n" if $pathto ne "";
 	    }
 	    if ($var eq "visibility") {
 		$lvis = $values[0];
@@ -354,6 +354,9 @@ line:	while(<ARC>) {
 		next line;  #smoothface must be excluded from archetype file
 	    }
 	    print ARCH $_,"\n";
+	    if ($print_editor_folder) {
+		print ARCH "editor_folder $pathto\n" if $pathto ne "";
+	    }
 	}
 	close(ARC);
     }
