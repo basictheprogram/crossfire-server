@@ -680,14 +680,20 @@ int command_weather (object *op, char *params)
     int wx, wy, temp, sky;
     char buf[MAX_BUF];
 
-    if (settings.dynamiclevel < 1)
+    if (settings.dynamiclevel < 1) {
+	draw_ext_info(NDI_UNIQUE, 0, op, MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_WEATHER,
+	    "The weather is perpetually great around here.", NULL);
 	return 1;
+    }
 
     if (op->map == NULL)
 	return 1;
 
-    if (worldmap_to_weathermap(op->x, op->y, &wx, &wy, op->map) != 0)
+    if (worldmap_to_weathermap(op->x, op->y, &wx, &wy, op->map) != 0) {
+	draw_ext_info(NDI_UNIQUE, 0, op, MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_WEATHER,
+	    "You can't see the weather from here.", NULL);
 	return 1;
+    }
 
     if (QUERY_FLAG(op, FLAG_WIZ)) {
 	/* dump the weather, Dm style! Yo! */
