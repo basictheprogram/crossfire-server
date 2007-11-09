@@ -17,6 +17,11 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Update the treasure list so the different types of Potions
+of Life show up in shops.
+ lib/treasures
+Rick Tanner 2007-11-08
+
 Display information for weather even if turned off.
  lib/weather.c
 Andreas Kirschbaum 2007-11-07
