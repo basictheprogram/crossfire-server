@@ -837,10 +837,13 @@ void put_object_in_sack (object *op, object *sack, object *tmp, uint32 nrof)
 	return;
     }
     if (tmp->type == CONTAINER && tmp->inv) {
-
+        if (tmp->slaying)
+            return;
 	/* Eneq(@csd.uu.se): If the object to be dropped is a container
+	 * and does not require a key to be opened,
 	 * we instead move the contents of that container into the active
 	 * container, this is only done if the object has something in it.
+	 * If object is container but need a key, just don't do anything
 	 */
 	sack2 = tmp;
 	new_draw_info_format(NDI_UNIQUE, 0,op, "You move the items from %s into %s.",
