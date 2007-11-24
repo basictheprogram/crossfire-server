@@ -28,7 +28,7 @@
 
 
 /* This file contains code relevant to the BOOKS hack -- designed
- * to allow randomly occuring messages in non-magical texts.
+ * to allow randomly occurring messages in non-magical texts.
  */
 
 /* laid down initial file - dec 1995. -b.t. thomas@astro.psu.edu */
@@ -53,10 +53,10 @@
  * under the current regime, since there are generally fewer possible (random) 
  * messages than space available on the titlelists.
  * One exception (for sure) are the monster messages. But no worries, you should
- * see all of the monster info in some order (but not all possble combinations)
+ * see all of the monster info in some order (but not all possible combinations)
  * before the monster titlelist space is run out. You can increase titlelist
  * space by increasing the array sizes for the monster book_authours and book_names 
- * (see  max_titles[] array and include/read.h). Since the unique_book algorthm is 
+ * (see  max_titles[] array and include/read.h). Since the unique_book algorithm is
  * kinda stupid, this program *may* slow down program execution if defined (but I don't 
  * think its a significant problem, at least, I have no problems running this option
  * on a Sparc 10! Also, once archive title lists are filled and/or all possible msg 
@@ -71,7 +71,7 @@
 /* This flag is useful to see what kind of output messages are created */
 /* #define BOOK_MSG_DEBUG */
 
-/* This flag is useful for debuging archiving action */
+/* This flag is useful for debugging archiving action */
 /* #define ARCHIVE_DEBUG */
 
 /* Moved these structures from struct.h to this file in 0.94.3 - they
@@ -454,7 +454,7 @@ static const char* const book_descrpt[] =
 /* Each line of this array is a readable subtype
  * Be careful to keep the order. If you add readable subtype, add them
  * at the bottom of the list. Never delete a subtype because index is used as
- * subtype paramater in arch files!
+ * subtype parameter in arch files!
  */
 static readable_message_type readable_message_types[] = 
 {
@@ -567,7 +567,7 @@ get_empty_book (void)
     return t;
 }
 
-/* get_titlelist() - returns pointer to the title list referanced by i  */
+/* get_titlelist() - returns pointer to the title list referenced by i  */
 
 static titlelist *
 get_titlelist (int i)
@@ -1088,7 +1088,7 @@ add_book_to_list (const object *book, int msgtype)
  * Aug 96 I changed this so we will attempt to create consistent 
  * authour/title and message content for BOOKs. Also, we will
  * alter books  that match archive entries to the archival 
- * levels and architypes. -b.t. 
+ * levels and archetypes. -b.t.
  */
 
 #define MAX_TITLE_CHECK 20
@@ -1177,7 +1177,7 @@ change_book (object *book, int msgtype)
 		    /* Now deal with 2 cases.
 		     * 1)If no space for a new title exists lets just restore
 		     * the old book properties. Remember, if the book had
-		     * matchd an older entry on the titlelist, we shouldnt
+		     * matched an older entry on the titlelist, we shouldn't
 		     * have called this routine in the first place!  
 		     * 2) If we got a unique title, we need to add it to
 		     * the list.
@@ -1234,7 +1234,7 @@ change_book (object *book, int msgtype)
  * Monster msg generation code.
  ****************************************************************************/
 
-/* get_random_mon() - returns a random monster slected from linked 
+/* get_random_mon() - returns a random monster selected from linked
  * list of all monsters in the current game. If level is non-zero,
  * then only monsters greater than that level will be returned.
  * Changed 971225 to be greater than equal to level passed.  Also
@@ -1274,7 +1274,7 @@ get_random_mon (int level)
      * appropriate level.  This wasn't very random because if you had a 
      * bunch of low level monsters and then a high level one, if the random
      * determine took one of the low level ones, it would just forward to the
-     * high level one and return that.  Thus, monsters that immediatly followed
+     * high level one and return that.  Thus, monsters that immediately followed
      * a bunch of low level monsters would be more heavily returned.  It also
      * means some of the dragons would be poorly represented, since they
      * are a group of high level monsters all around each other.
@@ -1430,7 +1430,7 @@ static const char *artifact_msg (int level, int booksize)
     if (i==10) /* Unable to find a message */
 	return("None");
 
-    /* There is no reason to start on the artifact list at the begining. Lets
+    /* There is no reason to start on the artifact list at the beginning. Lets
      * take our starting position randomly... */
     art = al->items;
     for (i = RANDOM () % level + RANDOM () % 2 + 1; i > 0; i--)
@@ -2042,7 +2042,7 @@ tailor_readable_ob (object *book, int msg_type)
 
 /*****************************************************************************
  *
- * Cleanup routine for readble stuff.
+ * Cleanup routine for readable stuff.
  *
  *****************************************************************************/
 

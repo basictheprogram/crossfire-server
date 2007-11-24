@@ -768,7 +768,7 @@ S->C: smooth <facenbr><smoothpic>
 C->S: asksmooth <facenbr>
 	Parameters is a plain text integer.
 	Ask server to send a smooth sequence. Server will respond with a smooth command.
-	<facenbr> is an integer telling server which face we want smooth informations on.
+	<facenbr> is an integer telling server which face we want smooth information on.
 
 ******************************************************************************
 MAP UPDATE COMMANDS
@@ -1124,14 +1124,14 @@ S->C: magicmap <width> <height> <px> <py> <data>
 	then up to down.
 
 C->S: toggleextendedinfos <string1> <string2> .... <stringn>
-	Ask the server to send some additionnal informations about the map.
+	Ask the server to send some additionnal information about the map.
 	This command is followed by 1 or more strings. String are separated
 	with spaces. Each string toggle an info. The server will respond
 	with the command ExtendedInfoSet telling client what actual
 	extended infos will be send to the client.
 	Valid extended infos are as follow:
 		smooth
-			send smoothlevel informations to the client.
+			send smoothlevel information to the client.
 
 S->C: ExtendedInfoSet <string1> <string2> .... <stringn>
 	Tell client what actually are the extended infos server may
@@ -1180,12 +1180,12 @@ S->C: mapextended <what><length><coord1>[data1a][data1b][data1c]<coord2>...
 		blocks following the <coord> block (same as for map1 and map1a). Ok, now
 		what stand in those <data>?
 		First each <data> block has a length determined by the <length> block. So
-		if ther are parts of the data the client may not understand, it's ok, he will
+		if there are parts of the data the client may not understand, it's ok, he will
 		skip to the end of the <data> block, jumoing to the next. Should help add
-		additionnal informations. Since the protocol evolved as on timeline basis.
+		additionnal information. Since the protocol evolved as on timeline basis.
 		If a client can't understand a data type cause it is too old, he won't
 		understand the next one too, etc, until the next <data> block is reached.
-		So to prevent problem, the server take care to put informations in the data
+		So to prevent problem, the server take care to put information in the data
 		block following the order of protocol evolution. If server need to
 		say to the client A BB C, assuming that A was defined in the
 		protocol before BB was defined which was before C was defined, it would say
@@ -1193,7 +1193,7 @@ S->C: mapextended <what><length><coord1>[data1a][data1b][data1c]<coord2>...
 		the server should put the datas in the following order: ABBCB  cause the last B
 		is more recent in protocol than the 2 first BB and the C. All this make sure
 		there will be no mistakes or conflict between different protocol versions.
-		Ok, following is the informations which may be present in a <data> block if
+		Ok, following is the information which may be present in a <data> block if
 		the corresponding flags are put.
 
 		if EMI_SMOOTH is present in <WHAT>

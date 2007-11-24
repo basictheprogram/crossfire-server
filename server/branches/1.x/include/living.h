@@ -40,7 +40,7 @@
 
 #define MAXLEVEL      115
 
-/* Changed from NO_STAT to NO_STAT_VAL to fix conlfict on
+/* Changed from NO_STAT to NO_STAT_VAL to fix conflict on
  * AIX systems
  */
 #define NO_STAT_VAL 99    /* needed by skills code -b.t. */

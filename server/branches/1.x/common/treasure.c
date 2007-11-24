@@ -422,7 +422,7 @@ void create_treasure(treasurelist *t, object *op, int flag, int difficulty,
 /* This is similar to the old generate treasure function.  However,
  * it instead takes a treasurelist.  It is really just a wrapper around
  * create_treasure.  We create a dummy object that the treasure gets
- * inserted into, and then return that treausre
+ * inserted into, and then return that treasure
  */
 object *generate_treasure(treasurelist *t, int difficulty)
 {

@@ -2641,7 +2641,7 @@ void get_search_arr(int *search_arr)
 /**
  * find_dir(map, x, y, exclude) will search some close squares in the
  * given map at the given coordinates for live objects.
- * It will not considered the object given as exclude among possible
+ * It will not considere the object given as exclude among possible
  * live objects.
  * It returns the direction toward the first/closest live object if finds
  * any, otherwise 0.

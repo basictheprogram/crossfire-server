@@ -1497,7 +1497,7 @@ static void check_spell_effect(object *op) {
 /* This is called by move_apply.  Basically, if someone
  * moves onto a spell effect and the walk_on or fly_on flags
  * are set, this is called.  This should only be called for
- * objects of the appropraite type.
+ * objects of the appropriate type.
  */
 void apply_spell_effect(object *spell, object *victim)
 {

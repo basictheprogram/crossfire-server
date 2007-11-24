@@ -642,7 +642,7 @@ void version_cmd(char *buf, int len,socket_struct *ns)
 
 	/* these are old dxclients */
 	/* Version 1024 added support for singular + plural name values - 
-	 * requiing this minimal value reduces complexity of that code, and it
+	 * requiring this minimal value reduces complexity of that code, and it
 	 * has been around for a long time.
 	 */
 	if(!strcmp(" CF DX CLIENT", cp) || ns->sc_version < 1024 )

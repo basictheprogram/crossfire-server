@@ -346,7 +346,7 @@ typedef struct Settings {
     uint8   not_permadeth;  /* if true, death is non-permament */
     uint8   simple_exp;	    /* If true, use the simple experience system */
     int	    reset_loc_time; /* Number of seconds to put player back at home */
-    uint8   set_title;	    /* players can set thier title */
+    uint8   set_title;	    /* players can set their title */
     uint8   resurrection;   /* ressurection possible w/ permadeth on */
     uint8   search_items;   /* search_items command */
     uint8   spell_encumbrance; /* encumbrance effects spells */

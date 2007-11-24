@@ -185,7 +185,7 @@ int rndm(int min, int max)
   return(RANDOM()%diff+min);
 }
 
-/* decay and destroy persihable items in a map */
+/* decay and destroy perishable items in a map */
 
 void decay_objects(mapstruct *m)
 {

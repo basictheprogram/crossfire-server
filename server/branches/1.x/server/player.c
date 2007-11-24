@@ -724,7 +724,7 @@ int receive_play_again(object *op, char key)
 	/* Lets put a space in here */
 	new_draw_info(NDI_UNIQUE, 0, op, "\n");
 	get_name(op);
-	op->name = name;		/* Alrady added a refcount above */
+	op->name = name;		/* Already added a refcount above */
 	op->name_pl = add_string(name);
 	set_first_map(op);
     } else {

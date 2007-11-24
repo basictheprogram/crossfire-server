@@ -3126,7 +3126,7 @@ int can_apply_object(object *who, object *op)
 	if (op->body_info[i]) {
 	    /* Item uses more slots than we have */
 	    if (FABS(op->body_info[i]) > who->body_info[i]) {
-		/* Could return now for efficiently - rest of info below isn'
+		/* Could return now for efficiently - rest of info below isn't
 		 * really needed.
 		 */
 		retval |= CAN_APPLY_NEVER;

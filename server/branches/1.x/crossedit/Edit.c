@@ -1345,7 +1345,7 @@ void EditDestroy(Edit self)
 	    break;
 	}
     }
-    /*** outer coonections ***/
+    /*** outer connections ***/
     if (self->mapattr) {
 	MapAttrDestroy(self->mapattr);
     }

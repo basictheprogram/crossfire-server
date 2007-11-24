@@ -236,7 +236,7 @@ Crossedit*CrFace*background:	DarkSeaGreen
 *mapattr*apply.width: 96
 *mapattr*cancel.width: 96
 
-!!! Ducumentation - infoFile !!!
+!!! Documentation - infoFile !!!
 *infoFile.title:		Documentation
 *infoFile*text.width:		600
 *infoFile*text.height:		330

@@ -30,7 +30,7 @@
 #include <funcpoint.h>
 #include <loader.h>
 
-/* IF set, does a little timing on the archetype load. */
+/* If set, does a little timing on the archetype load. */
 #define TIME_ARCH_LOAD 0
 
 static void add_arch(archetype *at);

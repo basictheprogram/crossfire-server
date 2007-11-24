@@ -1259,7 +1259,7 @@ int is_magical(const object *op) {
 		 return 1;
 
     /* Check for stealty, speed, flying, or just plain magic in the boots */
-    /* Presume any boots that hvae a move_type are special. */
+    /* Presume any boots that have a move_type are special. */
     if (op->type== BOOTS && 
 	((QUERY_FLAG(op, FLAG_STEALTH) || op->move_type ||  op->stats.exp)))
 		return 1;
