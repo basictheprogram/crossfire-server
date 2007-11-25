@@ -892,13 +892,15 @@ object *hit_with_arrow (object *op, object *victim)
     tag_t victim_tag, hitter_tag;
     sint16 victim_x, victim_y;
     mapstruct	*victim_map;
+    const char* old_skill=NULL;
 
     /* Disassemble missile */
     for (hitter = op->inv; hitter; hitter = hitter->below) {
         if (hitter->type == EVENT_CONNECTOR)
             continue;
         container = op;
-        hitter = op->inv;
+        /* 11-2007, commented seems buggy 
+        hitter = op->inv;*/
         remove_ob (hitter);
         if (free_no_drop(hitter))
             return NULL;
@@ -923,9 +925,20 @@ object *hit_with_arrow (object *op, object *victim)
     victim_tag = victim->count;
     hitter_tag = hitter->count;
     /* Lauwenmark: Handling plugin attack event for thrown items */
-    if (execute_event(op, EVENT_ATTACK,hitter,victim,NULL,SCRIPT_FIX_ALL) == 0)
+    if (execute_event(op, EVENT_ATTACK,hitter,victim,NULL,SCRIPT_FIX_ALL) == 0){
+        /*
+          temporary set the hitter's skill to the one associated with the 
+          throw wrapper. This is needed to that thrower gets it's xp at the 
+          correct level. This might proves an awfull hack :/ We should really
+          provide attack_ob_simple with the skill to use...
+         */
+        if (container!=NULL){
+            old_skill = hitter->skill;
+            hitter->skill = add_refcount(container->skill);
+        }
         hit_something = attack_ob_simple (victim, hitter, op->stats.dam,
                                         op->stats.wc);
+    }
 
     /* Arrow attacks door, rune of summoning is triggered, demon is put on
      * arrow, move_apply() calls this function, arrow sticks in demon,
@@ -939,6 +952,11 @@ object *hit_with_arrow (object *op, object *victim)
             free_object (container);
         }
         return NULL;
+    }
+    /*restore object's skill to original value */
+    if (container!=NULL){
+        free_string(hitter->skill);
+        hitter->skill=old_skill;
     }
 
     /* Missile hit victim */
