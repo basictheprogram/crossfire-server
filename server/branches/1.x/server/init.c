@@ -776,7 +776,6 @@ void init(int argc, char **argv) {
 
     init_library();	/* Must be called early */
     load_settings();	/* Load the settings file */
-    init_weather();
     load_materials();
     parse_args(argc, argv, 2);
     fprintf(logfile,"Welcome to CrossFire, v%s\n",VERSION);
@@ -804,6 +803,7 @@ void init(int argc, char **argv) {
 #endif
 
     init_beforeplay();
+    init_weather();
     init_ericserver();
     metaserver_init();
     metaserver2_init();
