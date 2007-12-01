@@ -1606,7 +1606,7 @@ void examine(object *op, object *tmp) {
 
     if(tmp->weight) {
 	sprintf(buf,tmp->nrof>1?"They weigh %3.3f kg.":"It weighs %3.3f kg.",
-            tmp->weight*(tmp->nrof?tmp->nrof:1)/1000.0);
+            tmp->weight*((float)(tmp->nrof?tmp->nrof:1)/1000.0));
 	new_draw_info(NDI_UNIQUE, 0,op,buf);
     }
 

@@ -26,6 +26,7 @@
     The authors can be reached via e-mail at crossfire-devel@real-time.com
 */
 
+#include <assert.h>
 #include <global.h>
 #include <spells.h>
 #include <skills.h>
@@ -339,7 +340,7 @@ static const char *cost_string_from_value(uint64 cost)
     static char buf[MAX_BUF];
     archetype *coin, *next_coin;
     char *endbuf;
-    int num;
+    uint32 num;
     int cointype = LARGEST_COIN_GIVEN;
 
     coin = find_next_coin(cost, &cointype);
@@ -360,7 +361,7 @@ static const char *cost_string_from_value(uint64 cost)
     if (num == 1)
 	sprintf(buf, "1 %s", coin->clone.name);
     else
-	sprintf(buf, "%d %ss", num, coin->clone.name);
+        sprintf(buf, "%u %ss", num, coin->clone.name);
 
     next_coin = find_next_coin(cost, &cointype);
     if (next_coin == NULL)
@@ -378,28 +379,65 @@ static const char *cost_string_from_value(uint64 cost)
 	else
 	    next_coin = find_next_coin(cost, &cointype);
 
-	if (next_coin) {
-	    /* There will be at least one more string to add to the list,
-	     * use a comma.
-	     */
-	    strcat(endbuf, ", "); endbuf += 2;
-	} else {
-	    strcat(endbuf, " and "); endbuf += 5;
-	}
-	if (num == 1)
-	    sprintf(endbuf, "1 %s", coin->clone.name);
-	else
-	    sprintf(endbuf, "%d %ss", num, coin->clone.name);
+        if (next_coin) {
+            /* There will be at least one more string to add to the list,
+             * use a comma.
+             */
+            strcat(endbuf, ", "); endbuf += 2;
+        } else {
+            strcat(endbuf, " and "); endbuf += 5;
+        }
+        if (num == 1)
+            sprintf(endbuf, "1 %s", coin->clone.name);
+        else
+            sprintf(endbuf, "%u %ss", num, coin->clone.name);
     } while (next_coin);
 
     return buf;
 }
 
+/**
+ * Returns a string representing the money's value, in plain coins.
+ *
+ * @param coin
+ * coin. Must be of type MONEY.
+ * @return
+ * value in string, static buffer.
+ * @todo remove static buffer.
+ */
+const char* real_money_value(const object* coin) {
+    static char buf[MAX_BUF];
+
+    assert(coin->type == MONEY);
+
+    snprintf(buf, sizeof(buf), "%ld %s", coin->nrof, coin->nrof == 1 ? coin->name : coin->name_pl);
+    return buf;
+}
+
+/**
+ * Finds the price of an item.
+ *
+ * Price will be either an approximate value or the real value.
+ * @param tmp
+ * object to get the price of.
+ * @param who
+ * who is getting the price.
+ * @param flag
+ * combination of @ref F_xxx "F_xxx" values.
+ * @return
+ * buffer containing the price.
+ * @todo remove evil static buffer thingy.
+ */
 const char *query_cost_string(const object *tmp,object *who,int flag) {
     uint64 real_value = query_cost(tmp,who,flag);
     int idskill1=0;
     int idskill2=0;
     const typedata *tmptype;
+
+    /* money it's pretty hard to not give the exact price, so skip all logic and just return the real value. */
+    if (tmp->type == MONEY) {
+        return real_money_value(tmp);
+    }
 
     tmptype=get_typedata(tmp->type);
     if (tmptype) {
