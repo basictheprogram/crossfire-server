@@ -773,6 +773,12 @@ static int god_enchants_weapon (object *op, object *god, object *tr, object *ski
     if (weapon == NULL || god_examines_item (god, weapon) <= 0)
         return 0;
 
+    if (weapon->item_power >= MAX_WEAPON_ITEM_POWER) {
+        new_draw_info_format (NDI_UNIQUE, 0, op, "%s considers your %s is not worthy to be enchanted any more.",
+            god->name, weapon->name);
+        return 0;
+    }
+
     /* First give it a title, so other gods won't touch it */
     if ( ! weapon->title) {
         sprintf (buf, "of %s", god->name);

@@ -17,6 +17,12 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Fix bug #1833943: Buffer overflow in item power calculation.
+ include/define.h: MAX_WEAPON_ITEM_POWER set to 100.
+ server/apply.c: change enchant logic to not enchant already powerful items.
+ server/gods.c: make god refuse to enchant an already powerful item.
+Nicolas Weeger 2007-12-01
+
 Update the treasure list so the different types of Potions
 of Life show up in shops.
  lib/treasures

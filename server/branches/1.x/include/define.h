@@ -722,6 +722,11 @@ typedef unsigned char	MoveType;
 #define F_APPROX	32  /* flag to give a guess of item value */
 #define F_SHOP		64  /* consider the effect that the shop that the player is in has */
 
+/**
+ * Maximum item power an item can have. If changed, check object::item_power for overflow issues.
+ */
+#define MAX_WEAPON_ITEM_POWER   100
+
 #define DIRX(xyz)	freearr_x[(xyz)->direction]
 #define DIRY(xyz)	freearr_y[(xyz)->direction]
 

@@ -783,7 +783,7 @@ static int improve_weapon(object *op,object *improver,object *weapon)
     new_draw_info(NDI_UNIQUE, 0,op,"This weapon has not been prepared.");
     return 0;
   }
-  if (weapon->level==weapon->last_eat && weapon->item_power >=100) {
+  if (weapon->level==weapon->last_eat && weapon->item_power >=MAX_WEAPON_ITEM_POWER) {
     new_draw_info(NDI_UNIQUE, 0,op,"This weapon cannot be improved any more.");
     return 0;
   }
