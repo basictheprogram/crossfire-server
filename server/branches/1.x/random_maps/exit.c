@@ -282,6 +282,8 @@ void place_exits(mapstruct *map, char **maze,char *exitstyle,int orientation,RMP
 
         the_exit_down->slaying = add_string(RP->final_map);
         strcpy(new_map->path,RP->final_map);
+            EXIT_X(the_exit_down) = MAP_ENTER_X(new_map);
+            EXIT_Y(the_exit_down) = MAP_ENTER_Y(new_map);
 
 		for (tmp=GET_MAP_OB(new_map,  MAP_ENTER_X(new_map), MAP_ENTER_Y(new_map)); tmp; tmp=tmp->above)
 	    /* Remove exit back to previous random map.  There should only be one
