@@ -90,10 +90,11 @@ mapstruct *make_map_floor(char **layout, char *floorstyle,RMParms *RP) {
   mapstruct *style_map=0;
   object *the_floor;
   mapstruct *newMap =0; /* (mapstruct *) calloc(sizeof(mapstruct),1); */
-  
+  object *thisfloor;
+  int x, y;
+
   /* allocate the map */
   newMap = get_empty_map(RP->Xsize,RP->Ysize);
-    int x, y;
 
   /* get the style map */
   sprintf(styledirname,"%s","/styles/floorstyles");
@@ -116,7 +117,7 @@ mapstruct *make_map_floor(char **layout, char *floorstyle,RMParms *RP) {
             for(y=0;y<RP->Ysize;y++) {
                 if (GET_MAP_OB(newMap, x, y) != NULL)
                     continue;
-                object *thisfloor = arch_to_object(the_floor->arch);
+                thisfloor = arch_to_object(the_floor->arch);
                 thisfloor->x = x; thisfloor->y = y;
                 insert_ob_in_map(thisfloor,newMap,thisfloor,INS_NO_MERGE | INS_NO_WALK_ON);
             }

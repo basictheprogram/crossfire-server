@@ -17,6 +17,14 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Win32 compilation fixes.
+ common/logger.c: typo.
+ plugins/cfanim/include/cfanim_proto.h: missing CF_PLUGIN.
+ plugins/cfpython/cfpython_object.c: variables must be declared before any instruction.
+ plugins/common/hashtable.c: header fixes.
+ random_maps/floor.c: variables must be declared before any instruction.
+Nicolas Weeger 2008-01-03
+
 Add Object.NoDamage and Object.RandomMovement to Python Crossfire Object.
  plugins/cfpython/cfpython_object.c
  plugins/cfpython/include/cfpython_object_private.h
