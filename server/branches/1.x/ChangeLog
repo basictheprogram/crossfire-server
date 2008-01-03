@@ -19,6 +19,7 @@ Changes for SVN:
 
 Win32 compilation fixes.
  common/logger.c: typo.
+ include/win32.h: #define sleep.
  plugins/cfanim/include/cfanim_proto.h: missing CF_PLUGIN.
  plugins/cfpython/cfpython_object.c: variables must be declared before any instruction.
  plugins/common/hashtable.c: header fixes.
