@@ -1090,7 +1090,7 @@ int key_confirm_quit(object *op, char key)
     terminate_all_pets(op);
     remove_ob(op);
     op->direction=0;
-    new_draw_info_format(NDI_UNIQUE | NDI_ALL, 5, NULL,
+    new_draw_info_format(NDI_UNIQUE | NDI_ALL | NDI_DK_ORANGE, 5, NULL,
 	"%s quits the game.",op->name);
 
     strcpy(op->contr->killer,"quit");
