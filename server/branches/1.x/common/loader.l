@@ -331,7 +331,7 @@ static void set_body_info(object *op, char *params) {
 
 
 /* This function checks the object after it has been loaded (when we
- * get the 'end' in the input stream).  This function can be used to 
+ * get the 'end' in the input stream).  This function can be used to
  * deal with legacy objects where fields may have changed.  It can also be used
  * to check for objects to make sure there are no common errors.
  */
@@ -350,7 +350,7 @@ static void check_loaded_object(object *op) {
      * also have to catch is if this object is not using the normal name for
      * the object.  In that case, we also want to use the loaded name.
      * Otherwise, what happens is that the the plural name will lose
-     * information (appear as just 'hearts' and not 'goblins heart') 
+     * information (appear as just 'hearts' and not 'goblins heart')
      */
     if (op->arch && op->name != op->arch->clone.name && op->name_pl == op->arch->clone.name_pl) {
 	if (op->name_pl) free_string(op->name_pl);
@@ -401,7 +401,7 @@ static void check_loaded_object(object *op) {
 	/* Legacy objects from before item power was in the game */
 	if (!op->item_power && ip) {
 	    if (ip > 3) {
-		LOG(llevDebug,"Object %s had no item power, using %d\n", 
+		LOG(llevDebug,"Object %s had no item power, using %d\n",
 		    op->name?op->name:"NULL", ip);
 	    }
 	    op->item_power = ip;
@@ -526,10 +526,10 @@ static void add_key_value(object * op) {
     char * value = NULL;
     char * cp;
     char * end;
-    
+
     /* First, skip over leading whitespace. */
     for (cp = yytext; isspace(*cp); cp++) { ; }
-    
+
     key = cp;
 
     /* Now look for the end of the key/field name. */
@@ -540,21 +540,21 @@ static void add_key_value(object * op) {
             return;
         }
     }
-    
+
     if (*cp == '\0') {
         set_ob_key_value(op, key, NULL, TRUE);
-        return;    
+        return;
     }
-    
+
     /* Chop off the key, and start at the next character. */
     *cp = '\0';
     cp++;
     if (*cp == '\0') {
         /* Was followed by one space? */
         set_ob_key_value(op, key, NULL, TRUE);
-        return;    
+        return;
     }
-    
+
     /* Now looking for the value. Skip over whitespace. */
     for (; isspace(*cp); cp++) {
         if (*cp == '\0') {
@@ -563,9 +563,9 @@ static void add_key_value(object * op) {
             return;
         }
     }
-    
+
     value = cp;
-    
+
     /* Got last character before null and strip
      * off tailing whitespace
      */
@@ -577,7 +577,7 @@ static void add_key_value(object * op) {
 	}
 	*end='\0';
     }
-    set_ob_key_value(op, key, value, TRUE);    
+    set_ob_key_value(op, key, value, TRUE);
 }
 
 static void set_move(MoveType *mt, char *params) {
@@ -877,7 +877,7 @@ A	.+
 ^client_anim_sync{S}	    SET_OR_CLEAR_FLAG(op, FLAG_CLIENT_ANIM_SYNC, IVAL);
 ^client_anim_random{S}	    SET_OR_CLEAR_FLAG(op, FLAG_CLIENT_ANIM_RANDOM, IVAL);
 
-%{ /* These are all legacy - any new objects should use the move_ .. values */ 
+%{ /* These are all legacy - any new objects should use the move_ .. values */
 %}
 ^no_pass{S}	    { if (IVAL) op->move_block = MOVE_ALL; else op->move_block=0; }
 ^walk_on{S}	    { if (IVAL) op->move_on |= MOVE_WALK; else op->move_on &= ~MOVE_WALK; }
@@ -886,7 +886,7 @@ A	.+
 ^fly_off{S}	    { if (IVAL) op->move_off |= MOVE_FLY_LOW; else op->move_off &= ~MOVE_FLY_LOW; }
 ^flying{S}	    { if (IVAL) op->move_type |= MOVE_FLY_LOW; else op->move_type &= ~MOVE_FLY_LOW; }
 
-%{ /* These are the new values */ 
+%{ /* These are the new values */
 %}
 ^move_block{S}	    set_move(&op->move_block, yval());
 ^move_allow{S}	    set_move(&op->move_allow, yval());
@@ -1248,7 +1248,7 @@ int set_variable(object *op,char *buf) {
 static const char *const flag_names[NUM_FLAGS+1] = {
 "alive", "wiz", NULL, NULL, "was_wiz", "applied", "unpaid",
 "can_use_shield", "no_pick", "client_anim_sync", "client_anim_random", /* 10 */
-"is_animated", NULL /* slow_move */, 
+"is_animated", NULL /* slow_move */,
 NULL /* flying */, "monster", "friendly", "generator",
 "is_thrown", "auto_apply", "treasure", "player sold",   /* 20 */
 "see_invisible", "can_roll", "overlay_floor",
@@ -1257,8 +1257,8 @@ NULL /*fly_off*/, "is_used_up", "identified", "reflecting",	/* 30 */
 "changing", "splitting", "hitback", "startequip",
 "blocksview", "undead", "scared", "unaggressive",
 "reflect_missile", "reflect_spell",                             /* 40 */
-"no_magic", "no_fix_player", "is_lightable", "tear_down", 
-"run_away", NULL /*pass_thru */, NULL /*can_pass_thru*/, 
+"no_magic", "no_fix_player", "is_lightable", "tear_down",
+"run_away", NULL /*pass_thru */, NULL /*can_pass_thru*/,
 "pick_up", "unique", "no_drop",					/* 50 */
 NULL /* wizcast*/, "can_cast_spell", "can_use_scroll", "can_use_range",
 "can_use_bow",  "can_use_armour", "can_use_weapon",
@@ -1331,7 +1331,7 @@ static char* get_string_move_type(MoveType mt)
     if (all_count <=1) return retbuf_all+1;
     else return retbuf+1;
 }
-    
+
 
 /*
  * Returns a pointer to a static string which contains all variables
@@ -1405,7 +1405,7 @@ char *get_ob_diff(object *op,object *op2) {/* I plan to optimize this heavily */
   for (my_field = op->key_values; my_field != NULL; my_field = my_field->next) {
       /* Find the field in the opposing member. */
       arch_field = get_ob_key_link(op2, my_field->key);
-      
+
       /* If there's no partnering field, or it's got a different value, save our field. */
       if (arch_field == NULL || my_field->value != arch_field->value) {
           FAST_STRCAT(fastbuf, my_field->key);
@@ -1632,16 +1632,16 @@ char *get_ob_diff(object *op,object *op2) {/* I plan to optimize this heavily */
     FAST_SAVE_LONG(fastbuf,"item_power ",op->item_power,11);
   }
 
-    if (op->duration != op2->duration) 
+    if (op->duration != op2->duration)
 	FAST_SAVE_LONG(fastbuf,"duration ",op->duration,9);
 
-    if (op->range != op2->range) 
+    if (op->range != op2->range)
 	FAST_SAVE_LONG(fastbuf,"range ",op->range,6);
 
     if (op->range_modifier != op2->range_modifier)
 	FAST_SAVE_LONG(fastbuf,"range_modifier ",op->range_modifier,15);
 
-    if (op->duration_modifier != op2->duration_modifier) 
+    if (op->duration_modifier != op2->duration_modifier)
 	FAST_SAVE_LONG(fastbuf,"duration_modifier ", op->duration_modifier,18);
 
     if (op->dam_modifier != op2->dam_modifier)
