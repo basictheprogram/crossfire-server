@@ -1967,7 +1967,8 @@ int command_stack_clear(object *op, char *params) {
  */
 int command_diff(object *op, char *params) {
     object *left, *right, *top;
-    const char *diff;
+    char *diff;
+    StringBuffer *sb;
     int left_from, right_from;
 
     top = NULL;
@@ -2008,14 +2009,15 @@ int command_diff(object *op, char *params) {
         }
     }
 
-    diff = get_ob_diff(left, right);
-
-    if (!diff) {
+    sb = stringbuffer_new();
+    get_ob_diff(sb, left, right);
+    diff = stringbuffer_finish(sb);
+    if (*diff == '\0') {
         new_draw_info(NDI_UNIQUE, 0, op, "Objects are the same.");
-        return 0;
+    } else {
+        new_draw_info(NDI_UNIQUE, 0, op, diff);
     }
-
-    new_draw_info(NDI_UNIQUE, 0, op, diff);
+    free(diff);
     return 0;
 }
 

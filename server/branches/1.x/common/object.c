@@ -39,10 +39,11 @@
 #include <funcpoint.h>
 #include <skills.h>
 #include <loader.h>
+#include "stringbuffer.h"
 
 static int compare_ob_value_lists_one(const object *, const object *);
 static int compare_ob_value_lists(const object *, const object *);
-static void dump_object2(object *);
+static void dump_object2(StringBuffer *sb, object *op);
 static void free_key_values(object *);
 static void expand_objects(void);
 static void permute(int *, int, int);
@@ -302,58 +303,52 @@ object *get_player_container(object *op) {
 /**
  * Used by: Crossedit: dump. Server DM commands: dumpbelow, dump.
  *	Some error messages.
- * The result of the dump is stored in the static global errmsg array.
+ * The result of the dump is stored in the <code>sb</code> parameter.
  */
 
-static void dump_object2(object *op) {
-  char *cp;
+static void dump_object2(StringBuffer *sb, object *op) {
 /*  object *tmp;*/
 
   if(op->arch!=NULL) {
-      strcat(errmsg,"arch ");
-      strcat(errmsg,op->arch->name?op->arch->name:"(null)");
-      strcat(errmsg,"\n");
-      if((cp=get_ob_diff(op,&empty_archetype->clone))!=NULL)
-	strcat(errmsg,cp);
+      stringbuffer_append_string(sb, "arch ");
+      stringbuffer_append_string(sb, op->arch->name ? op->arch->name : "(null)");
+      stringbuffer_append_string(sb, "\n");
+      get_ob_diff(sb, op, &empty_archetype->clone);
 #if 0
-      /* Don't dump player diffs - they are too long, mostly meaningless, and
-       * will overflow the buffer.
-       * Changed so that we don't dump inventory either.  This may
-       * also overflow the buffer.
+      /* Don't dump player diffs - they are too long, mostly meaningless.
+       * Changed so that we don't dump inventory either.
        */
-      if(op->type!=PLAYER && (cp=get_ob_diff(op,&empty_archetype->clone))!=NULL)
-        strcat(errmsg,cp);
+      if(op->type!=PLAYER)
+          stringbuffer_append_string(sb, op, &empty_archetype->clone);
       for (tmp=op->inv; tmp; tmp=tmp->below)
-        dump_object2(tmp);
+	  dump_object2(sb, tmp);
 #endif
       if (op->more) {
-          strcat(errmsg, "more ");
-          strcat(errmsg, ltostr10(op->more->count));
-          strcat(errmsg, "\n");
+          stringbuffer_append_string(sb, "more ");
+          stringbuffer_append_string(sb, ltostr10(op->more->count));
+          stringbuffer_append_string(sb, "\n");
       }
       if (op->head) {
-          strcat(errmsg, "head ");
-          strcat(errmsg, ltostr10(op->head->count));
-          strcat(errmsg, "\n");
+          stringbuffer_append_string(sb, "head ");
+          stringbuffer_append_string(sb, ltostr10(op->head->count));
+          stringbuffer_append_string(sb, "\n");
       }
       if (op->env) {
-          strcat(errmsg, "env ");
-          strcat(errmsg, ltostr10(op->env->count));
-          strcat(errmsg, "\n");
+          stringbuffer_append_string(sb, "env ");
+          stringbuffer_append_string(sb, ltostr10(op->env->count));
+          stringbuffer_append_string(sb, "\n");
       }
-      strcat(errmsg,"end\n");
+      stringbuffer_append_string(sb, "end\n");
   } else {
-      strcat(errmsg,"Object ");
-      if (op->name==NULL) strcat(errmsg, "(null)");
-      else strcat(errmsg,op->name);
-      strcat(errmsg,"\n");
+      stringbuffer_append_string(sb, "Object ");
+      stringbuffer_append_string(sb, op->name ? op->name : "(null)");
+      stringbuffer_append_string(sb, "\n");
 #if 0
-      if((cp=get_ob_diff(op,&empty_archetype->clone))!=NULL)
-        strcat(errmsg,cp);
+      get_ob_diff(sb, op, &empty_archetype->clone);
       for (tmp=op->inv; tmp; tmp=tmp->below)
-        dump_object2(tmp);
+	  dump_object2(sb, tmp);
 #endif
-      strcat(errmsg,"end\n");
+      stringbuffer_append_string(sb, "end\n");
   }
 }
 
@@ -362,12 +357,18 @@ static void dump_object2(object *op) {
  */
 
 void dump_object(object *op) {
+  char *p;
+  StringBuffer *sb;
+
   if(op==NULL) {
     strcpy(errmsg,"[NULL pointer]");
     return;
   }
-  errmsg[0]='\0';
-  dump_object2(op);
+  sb = stringbuffer_new();
+  dump_object2(sb, op);
+  p = stringbuffer_finish(sb);
+  snprintf(errmsg, sizeof(errmsg), "%s", p);
+  free(p);
 }
 
 #if 0

@@ -265,6 +265,7 @@ extern socket_struct *init_sockets;
 
 
 #ifndef __CEXTRACT__
+#include "stringbuffer.h"
 #include "libproto.h"
 #include "sockproto.h"
 #endif

@@ -398,5 +398,5 @@ extern int yyerror(char *s);
 extern int load_object(FILE *fp, object *op, int bufstate, int map_flags);
 extern int set_variable(object *op, char *buf);
 extern void init_vars(void);
-extern char *get_ob_diff(object *op, object *op2);
+extern void get_ob_diff(StringBuffer *sb, object *op, object *op2);
 extern int save_object(FILE *fp, object *op, int flag);
