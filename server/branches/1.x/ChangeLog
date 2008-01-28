@@ -17,6 +17,16 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Fix for bug 1850524 - SDL clients crash when entering boat.  Bogus scroll
+values were being sent on mapscroll, but only the SDL client did anything
+with the mapscroll variables, so only it saw problems.
+---
+server/apply.c: Store away player x and y positions so we
+  can do proper comparisions.  Move update of applier values out of
+  if coordinates are different, since those need to get updated in all
+  cases.
+MSW 2008-01-27	
+
 Fix buffer overflows in get_ob_diff(). Introduce a new module stringbuffer
 which implements a buffer that can hold variable-sized strings.
 Andreas Kirschbaum 2008-01-12

@@ -129,6 +129,7 @@ int apply_transport(object *pl, object *transport, int aflag) {
 	int pc=0, p_limit;
 	object *inv, *old_transport;
 	const char *kv;
+	sint16 ox, oy;
 
 	if (aflag & AP_UNAPPLY) return 1;
         
@@ -177,24 +178,27 @@ int apply_transport(object *pl, object *transport, int aflag) {
 
 	/* Everything checks out OK - player can get on the transport */
 	pl->contr->transport = transport;
-    if (transport->contr) {
-        new_draw_info_format(NDI_UNIQUE, 0, pl, "The %s's captain is currently %s", query_name(transport), transport->contr->ob->name);
-    }
-    else {
-        new_draw_info_format(NDI_UNIQUE, 0, pl, "You're the %s's captain", query_name(transport));
-        transport->contr = pl->contr;
-    }
+	if (transport->contr) {
+	    new_draw_info_format(NDI_UNIQUE, 0, pl, "The %s's captain is currently %s", query_name(transport), transport->contr->ob->name);
+	}
+	else {
+	    new_draw_info_format(NDI_UNIQUE, 0, pl, "You're the %s's captain", query_name(transport));
+	    transport->contr = pl->contr;
+	}
+	ox = pl->x;
+	oy = pl->y;
+
 	remove_ob(pl);
 	insert_ob_in_ob(pl, transport);
 	sum_weight(transport);
 	pl->map = transport->map;
-        if (pl->x != transport->x || pl->y != transport->y) {
-            esrv_map_scroll(&pl->contr->socket, (pl->x - transport->x), (pl->y - transport->y));
-	    pl->contr->socket.update_look=1;
-	    pl->contr->socket.look_position=0;
-            pl->x = transport->x;
-            pl->y = transport->y;
-        }
+        if (ox != transport->x || oy != transport->y) {
+            esrv_map_scroll(&pl->contr->socket, (ox - transport->x), (oy - transport->y));
+	}
+	pl->contr->socket.update_look=1;
+	pl->contr->socket.look_position=0;
+	pl->x = transport->x;
+	pl->y = transport->y;
 
 	/* Might need to update face, animation info */
 	if (!pc) {
