@@ -25,11 +25,11 @@
     The authors can be reached via e-mail to crossfire-devel@real-time.com
 */
 
-/**
- * @file
- * This file contains all the code implementing diseases,
- * except for odds and ends in attack.c and in living.c
- */
+/*  This file contains all the code implementing diseases,
+    except for odds and ends in attack.c and in
+	 living.c*/
+
+
 
 /*
 
@@ -138,13 +138,12 @@ speed            speed of movement, from DISEASE
 #include <spells.h>
 #include <sounds.h>
 #include <skills.h>
-#include <assert.h>
 
-static void remove_symptoms(object *disease);
+static int remove_symptoms(object *disease);
 static object *find_symptom(object *disease);
-static void check_infection(object *disease);
-static void do_symptoms(object *disease);
-static void grant_immunity(object *disease);
+static int check_infection(object *disease);
+static int do_symptoms(object *disease);
+static int grant_immunity(object *disease);
 
 
 
@@ -155,18 +154,7 @@ inventory.  They themselves do nothing, except modify Symptoms, or
 spread to other live objects.  Symptoms are what actually damage the player:
 these are their own object. */
 
-/**
- * Check if victim is susceptible to disease. Does not check for immunity.
- *
- * @param victim
- * potential victim.
- * @param disease
- * disease to check.
- * @retval 1
- * victim can be infected
- * @retval 0
- * victim doesn't care for the disease.
- */
+/* check if victim is susceptible to disease. */
 static int is_susceptible_to_disease(object *victim, object *disease)
 {
     /* Non living and DMs are immune. */
@@ -185,15 +173,6 @@ static int is_susceptible_to_disease(object *victim, object *disease)
     return 0;
 }
 
-/**
- * Ticks the clock for disease: infect, aggravate symptoms, ...
- * @param disease
- * disease to move. Can be removed during processing.
- * @retval 1
- * if disease was removed.
- * @retval 0
- * disease just moved.
- */
 int move_disease(object *disease) {
     /*  first task is to determine if the disease is inside or outside of someone.
      * If outside, we decrement 'value' until we're gone.
@@ -234,43 +213,28 @@ int move_disease(object *disease) {
     return 0;
 }
 
-/**
- * Remove any symptoms of disease.
- *
+/* remove any symptoms of disease
  * Modified by MSW 2003-03-28 do try to find all the symptom the
  * player may have - I think through some odd interactoins with
  * disease level and player level and whatnot, a player could get
  * more than one symtpom to a disease.
- *
- * @param disease
- * disease to remove. Must be in a living object.
  */
-static void remove_symptoms(object *disease) {
-    object *symptom, *victim=NULL;
 
-    assert(disease != NULL);
+static int remove_symptoms(object *disease) {
+    object *symptom, *victim=NULL;
 
     while ((symptom = find_symptom(disease)) != NULL) {
 	if (!victim) victim=symptom->env;
 	remove_ob(symptom);
 	free_object(symptom);
     }
-    if(victim)
-        fix_object(victim);
+    if(victim) fix_player(victim);
+    return 0;
 }
 
-/**
- * Find a symptom for a disease in disease's env.
- *
- * @param disease
- * disease to search symptom of. Must be in another object.
- * @return
- * matching symptom object, NULL if none found.
- */
+/* argument is a disease */
 static object * find_symptom(object *disease) {
   object *walk;
-
-  assert(disease->env != NULL);
 
   /* check the inventory for symptoms */
   for(walk=disease->env->inv;walk;walk = walk->below)
@@ -278,13 +242,8 @@ static object * find_symptom(object *disease) {
   return NULL;
 }
 
-/**
- * Searches around for more victims to infect.
- *
- * @param disease
- * disease infecting. Can be either on a map or inside another object.
- */
-static void check_infection(object *disease) {
+/*  searches around for more victims to infect */
+static int check_infection(object *disease) {
     int x,y,range, mflags;
     mapstruct *map, *map2;
     object *tmp;
@@ -302,7 +261,7 @@ static void check_infection(object *disease) {
 	map = disease->map;
     }
 
-    if(map == NULL) return;
+    if(map == NULL) return 0;
     for(i=x-range;i<=x+range;i++) {
 	for(j=y-range;j<=y+range;j++) {
 	    mflags = get_map_flags(map,&map2, i,j, &i2, &j2);
@@ -313,29 +272,16 @@ static void check_infection(object *disease) {
 	    }
 	}
     }
-    return;
+    return 1;
 }
 
 
-/**
- * Try to infect something with a disease. Rules:
- * - objects with immunity aren't infectable.
- * - objects already infected aren't infectable.
- * - dead objects aren't infectable.
- * - undead objects are infectible only if specifically named.
- *
- * @param victim
- * potential victim to infect.
- * @param disease
- * what could infect.
- * @param force
- * don't do a random check for infection. Other checks (susceptible to disease,
- * not immune, and so on) are still done.
- * @retval 0
- * victim wasn't infected.
- * @retval 1
- * victim was infected.
- */
+/*  check to see if an object is infectable:
+ *	 objects with immunity aren't infectable.
+ *	 objects already infected aren't infectable.
+ *	 dead objects aren't infectable.
+ *	 undead objects are infectible only if specifically named.
+*/
 int infect_object(object *victim, object *disease, int force) {
     object *tmp;
     object *new_disease;
@@ -424,17 +370,12 @@ int infect_object(object *victim, object *disease, int force) {
 	    sprintf(buf,"You infect %s with your disease, %s!",victim->name,new_disease->name);
 
 	 if(victim->type == PLAYER)
-	    draw_ext_info(NDI_UNIQUE | NDI_RED, 0, new_disease->owner,
-			  MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_DID_HIT,
-			  buf, buf);
+	    new_draw_info(NDI_UNIQUE | NDI_RED, 0, new_disease->owner, buf);
 	 else
-	    draw_ext_info(0, 4, new_disease->owner, MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_DID_HIT,
-			  buf, buf);
+	    new_draw_info(0, 4, new_disease->owner, buf);
     }
     if(victim->type==PLAYER)
-	 draw_ext_info(NDI_UNIQUE | NDI_RED,0,victim, MSG_TYPE_ATTRIBUTE,
-		       MSG_TYPE_ATTRIBUTE_BAD_EFFECT_START,
-		       "You suddenly feel ill.", NULL);
+	 new_draw_info(NDI_UNIQUE | NDI_RED,0,victim,"You suddenly feel ill.");
 
     return 1;
 
@@ -442,15 +383,11 @@ int infect_object(object *victim, object *disease, int force) {
 
 
 
-/**
- * This function monitors the symptoms caused by the disease (if any),
- * causes symptoms, and modifies existing symptoms in the case of
- * existing diseases.
- *
- * @param disease
- * disease acting. Should be in a living object.
- */
-static void do_symptoms(object *disease) {
+/*  this function monitors the symptoms caused by the disease (if any),
+causes symptoms, and modifies existing symptoms in the case of
+existing diseases.  */
+
+static int do_symptoms(object *disease) {
     object *symptom;
     object *victim;
     object *tmp;
@@ -462,11 +399,11 @@ static void do_symptoms(object *disease) {
      */
 
     if(victim == NULL || victim==disease)
-	return;/* no-one to inflict symptoms on */
+	return 0;/* no-one to inflict symptoms on */
 
     /* DMs don't suffer from diseases. */
     if (QUERY_FLAG(victim, FLAG_WIZ))
-        return;
+        return 0;
 
     symptom = find_symptom(disease);
     if(symptom==NULL) {
@@ -474,7 +411,7 @@ static void do_symptoms(object *disease) {
 	object *new_symptom;
 
 	/* first check and see if the carrier of the disease is immune.  If so, no symptoms!  */
-	if(!is_susceptible_to_disease(victim, disease)) return;
+	if(!is_susceptible_to_disease(victim, disease)) return 0;
 
 	/* check for an actual immunity */
 	/* do an immunity check */
@@ -484,7 +421,7 @@ static void do_symptoms(object *disease) {
 	for(/* tmp initialized in if, above */;tmp;tmp=tmp->below) {
 	    if(tmp->type == SIGN)  /* possibly an immunity, or diseased*/
 		if(!strcmp(tmp->name,disease->name) && tmp->level >= disease->level)
-		    return;  /*Immune! */
+		    return 0;  /*Immune! */
 	}
 
 	new_symptom = create_archetype(ARCH_SYMPTOM);
@@ -536,7 +473,7 @@ static void do_symptoms(object *disease) {
 	}
 	new_symptom->move_block=0;
 	insert_ob_in_ob(new_symptom,victim);
-	return;
+	return 1;
     }
 
     /* now deal with progressing diseases:  we increase the debility
@@ -568,29 +505,22 @@ static void do_symptoms(object *disease) {
 	symptom->other_arch = disease->other_arch;
     }
     SET_FLAG(symptom,FLAG_APPLIED);
-    fix_object(victim);
+    fix_player(victim);
+    return 1;
 }
 
 
-/**
- * Grants immunity to a disease.
- *
- * @param disease
- * disease to grant immunity to. Must be in another object.
- */
-static void grant_immunity(object *disease) {
+/*  grants immunity to plagues we've seen before.  */
+static int grant_immunity(object *disease) {
   object * immunity;
   object *walk;
   /* Don't give immunity to this disease if last_heal is set. */
-  if(disease->last_heal) return;
-
-  assert(disease->env != NULL);
-
+  if(disease->last_heal) return 0;
   /*  first, search for an immunity of the same name */
   for(walk=disease->env->inv;walk;walk=walk->below) {
-	 if(walk->type==SIGN && !strcmp(disease->name,walk->name)) {
+	 if(walk->type==98 && !strcmp(disease->name,walk->name)) {
 		walk->level = disease->level;
-		return; /* just update the existing immunity. */
+		return 1; /* just update the existing immunity. */
 	 }
   }
   immunity = create_archetype("immunity");
@@ -598,18 +528,14 @@ static void grant_immunity(object *disease) {
   immunity->level = disease->level;
   immunity->move_block = 0;
   insert_ob_in_ob(immunity,disease->env);
-  return;
+  return 1;
 
 }
 
 
-/**
- * Make the symptom do the nasty things it does.
- *
- * @param symptom
- * symptom to move.
- */
-void move_symptom(object *symptom) {
+/*  make the symptom do the nasty things it does  */
+
+int move_symptom(object *symptom) {
     object *victim = symptom->env;
     object *new_ob;
     int sp_reduce;
@@ -618,7 +544,7 @@ void move_symptom(object *symptom) {
     if(victim == NULL || victim->map==NULL) {  /* outside a monster/player, die immediately */
         remove_ob(symptom);
         free_object(symptom);
-        return;
+        return 0;
     }
 
     if(symptom->stats.dam > 0)  hit_player(victim,symptom->stats.dam,symptom,symptom->attacktype,1);
@@ -632,7 +558,7 @@ void move_symptom(object *symptom) {
 	    remove_ob(symptom);
 	    free_object(symptom);
 	}
-        return;
+        return 0;
     }
 
     if(symptom->stats.maxsp>0) sp_reduce = symptom->stats.maxsp;
@@ -644,6 +570,7 @@ void move_symptom(object *symptom) {
      * The victim may well have died.
      */
 
+    if(victim->map==NULL) return 0;
     if(symptom->other_arch) {
         object *tmp;
         tmp=victim;
@@ -663,42 +590,40 @@ void move_symptom(object *symptom) {
             insert_ob_in_map(new_ob,victim->map,victim,0);
         }
     }
-    draw_ext_info(NDI_UNIQUE | NDI_RED,0,victim,
-		  MSG_TYPE_ATTRIBUTE, MSG_TYPE_ATTRIBUTE_BAD_EFFECT_START,
-		  symptom->msg, symptom->msg);
+    new_draw_info(NDI_UNIQUE | NDI_RED,0,victim,symptom->msg);
 
-    return;
+    return 1;
 }
 
 
-/**
- * Possibly infect due to direct physical contact i.e., AT_PHYSICAL.
- *
- * @param victim
- * potential victim.
- * @param hitter
- * who is hitting.
- */
+/*  possibly infect due to direct physical contact
+  i.e., AT_PHYSICAL-- called from "hit_player_attacktype" */
 
-void check_physically_infect(object *victim, object *hitter) {
+int check_physically_infect(object *victim, object *hitter) {
   object *walk;
   /* search for diseases, give every disease a chance to infect */
   for(walk=hitter->inv;walk!=NULL;walk=walk->below)
 	 if(walk->type==DISEASE) infect_object(victim,walk,0);
+  return 1;
 }
 
-/**
- * Do the cure disease stuff, from the spell "cure disease".
- * @param sufferer
- * who is getting cured.
- * @param caster
- * spell object used for curing. If NULL all diseases are removed, else only those of lower level than
- * caster or randomly chosen.
- * @retval 0
- * no disease was cured.
- * @retval 1
- * at least one disease was cured.
+#if 0
+/*
+ * find_disease no longer used - perhaps should be removed.
+ * MSW 2006-06-02
  */
+
+/*  find a disease in someone*/
+static object *find_disease(object *victim) {
+  object *walk;
+  for(walk=victim->inv;walk;walk=walk->below)
+	 if(walk->type==DISEASE) return walk;
+  return NULL;
+}
+#endif
+
+/* do the cure disease stuff, from the spell "cure disease" */
+
 int cure_disease(object *sufferer,object *caster) {
     object *disease, *next;
     int casting_level;
@@ -732,12 +657,41 @@ int cure_disease(object *sufferer,object *caster) {
     if (cure) {
 	/* Only draw these messages once */
 	if (caster)
-	    draw_ext_info_format(NDI_UNIQUE,0,caster, MSG_TYPE_SPELL, MSG_TYPE_SPELL_HEAL,
-				 "You cure a disease!", NULL);
-
-	draw_ext_info(NDI_UNIQUE,0,sufferer,
-		      MSG_TYPE_ATTRIBUTE, MSG_TYPE_ATTRIBUTE_BAD_EFFECT_END,
-		      "You no longer feel diseased.", NULL);
+	    new_draw_info_format(NDI_UNIQUE,0,caster,"You cure a disease!");
+	new_draw_info(NDI_UNIQUE,0,sufferer,"You no longer feel diseased.");
     }
-  return cure;
+  return 1;
 }
+
+
+#if 0
+/*
+ * reduce_symptoms is no longer used - should perhaps be removed.
+ * MSW 2006-06-02
+ */
+
+/* reduces disease progression:  reduce_symptoms
+ * return true if we actually reduce a disease.
+ */
+
+static int reduce_symptoms(object *sufferer, int reduction) {
+    object *walk;
+    int success=0;
+
+    for(walk=sufferer->inv;walk;walk=walk->below) {
+	 if(walk->type==SYMPTOM) {
+	    if(walk->value > 0) {
+		success=1;
+		walk->value = MAX(0,walk->value - 2*reduction);
+		/* give the disease time to modify this symptom,
+		 * and reduce its severity.  */
+		walk->speed_left = 0;
+	    }
+	 }
+    }
+    if (success)
+	  new_draw_info(NDI_UNIQUE,0,sufferer,"Your illness seems less severe.");
+    return success;
+}
+
+#endif

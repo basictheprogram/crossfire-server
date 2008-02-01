@@ -26,24 +26,16 @@
     The author can be reached via e-mail to crossfire-devel@real-time.com
 */
 
-/**
- * @file
- * All those functions deal with swapping maps to disk to claim memory space.
- */
-
 #include <global.h>
 #ifndef __CEXTRACT__
 #include <sproto.h>
 #endif
 #include <object.h>
 
-/**
- * Writes out information on all the temporary maps.  It is called by
- * swap_map().
- *
- * Will LOG() in case of error.
+/* This writes out information on all the temporary maps.  It is called by
+ * swap_map below.
  */
-static void write_map_log(void)
+static void write_map_log(void) 
 {
     FILE *fp;
     mapstruct *map;
@@ -75,12 +67,7 @@ static void write_map_log(void)
     fclose(fp);
 }
 
-/**
- * Reads temporary maps information from disk.
- *
- * Will LOG() in case of error.
- */
-void read_map_log(void)
+void read_map_log(void) 
 {
     FILE *fp;
     mapstruct *map;
@@ -126,7 +113,7 @@ void read_map_log(void)
          * of seconds from current time that it should reset).  We need
 	 * to add in the current seconds for this to work right.
 	 * On metalforge, strange behavior was observed with really high
-	 * reset times - I don't know how they got to that state,
+	 * reset times - I don't know how they got to that state, 
 	 * but easy enough to do some sanity checking here.
 	 */
 	map->reset_time += sec;
@@ -165,7 +152,7 @@ int swap_map(mapstruct *map) {
         LOG(llevDebug,"Wanted to swap out map with player.\n");
         return SAVE_ERROR_PLAYER;
     }
-    remove_all_pets(); /* Give them a chance to follow */
+    remove_all_pets(map); /* Give them a chance to follow */
 
     /* Update the reset time.  Only do this is STAND_STILL is not set */
     if (!map->fixed_resettime)
@@ -185,7 +172,7 @@ int swap_map(mapstruct *map) {
         return SAVE_ERROR_OK;
     }
 
-    if ((res = save_map (map, SAVE_MODE_NORMAL)) < 0) {
+    if ((res = new_save_map (map, SAVE_MODE_NORMAL)) < 0) {
         LOG(llevError, "Failed to swap map %s.\n", map->path);
         /* This is sufficiently critical to mandate to warn all DMs. */
         draw_ext_info_format(NDI_ALL_DMS | NDI_UNIQUE | NDI_RED, -1, NULL, MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_LOADSAVE,
@@ -203,12 +190,6 @@ int swap_map(mapstruct *map) {
     return SAVE_ERROR_OK;
 }
 
-/**
- * Finds maps in memory to reset.
- *
- * @todo
- * The check for MAX_OBJECTS_LWM is wrongly placed, and should be moved elsewhere.
- */
 void check_active_maps(void) {
     mapstruct *map, *next;
 
@@ -227,15 +208,10 @@ void check_active_maps(void) {
     }
 }
 
-/**
- * Returns the map with the lowest timeout variable (not 0).
- *
- * @param except_level
- * path of map to ignore for reset. Musn't be NULL.
- * @return
- * map, or NULL if no map is ready for reset.
- * @todo change the char* to const char*
+/*
+ * map_least_timeout() returns the map with the lowest timeout variable (not 0)
  */
+
 static mapstruct *map_least_timeout(char *except_level) {
   mapstruct *map, *chosen=NULL;
   int timeout = MAP_MAXTIMEOUT + 1;
@@ -246,15 +222,12 @@ static mapstruct *map_least_timeout(char *except_level) {
   return chosen;
 }
 
-/**
- * Tries to swap out maps which are still in memory, because
+/*
+ * swap_below_max() tries to swap out maps which are still in memory because
  * of MAP_TIMEOUT until used objects is below MAX_OBJECTS or there are
  * no more maps to swap.
- *
- * @param except_level
- * path of map to ignore for reset. Musn't be NULL.
- * @todo change the char* to const char*
  */
+
 void swap_below_max(char *except_level) {
     mapstruct *map;
 
@@ -276,18 +249,11 @@ void swap_below_max(char *except_level) {
     }
 }
 
-/**
- * Returns the count of players on a map, calculated from player list.
- *
- * @param m
- * map we want the count of players on.
- * @param show_all
- * if true, show everyone. If not, don't show hidden players (dms)
- * @return
- * player count.
- *
- * @todo
- * this doesn't take into account transports. Should be removed when mapstruct::players is valid.
+/*
+ * players_on_map(): will be replaced by map->players when I'm satisfied
+ * that the variable is always correct.
+ * If show_all is true, we show everyone.  If not, we don't show hidden
+ * players (dms)
  */
 
 int players_on_map(mapstruct *m, int show_all) {
@@ -300,7 +266,8 @@ int players_on_map(mapstruct *m, int show_all) {
   return nr;
 }
 
-/**
+/*
+ * flush_old_maps():
  * Removes tmp-files of maps which are going to be reset next time
  * they are visited.
  * This is very useful if the tmp-disk is very full.

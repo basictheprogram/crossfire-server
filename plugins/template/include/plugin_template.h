@@ -23,8 +23,7 @@
 /*  You should have received a copy of the GNU General Public License        */
 /*  along with this program; if not, write to the Free Software              */
 /*  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                */
-/*                                                                           */
-/*****************************************************************************/
+/*                                                                           */ /*****************************************************************************/
 #ifndef PLUGIN_TEMPLATE_H
 #define PLUGIN_TEMPLATE_H
 
@@ -49,6 +48,7 @@
 
 #include <plugin_common.h>
 #include <plugin_template.h>
+#include <plugin_template_proto.h>
 
 typedef struct _cfpcontext
 {
@@ -56,7 +56,6 @@ typedef struct _cfpcontext
     object*     who;
     object*     activator;
     object*     third;
-    object*     event;
     char        message[1024];
     int         fix;
     int         event_code;

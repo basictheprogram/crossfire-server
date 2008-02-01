@@ -24,7 +24,7 @@
 /*  You should have received a copy of the GNU General Public License        */
 /*  along with this program; if not, write to the Free Software              */
 /*  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                */
-/*                                                                           */
+/*                                                                           */ 
 /*****************************************************************************/
 
 /* First let's include the header file needed                                */
@@ -278,7 +278,6 @@ int runghosted(struct CFanimation_struct* animation, long int id, void* paramete
         corpse->x=animation->victim->x;
         corpse->y=animation->victim->y;
         corpse->type=0;
-        CLEAR_FLAG(corpse, FLAG_WIZ);
         corpse->contr=NULL;
         cf_map_insert_object_there(corpse, animation->victim->map, NULL, 0);
         animation->wizard=1;
@@ -293,7 +292,6 @@ int runghosted(struct CFanimation_struct* animation, long int id, void* paramete
         cf_object_free(animation->corpse);
         animation->corpse=NULL;
         animation->victim->invisible=0;
-        cf_player_move(animation->victim->contr, 0);
     }
     animation->ghosted=id;
     return 1;
@@ -375,16 +373,6 @@ int runnotice(struct CFanimation_struct* animation, long int id, void* parameter
     return 1;
 }
 
-long int initstop(char *name, char *parameters, struct CFmovement_struct *move_entity)
-{
-    return 1;
-}
-int runstop(struct CFanimation_struct *animation, long int id, void *parameters)
-{
-    cf_log(llevDebug, "CFAnim: stop encountered\n");
-    return 1;
-}
-
 
 CFanimationHook animationbox[]=
 {
@@ -430,8 +418,7 @@ CFanimationHook animationbox[]=
     {"pickup_object",initpickupobject,runpickupobject},
     {"ghosted",initghosted,runghosted},
     {"teleport",initteleport,runteleport},
-    {"notice",initnotice,runnotice},
-    {"stop", initstop, runstop}
+    {"notice",initnotice,runnotice}
 };
 int animationcount=sizeof (animationbox) / sizeof (CFanimationHook);
 int ordered_commands=0;
@@ -565,20 +552,20 @@ int equality_split (char* buffer, char**variable, char**value)
  * if return value is true, bool was set successfully
  * else, an error occured and bool was not touched
  */
-int get_boolean (char* strg,int* bl)
+int get_boolean (char* string,int* bool)
 {
-    if (!strncmp (strg,"y",1))
-        *bl=1;
-    else if (!strncmp (strg,"n",1))
-        *bl=0;
-    else if (!strncmp (strg,"Y",1))
-        *bl=1;
-    else if (!strncmp (strg,"N",1))
-        *bl=0;
-    else if (!strncmp (strg,"1",1))
-        *bl=1;
-    else if (!strncmp (strg,"0",1))
-        *bl=0;
+    if (!strncmp (string,"y",1))
+        *bool=1;
+    else if (!strncmp (string,"n",1))
+        *bool=0;
+    else if (!strncmp (string,"Y",1))
+        *bool=1;
+    else if (!strncmp (string,"N",1))
+        *bool=0;
+    else if (!strncmp (string,"1",1))
+        *bool=1;
+    else if (!strncmp (string,"0",1))
+        *bool=0;
     else return 0;
     return 1;
 }
@@ -664,7 +651,7 @@ int start_animation (object* who,object* activator,char* file, char* options)
     CFanimation* current_anim;
     char    path[1024];
 
-    fichier = fopen(file,"r");
+    fichier = fopen(cf_get_maps_directory(file, path, sizeof(path)),"r");
     if (fichier == NULL)
     {
         cf_log(llevDebug, "CFAnim: Unable to open %s\n", path);
@@ -860,13 +847,8 @@ static void animate_one(CFanimation *animation, long int milliseconds)
         cf_object_set_flag(animation->victim, FLAG_WIZPASS,1);
         cf_object_set_flag(animation->victim, FLAG_WIZCAST,1);
         cf_object_set_flag(animation->victim, FLAG_WIZ,1);
-        if (animation->verbose)
-            cf_log(llevDebug, "CFAnim: Setting wizard flags done\n");
 
     }
-    if (animation->paralyze)
-        animation->victim->speed_left= -99999;
-
     cf_object_update(animation->victim,UP_OBJ_CHANGE);
 
     if (animation->nextmovement)
@@ -890,7 +872,6 @@ void animate(void)
 {
     CFanimation* current;
     CFanimation* next;
-    CFanimation* previous_anim=NULL;
     struct timeval now;
     static struct timeval yesterday;
     static int already_passed=0;
@@ -912,26 +893,16 @@ void animate(void)
     {
         if (!current->nextmovement)
         {
-            if (current->paralyze)
-                current->victim->speed_left=current->victim->speed;
             next=current->nextanimation;
             if (first_animation==current)
                 first_animation=next;
-            else
-            {
-                cf_log(llevDebug, "CFAnim: Not the first anim, binding to %p.\n", previous_anim);
-                previous_anim->nextanimation = next;
-            }
             if (current->name)
                 free (current->name);
             free (current);
             current=next;
         }
         else
-        {
-            previous_anim = current;
             current=current->nextanimation;
-        }
     }
 }
 
@@ -1104,7 +1075,6 @@ CF_PLUGIN void* globalEventListener(int* type, ...)
             context->activator = va_arg(args, object*);
             break;
         case EVENT_CLOCK:
-            animate();
             break;
         case EVENT_MAPRESET:
             buf = va_arg(args, char*);
@@ -1145,7 +1115,6 @@ CF_PLUGIN void* eventListener(int* type, ...)
     context->activator   = va_arg(args, object*);
     context->third       = va_arg(args, object*);
     buf                  = va_arg(args, char*);
-
     if (buf !=0)
         strcpy(context->message,buf);
     context->fix         = va_arg(args, int);
@@ -1158,21 +1127,11 @@ CF_PLUGIN void* eventListener(int* type, ...)
 
     pushContext(context);
     /* Put your plugin action(s) here */
-    if (context->activator != NULL)
-    {
-        cf_log(llevDebug, "CFAnim: %s called animator script %s, options are %s\n",
+    cf_log(llevDebug, "CFAnim: %s called animator script %s, options are %s\n",
            context->activator->name,
            context->script,
            context->options);
-    }
-    else if (context->who != NULL)
-    {
-        context->activator = context->who;
-        cf_log(llevDebug, "CFAnim: %s called animator script %s, options are %s\n",
-           context->who->name,
-           context->script,
-           context->options);
-    }
+
     context->returnvalue = start_animation(context->who, context->activator,
                                            context->script, context->options);
 
@@ -1188,3 +1147,4 @@ CF_PLUGIN int   closePlugin()
     cf_log(llevDebug, "CFAnim 2.0a closing\n");
     return 0;
 }
+

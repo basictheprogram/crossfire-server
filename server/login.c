@@ -26,11 +26,6 @@
     The authors can be reached via e-mail at crossfire-devel@real-time.com
 */
 
-/**
- * @file
- * Player login/logout/save functions.
- */
-
 #include <global.h>
 #ifndef __CEXTRACT__
 #include <sproto.h>
@@ -39,13 +34,12 @@
 #include <loader.h>
 #include <define.h>
 
+extern void sub_weight (object *, signed long);
+extern void add_weight (object *, signed long);
+
 static void copy_file(const char *filename, FILE *fpout);
 
-/**
- * Save all players.
- *
- * @param flag
- * if non zero, it means that we want to try and save everyone, but
+/* If flag is non zero, it means that we want to try and save everyone, but
  * keep the game running.  Thus, we don't want to free any information.
  */
 void emergency_save(int flag) {
@@ -53,6 +47,8 @@ void emergency_save(int flag) {
   player *pl;
 
   trying_emergency_save = 1;
+  if(editor)
+    return;
   LOG(llevError,"Emergency save:  ");
   for(pl=first_player;pl!=NULL;pl=pl->next) {
     if(!pl->ob) {
@@ -60,8 +56,7 @@ void emergency_save(int flag) {
       continue;
     }
     LOG(llevError,"%s ",pl->ob->name);
-    draw_ext_info(NDI_UNIQUE, 0,pl->ob, MSG_TYPE_ADMIN,  MSG_TYPE_ADMIN_LOADSAVE,
-		  "Emergency save...", NULL);
+    new_draw_info(NDI_UNIQUE, 0,pl->ob,"Emergency save...");
 
 /* If we are not exiting the game (ie, this is sort of a backup save), then
  * don't change the location back to the village.  Note that there are other
@@ -76,8 +71,7 @@ void emergency_save(int flag) {
     }
     if(!save_player(pl->ob,flag)) {
       LOG(llevError, "(failed) ");
-      draw_ext_info(NDI_UNIQUE, 0,pl->ob,MSG_TYPE_ADMIN,  MSG_TYPE_ADMIN_LOADSAVE,
-		    "Emergency save failed, checking score...", NULL);
+      new_draw_info(NDI_UNIQUE, 0,pl->ob,"Emergency save failed, checking score...");
     }
     check_score(pl->ob,1);
   }
@@ -102,21 +96,11 @@ void delete_character(const char *name) {
     remove_directory(buf);
 }
 
-/**
- * This verify that a character of name exits, and that it matches
- * password.
- *
- * @param name
- * player name.
- * @param password
- * player's password, not encrypted.
- * @retval 0
- * there is match.
- * @retval 1
- * no such player.
- * @retval 2
- * incorrect password.
+/* This verify that a character of name exits, and that it matches
+ * password.  It return 0 if there is match, 1 if no such player,
+ * 2 if incorrect password.
  */
+
 int verify_player(const char *name, char *password)
 {
     char buf[MAX_BUF];
@@ -159,47 +143,62 @@ int verify_player(const char *name, char *password)
     return 1;
 }
 
-/**
- * Ensure player's name is valid.
- *
- * @param me
- * player to report to.
- * @param name
- * name to check.
- * @retval 0
- * invalid name.
- * @retval 1
- * valid name.
+/* Checks to see if anyone else by 'name' is currently playing. 
+ * If we find that file or another character of some name is already in the
+ * game, we don't let this person join (we should really let the new player
+ * enter the password, and if correct, disconnect that socket and attach it to
+ * the players current session.
+ * If no one by that name is currently playing, we then make sure the name
+ * doesn't include any bogus characters.
+ * We return 0 if the name is in use/bad, 1 if it is OK to use this name.
  */
+
 int check_name(player *me,const char *name) {
 
     if (*name=='\0') {
-	draw_ext_info(NDI_UNIQUE, 0,me->ob,MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_LOGIN,
-		      "Your username cannot be blank.", NULL);
+	new_draw_info(NDI_UNIQUE, 0,me->ob,"Null names are not allowed.");
 	return 0;
     }
 
     if(!playername_ok(name)) {
-	draw_ext_info(NDI_UNIQUE, 0,me->ob,MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_LOGIN,
-		      "That name contains illegal characters. Use letters, hyphens and underscores only. Hyphens and underscores are not allowed as the first character.", NULL);
+	new_draw_info(NDI_UNIQUE, 0,me->ob,"That name contains illegal characters.");
 	return 0;
     }
     if (strlen(name) >= MAX_NAME) {
-	draw_ext_info_format(NDI_UNIQUE, 0,me->ob,MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_LOGIN,
-		      "That name is too long. (Max length: %d characters)", NULL, MAX_NAME);
+	new_draw_info(NDI_UNIQUE, 0,me->ob,"That name is too long.");
 	return 0;
     }
 
     return 1;
 }
 
-/**
- * Recursively free_object() op and its inventory.
- *
- * @param op
- * object to totally free_object().
- * @todo doesn't free_object() handle inventory?
+#if 0
+/*
+ * create_savedir_if_needed no longer needed.  Should perhaps get removed.
+ * MSW 2006-06-02
  */
+
+static int create_savedir_if_needed(char *savedir)
+{
+  struct stat *buf;
+
+  if ((buf = (struct stat *) malloc(sizeof(struct stat))) == NULL) {
+    LOG(llevError, "Unable to save playerfile... out of memory.\n");
+    return 0;
+  } else {
+    stat(savedir, buf);
+    if (!S_ISDIR(buf->st_mode))
+      if (mkdir(savedir, SAVE_DIR_MODE))
+	{
+	LOG(llevError, "Unable to create player savedir %s: %s\n", savedir, strerror_local(errno));
+	return 0;
+      }
+    free(buf);
+  }
+ return 1;
+}
+#endif
+
 void destroy_object (object *op)
 {
     object *tmp;
@@ -211,18 +210,13 @@ void destroy_object (object *op)
     free_object(op);
 }
 
-/**
- * Saves a player to disk.
- *
- * @param op
- * player to save.
- * @param flag
- * if is set, it's only backup, ie dont remove objects from inventory.
+/*
+ * If flag is set, it's only backup, ie dont remove objects from inventory
  * If BACKUP_SAVE_AT_HOME is set, and the flag is set, then the player
  * will be saved at the emergency save location.
- * @return
- * non zero if successful.
+ * Returns non zero if successful.
  */
+
 int save_player(object *op, int flag) {
   FILE *fp;
   char filename[MAX_BUF], *tmpfilename,backupfile[MAX_BUF];
@@ -240,8 +234,8 @@ int save_player(object *op, int flag) {
 
   if(!pl->name_changed||(!flag&&!op->stats.exp)) {
     if(!flag) {
-      draw_ext_info(NDI_UNIQUE, 0,op,MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_LOADSAVE,
-		    "Your game is not valid, game not saved.", NULL);
+      new_draw_info(NDI_UNIQUE, 0,op,"Your game is not valid,");
+      new_draw_info(NDI_UNIQUE, 0,op,"Game not saved.");
     }
     return 0;
   }
@@ -258,13 +252,16 @@ int save_player(object *op, int flag) {
   if (flag == 0)
     terminate_all_pets(op);
 
+  /* Delete old style file */
+  sprintf(filename,"%s/%s/%s.pl",settings.localdir,settings.playerdir,op->name);
+  unlink(filename);
+
   sprintf(filename,"%s/%s/%s/%s.pl",settings.localdir,settings.playerdir,op->name,op->name);
   make_path_to_file(filename);
   tmpfilename = tempnam_local(settings.tmpdir,NULL);
   fp=fopen(tmpfilename, "w");
   if(!fp) {
-    draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_LOADSAVE,
-		  "Can't open file for save.", NULL);
+    new_draw_info(NDI_UNIQUE, 0,op, "Can't open file for save.");
     LOG(llevDebug,"Can't open file for save (%s).\n",tmpfilename);
     free(tmpfilename);
     return 0;
@@ -312,9 +309,10 @@ int save_player(object *op, int flag) {
     fprintf(fp,"map %s\n",op->map->path);
   else
     fprintf(fp,"map %s\n",settings.emergency_mapname);
-
+  
   fprintf(fp,"savebed_map %s\n", pl->savebed_map);
   fprintf(fp,"bed_x %d\nbed_y %d\n", pl->bed_x, pl->bed_y);
+  fprintf(fp,"weapon_sp %f\n",pl->weapon_sp);
   fprintf(fp,"Str %d\n",pl->orig_stats.Str);
   fprintf(fp,"Dex %d\n",pl->orig_stats.Dex);
   fprintf(fp,"Con %d\n",pl->orig_stats.Con);
@@ -334,7 +332,6 @@ int save_player(object *op, int flag) {
       fprintf(fp, "party_rejoin_name %s\n", pl->party->partyname);
       fprintf(fp, "party_rejoin_password %s\n", pl->party->passwd);
   }
-  fprintf(fp, "language %d\n", pl->language);
   fprintf(fp,"endplst\n");
 
   SET_FLAG(op, FLAG_NO_FIX_PLAYER);
@@ -349,26 +346,14 @@ int save_player(object *op, int flag) {
   /* Save objects, but not unpaid objects.  Don't remove objects from
    * inventory.
    */
-  i = save_object(fp, op, SAVE_FLAG_NO_REMOVE);
+  save_object(fp, op, SAVE_FLAG_NO_REMOVE);
   if (flag) {
     op->x = backup_x;
     op->y = backup_y;
   }
 #else
-  i = save_object(fp, op, SAVE_FLAG_SAVE_UNPAID | SAVE_FLAG_NO_REMOVE); /* don't check and don't remove */
+  save_object(fp, op, SAVE_FLAG_SAVE_UNPAID | SAVE_FLAG_NO_REMOVE); /* don't check and don't remove */
 #endif
-
-  if (wiz)
-      SET_FLAG(op,FLAG_WIZ);
-
-  if (fclose(fp) != 0 || i != SAVE_ERROR_OK) {	/* make sure the write succeeded */
-      draw_ext_info(NDI_UNIQUE | NDI_RED, 0,op, MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_LOADSAVE,
-                    "Can't save character!", NULL);
-      draw_ext_info_format(NDI_ALL_DMS | NDI_RED, 0, op, MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_LOADSAVE, "Save failure for player %s!", NULL, op->name);
-      unlink(tmpfilename);
-      free(tmpfilename);
-      return 0;
-  }
 
   CLEAR_FLAG(op, FLAG_NO_FIX_PLAYER);
 
@@ -376,13 +361,18 @@ int save_player(object *op, int flag) {
       while ((tmp = op->inv))
 	  destroy_object (tmp);
 
+  if (fclose(fp) == EOF) {	/* make sure the write succeeded */
+	new_draw_info(NDI_UNIQUE, 0,op, "Can't save character.");
+	unlink(tmpfilename);
+	free(tmpfilename);
+	return 0;
+  }
   checksum = 0;
   sprintf(backupfile, "%s.tmp", filename);
   rename(filename, backupfile);
   fp = fopen(filename,"w");
   if(!fp) {
-    draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_LOADSAVE,
-		  "Can't open file for save.", NULL);
+    new_draw_info(NDI_UNIQUE, 0,op, "Can't open file for save.");
     unlink(tmpfilename);
     free(tmpfilename);
     return 0;
@@ -392,8 +382,7 @@ int save_player(object *op, int flag) {
   unlink(tmpfilename);
   free(tmpfilename);
   if (fclose(fp) == EOF) {	/* got write error */
-	draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_LOADSAVE,
-		      "Can't close file for save.", NULL);
+	new_draw_info(NDI_UNIQUE, 0,op, "Can't close file for save.");
 	rename(backupfile, filename); /* Restore the original */
 	return 0;
   }
@@ -401,9 +390,10 @@ int save_player(object *op, int flag) {
 	unlink(backupfile);
 
   /* Eneq(@csd.uu.se): Reveal the container if we have one. */
-  if (flag&&container!=NULL)
+  if (flag&&container!=NULL) 
     op->container = container;
 
+  if (wiz) SET_FLAG(op,FLAG_WIZ);
   if(!flag)
 	esrv_send_inventory(op, op);
 
@@ -411,14 +401,6 @@ int save_player(object *op, int flag) {
   return 1;
 }
 
-/**
- * Copy a file.
- *
- * @param filename
- * source file.
- * @param fpout
- * where to copy to.
- */
 static void copy_file(const char *filename, FILE *fpout) {
   FILE *fp;
   char buf[MAX_BUF];
@@ -429,32 +411,25 @@ static void copy_file(const char *filename, FILE *fpout) {
   fclose(fp);
 }
 
-/**
- * Simple function to print errors when password is
- * not correct, and reinitialise the name.
- *
- * @param op
- * player.
+/* Simple function to print errors when password is
+ * not correct
  */
 static void wrong_password(object *op)
 {
-    draw_ext_info(NDI_UNIQUE, 0,op,MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_LOGIN,
-	  "\nA character with this name already exists. "
-	  "Please choose another name, or make sure you entered your "
-	  "password correctly.\n",
-	  NULL);
+    new_draw_info(NDI_UNIQUE, 0,op," ");
+    new_draw_info(NDI_UNIQUE, 0,op,"A character with this name already exists.");
+    new_draw_info(NDI_UNIQUE, 0,op,"Please choose another name, or make sure you entered your password correctly.");
+    new_draw_info(NDI_UNIQUE, 0,op," ");
 
     FREE_AND_COPY(op->name, "noname");
     FREE_AND_COPY(op->name_pl, "noname");
 
     op->contr->socket.password_fails++;
     if (op->contr->socket.password_fails >= MAX_PASSWORD_FAILURES) {
-	draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_LOGIN,
-	      "You gave an incorrect password too many times, "
-	      "you will now be dropped from the server.",
-	      NULL);
+	new_draw_info(NDI_UNIQUE, 0,op,
+	    "You gave an incorrect password too many times, you will now be dropped from the server.");
 
-	LOG(llevInfo, "A player connecting from %s has been dropped for password failure\n",
+	LOG(llevInfo, "A player connecting from %s has been dropped for password failure\n", 
 	    op->contr->socket.host);
 
 	op->contr->socket.status = Ns_Dead; /* the socket loop should handle the rest for us */
@@ -462,13 +437,6 @@ static void wrong_password(object *op)
     else get_name(op);
 }
 
-/**
- * Actually login a player, load from disk and such.
- *
- * @param op
- * player.
- * @todo describe connect/login/logout/disconnect process.
- */
 void check_login(object *op) {
     FILE *fp;
     char filename[MAX_BUF];
@@ -547,14 +515,13 @@ void check_login(object *op) {
 	    /* New password scheme: */
 	    correct=check_password(pl->write_buf+1,buf);
 	}
-	/* Old password mode removed - I have no idea what it
+	/* Old password mode removed - I have no idea what it 
 	 * was, and the current password mechanism has been used
 	 * for at least several years.
 	 */
     }
     if (!correct) {
 	wrong_password(op);
-	fclose(fp);
 	return;
     }
 
@@ -575,7 +542,7 @@ void check_login(object *op) {
     strcpy(pl->savebed_map, first_map_path);
     pl->bed_x=0, pl->bed_y=0;
     pl->spellparam[0] = '\0';
-
+    
     /* Loop through the file, loading the rest of the values */
     while (fgets(bufall,MAX_BUF,fp)!=NULL) {
 	sscanf(bufall,"%s %d\n",buf,&value);
@@ -619,6 +586,8 @@ void check_login(object *op) {
 	    pl->bed_x=value;
 	else if (!strcmp(buf,"bed_y"))
 	    pl->bed_y=value;
+	else if (!strcmp(buf,"weapon_sp"))
+	    sscanf(buf,"weapon_sp %f",&pl->weapon_sp);
         else if (!strcmp(buf,"Str"))
 	    pl->orig_stats.Str=value;
         else if (!strcmp(buf,"Dex"))
@@ -661,6 +630,28 @@ void check_login(object *op) {
 		fscanf(fp,"%d\n",&j);
 		pl->levgrace[i]=j;
 	    }
+	/* spell_array code removed - don't know when that was last used.
+	 * Even the load code below will someday be replaced by spells being
+	 * objects.
+	 */
+     /*TODO remove block inside #if 0*/
+	} else if (!strcmp(buf,"known_spell")) {
+#if 0
+	    /* Logic is left here in case someone wants to try
+	     * and write code to update to spell objects.
+	     */
+	    char *cp=strchr(bufall,'\n');
+	    *cp='\0';
+	    cp=strchr(bufall,' ');
+	    cp++;
+	    for(i=0;i<NROFREALSPELLS;i++)
+		if(!strcmp(spells[i].name,cp)) {
+		    pl->known_spells[pl->nrofknownspells++]=i;
+		    break;
+		}
+	    if(i==NROFREALSPELLS)
+		LOG(llevDebug, "Error: unknown spell (%s)\n",cp);
+#endif
 	}
         else if (!strcmp(buf, "party_rejoin_mode")) {
             pl->rejoin_party = value;
@@ -674,11 +665,6 @@ void check_login(object *op) {
             snprintf(party_password, sizeof(party_password), bufall + strlen("party_rejoin_password") + 1);
             if (strlen(party_password) > 0)
                 party_password[strlen(party_password) - 1] = '\0';
-        }
-        else if (!strcmp(buf, "language")) {
-            if (value < 0 || value >= NUM_LANGUAGES)
-                value = 0;
-            pl->language = value;
         }
     } /* End of loop loading the character file */
     remove_ob(op);
@@ -696,7 +682,7 @@ void check_login(object *op) {
 
     strncpy(pl->title, op->arch->clone.name, sizeof(pl->title)-1);
     pl->title[sizeof(pl->title)-1] = '\0';
-
+    
     /* If the map where the person was last saved does not exist,
      * restart them on their home-savebed. This is good for when
      * maps change between versions
@@ -734,7 +720,7 @@ void check_login(object *op) {
 
     if ( ! legal_range (op, op->contr->shoottype))
         op->contr->shoottype = range_none;
-
+    
     /* if it's a dragon player, set the correct title here */
     if (is_dragon_pl(op) && op->inv != NULL) {
         object *tmp, *abil=NULL, *skin=NULL;
@@ -748,14 +734,10 @@ void check_login(object *op) {
 	}
 	set_dragon_name(op, abil, skin);
     }
-
-    draw_ext_info(NDI_UNIQUE, 0,op,MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_LOGIN,
-		  "Welcome Back!", NULL);
-    draw_ext_info_format(NDI_UNIQUE | NDI_ALL | NDI_DK_ORANGE, 5, NULL,
-		 MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_PLAYER,
-		 "%s has entered the game.",
-		 "%s has entered the game.",
-		 pl->ob->name);
+    
+    new_draw_info(NDI_UNIQUE, 0,op,"Welcome Back!");
+    new_draw_info_format(NDI_UNIQUE | NDI_ALL | NDI_DK_ORANGE, 5, NULL,
+	     "%s has entered the game.",pl->ob->name);
 
     /* Lauwenmark : Here we handle the LOGIN global event */
     execute_global_event(EVENT_LOGIN, pl, pl->socket.host);
@@ -767,13 +749,11 @@ void check_login(object *op) {
      * set the play_again flag, so return.
      */
     if (op->stats.hp<0) {
-	draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_LOGIN,
-		      "Your character was dead last your played.",
-		      NULL);
+	new_draw_info(NDI_UNIQUE, 0,op,"Your character was dead last your played.");
 	kill_player(op);
 	if (pl->state != ST_PLAYING) return;
     }
-    LOG(llevInfo,"LOGIN: Player named %s from ip %s\n", op->name,
+    LOG(llevInfo,"LOGIN: Player named %s from ip %s\n", op->name, 
 	op->contr->socket.host);
 
     /* Do this after checking for death - no reason sucking up bandwidth if
@@ -792,10 +772,9 @@ void check_login(object *op) {
      * sent to the client.  Needs to be after esvr_add_spells, otherwise
      * we'll try to update spells from fix_object.
      */
-    fix_object(op);
+    fix_player(op);
 
     esrv_send_inventory(op, op);
-    esrv_send_pickup(pl);
 
     CLEAR_FLAG(op, FLAG_FRIENDLY);
 

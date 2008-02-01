@@ -60,12 +60,7 @@
 #include <newserver.h>
 #include <loader.h>
 
-/** Socket information. */
 Socket_Info socket_info;
-/**
- * Established connections for clients not yet playing.  See the page on
- * @ref page_connection "the login process" for a description of its use.
- */
 socket_struct* init_sockets;
 
 /**
@@ -82,11 +77,11 @@ void init_connection(socket_struct *ns, const char *from_ip)
     socklen_t buflen=sizeof(int);
 
 #ifdef WIN32 /* ***WIN32 SOCKET: init win32 non blocking socket */
-	int temp = 1;
+	int temp = 1;	
 
 	if(ioctlsocket(ns->fd, FIONBIO , &temp) == -1)
 		LOG(llevError,"init_connection:  Error on ioctlsocket.\n");
-#else
+#else 
     if (fcntl(ns->fd, F_SETFL, O_NONBLOCK)==-1) {
 		LOG(llevError,"init_connection:  Error on fcntl.\n");
     }
@@ -98,7 +93,7 @@ void init_connection(socket_struct *ns, const char *from_ip)
 #ifdef ESRV_DEBUG
 	LOG(llevDebug, "Default buffer size was %d bytes, will reset it to %d\n", oldbufsize, bufsize);
 #endif
-	if(setsockopt(ns->fd,SOL_SOCKET,SO_SNDBUF, (char*)&bufsize, sizeof(bufsize))) {
+	if(setsockopt(ns->fd,SOL_SOCKET,SO_SNDBUF, (char*)&bufsize, sizeof(&bufsize))) {
 	    LOG(llevError,"init_connection: setsockopt unable to set output buf size to %d\n", bufsize);
 	}
     }
@@ -110,14 +105,21 @@ void init_connection(socket_struct *ns, const char *from_ip)
 
     ns->faceset = 0;
     ns->facecache = 0;
+    ns->image2 = 0;
     ns->sound = 0;
+    ns->exp64 = 0;
     ns->monitor_spells = 0;
-    ns->mapmode = Map2Cmd;
+    ns->mapmode = Map0Cmd;
     ns->darkness = 1;
     ns->status = Ns_Add;
+    ns->comment = NULL;
+    ns->old_mode = 0;
     ns->mapx = 11;
     ns->mapy = 11;
     ns->newmapcmd= 0;
+    ns->itemcmd = 1;	/* Default is version item1 command*/
+    ns->ext_mapinfos=0; /*extendedmapinfo datas*/
+    ns->EMI_smooth=0; 
     ns->look_position = 0;
     ns->update_look = 0;
     ns->has_readable_type = 0;
@@ -125,7 +127,6 @@ void init_connection(socket_struct *ns, const char *from_ip)
     ns->monitor_spells = 0;
     ns->tick=0;
     ns->is_bot = 0;
-    ns->want_pickup = 0;
 
     /* we should really do some checking here - if total clients overflows
      * we need to do something more intelligent, because client id's will start
@@ -160,6 +161,7 @@ void init_connection(socket_struct *ns, const char *from_ip)
     ns->can_write=1;
     ns->password_fails = 0;
 
+    ns->sent_scroll=0;
     ns->host=strdup_local(from_ip);
     sprintf((char*)buf, "version %d %d %s\n", VERSION_CS,VERSION_SC, VERSION_INFO);
     sl.buf=buf;
@@ -180,7 +182,6 @@ void init_ericserver(void)
     struct sockaddr_in	insock;
     struct protoent  *protox;
     struct linger linger_opt;
-    char err[MAX_BUF];
 
 #ifdef WIN32 /* ***win32  -  we init a windows socket */
 	WSADATA w;
@@ -226,7 +227,7 @@ void init_ericserver(void)
     }
     init_sockets[0].fd = socket(PF_INET, SOCK_STREAM, protox->p_proto);
     if (init_sockets[0].fd == -1) {
-	LOG(llevError, "Cannot create socket: %s\n", strerror_local(errno, err, sizeof(err)));
+	LOG(llevError, "Cannot create socket: %s\n", strerror_local(errno));
 	exit(-1);
     }
     insock.sin_family = AF_INET;
@@ -237,7 +238,7 @@ void init_ericserver(void)
     linger_opt.l_linger = 0;
     if(setsockopt(init_sockets[0].fd,SOL_SOCKET,SO_LINGER,(char *) &linger_opt,
        sizeof(struct linger))) {
-	LOG(llevError, "Cannot setsockopt(SO_LINGER): %s\n", strerror_local(errno, err, sizeof(err)));
+	LOG(llevError, "Cannot setsockopt(SO_LINGER): %s\n", strerror_local(errno));
     }
 /* Would be nice to have an autoconf check for this.  It appears that
  * these functions are both using the same calling syntax, just one
@@ -256,17 +257,17 @@ void init_ericserver(void)
 #endif
 
 	if(setsockopt(init_sockets[0].fd,SOL_SOCKET,SO_REUSEADDR, &tmp, sizeof(tmp))) {
-	    LOG(llevError, "Cannot setsockopt(SO_REUSEADDR): %s\n", strerror_local(errno, err, sizeof(err)));
+	    LOG(llevError, "Cannot setsockopt(SO_REUSEADDR): %s\n", strerror_local(errno));
 	}
     }
 #else
     if(setsockopt(init_sockets[0].fd,SOL_SOCKET,SO_REUSEADDR,(char *)NULL,0)) {
-	LOG(llevError, "Cannot setsockopt(SO_REUSEADDR): %s\n", strerror_local(errno, err, sizeof(err)));
+	LOG(llevError, "Cannot setsockopt(SO_REUSEADDR): %s\n", strerror_local(errno));
     }
 #endif
 
     if (bind(init_sockets[0].fd,(struct sockaddr *)&insock,sizeof(insock)) == (-1)) {
-	LOG(llevError, "Cannot bind socket to port %d: %s\n", ntohs(insock.sin_port), strerror_local(errno, err, sizeof(err)));
+	LOG(llevError, "Cannot bind socket to port %d: %s\n", ntohs(insock.sin_port), strerror_local(errno));
 #ifdef WIN32 /* ***win32: close() -> closesocket() */
 	shutdown(init_sockets[0].fd,SD_BOTH);
 	closesocket(init_sockets[0].fd);
@@ -276,7 +277,7 @@ void init_ericserver(void)
 	exit(-1);
     }
     if (listen(init_sockets[0].fd,5) == (-1))  {
-	LOG(llevError, "Cannot listen on socket: %s\n", strerror_local(errno, err, sizeof(err)));
+	LOG(llevError, "Cannot listen on socket: %s\n", strerror_local(errno));
 #ifdef WIN32 /* ***win32: close() -> closesocket() */
 	shutdown(init_sockets[0].fd,SD_BOTH);
 	closesocket(init_sockets[0].fd);
@@ -298,7 +299,7 @@ void init_ericserver(void)
 
 /** Free's all the memory that ericserver allocates. */
 void free_all_newserver(void)
-{
+{  
     LOG(llevDebug,"Freeing all new client/server information.\n");
     free_socket_images();
     free(init_sockets);
@@ -329,6 +330,8 @@ void free_newsocket(socket_struct *ns)
 	FREE_AND_CLEAR(ns->stats.range);
     if (ns->stats.title)
         FREE_AND_CLEAR(ns->stats.title);
+    if (ns->comment)
+	FREE_AND_CLEAR(ns->comment);
     if (ns->host)
 	FREE_AND_CLEAR(ns->host);
     if (ns->inbuf.buf)
@@ -342,3 +345,4 @@ void final_free_player(player *pl)
     free_newsocket(&pl->socket);
     free_player(pl);
 }
+

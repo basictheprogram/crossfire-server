@@ -7,7 +7,7 @@
     CrossFire, A Multiplayer game for X-windows
 
     Copyright (C) 2003-2006 Mark Wedel & Crossfire Development Team
-    Copyright (C) 2000 Tim Rightnour
+    Copyright (C) 2000 Tim Rightnour 
     Copyright (C) 1992 Frank Tore Johansen
 
     This program is free software; you can redistribute it and/or modify
@@ -27,11 +27,6 @@
     The authors can be reached via e-mail at crossfire-devel@real-time.com
 */
 
-/**
- * @file
- * Defines for the ingame clock, ticks management and weather system.
- */
-
 #ifndef TOD_H
 #define TOD_H
 
@@ -42,8 +37,6 @@
 #define DAYS_PER_WEEK		7
 #define WEEKS_PER_MONTH		5
 #define MONTHS_PER_YEAR		17
-#define SEASONS_PER_YEAR        5
-#define PERIODS_PER_DAY         6
 
 /* convenience */
 #define WEEKS_PER_YEAR		(WEEKS_PER_MONTH*MONTHS_PER_YEAR)
@@ -55,9 +48,6 @@
 
 #define LUNAR_DAYS		DAYS_PER_MONTH
 
-/**
- * Represents the ingame time.
- */
 typedef struct _timeofday {
 	int year;
 	int month;
@@ -67,7 +57,6 @@ typedef struct _timeofday {
 	int minute;
 	int weekofmonth;
 	int season;
-        int periodofday;
 } timeofday_t;
 
 /* from common/time.c */
@@ -90,14 +79,13 @@ extern void get_tod(timeofday_t *tod);
 #define PRESSURE_MAX			1040
 #define PRESSURE_MIN			960
 
-/**
- * This is a multiplier for the wind caused by pressure differences.
+/* This is a multiplier for the wind caused by pressure differences.
  * The type of overal climate you get depends on this.
  * Too little wind, and the rain hugs the coast.
  * Too much wind, and there are hurricanes and blizzards everywhere.
  * 1 is too little.
  */
-#define WIND_FACTOR  4.0
+#define WIND_FACTOR  4.0 
 
 /* editing the below might require actual changes to code */
 #define WEATHERMAPTILESX		100
@@ -120,41 +108,33 @@ extern void get_tod(timeofday_t *tod);
 #define SKY_HEAVY_SNOW    15
 #define SKY_BLIZZARD      16
 
-/**
- * Defines a tile the weather system should avoid.
- */
 typedef struct _weather_avoids {
-	const char *name;   /**< Tile archetype name, used during initialisation only. */
-	int snow;           /**< Is this snow? Used for various tests. */
-	archetype *what;    /**< Inited from name, faster to compare arch pointers than strings. */
+	const char *name;
+	int snow;
+	archetype *what; /*inited from name, faste to compare arch pointers than strings*/
 } weather_avoids_t;
 
-/**
- * Defines a tile the weather system can change to another tile.
- */
 typedef struct _weather_replace {
-	const char *tile;               /**< Tile archetype name. */
-	const char *special_snow;       /**< If set, this is some special snow. */
-	const char *doublestack_arch;   /**< If set, this other archetype will be added. */
-	int arch_or_name;               /**< If set, tile matches the archetype name, else the object's name. */
+	const char *tile;
+	const char *special_snow;
+	const char *doublestack_arch;
+	int arch_or_name;
 } weather_replace_t;
 
-/**
- * Defines a tile where something can grow.
- */
 typedef struct _weather_grow {
-	const char *herb;   /**< Arch name of item to grow. */
-	const char *tile;   /**< Arch tile to grow on, NULL if anything. */
-	int random;         /**< Random apparition factor. Min 1, higher = lower chance of appearance. */
-	float rfmin;        /**< Minimum rainfall for herb to grow (inches/day). */
-	float rfmax;        /**< Maximum rainfall for herb to grow (inches/day). */
-	int humin;          /**< Minimum humidity for herb to grow. */
-	int humax;          /**< Maximum humidity for herb to grow. */
-	int tempmin;        /**< Minimum temperature for herb to grow. */
-	int tempmax;        /**< Maximum temperature for herb to grow. */
-	int elevmin;        /**< Minimum elevation for herb to grow. */
-	int elevmax;        /**< Maximum elevation for herb to grow. */
-	int season;         /**< Season the herb can grow. 0=any or 1-5. */
+	const char *herb; /* arch name of item to grow */
+	const char *tile; /* arch tile to grow on, NULL if anything */
+	int random; /* random factor.  min 1, higher = lower chance of
+		     * appearance */
+	float rfmin;
+	float rfmax; /* rainfall min/max (inches/day) */
+	int humin;
+	int humax; /* humidity min/max */
+	int tempmin;
+	int tempmax; /* temp min/max */
+	int elevmin;
+	int elevmax; /* elevation min/max */
+	int season; /* 0=any or 1-5 */
 } weather_grow_t;
 
 #endif /* TOD_H */

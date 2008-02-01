@@ -94,7 +94,6 @@ WS	[ \t]*
 ^dungeon_name{S}	strncpy(RP->dungeon_name, rmap_yval(),RM_SIZE);
 ^dungeon_depth{S}   RP->dungeon_depth = IVAL;
 ^final_map{S}       strncpy(RP->final_map,rmap_yval(),RM_SIZE);
-^final_exit_archetype{S} strncpy(RP->final_exit_archetype, rmap_yval(), RM_SIZE);
 ^orientation{S}    RP-> orientation = IVAL;
 ^origin_x{S}        RP->origin_x = IVAL;
 ^origin_y{S}       RP-> origin_y = IVAL;
@@ -144,7 +143,7 @@ int load_parameters(FILE *fp, int bufstate,RMParms *RP) {
         yy_delete_buffer(YY_CURRENT_BUFFER);
         yy_switch_to_buffer(yy_create_buffer(fp, YY_BUF_SIZE));
         if (bufstate==LO_NOREAD) return LL_NORMAL;
-    }
+    } 
     if (bufstate==LO_LINEMODE) {
         YY_BUFFER_STATE  yybufstate;
         while (fgets(inbuf, MAX_BUF-3, fp)) {

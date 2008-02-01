@@ -3,10 +3,11 @@
  *   "$Id$";
  */
 
-/**
- * @file
- * This code was grabbed from the Netrek source and modified to work with
- * Crossfire.
+/*
+ * Ban.c
+ * Code was grabbed from the netrek source and modified to work with
+ * crossfire. This function checks a file in the lib directory for any
+ * banned players. If it finds one it returns a 1. Wildcards can be used.
  */
 
 #include <global.h>
@@ -25,15 +26,13 @@
 #endif /* win32 */
 
 /**
- * Check if a player and/or host is banned. Wildcards can be used.
+ * Check if a player and/or host is banned.
  *
- * @param login
- * player name to check; NULL to check only the host name.
- * @param host
- * host name to check.
+ * @param login the player name to check; NULL to check only the host name
  *
- * @return
- * 1=player/host is banned; 0=player/host is not banned
+ * @param host the host name to check
+ *
+ * @return 1=player/host is banned; 0=player/host is not banned
  */
 int checkbanned(const char *login, const char *host)
 {

@@ -3,8 +3,6 @@
  *   "$Id$ ";
  */
 
-int reopen_logfile = 0; /* May be set in SIGHUP handler */
-
 /*
     CrossFire, A Multiplayer game for X-windows
 
@@ -28,42 +26,31 @@ int reopen_logfile = 0; /* May be set in SIGHUP handler */
     The authors can be reached via e-mail at crossfire-devel@real-time.com
 */
 
-/**
- * @file logger.c
- * This handles logging, to file or strerr/stdout.
- */
 
 #include <stdarg.h>
 #include <global.h>
-#include <sproto.h>
+#include <funcpoint.h>
 
-/**
- * Human-readable name of log levels.
- */
-static char* loglevel_names[] = {"[Error]   ",
-                                 "[Info]    ",
-                                 "[Debug]   ",
-                                 "[Monster] "};
+int reopen_logfile = 0; /* May be set in SIGHUP handler */
 
-/**
- * Logs a message to stderr, or to file.
+/*
+ * Logs a message to stderr, or to file, and/or even to socket.
  * Or discards the message if it is of no importance, and none have
  * asked to hear messages of that logLevel.
  *
  * See include/logger.h for possible logLevels.  Messages with llevInfo
  * and llevError are always printed, regardless of debug mode.
- *
- * @param logLevel
- * level of the message
- * @param format
- * message to log. Works like printf() and such
  */
+static char* loglevel_names[] = {"[Error]   ",
+                                 "[Info]    ",
+                                 "[Debug]   ",
+                                 "[Monster] "};
 void LOG (LogLevel logLevel, const char *format, ...)
 {
-    char buf[20480];  /* This needs to be really really big - larger
-                       * than any other buffer, since that buffer may
-                       * need to be put in this one.
-                       */
+  char buf[20480];  /* This needs to be really really big - larger
+		     * than any other buffer, since that buffer may
+		     * need to be put in this one.
+		     */
 
     char time_buf[2048];
 
@@ -86,7 +73,7 @@ void LOG (LogLevel logLevel, const char *format, ...)
         }
 
         vsprintf(buf, format, ap);
-#ifdef WIN32 /* ---win32 change log handling for win32 */
+#ifdef WIN32
         if (time_buf[0] != 0) {
             fputs(time_buf, logfile);
             fputs(" ", logfile);
@@ -94,11 +81,11 @@ void LOG (LogLevel logLevel, const char *format, ...)
         fputs(loglevel_names[logLevel], logfile);    /* wrote to file or stdout */
         fputs(buf, logfile);    /* wrote to file or stdout */
 #ifdef DEBUG				/* if we have a debug version, we want see ALL output */
-        fflush(logfile);    /* so flush this! */
+		fflush(logfile);    /* so flush this! */
 #endif
-        if(logfile != stderr) {   /* if was it a logfile wrote it to screen too */
-            fputs(loglevel_names[logLevel], stderr);
-            fputs(buf, stderr);
+        if(logfile != stderr) {   /* if was it a logfile wrote it to screen too */ 
+            fputs(loglevel_names[logLevel], stderr); 
+            fputs(buf, stderr); 
             if (time_buf[0] != 0) {
                 fputs(time_buf, stderr);
                 fputs(" ", stderr);
@@ -131,12 +118,12 @@ void LOG (LogLevel logLevel, const char *format, ...)
     fputs(loglevel_names[logLevel], logfile);
     fputs(buf, logfile);
 #endif
-    }
-    if (!exiting && !trying_emergency_save &&
-        logLevel == llevError && ++nroferrors > MAX_ERRORS) {
-        exiting = 1;
-        if (!trying_emergency_save)
-            emergency_save(0);
-    }
-    va_end(ap);
+  }
+  if (!exiting && !trying_emergency_save &&
+      logLevel == llevError && ++nroferrors > MAX_ERRORS) {
+    exiting = 1;
+    if (!trying_emergency_save)
+      emergency_save(0);
+  }
+  va_end(ap);
 }

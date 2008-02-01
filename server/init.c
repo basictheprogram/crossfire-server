@@ -26,14 +26,8 @@
     The authors can be reached via e-mail at crossfire-devel@real-time.com
 */
 
-/**
- * @file
- * Server initialisation, settings loading, command-line handling and such.
- */
-
 #include <global.h>
 #include <loader.h>
-#include <version.h>
 #ifndef __CEXTRACT__
 #include <sproto.h>
 #endif
@@ -48,12 +42,10 @@ static void init_races(void);
 static void dump_races(void);
 static void add_to_racelist(const char *race_name, object *op);
 static racelink *get_racelist(void);
-static void fatal_signal(int make_core);
 
 /** global weathermap */
 weathermap_t **weathermap;
 
-/** Filename when in daemon mode. */
 static char default_daemon_log[] = "logfile";
 
 static void set_logfile(char *val) { settings.logfilename=val; }
@@ -84,22 +76,14 @@ static void set_uniquedir(char *path) { settings.uniquedir=path; }
 static void set_templatedir(char *path) { settings.templatedir=path; }
 static void set_playerdir(char *path) { settings.playerdir=path; }
 static void set_tmpdir(char *path) { settings.tmpdir=path; }
-static void free_races(void);
-static void free_materials(void);
 
-static void showscoresparm(char *data) {
-    display_high_score(NULL,9999,data);
-    exit(0);
+static void showscoresparm(char *data) { 
+    display_high_score(NULL,9999,data); 
+    exit(0); 
 }
 
-/**
- * Change the server's port. Will exit() if invalid value.
- *
- * @param val
- * port to use. Must be a valid one, between 1 and 32765 inclusive.
- */
 static void set_csport(char *val)
-{
+{ 
     settings.csport=atoi(val);
 #ifndef WIN32 /* ***win32: set_csport: we remove csport error secure check here, do this later */
     if (settings.csport<=0 || settings.csport>32765 ||
@@ -110,24 +94,20 @@ static void set_csport(char *val)
 #endif /* win32 */
 }
 
-/**
- * One command line option definition.
- * Most of this is shamelessly stolen from XSysStats.  But since that is
+/** Most of this is shamelessly stolen from XSysStats.  But since that is
  * also my program, no problem.
  */
 struct Command_Line_Options {
-    const char *cmd_option; /**< How it is called on the command line. */
-    uint8   num_args;	    /**< Number or args it takes. */
-    uint8   pass;           /**< What pass this should be processed on. @todo describe passes :) */
-    void    (*func)();      /**< function to call when we match this.
+    const char *cmd_option; /* how it is called on the command line */
+    uint8   num_args;	    /* Number or args it takes */
+    uint8   pass;           /* What pass this should be processed on. */
+    void    (*func)();      /* function to call when we match this.
 			     * if num_args is true, than that gets passed
 			     * to the function, otherwise nothing is passed
 			     */
 };
 
-/**
- * Actual valid command line options.
- * The way this system works is pretty simple - parse_args takes
+/** The way this system works is pretty simple - parse_args takes
  * the options passed to the program and a pass number.  If an option
  * matches both in name and in pass (and we have enough options),
  * we call the associated function.  This makes writing a multi
@@ -135,7 +115,7 @@ struct Command_Line_Options {
  */
 struct Command_Line_Options options[] = {
 
-/** Pass 1 functions - Stuff that can/should be called before we actually
+/** Pass 1 functions - STuff that can/should be called before we actually
  * initialize any data.
  */
 {"-h", 0, 1, help},
@@ -166,13 +146,13 @@ struct Command_Line_Options options[] = {
 {"-srv", 0, 1, service_handle},
 #endif
 
-/** Pass 2 functions.  Most of these could probably be in pass 1,
+/** Pass 2 functions.  Most of these could probably be in pass 1, 
  * as they don't require much of anything to bet set up.
  */
 {"-csport", 1, 2, set_csport},
 
 /** Start of pass 3 information. In theory, by pass 3, all data paths
- * and defaults should have been set up.
+ * and defaults should have been set up. 
  */
 {"-o", 0, 3, compile_info},
 {"-m", 0, 3, set_dumpmon1},
@@ -191,19 +171,8 @@ struct Command_Line_Options options[] = {
 };
 
 
-/**
- * Parse command line arguments.
- *
- * Note since this may be called before the library has been set up,
+/** Note since this may be called before the library has been set up,
  * we don't use any of crossfires built in logging functions.
- *
- * @param argc
- * length of argv.
- * @param argv
- * arguments.
- * @param pass
- * initialization pass arguments to use.
- * @todo describe pass.
  */
 static void parse_args(int argc, char *argv[], int pass)
 {
@@ -248,17 +217,8 @@ static void parse_args(int argc, char *argv[], int pass)
     }
 }
 
-/** Material types. */
 materialtype_t *materialt;
 
-/**
- * Creates an empty materialtype_t structure.
- *
- * @return
- * new blanked structure.
- * @note
- * will fatal() instead of returning NULL.
- */
 static materialtype_t *get_empty_mat(void) {
     materialtype_t *mt;
     int i;
@@ -285,10 +245,6 @@ static materialtype_t *get_empty_mat(void) {
     return mt;
 }
 
-/**
- * Loads the materials.
- * @todo describe materials and such.
- */
 static void load_materials(void)
 {
     char buf[MAX_BUF], filename[MAX_BUF], *cp, *next;
@@ -297,7 +253,7 @@ static void load_materials(void)
     int i, value;
 
     sprintf(filename, "%s/materials", settings.datadir);
-    LOG(llevDebug, "Reading material type data from %s...\n", filename);
+    LOG(llevDebug, "Reading material type data from %s...", filename);
     if ((fp = fopen(filename, "r")) == NULL) {
         LOG(llevError, "Cannot open %s for reading\n", filename);
         mt = get_empty_mat();
@@ -381,20 +337,6 @@ static void load_materials(void)
     }
     LOG(llevDebug, "Done.\n");
     fclose(fp);
-
-}
-
-/**
- * Frees all memory allocated to materials.
- */
-static void free_materials(void) {
-    materialtype_t* next;
-    while (materialt) {
-        next = materialt->next;
-        free(materialt);
-        materialt = next;
-    }
-    materialt = NULL;
 }
 
 /**
@@ -448,21 +390,21 @@ static void load_settings(void)
 	    }
 	} else if (!strcasecmp(buf,"metaserver_server")) {
 	    if (has_val) strcpy(settings.meta_server, cp);
-	    else
+	    else 
 		LOG(llevError,"load_settings: metaserver_server must have a value.\n");
 	} else if (!strcasecmp(buf,"motd")) {
 	    if (has_val)
 		strcpy(settings.motd, cp);
-	    else
+	    else 
 		LOG(llevError,"load_settings: motd must have a value.\n");
 	} else if (!strcasecmp(buf,"dm_mail")) {
 	    if (has_val)
 		strcpy(settings.dm_mail, cp);
-	    else
+	    else 
 		LOG(llevError,"load_settings: dm_mail must have a value.\n");
 	} else if (!strcasecmp(buf,"metaserver_host")) {
 	    if (has_val) strcpy(settings.meta_host, cp);
-	    else
+	    else 
 		LOG(llevError,"load_settings: metaserver_host must have a value.\n");
 	} else if (!strcasecmp(buf,"port")) {
 	    set_csport(cp);
@@ -634,7 +576,7 @@ static void load_settings(void)
 	    	strcpy(settings.who_format, cp);
 	} else if (!strcasecmp(buf,"who_wiz_format")) {
 	    if (has_val)
-	    	strcpy(settings.who_wiz_format, cp);
+	    	strcpy(settings.who_wiz_format, cp);      
 	} else if (!strcasecmp(buf, "spellpoint_level_depend")) {
 	    if (!strcasecmp(cp, "on") || !strcasecmp(cp, "true")) {
 		settings.spellpoint_level_depend=TRUE;
@@ -717,7 +659,7 @@ static void load_settings(void)
 		LOG(llevError, "load_settings: set_friendly_fire must be between 1 an 100"
 		    ", %d is invalid\n", val);
 	    else
-		settings.set_friendly_fire = val;
+		settings.set_friendly_fire = val;	
     } else if ( !strcasecmp( buf, "armor_max_enchant" ) ) {
         int max_e = atoi( cp );
         if ( max_e <= 0 )
@@ -771,25 +713,7 @@ static void load_settings(void)
 	    } else {
 		LOG(llevError, "load_settings: unknown value for create_home_portals: %s\n", cp);
         }
-    } else if ( !strcasecmp( buf, "personalized_blessings" ) ) {
-            if (!strcasecmp(cp, "on") || !strcasecmp(cp, "true")) {
-                settings.personalized_blessings = TRUE;
-            } else if (!strcasecmp(cp, "off") || !strcasecmp(cp, "false")) {
-                settings.personalized_blessings = FALSE;
-            } else {
-                LOG(llevError, "load_settings: unknown value for personalized_blessings: %s\n", cp);
-        }
-    } else if ( !strcasecmp( buf, "pk_max_experience" ) ) {
-        sint64 pkme = atoll(cp);
-        if (pkme < 0)
-            pkme = -1;
-        settings.pk_max_experience = pkme;
-    } else if ( !strcasecmp( buf, "pk_max_experience_percent" ) ) {
-        int pkmep = atoi(cp);
-        if (pkmep < 0) {
-            LOG(llevError, "load_settings: pk_max_experience_percent should be positive or zero\n", cp);
-        } else
-            settings.pk_max_experience_percent = pkmep;
+
     } else if ( !strcasecmp( buf, "allow_denied_spells_writing" ) ) {
             if (!strcasecmp(cp, "on") || !strcasecmp(cp, "true")) {
                 settings.allow_denied_spells_writing = TRUE;
@@ -839,9 +763,7 @@ static void load_settings(void)
 
 
 /**
- * This is the main server initialisation function.
- *
- * Called only once, when starting the program.
+ * init() is called only once, when starting the program.
  */
 
 void init(int argc, char **argv) {
@@ -856,7 +778,7 @@ void init(int argc, char **argv) {
     load_settings();	/* Load the settings file */
     load_materials();
     parse_args(argc, argv, 2);
-    fprintf(logfile,"Welcome to CrossFire, v%s\n",FULL_VERSION);
+    fprintf(logfile,"Welcome to CrossFire, v%s\n",VERSION);
     fprintf(logfile,"Copyright (C) 1994 Mark Wedel.\n");
     fprintf(logfile,"Copyright (C) 1992 Frank Tore Johansen.\n");
 
@@ -871,7 +793,6 @@ void init(int argc, char **argv) {
     init_commands();	/* Sort command tables */
     read_map_log();	/* Load up the old temp map files */
     init_skills();
-    init_ob_methods();
     cftimer_init();
 
     parse_args(argc, argv, 3);
@@ -888,16 +809,6 @@ void init(int argc, char **argv) {
     metaserver2_init();
     reset_sleep();
     init_done=1;
-}
-
-/**
- * Frees all memory allocated around here:
- * - materials
- * - races
- */
-void free_server(void) {
-    free_materials();
-    free_races();
 }
 
 static void usage(void) {
@@ -950,52 +861,47 @@ static void help(void) {
 static void init_beforeplay(void) {
   init_archetypes(); /* If not called before, reads all archetypes from file */
   init_artifacts();  /* If not called before, reads all artifacts from file */
-  check_spells();     /* If not called before, links archtypes used by spells */
+  init_spells();     /* If not called before, links archtypes used by spells */
   init_regions();    /* If not called before, reads all regions from file */
   init_archetype_pointers(); /* Setup global pointers to archetypes */
-  init_races();	   /* overwrite race designations using entries in lib/races file */
-  init_gods();	/* init linked list of gods from archs*/
+  init_races();	   /* overwrite race designations using entries in lib/races file */ 
+  init_gods();	/* init linked list of gods from archs*/ 
   init_readable();	/* inits useful arrays for readable texts */
   init_formulae();  /* If not called before, reads formulae from file */
 
   switch(settings.dumpvalues) {
   case 1:
     print_monsters();
-    cleanup();
+    exit(0);
   case 2:
     dump_abilities();
-    cleanup();
+    exit(0);
   case 3:
     dump_artifacts();
-    cleanup();
+    exit(0);
   case 4:
     dump_spells();
-    cleanup();
+    exit(0);
   case 5:
-    cleanup();
+    exit(0);
   case 6:
     dump_races();
-    cleanup();
+    exit(0);
   case 7:
     dump_alchemy();
-    cleanup();
+    exit(0);
   case 8:
     dump_gods();
-    cleanup();
+    exit(0);
   case 9:
     dump_alchemy_costs();
-    cleanup();
+    exit(0);
   case 10:
     dump_monster_treasure(settings.dumparg);
-    cleanup();
+    exit(0);
   }
 }
 
-/**
- * Checks if starting the server is allowed.
- *
- * @todo describe forbid_play() and such restrictions.
- */
 static void init_startup(void) {
   char buf[MAX_BUF];
   FILE *fp;
@@ -1018,15 +924,13 @@ static void init_startup(void) {
 }
 
 /**
- * Dump compilation information, activated with the -o flag.
- *
+ * compile_info(): activated with the -o flag.
  * It writes out information on how Imakefile and config.h was configured
  * at compile time.
  */
 
 static void compile_info(void) {
   int i=0;
-  char err[MAX_BUF];
   printf("Non-standard include files:\n");
 #if !defined (__STRICT_ANSI__) || defined (__sun__)
 #if !defined (Mips)
@@ -1071,6 +975,10 @@ static void compile_info(void) {
   printf("Use_calloc:\t<false>\n");
 #endif
 
+#ifdef X_EDITOR
+  printf("Editor:\t\t%s\n",X_EDITOR);
+#endif
+
   printf("Max_time:\t%d\n",MAX_TIME);
 
 #ifdef WIN32 /* ***win32 compile_info(): remove execl... */
@@ -1078,46 +986,31 @@ static void compile_info(void) {
   exit(0);
 #else
   execl("/bin/uname", "uname", "-a", NULL);
-  LOG(llevError, "Oops, shouldn't have gotten here: execl(/bin/uname) failed: %s\n", strerror_local(errno, err, sizeof(err)));
+  LOG(llevError, "Oops, shouldn't have gotten here: execl(/bin/uname) failed: %s\n", strerror_local(errno));
   exit(-1);
 #endif
 }
 
 /* Signal handlers: */
 
-/**
- * SIGSERV handler.
- * @param i
- * unused.
- */
-static void rec_sigsegv(int i) {
+void rec_sigsegv(int i) {
   LOG(llevError,"\nSIGSEGV received.\n");
-  fatal_signal(1);
+  fatal_signal(1, 1);
 }
 
-/**
- * SIGINT handler.
- * @param i
- * unused.
- */
-static void rec_sigint(int i) {
+void rec_sigint(int i) {
   LOG(llevInfo,"\nSIGINT received.\n");
-  fatal_signal(0);
+  fatal_signal(0, 1);
 }
 
-/**
- * SIGHUP handler.
- * SIGHUP handlers on daemons typically make them reread the config
+/* SIGHUP handlers on daemons typically make them reread the config
  * files and reinitialize itself.  This behaviour is better left for
  * an explicit shutdown and restart with Crossfire, as there is just
  * too much persistent runtime state.  However, another function of
  * SIGHUP handlers is to reopen the log file for logrotate's benefit.
  * We can do that here.
- *
- * @param i
- * unused.
  */
-static void rec_sighup(int i) {
+void rec_sighup(int i) {
   /* Don't call LOG().  It calls non-reentrant functions.  The other
    * signal handlers shouldn't really call LOG() either. */
   if(logfile != stderr) {
@@ -1125,73 +1018,43 @@ static void rec_sighup(int i) {
   }
 }
 
-/**
- * SIGQUIT handler.
- *
- * @param i
- * unused.
- */
-static void rec_sigquit(int i) {
+void rec_sigquit(int i) {
   LOG(llevInfo,"\nSIGQUIT received\n");
-  fatal_signal(1);
+  fatal_signal(1, 1);
 }
 
-/**
- * SIGPIPE handler.
- *
- * Keep running if we receive a sigpipe.  Crossfire should really be able
+void rec_sigpipe(int i) {
+
+/* Keep running if we receive a sigpipe.  Crossfire should really be able
  * to handle this signal (at least at some point in the future if not
  * right now).  By causing a dump right when it is received, it is not
  * doing much good.  However, if it core dumps later on, at least it can
  * be looked at later on, and maybe fix the problem that caused it to
  * dump core.  There is no reason that SIGPIPES should be fatal
- *
- * @param i
- * unused.
  */
-static void rec_sigpipe(int i) {
-
   LOG(llevError,"\nSIGPIPE--------------\n------------\n--------\n---\n");
 #if 1 && !defined(WIN32) /* ***win32: we don't want send SIGPIPE */
   LOG(llevInfo,"\nReceived SIGPIPE, ignoring...\n");
   signal(SIGPIPE,rec_sigpipe);/* hocky-pux clears signal handlers */
 #else
   LOG(llevError,"\nSIGPIPE received, not ignoring...\n");
-  fatal_signal(1); /*Might consider to uncomment this line */
+  fatal_signal(1, 1); /*Might consider to uncomment this line */
 #endif
 }
 
-/**
- * SIGBUS handler.
- *
- * @param i
- * unused.
- */
-static void rec_sigbus(int i) {
+void rec_sigbus(int i) {
 #ifdef SIGBUS
   LOG(llevError,"\nSIGBUS received\n");
-  fatal_signal(1);
+  fatal_signal(1, 1);
 #endif
 }
 
-/**
- * SIGTERM handler.
- *
- * @param i
- * unused.
- */
-static void rec_sigterm(int i) {
+void rec_sigterm(int i) {
   LOG(llevInfo,"\nSIGTERM received\n");
-  fatal_signal(0);
+  fatal_signal(0, 1);
 }
 
-/**
- * General signal handling. Will exit() in any case.
- *
- * @param make_core
- * if set abort() instead of exit() to generate a core dump.
- */
-static void fatal_signal(int make_core) {
+void fatal_signal(int make_core, int close_sockets) {
   if(init_done) {
     emergency_save(0);
     clean_tmp_files();
@@ -1201,9 +1064,6 @@ static void fatal_signal(int make_core) {
   exit(0);
 }
 
-/**
- * Setup our signal handlers.
- */
 static void init_signals(void) {
 #ifndef WIN32 /* init_signals() remove signals */
   struct sigaction sa;
@@ -1226,12 +1086,13 @@ static void init_signals(void) {
 #endif /* win32 */
 }
 
-/**
+/** 
  * Reads the races file in the lib/ directory, then
  * overwrites old 'race' entries. This routine allow us to quickly
  * re-configure the 'alignment' of monsters, objects. Useful for
  * putting together lists of creatures, etc that belong to gods.
  */
+ 
 static void init_races(void) {
   FILE *file;
   char race[MAX_BUF], fname[MAX_BUF], buf[MAX_BUF], *cp, variable[MAX_BUF];
@@ -1243,9 +1104,9 @@ static void init_races(void) {
   first_race=NULL;
 
   sprintf(fname,"%s/races",settings.datadir);
-  LOG(llevDebug, "Reading races from %s...\n",fname);
+  LOG(llevDebug, "Reading races from %s...",fname);
   if(! (file=fopen(fname,"r"))) {
-    LOG(llevError, "Cannot open races file %s: %s\n", fname, strerror_local(errno, buf, sizeof(buf)));
+    LOG(llevError, "Cannot open races file %s: %s\n", fname, strerror_local(errno));
     return;
   }
 
@@ -1255,7 +1116,7 @@ static void init_races(void) {
     if((cp=strchr(buf,'\n'))!=NULL)
       *cp='\0';
     cp=buf;
-    while(*cp==' '||*cp=='!'||*cp=='@') {
+    while(*cp==' '||*cp=='!'||*cp=='@') { 
       if(*cp=='!') set_race=0;
       if(*cp=='@') set_list=0;
       cp++;
@@ -1271,15 +1132,15 @@ static void init_races(void) {
 		*cp1='\0';
 		if (cp==cp1) break;
 	}
-
+	
 	if (cp[strlen(cp)-1]=='\n') cp[strlen(cp)-1]='\0';
         /* set creature race to race value */
         if((mon=find_archetype(cp))==NULL)
-           LOG(llevError,"Creature %s in race file lacks archetype\n",cp);
+           LOG(llevError,"\nCreature %s in race file lacks archetype",cp);
         else {
            if(set_race&&(!mon->clone.race||strcmp(mon->clone.race,race))) {
                 if(mon->clone.race) {
-                   LOG(llevDebug," Resetting race to %s from %s for archetype %s\n",
+                   LOG(llevDebug,"\n Resetting race to %s from %s for archetype %s",
                         race,mon->clone.race,mon->name);
                   free_string(mon->clone.race);
                 }
@@ -1292,65 +1153,34 @@ static void init_races(void) {
     }
   }
   fclose(file);
-    LOG(llevDebug,"done races.\n");
+    LOG(llevDebug,"done.\n");
 }
 
-/**
- * Dumps all race information to stderr.
- */
 static void dump_races(void)
-{
+{ 
     racelink *list;
     objectlink *tmp;
     for(list=first_race;list;list=list->next) {
-      fprintf(stderr,"\nRACE %s:\t",list->name);
+      fprintf(stderr,"\nRACE %s:\t",list->name); 
       for(tmp=list->member;tmp;tmp=tmp->next)
         fprintf(stderr,"%s(%d), ",tmp->ob->arch->name,tmp->ob->level);
     }
     fprintf(stderr,"\n");
 }
 
-/**
- * Frees all race-related information.
- */
-static void free_races(void) {
-    racelink* race;
-    objectlink* link;
-    LOG(llevDebug, "Freeing race information.\n");
-    while (first_race) {
-        race = first_race->next;
-        while (first_race->member) {
-            link = first_race->member->next;
-            free(first_race->member);
-            first_race->member = link;
-        }
-        free_string(first_race->name);
-        free(first_race);
-        first_race = race;
-    }
-}
-
-/**
- * Add an object to the racelist.
- *
- * @param race_name
- * race name.
- * @param op
- * what object to add to the race.
- */
 static void add_to_racelist(const char *race_name, object *op) {
   racelink *race;
-
+ 
   if(!op||!race_name) return;
   race=find_racelink(race_name);
-
+ 
   if(!race) { /* add in a new race list */
     race = get_racelist();
     race->next = first_race;
     first_race = race;
     race->name=add_string(race_name);
   }
-
+ 
   if(race->member->ob) {
     objectlink *tmp = get_objectlink();
     tmp->next=race->member;
@@ -1360,20 +1190,10 @@ static void add_to_racelist(const char *race_name, object *op) {
   race->member->ob = op;
 }
 
-/**
- * Create a new ::racelink structure.
- *
- * @note
- * will call fatal() in case of memory allocation failure.
- * @return
- * empty structure.
- */
 static racelink * get_racelist(void) {
   racelink *list;
-
+ 
   list = (racelink *) malloc(sizeof(racelink ));
-  if (!list)
-      fatal(OUT_OF_MEMORY);
   list->name=NULL;
   list->nrof=0;
   list->member=get_objectlink();
@@ -1381,21 +1201,13 @@ static racelink * get_racelist(void) {
 
   return list;
 }
-
-/**
- * Find the race information for the specified name.
- *
- * @param name
- * race to search for.
- * @return
- * race structure, NULL if not found.
- */
+ 
 racelink * find_racelink(const char *name) {
   racelink *test=NULL;
-
+ 
   if(name&&first_race)
     for(test=first_race;test&&test!=test->next;test=test->next)
        if(!test->name||!strcmp(name,test->name)) break;
-
+ 
   return test;
 }

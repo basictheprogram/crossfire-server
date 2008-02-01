@@ -154,7 +154,7 @@ AC_DEFUN([AM_PATH_CHECK],
 [
   AC_ARG_WITH(check,
   [  --with-check=PATH       prefix where check is installed [default=auto]])
-
+ 
   min_check_version=ifelse([$1], ,0.8.2,$1)
 
   AC_MSG_CHECKING(for check - version >= $min_check_version)
@@ -197,7 +197,7 @@ int main ()
      printf("%s, bad version string\n", "$min_check_version");
      return 1;
    }
-
+    
   if ((CHECK_MAJOR_VERSION != check_major_version) ||
       (CHECK_MINOR_VERSION != check_minor_version) ||
       (CHECK_MICRO_VERSION != check_micro_version))
@@ -220,7 +220,7 @@ int main ()
       printf("\n*** An old version of check (%d.%d.%d) was found.\n",
              check_major_version, check_minor_version, check_micro_version);
       printf("*** You need a version of check being at least %d.%d.%d.\n", major, minor, micro);
-      printf("***\n");
+      printf("***\n"); 
       printf("*** If you have already installed a sufficiently new version, this error\n");
       printf("*** probably means that the wrong copy of the check library and header\n");
       printf("*** file is being found. Rerun configure with the --with-check=PATH option\n");
@@ -260,7 +260,7 @@ int main ()
         echo "*** you may also be able to get things to work by modifying LD_LIBRARY_PATH"],
       [ echo "*** The test program failed to compile or link. See the file config.log for"
         echo "*** the exact error that occured." ])
-
+      
         CFLAGS="$ac_save_CFLAGS"
         LIBS="$ac_save_LIBS"
       fi
@@ -281,8 +281,40 @@ int main ()
 ])
 
 
+dnl CF_CHECK_CROSSEDIT(X11LIBS, ACTION-IF-FOUND , ACTION-IF-NOT-FOUND)
+dnl check if a sample X test code can compile
+dnl
+dnl The distcheck builds the source in a different area, so
+dnl need to make sure srcdir is set.
+
+AC_DEFUN([CF_CHECK_CROSSEDIT],[
+
+    ac_save_LIBS="$LIBS"
+
+    LIBS="$1 $LIBS" 
+    OCFLAGS=$CFLAGS
+    CFLAGS="-I./${srcdir}/include -I./${srcdir}/crossedit/include"
+    AC_MSG_CHECKING(for crossedit required headers)
+    AC_TRY_LINK([
+#include <Posix.h>
+#include <Xaw.h>
+#include <Ansi.h>
+#include <config.h>
+/*include <includes.h>*/
+#include <debug.h>
+#include <assert.h>
+
+    ], ,
+	AC_MSG_RESULT(yes)
+	[$2],
+	AC_MSG_RESULT(no)
+	[$3])
+    LIBS="$ac_save_LIBS"
+    CFLAGS=$OCFLAGS
+])
+
 dnl CF_IS_XSLT_COMPLIANT(progpath,ACTION-IF-FOUND, ACTION_IF_NOT_FOUND)
-dnl check for xslt compliance of a given prog, prog must be a full executable
+dnl check for xslt compliance of a given prog, prog must be a full executable 
 dnl execution command, in this command, this substitution will be donne:
 dnl %1  = xml file
 dnl %2  = xsl file

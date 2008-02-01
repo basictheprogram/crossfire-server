@@ -66,7 +66,7 @@
 
 /*****************************************************************************
  * Start of command dispatch area.
- * The commands here are protocol commands.
+ * The commands here are protocol commands. 
  ****************************************************************************/
 
 /* Either keep this near the start or end of the file so it is
@@ -95,7 +95,7 @@ struct player_cmd_mapping {
  * Dispatch tables for the server.
  *
  * CmdMapping is the dispatch table for the server, used in handle_client,
- * which gets called when the client has input.  All commands called here
+ * which gets called when the client has input.  All commands called here 
  * use the same parameter form (char* data, int len, int clientnum.
  * We do implicit casts, because the data that is being passed is
  * unsigned (pretty much needs to be for binary data), however, most
@@ -110,6 +110,7 @@ static struct player_cmd_mapping player_commands[] = {
     { "apply",		apply_cmd,	1},
     { "move",		move_cmd,	1},
     { "reply",		reply_cmd,	0},
+    { "command",	player_cmd,	1},
     { "ncom",		(func_uint8_int_pl)new_player_cmd, 1},
     { "lookat",		look_at_cmd,		1},
     { "lock",		(func_uint8_int_pl)lock_item_cmd,	1},
@@ -130,7 +131,7 @@ static struct client_cmd_mapping client_commands[] = {
     { "version",	version_cmd },
     { "toggleextendedinfos", toggle_extended_infos_cmd}, /*Added: tchize*/
     { "toggleextendedtext", toggle_extended_text_cmd},   /*Added: tchize*/
-    { "asksmooth", ask_smooth_cmd},   /*Added: tchize (smoothing technologies)*/
+    { "asksmooth", ask_smooth_cmd},   /*Added: tchize (smoothing technologies)*/ 
     { NULL, NULL}	/* terminator (I, II & III)*/
 };
 
@@ -171,6 +172,150 @@ void request_info_cmd(char *buf, int len, socket_struct *ns)
 }
 
 /**
+ * Handles old socket format.
+ */
+void handle_oldsocket(socket_struct *ns)
+{
+    int stat,i;
+    command_function	command;
+    char buf[MAX_BUF],*cp;
+    object ob;
+    player pl;
+
+    /* This is not the most efficient block, but keeps the code simpler -
+     * we basically read a byte at a time until we get a newline, error,
+     * or no more characters to read.
+     */
+    do {
+	if (ns->inbuf.len >= MAXSOCKRECVBUF-1) {
+	    ns->status = Ns_Dead;
+	    LOG(llevDebug, "Old input socket sent too much data without newline\n");
+	    return;
+	}
+#ifdef WIN32 /* ***win32: change oldsocket read() to recv() */
+		stat = recv(ns->fd, ns->inbuf.buf + ns->inbuf.len, 1,0);
+
+	if (stat==-1 && WSAGetLastError() !=WSAEWOULDBLOCK) {
+#else
+	do {
+	    stat = read(ns->fd, ns->inbuf.buf + ns->inbuf.len, 1);
+	} while ((stat<0) && (errno == EINTR));
+
+	if (stat<0 && errno != EAGAIN && errno !=EWOULDBLOCK) {
+#endif	
+	    LOG(llevError, "Cannot read from socket: %s\n", strerror_local(errno));
+	    ns->status = Ns_Dead;
+	    return;
+	}
+	if (stat == 0) return;
+    } while (ns->inbuf.buf[ns->inbuf.len++]!='\n');
+
+    ns->inbuf.buf[ns->inbuf.len]=0;
+
+    cp = strchr((char*)ns->inbuf.buf, ' ');
+    if (cp) {
+	/* Replace the space with a null, skip any more spaces */
+	*cp++=0;
+	while (isspace(*cp)) cp++;
+    }
+
+    /* Strip off all spaces and control characters from end of line */
+    for (i=ns->inbuf.len-1; i>=0; i--) {
+	if (ns->inbuf.buf[i]<=32) ns->inbuf.buf[i]=0;
+	else break;
+    }
+    ns->inbuf.len=0;	/* reset for next read */
+
+    /* If just a return, don't do anything */
+    if (ns->inbuf.buf[0] == 0) return;
+    if (!strcasecmp((char*)ns->inbuf.buf,"quit")) {
+	ns->status = Ns_Dead;
+	return;
+    }
+    if (!strcasecmp((char*)ns->inbuf.buf, "listen")) {
+	if (cp) {
+	    const char *buf="Socket switched to listen mode\n";
+
+	    free(ns->comment);
+	    ns->comment = strdup_local(cp);
+	    ns->old_mode = Old_Listen;
+	    cs_write_string(ns, buf, strlen(buf));
+	} else {
+	    const char *buf="Need to supply a comment/url to listen\n";
+	    cs_write_string(ns, buf, strlen(buf));
+	}
+	return;
+    }
+    if (!strcasecmp((char*)ns->inbuf.buf, "name")) {
+	char *cp1=NULL;
+	if (cp) cp1= strchr(cp, ' ');
+	if (cp1) {
+	    *cp1++ = 0;
+	    while (isspace(*cp1)) cp1++;
+	}
+	if (!cp || !cp1) {
+	    const char *buf="Need to provide a name/password to name\n";
+	    cs_write_string(ns, buf, strlen(buf));
+	    return;
+	}
+
+	if (verify_player(cp, cp1)==0) {
+	    const char *buf="Welcome back\n";
+	    free(ns->comment);
+	    ns->comment = strdup_local(cp);
+	    ns->old_mode = Old_Player;
+	    cs_write_string(ns, buf, strlen(buf));
+	}
+	else if (verify_player(cp, cp1)==2) {
+	    ns->password_fails++;
+	    if (ns->password_fails >= MAX_PASSWORD_FAILURES) {
+		const char *buf="You failed to log in too many times, you will now be kicked.\n";
+		LOG(llevInfo, "A player connecting from %s in oldsocketmode has been dropped for password failure\n",
+		    ns->host); 
+		cs_write_string(ns, buf, strlen(buf));
+		ns->status = Ns_Dead;
+	    }
+	    else {
+		const char *buf="Could not login you in.  Check your name and password.\n";
+		cs_write_string(ns, buf, strlen(buf));
+	    }
+	}	
+	else {
+	    const char *buf="Could not login you in.  Check your name and password.\n";
+	    cs_write_string(ns, buf, strlen(buf));
+	}
+	return;
+    }
+
+    command = find_oldsocket_command((char*)ns->inbuf.buf);
+    if (!command && ns->old_mode==Old_Player) {
+	command = find_oldsocket_command2((char*)ns->inbuf.buf);
+    }
+    if (!command) {
+	snprintf(buf, sizeof(buf), "Could not find command: %s\n", ns->inbuf.buf);
+	cs_write_string(ns, buf, strlen(buf));
+	return;
+    }
+
+    /* This is a bit of a hack, but works.  Basically, we make some
+     * fake object and player pointers and give at it.
+     * This works as long as the functions we are calling don't need
+     * to do anything to the object structure (ie, they are only
+     * outputting information and not actually updating anything much.)
+     */
+    ob.contr = &pl;
+    pl.ob = &ob;
+    ob.type = PLAYER;
+    pl.listening = 10;
+    pl.socket = *ns;
+    pl.outputs_count = 1;
+    ob.name = ns->comment;
+
+    command(&ob, cp);
+}
+
+
+/**
  * Handle client input.
  *
  * handle_client is actually not named really well - we only get here once
@@ -193,8 +338,24 @@ void handle_client(socket_struct *ns, player *pl)
 	if (pl && pl->state==ST_PLAYING && pl->ob != NULL && pl->ob->speed_left < 0) {
 	    return;
 	}
-
+	    
+	if (ns->status == Ns_Old) {
+	    handle_oldsocket(ns);
+	    return;
+	}
 	i=SockList_ReadPacket(ns->fd, &ns->inbuf, MAXSOCKRECVBUF-1);
+	/* Special hack - let the user switch to old mode if in the Ns_Add
+	 * phase.  Don't demand they add in the special length bytes
+	 */
+	if (ns->status == Ns_Add) {
+	    if (!strncasecmp((char*)ns->inbuf.buf,"oldsocketmode", 13)) {
+		ns->status = Ns_Old;
+		ns->inbuf.len=0;
+		cs_write_string(ns, "Switched to old socket mode\n", 28);
+		LOG(llevDebug,"Switched socket to old socket mode\n");
+		return;
+	    }
+	}
 
 	if (i<0) {
 #ifdef ESRV_DEBUG
@@ -265,7 +426,7 @@ void handle_client(socket_struct *ns, player *pl)
  * Tell watchdog that we are still alive
  *
  * I put the function here since we should hopefully already be getting
- * all the needed include files for socket support
+ * all the needed include files for socket support 
  */
 
 void watchdog(void)
@@ -364,7 +525,7 @@ static int is_fd_valid(int fd) {
  *
  * A bit of this code is grabbed out of socket.c
  * There are 2 lists we need to look through - init_sockets is a list
- *
+ * 
  */
 void doeric_server(void)
 {
@@ -373,7 +534,6 @@ void doeric_server(void)
     struct sockaddr_in addr;
     socklen_t addrlen=sizeof(struct sockaddr);
     player *pl, *next;
-    char err[MAX_BUF];
 
 #ifdef CS_LOGSTATS
     if ((time(NULL)-cst_lst.time_start)>=CS_LOGTIME)
@@ -429,7 +589,7 @@ void doeric_server(void)
 	}
     }
 
-    if (socket_info.nconns==1 && first_player==NULL)
+    if (socket_info.nconns==1 && first_player==NULL) 
 	block_until_new_connection();
 
     /* Reset timeout each time, since some OS's will change the values on
@@ -438,11 +598,11 @@ void doeric_server(void)
     socket_info.timeout.tv_sec = 0;
     socket_info.timeout.tv_usec = 0;
 
-    pollret= select(socket_info.max_filedescriptor, &tmp_read, &tmp_write,
+    pollret= select(socket_info.max_filedescriptor, &tmp_read, &tmp_write, 
 		    &tmp_exceptions, &socket_info.timeout);
 
     if (pollret==-1) {
-	LOG(llevError, "select failed: %s\n", strerror_local(errno, err, sizeof(err)));
+	LOG(llevError, "select failed: %s\n", strerror_local(errno));
 	return;
     }
 
@@ -478,7 +638,7 @@ void doeric_server(void)
 	}
 	init_sockets[newsocknum].fd=accept(init_sockets[0].fd, (struct sockaddr *)&addr, &addrlen);
 	if (init_sockets[newsocknum].fd==-1) {
-	    LOG(llevError, "accept failed: %s\n", strerror_local(errno, err, sizeof(err)));
+	    LOG(llevError, "accept failed: %s\n", strerror_local(errno));
 	}
 	else {
 	    char buf[MAX_BUF];
@@ -527,6 +687,9 @@ void doeric_server(void)
 
 	if (FD_ISSET(pl->socket.fd,&tmp_write)) {
 	    if (!pl->socket.can_write)  {
+#if 0
+		LOG(llevDebug,"Player %s socket now write enabled\n", pl->ob->name);
+#endif
 		pl->socket.can_write=1;
 		write_socket_buffer(&pl->socket);
 	    }

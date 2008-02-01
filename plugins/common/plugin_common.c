@@ -86,6 +86,7 @@ static f_plug_api cfapiObject_transfer = NULL;
 static f_plug_api cfapiObject_find_archetype_inside = NULL;
 static f_plug_api cfapiObject_out_of_map = NULL;
 static f_plug_api cfapiObject_drop = NULL;
+static f_plug_api cfapiObject_take = NULL;
 static f_plug_api cfapiObject_change_abil = NULL;
 static f_plug_api cfapiObject_say = NULL;
 static f_plug_api cfapiMap_get_property = NULL;
@@ -97,7 +98,6 @@ static f_plug_api cfapiMap_present_arch_by_name = NULL;
 static f_plug_api cfapiMap_create_path = NULL;
 static f_plug_api cfapiMap_has_been_loaded = NULL;
 static f_plug_api cfapiMap_change_light = NULL;
-static f_plug_api cfapiMap_trigger_connected = NULL;
 static f_plug_api cfapiPlayer_find = NULL;
 static f_plug_api cfapiPlayer_message = NULL;
 static f_plug_api cfapiPlayer_send_inventory = NULL;
@@ -115,11 +115,6 @@ static f_plug_api cfapiFriendlylist_get_next = NULL;
 static f_plug_api cfapiSet_random_map_variable = NULL;
 static f_plug_api cfapiGenerate_random_map = NULL;
 static f_plug_api cfapiObject_change_exp = NULL;
-static f_plug_api cfapiSystem_get_month_name = NULL;
-static f_plug_api cfapiSystem_get_season_name = NULL;
-static f_plug_api cfapiSystem_get_weekday_name = NULL;
-static f_plug_api cfapiSystem_get_periodofday_name = NULL;
-static f_plug_api cfapiObject_user_event = NULL;
 
 #define GET_HOOK( x, y, z ) \
     { \
@@ -177,6 +172,7 @@ int cf_init_plugin( f_plug_api getHooks )
     GET_HOOK( cfapiObject_delete, "cfapi_object_delete", z );
     GET_HOOK( cfapiObject_out_of_map, "cfapi_map_out_of_map", z );
     GET_HOOK( cfapiObject_drop, "cfapi_object_drop", z );
+    GET_HOOK( cfapiObject_take, "cfapi_object_take", z );
     GET_HOOK( cfapiObject_change_abil, "cfapi_object_change_abil", z );
     GET_HOOK( cfapiObject_say, "cfapi_object_say", z );
     GET_HOOK( cfapiMap_create_path, "cfapi_map_create_path", z );
@@ -188,7 +184,6 @@ int cf_init_plugin( f_plug_api getHooks )
     GET_HOOK( cfapiMap_present_arch_by_name, "cfapi_map_present_arch_by_name", z );
     GET_HOOK( cfapiMap_change_light, "cfapi_map_change_light", z );
     GET_HOOK( cfapiMap_has_been_loaded, "cfapi_map_has_been_loaded", z );
-    GET_HOOK( cfapiMap_trigger_connected, "cfapi_map_trigger_connected", z );
     GET_HOOK( cfapiPlayer_find, "cfapi_player_find", z );
     GET_HOOK( cfapiPlayer_message, "cfapi_player_message", z );
     GET_HOOK( cfapiObject_teleport, "cfapi_object_teleport", z );
@@ -209,11 +204,7 @@ int cf_init_plugin( f_plug_api getHooks )
     GET_HOOK( cfapiSet_random_map_variable, "cfapi_set_random_map_variable", z );
     GET_HOOK( cfapiGenerate_random_map, "cfapi_generate_random_map", z );
     GET_HOOK( cfapiObject_change_exp, "cfapi_object_change_exp", z );
-    GET_HOOK( cfapiSystem_get_season_name, "cfapi_system_get_season_name", z );
-    GET_HOOK( cfapiSystem_get_month_name, "cfapi_system_get_month_name", z );
-    GET_HOOK( cfapiSystem_get_weekday_name, "cfapi_system_get_weekday_name", z );
-    GET_HOOK( cfapiSystem_get_periodofday_name, "cfapi_system_get_periodofday_name", z );
-    GET_HOOK( cfapiObject_user_event, "cfapi_object_user_event", z );
+
     return 1;
 }
 
@@ -228,14 +219,6 @@ int cf_map_get_int_property(mapstruct* map, int property)
 {
     int type, value;
     cfapiMap_get_property(&type, map, property, &value);
-    assert(type == CFAPI_INT);
-    return value;
-}
-
-int cf_object_user_event(object* op, object* activator, object* third, const char* message, int fix)
-{
-    int type, value;
-    cfapiObject_user_event(&type, op, activator, third, message, fix, &value);
     assert(type == CFAPI_INT);
     return value;
 }
@@ -592,12 +575,12 @@ int cf_object_pay_item(object *op,object *pl)
 
 /**
  * Wrapper for pay_for_amount().
- * @copydoc pay_for_amount().
+ * @copydoc pay_for_item().
  */
-int cf_object_pay_amount(object* pl, uint64 to_pay)
+int cf_object_pay_amount(object* op, uint64 amount)
 {
     int type, value;
-    cfapiObject_pay_amount(&type, pl, to_pay, &value);
+    cfapiObject_pay_amount(&type, op, amount, &value);
     assert(type == CFAPI_INT);
     return value;
 }
@@ -798,11 +781,11 @@ int cf_object_query_cost(const object *tmp, object *who, int flag)
  * Wrapper for spring_trap().
  * @copydoc spring_trap().
  */
-void cf_spring_trap( object* trap , object* victim)
+void cf_spring_trap( object* op , object* victim)
 {
     int type;
-    if (trap)
-        cfapiObject_activate_rune( &type, trap, victim );
+    if ( op )
+        cfapiObject_activate_rune( &type, op, victim );
 }
 /**
  * Wrapper for check_trigger().
@@ -815,16 +798,6 @@ int cf_object_check_trigger(object* op, object* cause)
     assert(type == CFAPI_INT);
     return value;
 }
-/**
- * Wrapper for trigger_connected().
- * @copydoc trigger_connected().
- */
-void cf_map_trigger_connected(objectlink* ol, object* cause, int state)
-{
-    int type;
-    cfapiMap_trigger_connected(&type, ol, cause, state);
-    assert(type == CFAPI_NONE);
-}
 int cf_object_out_of_map( object* op, int x, int y)
 {
     int type, value;
@@ -836,6 +809,11 @@ void cf_object_drop( object* op, object* author)
 {
     int type;
     cfapiObject_drop( &type, op, author );
+}
+void cf_object_take( object* op, object* author)
+{
+    int type;
+    cfapiObject_take( &type, op, author );
 }
 void cf_object_say( object* op, char* msg)
 {
@@ -1348,58 +1326,13 @@ void cf_log( LogLevel logLevel, const char* format, ... )
     cfapiSystem_log(&type, logLevel, buf);
     assert(type == CFAPI_NONE);
 }
-/**
- * Wrapper for LOG() that
- * uses directly a buffer, without format
- */
-void cf_log_plain( LogLevel logLevel, const char* message) {
-    int type;
-    cfapiSystem_log(&type, logLevel, message);
-    assert(type == CFAPI_NONE);
-}
+
 void cf_get_time( timeofday_t* tod )
 {
     int type;
     cfapiSystem_get_time(&type, tod);
     assert(type == CFAPI_NONE);
 }
-
-const char *cf_get_season_name( int index )
-{
-    int type;
-    char* result;
-    cfapiSystem_get_season_name(&type, index, &result);
-    assert(type == CFAPI_STRING);
-    return result;
-}
-
-const char *cf_get_month_name( int index )
-{
-    int type;
-    char* result;
-    cfapiSystem_get_month_name(&type, index, &result);
-    assert(type == CFAPI_STRING);
-    return result;
-}
-
-const char *cf_get_weekday_name( int index )
-{
-    int type;
-    char* result;
-    cfapiSystem_get_weekday_name(&type, index, &result);
-    assert(type == CFAPI_STRING);
-    return result;
-}
-
-const char *cf_get_periodofday_name( int index )
-{
-    int type;
-    char* result;
-    cfapiSystem_get_periodofday_name(&type, index, &result);
-    assert(type == CFAPI_STRING);
-    return result;
-}
-
 
 /**
  * Creates a timer, equivalent of calling cftimer_create().

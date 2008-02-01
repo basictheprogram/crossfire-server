@@ -26,7 +26,7 @@
     The authors can be reached via e-mail at crossfire-devel@real-time.com
 */
 
-/*
+/* 
  * This is the unit tests file for common/arch.c
  */
 
@@ -115,27 +115,27 @@ START_TEST (test_get_archetype_by_skill_name)
     fail_unless(arch==NULL,"Asking for null skill should return null");
 }
 END_TEST
-
+        
 START_TEST (test_get_archetype_by_type_subtype)
 {
     archetype* arch;
-    arch = get_archetype_by_type_subtype(SKILL,SK_LITERACY);
-    fail_unless(arch!=NULL,"Should be able to find an arch of type SKILL, subtype SK_LITERACY");
-    fail_unless(arch->clone.type==SKILL,"Arch of type SKILL, subtype SK_LITERACY shoud have type %d but has type %d",
-            SKILL,arch->clone.type);
-    fail_unless(arch->clone.subtype==SK_LITERACY,"Arch of type SKILL, subtype SK_LITERACY shoud have subtype %d but has subtype %d",
-            SK_LITERACY,arch->clone.subtype);
-    fail_unless(arch!=NULL,"Should be able to find an arch of type quest, subtype SK_LITERACY");
-    arch = get_archetype_by_type_subtype(SKILL,-1);
-    fail_unless(arch!=NULL,"Should be able to find an arch of type SKILL, no subtype");
-    fail_unless(arch->clone.type==SKILL,"arch of type SKILL, no subtype should have type %d but has %d",
-            SKILL,arch->clone.type);
-    arch = get_archetype_by_type_subtype(-1,SK_LITERACY);
-    fail_unless(arch!=NULL,"Should be able to find an arch of type unknown, SK_LITERACY");
-    fail_unless(arch->clone.subtype==SK_LITERACY,"arch of type unknown, subtype quest in progress shoud have subtype %d but has subtype %d",
-                SK_LITERACY,arch->clone.subtype);
+    arch = get_archetype_by_type_subtype(QUEST,QUEST_IN_PROGRESS);
+    fail_unless(arch!=NULL,"Should be able to find an arch of type quest, subtype quest in progress");
+    fail_unless(arch->clone.type==QUEST,"Arch of type quest, subtype quest in progress shoud have type %d but has type %d",
+            QUEST,arch->clone.type);
+    fail_unless(arch->clone.type==QUEST,"Arch of type quest, subtype quest in progress shoud have subtype %d but has subtype %d",
+            QUEST_IN_PROGRESS,arch->clone.subtype);
+    fail_unless(arch!=NULL,"Should be able to find an arch of type quest, subtype quest in progress");
+    arch = get_archetype_by_type_subtype(QUEST,-1);
+    fail_unless(arch!=NULL,"Should be able to find an arch of type quest, no subtype");
+    fail_unless(arch->clone.type==QUEST,"arch of type quest, no subtype should have type %d but has %d",
+            QUEST,arch->clone.type);
+    arch = get_archetype_by_type_subtype(-1,QUEST_IN_PROGRESS);
+    fail_unless(arch!=NULL,"Should be able to find an arch of type unknown, subtype quest in progress");
+    fail_unless(arch->clone.subtype==QUEST_IN_PROGRESS,"arch of type unknown, subtype quest in progress shoud have subtype %d but has subtype %d",
+                QUEST_IN_PROGRESS,arch->clone.subtype);
     arch = get_archetype_by_type_subtype(-1,-1);
-    fail_unless(arch!=NULL, "Should be able to find arch of type unknown, subtype unknown, despite this being useless");
+    fail_unless(arch!=NULL, "Should be able to find arch of type unknow , subtype unknown, despite this being useless");
     arch = get_archetype_by_type_subtype(OBJECT_TYPE_MAX+1,-1);
     if (arch!=NULL)
         fail("Should be not able to find arch of inexistant type but got %p (%s)",arch, arch->name);
@@ -170,7 +170,7 @@ START_TEST (test_create_archetype_by_object_name)
                  "Searching for \"\" should have returned a singularity");
 }
 END_TEST
-
+        
 START_TEST (test_init_archetypes)
 {
     /*init_archetypes is used by setup, just check it created the empty_archetype*/
@@ -204,7 +204,7 @@ START_TEST(test_get_archetype_struct)
 	fail_unless(arch->name==NULL,"arch->name of get_archetype_struct should be inited to NULL");
 	fail_unless(arch->head==NULL,"arch->head of get_archetype_struct should be inited to NULL");
 	fail_unless(arch->next==NULL,"arch->next of get_archetype_struct should be inited to NULL");
-	fail_unless(arch->more==NULL,"arch->more of get_archetype_struct should be inited to NULL");
+	fail_unless(arch->more==NULL,"arch->more of get_archetype_struct should be inited to NULL");	
 	fail_unless(arch->clone.other_arch==NULL,"arch->clone.other_arch of get_archetype_struct should be inited to NULL");
 	fail_unless(arch->clone.contr==NULL,"arch->clone.contr of get_archetype_struct should be inited to NULL");
     fail_unless(arch->clone.next==NULL,"arch->clone.next of get_archetype_struct should be inited to NULL");
@@ -219,7 +219,7 @@ START_TEST(test_get_archetype_struct)
     fail_unless(arch->clone.more==NULL,"arch->clone.more of get_archetype_struct should be inited to NULL");
     fail_unless(arch->clone.head==NULL,"arch->clone.head of get_archetype_struct should be inited to NULL");
     fail_unless(arch->clone.map==NULL,"arch->clone.map of get_archetype_struct should be inited to NULL");
-
+    
     fail_unless(arch->clone.name==NULL,"arch->clone.name of get_archetype_struct should be inited to NULL");
 	fail_unless(arch->clone.name_pl==NULL,"arch->clone.name_pl of get_archetype_struct should be inited to NULL");
 	fail_unless(arch->clone.title==NULL,"arch->clone.title of get_archetype_struct should be inited to NULL");
@@ -228,8 +228,8 @@ START_TEST(test_get_archetype_struct)
 	fail_unless(arch->clone.msg==NULL,"arch->clone.msg of get_archetype_struct should be inited to NULL");
 	fail_unless(arch->clone.skill==NULL,"arch->clone.skill of get_archetype_struct should be inited to NULL");
 	fail_unless(arch->clone.lore==NULL,"arch->clone.lore of get_archetype_struct should be inited to NULL");
-
-
+	
+	
 	fail_unless(arch->clone.current_weapon==NULL,"arch->clone.current_weapon of get_archetype_struct should be inited to NULL");
 	fail_unless(arch->clone.enemy==NULL,"arch->clone.enemy of get_archetype_struct should be inited to NULL");
 	fail_unless(arch->clone.attacked_by==NULL,"arch->clone.attacked_by of get_archetype_struct should be inited to NULL");
@@ -242,7 +242,7 @@ START_TEST(test_get_archetype_struct)
 	fail_unless(arch->clone.other_arch==NULL,"arch->clone.other_arch of get_archetype_struct should be inited to NULL");
 	fail_unless(arch->clone.custom_name==NULL,"arch->clone.custom_name of get_archetype_struct should be inited to NULL");
 	fail_unless(arch->clone.key_values==NULL,"arch->clone.key_values of get_archetype_struct should be inited to NULL");
-
+    
 }
 END_TEST
 
@@ -286,6 +286,16 @@ START_TEST (test_find_archetype)
 }
 END_TEST
 
+START_TEST (test_type_to_archetype)
+{
+    archetype* arch;
+    arch = type_to_archetype(PLAYER);
+    fail_unless(arch!=NULL,"Should be able to locate an archetype of type PLAYER");
+    arch = type_to_archetype(OBJECT_TYPE_MAX+1);
+    fail_unless(arch==NULL,"Should not be able to locate and archetype of inexistant type");
+}
+END_TEST
+
 START_TEST (test_object_create_arch)
 {
     archetype* arch;
@@ -303,7 +313,7 @@ Suite *arch_suite(void)
   Suite *s = suite_create("arch");
   TCase *tc_core = tcase_create("Core");
     /*setup and teardown will be called before each test in testcase 'tc_core' */
-  tcase_add_checked_fixture(tc_core,setup,teardown);
+  tcase_add_checked_fixture(tc_core,setup,teardown); 
 
   suite_add_tcase (s, tc_core);
   tcase_add_test(tc_core, test_find_archetype_by_object_name);
@@ -319,6 +329,7 @@ Suite *arch_suite(void)
   tcase_add_test(tc_core, test_create_singularity);
   tcase_add_test(tc_core, test_create_archetype);
   tcase_add_test(tc_core, test_find_archetype);
+  tcase_add_test(tc_core, test_type_to_archetype);
   tcase_add_test(tc_core, test_object_create_arch);
 
   return s;

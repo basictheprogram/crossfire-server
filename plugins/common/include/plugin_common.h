@@ -51,15 +51,11 @@ extern char*        cf_get_maps_directory(const char *name, char* buf, int size)
 extern int          cf_find_animation(const char* txt);
 extern int          cf_find_face(const char* name, int error);
 extern void         cf_log( LogLevel logLevel, const char* format, ... );
-extern void         cf_log_plain( LogLevel logLevel, const char* message );
 extern void         cf_get_time( timeofday_t* tod );
 extern int          cf_timer_create(object* ob, long delay, int mode);
 extern int          cf_timer_destroy(int id);
 extern const char*  cf_get_directory(int id);
 extern const char*  cf_re_cmp(const char *str, const char *regexp);
-extern const char*  cf_get_season_name( int index );
-extern const char*  cf_get_month_name( int index );
-extern const char*  cf_get_weekday_name( int index );
 
 /* Objects */
 extern void         cf_object_set_int_property(object* op, int propcode, int value);
@@ -94,7 +90,7 @@ extern int          cf_object_get_flag( object* ob, int flag );
 extern void         cf_object_set_flag( object* ob, int flag, int value );
 extern object*      cf_object_insert_in_ob( object* op, object* where );
 extern void         cf_object_set_string_property(object* op, int propcode, const char* value);
-extern void         cf_spring_trap( object* trap, object* victim);
+extern void         cf_spring_trap( object* op , object* victim);
 extern int          cf_object_check_trigger( object* op, object* cause );
 extern int          cf_object_query_money(const object* op);
 extern int          cf_object_query_cost(const object *tmp, object *who, int flag);
@@ -103,12 +99,13 @@ extern void         cf_object_learn_spell(object *op, object *spell, int special
 extern void         cf_object_forget_spell(object* op, object* sp);
 extern object*      cf_object_check_for_spell(object *op, const char *name);
 extern int          cf_object_cast_ability(object* caster, object* ctoo, int dir, object* sp, char* flags);
-extern int          cf_object_pay_amount(object* pl, uint64 to_pay);
+extern int          cf_object_pay_amount(object* op, uint64 amount);
 extern int          cf_object_pay_item(object *op,object *pl);
 extern void         cf_object_set_long_property(object* op, int propcode, long value);
 extern int          cf_object_transfer(object *op, int x, int y, int randomly, object *originator);
 extern int          cf_object_out_of_map( object* op, int x, int y);
 extern void         cf_object_drop( object* op, object* author);
+extern void         cf_object_take( object* op, object* author);
 extern void         cf_object_say( object* op, char* msg);
 extern object*      cf_object_insert_object(object* op, object* container);
 extern object*      cf_object_present_archname_inside(object* op, char* whatstr);
@@ -128,9 +125,9 @@ extern void         cf_object_set_resistance(object* op, int rtype, sint16 value
 extern int          cf_object_move(object* op, int dir, object*originator);
 extern void         cf_object_apply_below(object* pl);
 extern object*      cf_object_clone(object* op, int clonetype);
-extern void         cf_object_change_exp(object *op, sint64 exp, const char *skill_name, int flag);
+extern void         cf_object_change_experience(object *op, sint64 exp, const char *skill_name, int flag);
 extern int          cf_object_change_abil(object* op, object* tmp);
-extern int          cf_object_user_event(object* op, object* activator, object* third, const char* message, int fix);
+
 /* Maps */
 /*extern void*        cf_map_get_property(mapstruct* map, int propcode);*/
 extern sstring cf_map_get_sstring_property(mapstruct* map, int propcode);
@@ -169,7 +166,6 @@ extern int          cf_map_get_sky(mapstruct* map);
 extern int          cf_map_get_wpartx(mapstruct* map);
 extern int          cf_map_get_wparty(mapstruct* map);
 extern int          cf_map_change_light(mapstruct *m, int change);
-extern void         cf_map_trigger_connected(objectlink* ol, object* cause, int state);
 
 /* Random maps */
 extern int           cf_random_map_set_variable(RMParms* rp, const char* buf);

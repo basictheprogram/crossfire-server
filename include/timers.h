@@ -3,11 +3,9 @@
 /* This code is placed under the GPL.                                        */
 /*****************************************************************************/
 
-/**
- * @file
- * Variables for the custom timers.
- * See @ref page_timers.
- */
+/*****************************************************************************/
+/* Headers needed.                                                           */
+/*****************************************************************************/
 
 #ifndef TIMERS_H
 #define TIMERS_H
@@ -46,29 +44,24 @@
 /* memory should not be a problem in that case, given the size of a cftimer. */
 /*****************************************************************************/
 
-#define TIMER_MODE_DEAD    0 /**< Used to mark a timer as unused in the list. */
-#define TIMER_MODE_SECONDS 1 /**< Timer is in seconds. */
-#define TIMER_MODE_CYCLES  2 /**< Timer is in server cycles. */
+#define TIMER_MODE_DEAD    0 /* Used to mark a timer as unused in the list */
+#define TIMER_MODE_SECONDS 1
+#define TIMER_MODE_CYCLES  2
 
-/**
- * One timer.
- */
 typedef struct _cftimer
 {
-    int     mode;   /**< Timer mode. */
-    long    delay;  /**< Either server ticks before trigger, or trigger time. */
-    tag_t   ob_tag; /**< Object associated to the timer. */
+    int     mode;
+    long    delay;
+    tag_t   ob_tag;
 } cftimer;
 
-/** Maximum number of timers. */
 #define MAX_TIMERS 1000
 
-/** The actual timers. */
 cftimer timers_table[MAX_TIMERS];
 
-#define TIMER_ERR_NONE      0   /**< No error. */
-#define TIMER_ERR_ID       -1   /**< Invalid timer id. */
-#define TIMER_ERR_OBJ      -2   /**< NULL object, or no ::EVENT_TIMER handler. */
-#define TIMER_ERR_MODE     -3   /**< Invalid timer mode. */
+#define TIMER_ERR_NONE      0
+#define TIMER_ERR_ID       -1
+#define TIMER_ERR_OBJ      -2
+#define TIMER_ERR_MODE     -3
 
 #endif /* TIMERS_H */

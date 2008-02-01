@@ -27,10 +27,6 @@
     The authors can be reached via e-mail at crossfire-devel@real-time.com
 */
 
-/**
- * @file
- * Spell-related helper functions.
- */
 
 #include <global.h>
 #include <spells.h>
@@ -40,22 +36,12 @@
 #include <sproto.h>
 #endif
 #include <sounds.h>
-#include <assert.h>
 
 extern char *spell_mapping[];
 
-/**
- * This returns a random spell from 'ob'.  If skill is set, then
+/* This returns a random spell from 'ob'.  If skill is set, then
  * the spell must be of this skill, it can be NULL in which case all
  * matching spells are used.
- *
- * @param ob
- * object to find spells in.
- * @param skill
- * skill the spell should match, NULL if can match any spell.
- * @return
- * random spell, or NULL if none found.
- * @todo change skill to sstring.
  */
 object *find_random_spell_in_ob(object *ob, const char *skill)
 {
@@ -79,25 +65,13 @@ object *find_random_spell_in_ob(object *ob, const char *skill)
     return NULL;
 }
 
-/**
- * Utility function to assign the correct skill when casting.
- *
- * Relatively simple function that gets used a lot.
+/* Relatively simple function that gets used a lot.
  * Basically, it sets up the skill pointer for the spell being
  * cast.  If op is really casting the spell, then the skill
  * is whatever skill the spell requires.
  * if instead caster (rod, horn, wand, etc) is casting the skill,
  * then they get exp for the skill that you need to use for
  * that object (use magic device).
- *
- * @param op
- * object casting the spell.
- * @param caster
- * object used to cast the spell (rod, wand, ...).
- * @param spob
- * spell object.
- * @param dest
- * object to set the skill for.
  */
 void set_spell_skill(object *op, object *caster, object *spob, object *dest)
 {
@@ -108,17 +82,20 @@ void set_spell_skill(object *op, object *caster, object *spob, object *dest)
 	dest->skill = add_refcount(caster->skill);
 }
 
-/**
- * It goes through the spells looking for any
+/* init_spells: This should really be called check_spells, as that
+ * is what it does.  It goes through the spells looking for any
  * obvious errors.  This was most useful in debugging when re-doing
  * all the spells to catch simple errors.  To use it all the time
  * will result in it spitting out messages that aren't really errors.
  */
-void check_spells(void) {
+void init_spells(void) {
 #ifdef SPELL_DEBUG
+    static int init_spells_done = 0;
     int i;
     archetype *at;
 
+    if (init_spells_done)
+	return;
     LOG(llevDebug, "Checking spells...\n");
 
     for (at=first_archetype; at; at=at->next) {
@@ -145,8 +122,7 @@ void check_spells(void) {
 #endif
 }
 
-/**
- * Dumps all the spells - now also dumps skill associated with the spell.
+/* Dumps all the spells - now also dumps skill associated with the spell.
  * not sure what this would be used for, as the data seems pretty
  * minimal, but easy enough to keep around.
  */
@@ -163,17 +139,8 @@ void dump_spells(void)
     }
 }
 
-/**
- * Inserts into map a spell effect based on other_arch.
- *
- * @param spob
- * spell object to insert object from.
- * @param x
- * @param y
- * @param map
- * coordinates to put the effect at.
- * @param originator
- * what causes the effect to be inserted. Can be NULL.
+/* pretty basic function - basically just takes
+ * an object, sets the x,y, and calls insert_ob_in_map
  */
 
 void spell_effect (object *spob, int x, int y, mapstruct *map,
@@ -190,18 +157,15 @@ void spell_effect (object *spob, int x, int y, mapstruct *map,
     }
 }
 
-/**
+/*
  * This function takes a caster and spell and presents the
  * effective level the caster needs to be to cast the spell.
- * Basically, it just adjusts the spell->level with attuned/repelled
- * spellpaths.
+ * basically, it just adjusts the spell->level with attuned/repelled
+ * spellpaths.  Was called path_level_mod
  *
- * @param caster
- * person casting the spell.
- * @param spell
- * spell object.
- * @return
- * adjusted level.
+ * caster is person casting hte spell.
+ * spell is the spell object.
+ * Returns modified level.
  */
 int min_casting_level(object *caster, object *spell)
 {
@@ -211,7 +175,11 @@ int min_casting_level(object *caster, object *spell)
 	/* This case is not a bug, just the fact that this function is
 	 * usually called BEFORE checking for path_deny. -AV
 	 */
-        return 1;
+#if 0
+	LOG (llevError, "BUG: path_level_mod (arch %s, name %s): casting denied "
+	     "spell\n", caster->arch->name, caster->name);
+#endif
+	return 1;
     }
     new_level = spell->level
              + ((caster->path_repelled & spell->path_attuned) ? +2 : 0)
@@ -220,20 +188,13 @@ int min_casting_level(object *caster, object *spell)
 }
 
 
-/**
- * This function returns the effective level the spell
+/* This function returns the effective level the spell
  * is being cast at.
  * Note that I changed the repelled/attuned bonus to 2 from 5.
  * This is because the new code compares casting_level against
  * min_caster_level, so the difference is effectively 4
- *
- * @param caster
- * person casting the spell.
- * @param spell
- * spell object.
- * @return
- * adjusted level.
  */
+
 int caster_level(object *caster, object *spell)
 {
     int level= caster->level;
@@ -260,24 +221,18 @@ int caster_level(object *caster, object *spell)
     return level;
 }
 
-/**
- * Scales the spellpoint cost of a spell by it's increased effectiveness.
- * Some of the lower level spells become incredibly vicious at high
+/* The following function scales the spellpoint cost of
+ * a spell by it's increased effectiveness.  Some of the
+ * lower level spells become incredibly vicious at high
  * levels.  Very cheap mass destruction.  This function is
  * intended to keep the sp cost related to the effectiveness.
- *
+ * op is the player/monster
+ * caster is what is casting the spell, can be op.
+ * spell is the spell object.
  * Note that it is now possible for a spell to cost both grace and
  * mana.  In that case, we return which ever value is higher.
- *
- * @param caster
- * what is casting the spell.
- * @param spell
- * spell object.
- * @param flags
- * one of @ref SPELL_xxx.
- * @return
- * sp/mana points cost.
  */
+
 sint16 SP_level_spellpoint_cost(object *caster, object *spell, int flags)
 {
     int sp, grace, level = caster_level(caster, spell);
@@ -321,15 +276,8 @@ sint16 SP_level_spellpoint_cost(object *caster, object *spell, int flags)
 }
 
 
-/**
- * Returns adjusted damage based on the caster.
- *
- * @param caster
- * who is casting.
- * @param spob
- * spell we are adjusting.
- * @return
- * adjusted damage.
+/* SP_level_dam_adjust: Returns adjusted damage based on the caster.
+ * spob is the spell we are adjusting.
  */
 int SP_level_dam_adjust(object *caster, object *spob)
 {
@@ -343,17 +291,9 @@ int SP_level_dam_adjust(object *caster, object *spob)
     return adj;
 }
 
-/**
- * Adjust the duration of the spell based on level.
- * This is basically the same as SP_level_dam_adjust() above,
+/* Adjust the strength of the spell based on level.
+ * This is basically the same as SP_level_dam_adjust above,
  * but instead looks at the level_modifier value.
- *
- * @param caster
- * who is casting.
- * @param spob
- * spell we are adjusting.
- * @return
- * adjusted duration.
  */
 int SP_level_duration_adjust(object *caster, object *spob)
 {
@@ -368,17 +308,9 @@ int SP_level_duration_adjust(object *caster, object *spob)
     return adj;
 }
 
-/**
- * Adjust the range of the spell based on level.
- * This is basically the same as SP_level_dam_adjust() above,
+/* Adjust the strength of the spell based on level.
+ * This is basically the same as SP_level_dam_adjust above,
  * but instead looks at the level_modifier value.
- *
- * @param caster
- * who is casting.
- * @param spob
- * spell we are adjusting.
- * @return
- * adjusted range.
  */
 int SP_level_range_adjust(object *caster, object *spob)
 {
@@ -393,16 +325,9 @@ int SP_level_range_adjust(object *caster, object *spob)
     return adj;
 }
 
-/**
- * Checks to see if player knows the spell.  If the name is the same
+/* Checks to see if player knows the spell.  If the name is the same
  * as an existing spell, we presume they know it.
- *
- * @param op
- * object we're looking into.
- * @param name
- * spell name. Doesn't need to be a shared string.
- * @return
- * 1 if op knows the spell, 0 if it don't.
+ * returns 1 if they know the spell, 0 if they don't.
  */
 object *check_spell_known (object *op, const char *name)
 {
@@ -415,18 +340,15 @@ object *check_spell_known (object *op, const char *name)
 }
 
 
-/**
+/*
  * Look at object 'op' and see if they know the spell
  * spname. This is pretty close to check_spell_known
  * above, but it uses a looser matching mechanism.
- *
- * @param op
- * object we're searching the inventory.
- * @param spname
- * partial spell name.
- * @returns
- * matching spell object, or NULL. If we match multiple spells but don't get an exact match, we also return NULL.
+ * returns the matching spell object, or NULL.
+ * If we match multiple spells but don't get an
+ * exact match, we also return NULL.
  */
+
 object *lookup_spell_by_name(object *op,const char *spname) {
     object *spob1=NULL, *spob2=NULL, *spob;
     int nummatch=0;
@@ -438,25 +360,22 @@ object *lookup_spell_by_name(object *op,const char *spname) {
      * the past spname, spob2 uses the length of the spell name.
      */
     for (spob = op->inv; spob; spob=spob->below) {
-        if (spob->type == SPELL) {
-            if (!strncmp(spob->name, spname, strlen(spname))) {
-                if (strlen(spname) == strlen(spob->name))
-                    /* Perfect match, return it. */
-                    return spob;
-                nummatch++;
-                spob1 = spob;
-            } else if (!strncmp(spob->name, spname, strlen(spob->name))) {
-                /* if spells have ambiguous names, it makes matching
-                 * really difficult.  (eg, fire and fireball would
-                 * fall into this category).  It shouldn't be hard to
-                 * make sure spell names don't overlap in that fashion.
-                 */
-                if (spob2)
-                    LOG(llevError,"Found multiple spells with overlapping base names: %s, %s\n",
-                        spob2->name, spob->name);
-                spob2 = spob;
-            }
-        }
+	if (spob->type == SPELL) {
+	    if (!strncmp(spob->name, spname, strlen(spname))) {
+		nummatch++;
+		spob1 = spob;
+	    } else if (!strncmp(spob->name, spname, strlen(spob->name))) {
+		/* if spells have ambiguous names, it makes matching
+		 * really difficult.  (eg, fire and fireball would
+		 * fall into this category).  It shouldn't be hard to
+		 * make sure spell names don't overlap in that fashion.
+		 */
+		if (spob2)
+		    LOG(llevError,"Found multiple spells with overlapping base names: %s, %s\n",
+			spob2->name, spob->name);
+		spob2 = spob;
+	    }
+	}
     }
     /* if we have best match, return it.  Otherwise, if we have one match
      * on the loser match, return that, otehrwise null
@@ -466,24 +385,12 @@ object *lookup_spell_by_name(object *op,const char *spname) {
     return NULL;
 }
 
-/**
- * Decides weither the (spell-)object sp_op will
+/* reflwall - decides weither the (spell-)object sp_op will
  * be reflected from the given mapsquare. Returns 1 if true.
- *
  * (Note that for living creatures there is a small chance that
  * reflect_spell fails.)
- *
  * Caller should be sure it passes us valid map coordinates
  * eg, updated for tiled maps.
- *
- * @param m
- * @param x
- * @param y
- * position of the object to test.
- * @param sp_op
- * spell object to test.
- * @return
- * 1 if reflected, 0 else.
  */
 int reflwall(mapstruct *m,int x,int y, object *sp_op) {
     object *op;
@@ -491,27 +398,20 @@ int reflwall(mapstruct *m,int x,int y, object *sp_op) {
     if(OUT_OF_REAL_MAP(m,x,y)) return 0;
     for(op=get_map_ob(m,x,y);op!=NULL;op=op->above)
 	if(QUERY_FLAG(op, FLAG_REFL_SPELL) && (!QUERY_FLAG(op, FLAG_ALIVE) ||
-			       (rndm(0, 99)) < 90-(sp_op->level/10)))
+			       sp_op->type==LIGHTNING || (rndm(0, 99)) < 90-(sp_op->level/10)))
 	return 1;
 
     return 0;
 }
 
-/**
- * Creates object new_op in direction dir or if that is blocked, beneath the player (op).
+/* cast_create_object: creates object new_op in direction dir
+ * or if that is blocked, beneath the player (op).
  * we pass 'caster', but don't use it for anything.
  * This is really just a simple wrapper function .
- *
- * @param op
- * who is casting.
- * @param new_op
- * object to insert.
- * @param dir
- * direction to insert into. Can be 0.
- * @return
- * direction that the object was actually placed in.
+ * returns the direction that the object was actually placed
+ * in.
  */
-int cast_create_obj(object *op,object *new_op, int dir)
+int cast_create_obj(object *op,object *caster,object *new_op, int dir)
 {
     mapstruct *m;
     sint16  sx, sy;
@@ -519,8 +419,8 @@ int cast_create_obj(object *op,object *new_op, int dir)
     if(dir &&
       ((get_map_flags(op->map, &m, op->x+freearr_x[dir],op->y+freearr_y[dir], &sx, &sy) & P_OUT_OF_MAP) ||
       OB_TYPE_MOVE_BLOCK(op, GET_MAP_MOVE_BLOCK(m, sx, sy)))) {
-	draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_SPELL, MSG_TYPE_SPELL_INFO,
-			  "Something is in the way. You cast it at your feet.", NULL);
+	new_draw_info(NDI_UNIQUE, 0,op,"Something is in the way.");
+	new_draw_info(NDI_UNIQUE, 0,op,"You cast it at your feet.");
 	dir = 0;
     }
     new_op->x=op->x+freearr_x[dir];
@@ -532,24 +432,15 @@ int cast_create_obj(object *op,object *new_op, int dir)
     return dir;
 }
 
-/**
- * Returns true if it is ok to put spell op on the space/may provided.
- *
- * @param m
- * @param x
- * @param y
- * coordinates to test.
- * @param op
- * spell to test for.
- * @param immune_stop
- * basically the attacktype of the spell (why
+/* Returns true if it is ok to put spell *op on the space/may provided.
+ * immune_stop is basically the attacktype of the spell (why
  * passed as a different value, not sure of).  If immune_stop
  * has the AT_MAGIC bit set, and there is a counterwall
- * on the space, the object doesn't get placed.  if immune_stop
+ * on the space, the object doesn't get placed.  if immune stop
  * does not have AT_MAGIC, then counterwalls do not effect the spell.
- * @return
- * 1 if we can add op, 0 else.
+ *
  */
+
 int ok_to_put_more(mapstruct *m,sint16 x,sint16 y,object *op,int immune_stop) {
     object *tmp;
     int mflags;
@@ -579,38 +470,15 @@ int ok_to_put_more(mapstruct *m,sint16 x,sint16 y,object *op,int immune_stop) {
 	    (immune_stop & AT_MAGIC)) return 0;
 
 	/* This is to prevent 'out of control' spells.  Basically, this
-	 * limits one spell effect per space per spell.  This is definitely
+	 * limits one spell effect per space per spell.  This is definately
 	 * needed for performance reasons, and just for playability I believe.
 	 * there are no such things as multispaced spells right now, so
 	 * we don't need to worry about the head.
-	 * We only need to go down this path is maxhp is set on both objects -
-	 * otherwise, no reason to check.  But if we do check, we need to
-	 * do some extra work, looking in the spell_tags[] of each object,
-	 * if they have it set.
 	 */
-	if (tmp->type == op->type && tmp->subtype == op->subtype &&
-          tmp->stats.maxhp && op->stats.maxhp) {
-	    if ((tmp->stats.maxhp == op->stats.maxhp) ||
-	        (tmp->spell_tags && OB_SPELL_TAG_MATCH(tmp, op->stats.maxhp)) ||
-	        (op->spell_tags && OB_SPELL_TAG_MATCH(op, tmp->stats.maxhp))) {
-		statistics.spell_suppressions++;
-		return 0;
-	    }
+	if ((tmp->stats.maxhp == op->stats.maxhp) && (tmp->type == op->type) &&
+	    (tmp->subtype == op->subtype))
+	    return 0;
 
-	    /* if both objects have spell tags, then if the two tags entries
-	     * from either match, that also counts.  Need to check
-	     * the spell_tags, because 0 values are allowed to match
-	     */
-	    if (op->spell_tags && tmp->spell_tags) {
-		int i;
-
-		for (i=0; i<SPELL_TAG_SIZE; i++) {
-		    if (op->spell_tags[i] && op->spell_tags[i] == tmp->spell_tags[i])
-			statistics.spell_suppressions++;
-			return 0;
-		}
-	    }
-	}
 	/* Perhaps we should also put checks in for no magic and unholy
 	 * ground to prevent it from moving along?
 	 */
@@ -619,27 +487,17 @@ int ok_to_put_more(mapstruct *m,sint16 x,sint16 y,object *op,int immune_stop) {
     return 1;
 }
 
-/**
- * Fires an archetype.
- *
- * @note
- * it uses op->map for the map for these coordinates, which is probably a really bad idea.
- *
- * @param op
- * person firing the object.
- * @param caster
- * object casting the spell.
- * @param x
- * @param y
- * where to fire the spell.
- * @param dir
- * direction to fire in.
- * @param spell
- * spell that is being fired.  It uses other_arch for the archetype to fire.
- * @return
- * 0 on failure, 1 on success.
- * @todo check the note?
+/* fire_arch_from_position: fires an archetype.
+ * op: person firing the object.
+ * caster: object casting the spell.
+ * x, y: where to fire the spell (note, it then uses op->map for the map
+ *   for these coordinates, which is probably a really bad idea.
+ * dir: direction to fire in.
+ * spell: spell that is being fired.  It uses other_arch for the archetype
+ * to fire.
+ * returns 0 on failure, 1 on success.
  */
+
 int fire_arch_from_position (object *op, object *caster, sint16 x, sint16 y,
 	int dir, object *spell)
 {
@@ -664,8 +522,7 @@ int fire_arch_from_position (object *op, object *caster, sint16 x, sint16 y,
     if (OB_TYPE_MOVE_BLOCK(tmp, GET_MAP_MOVE_BLOCK(m, x, y))) {
         if ( caster->type == PLAYER )
             /* If caster is not player, it's for instance a swarm, so don't say there's an issue. */
-            draw_ext_info(NDI_UNIQUE, 0, op, MSG_TYPE_SPELL, MSG_TYPE_SPELL_ERROR,
-			  "You can't cast the spell on top of a wall!", NULL);
+            new_draw_info(NDI_UNIQUE, 0, op, "You can't cast the spell on top of a wall!\n");
 	free_object(tmp);
 	return 0;
     }
@@ -698,7 +555,7 @@ int fire_arch_from_position (object *op, object *caster, sint16 x, sint16 y,
     if ((tmp = insert_ob_in_map (tmp, m, op,0)) == NULL)
 	return 1;
 
-    ob_process(tmp);
+    move_spell_effect(tmp);
 
     return 1;
 }
@@ -711,12 +568,6 @@ int fire_arch_from_position (object *op, object *caster, sint16 x, sint16 y,
  *
  ****************************************************************************/
 
-/**
- * Regenerates a rod's charges.
- *
- * @param rod
- * rod to regenerate.
- */
 void regenerate_rod(object *rod) {
     if (rod->stats.hp < rod->stats.maxhp) {
 	rod->stats.hp+= 1 + rod->stats.maxhp/10;
@@ -726,48 +577,21 @@ void regenerate_rod(object *rod) {
     }
 }
 
-/**
- * Drain charges from a rod.
- *
- * @param rod
- * rod to drain.
- */
+
 void drain_rod_charge(object *rod) {
     rod->stats.hp -= SP_level_spellpoint_cost(rod, rod->inv, SPELL_HIGHEST);
 }
 
-/**
- * Drains a charge from a wand. Handles animation fix, and player update if required.
- *
- * @param wand
- * wand to drain. Must be of type WAND.
- */
-void drain_wand_charge(object* wand) {
-    assert(wand->type == WAND);
 
-    if (!(--wand->stats.food)) {
-        object *tmp;
-        if (wand->arch) {
-            CLEAR_FLAG(wand, FLAG_ANIMATE);
-            wand->face = wand->arch->clone.face;
-            wand->speed = 0;
-            update_ob_speed(wand);
-        }
-        if ((tmp=get_player_container(wand)))
-            esrv_update_item(UPD_ANIM, tmp, wand);
-    }
-}
 
-/**
- * This function is commonly used to find a friendly target for
+
+/* this function is commonly used to find a friendly target for
  * spells such as heal or protection or armour
- * @param op
- * what is looking for the target (which can be a player).
- * @param dir
- * direction we are looking in.
- * @return
- * object found, or NULL if no good object.
+ * op is what is looking for the target (which can be a player),
+ * dir is the direction we are looking in.  Return object found, or
+ * NULL if no good object.
  */
+
 object *find_target_for_friendly_spell(object *op,int dir) {
     object *tmp;
     mapstruct *m;
@@ -827,26 +651,19 @@ object *find_target_for_friendly_spell(object *op,int dir) {
 
 
 
-/**
- * Search what direction a spell should go in, first the center square
+/* raytrace:
+ * spell_find_dir(map, x, y, exclude) will search first the center square
  * then some close squares in the given map at the given coordinates for
  * live objects.
- *
  * It will not consider the object given as exclude (= caster) among possible
  * live objects. If the caster is a player, the spell will go after
  * monsters/generators only. If not, the spell will hunt players only.
- *
  * Exception is player on a battleground, who will be targeted unless excluded.
- *
- * @param m
- * @param x
- * @param y
- * where to search from.
- * @param exclude
- * what object to avoid. Can be NULL, in which case all bets are off.
- * @return
- * direction toward the first/closest live object if it finds any, otherwise -1.
+ * It returns the direction toward the first/closest live object if it finds
+ * any, otherwise -1.
+ * note that exclude can be NULL, in which case all bets are off.
  */
+
 int spell_find_dir(mapstruct *m, int x, int y, object *exclude) {
     int i,max=SIZEOFFREE;
     sint16 nx,ny;
@@ -882,17 +699,11 @@ int spell_find_dir(mapstruct *m, int x, int y, object *exclude) {
 
 
 
-/**
- * Puts a monster named monstername near by
+/* put_a_monster: puts a monster named monstername near by
  * op.  This creates the treasures for the monsters, and
  * also deals with multipart monsters properly.
- *
- * @param op
- * victim.
- * @param monstername
- * monster's archetype name.
- * @todo there is a multipart-aware archetype conversion function, use it.
  */
+
 static void put_a_monster(object *op,const char *monstername) {
     object *tmp,*head=NULL,*prev=NULL;
     archetype *at;
@@ -939,27 +750,20 @@ static void put_a_monster(object *op,const char *monstername) {
     }
 }
 
-/**
- * Summons hostile monsters and places them in nearby squares.
- *
- * @note
- * this is not used by any spells (summon evil monsters
+/* peterm:  function which summons hostile monsters and
+ * places them in nearby squares.
+ * op is the summoner.
+ * n is the number of monsters.
+ * monstername is the name of the monster.
+ * returns the number of monsters, which is basically n.
+ * it should really see how many it successfully replaced and
+ * return that instead.
+ * Note that this is not used by any spells (summon evil monsters
  * use to call this, but best I can tell, that spell/ability was
  * never used.  This is however used by various failures on the
  * players part (alchemy, reincarnation, etc)
- *
- * @param op
- * the summoner.
- * @param n
- * number of monsters.
- * @param monstername
- * name of the monster to summon, should be a valid archetype.
- * @return
- * number of monsters, which is basically n.
- *
- * @todo it should really see how many it successfully replaced and
- * return that instead.
  */
+
 int summon_hostile_monsters(object *op,int n,const char *monstername){
     int i;
     for(i=0;i<n;i++)
@@ -969,29 +773,21 @@ int summon_hostile_monsters(object *op,int n,const char *monstername){
 }
 
 
-/**
+/* shuffle_attack:  peterm
  * This routine shuffles the attack of op to one of the
- * ones in the list. It does this at random.  It also
- * chooses a face appropriate to the attack that is
- * being committed by that square at the moment.
- *
- * right now it's being used by color spray and create pool of
- * chaos.
- *
+ * ones in the list.  It does this at random.  It also
+ *  chooses a face appropriate to the attack that is
+ *  being committed by that square at the moment.
+ *  right now it's being used by color spray and create pool of
+ *  chaos.
  * This could really be a better implementation - the
  * faces and attacktypes above are hardcoded, which is never
  * good.  The faces refer to faces in the animation sequence.
  * Not sure how to do better - but not having it hardcoded
  * would be nice.
- *
  * I also fixed a bug here in that attacktype was |= -
  * to me, that would be that it would quickly get all
  * attacktypes, which probably wasn't the intent.  MSW 2003-06-03
- *
- * @param op
- * object to change.
- * @param change_face
- * if set, also changes the face, else only changes the attacktype.
  */
 void shuffle_attack(object *op,int change_face)
 {
@@ -1006,16 +802,13 @@ void shuffle_attack(object *op,int change_face)
 }
 
 
-/**
- * Called when a player fails at casting a prayer.
- *
- * @param op
- * player.
- * @param failure
- * basically how much grace they had.
- * @param power
- * how much grace the spell would normally take to cast.
+/* prayer_failure: This is called when a player fails
+ * at casting a prayer.
+ * op is the player.
+ * failure is basically how much grace they had.
+ * power is how much grace the spell would normally take to cast.
  */
+
 static void prayer_failure(object *op, int failure, int power)
 {
     const char *godname;
@@ -1025,10 +818,7 @@ static void prayer_failure(object *op, int failure, int power)
 
     if(failure<= -20 && failure > -40) /* wonder */
     {
-	draw_ext_info_format(NDI_UNIQUE, 0,op, MSG_TYPE_SPELL, MSG_TYPE_SPELL_FAILURE,
-			     "%s gives a sign to renew your faith.",
-			     "%s gives a sign to renew your faith.",
-			     godname);
+	new_draw_info_format(NDI_UNIQUE, 0,op,"%s gives a sign to renew your faith.",godname);
 	tmp = create_archetype(SPELL_WONDER);
 	cast_cone(op,op,0,tmp);
 	free_object(tmp);
@@ -1036,42 +826,32 @@ static void prayer_failure(object *op, int failure, int power)
 
     else if (failure <= -40 && failure > -60) /* confusion */
     {
-	draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_SPELL, MSG_TYPE_SPELL_FAILURE,
-		      "Your diety touches your mind!", NULL);
+	new_draw_info(NDI_UNIQUE, 0,op,"Your diety touches your mind!");
 	confuse_player(op,op,99);
     }
     else if (failure <= -60 && failure> -150) /* paralysis */
     {
-	draw_ext_info_format(NDI_UNIQUE, 0,op, MSG_TYPE_SPELL, MSG_TYPE_SPELL_FAILURE,
-		     "%s requires you to pray NOW. You comply, ignoring all else.",
-		     "%s requires you to pray NOW. You comply, ignoring all else.",
-		     godname);
-
+	new_draw_info_format(NDI_UNIQUE, 0,op,"%s requires you to pray NOW.",godname);
+	new_draw_info(NDI_UNIQUE, 0,op,"You comply, ignoring all else.");
 	paralyze_player(op,op,99);
     }
     else if (failure <= -150) /* blast the immediate area */
     {
 	tmp = create_archetype(GOD_POWER);
-	draw_ext_info_format(NDI_UNIQUE, 0,op, MSG_TYPE_SPELL, MSG_TYPE_SPELL_FAILURE,
-			     "%s smites you!",
-			     "%s smites you!",
-			     godname);
+	new_draw_info_format(NDI_UNIQUE, 0,op,"%s smites you!",godname);
 	cast_magic_storm(op,tmp, power);
     }
 }
 
-/**
- * Handles the various effects for differing degrees of failure badness.
- *
- * @param op
- * player that failed.
- * @param failure
- * random value of how badly you failed.
- * @param power
- * how many spellpoints you'd normally need for the spell.
- * @param skill
- * skill needed to cast the spell.
+/*
+ * spell_failure()  handles the various effects for differing degrees
+ * of failure badness.
+ * op is the player that failed.
+ * failure is a random value of how badly you failed.
+ * power is how many spellpoints you'd normally need for the spell.
+ * skill is the skill you'd need to cast the spell.
  */
+
 void spell_failure(object *op, int failure,int power, object *skill)
 {
     object *tmp;
@@ -1081,8 +861,7 @@ void spell_failure(object *op, int failure,int power, object *skill)
 
     if (failure<=-20 && failure > -40) /* wonder */
     {
-	draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_SPELL, MSG_TYPE_SPELL_FAILURE,
-		      "Your spell causes an unexpected effect.", NULL);
+	new_draw_info(NDI_UNIQUE, 0,op,"Your spell causes an unexpected effect.");
 	tmp = create_archetype(SPELL_WONDER);
 	cast_cone(op,op,0,tmp);
 	free_object(tmp);
@@ -1090,14 +869,12 @@ void spell_failure(object *op, int failure,int power, object *skill)
 
     else if (failure <= -40 && failure > -60) /* confusion */
     {
-	draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_SPELL, MSG_TYPE_SPELL_FAILURE,
-		      "Your magic recoils on you, making you confused!", NULL);
+	new_draw_info(NDI_UNIQUE, 0,op,"Your magic recoils on you, making you confused!");
 	confuse_player(op,op,99);
     }
     else if (failure <= -60 && failure> -80) /* paralysis */
     {
-	draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_SPELL, MSG_TYPE_SPELL_FAILURE,
-		      "Your magic stuns you!", NULL);
+	new_draw_info(NDI_UNIQUE, 0,op,"Your magic stuns you!");
 	paralyze_player(op,op,99);
     }
     else if (failure <= -80) /* blast the immediate area */
@@ -1105,14 +882,11 @@ void spell_failure(object *op, int failure,int power, object *skill)
 	object *tmp;
 	/* Safety check to make sure we don't get any mana storms in scorn */
 	if (get_map_flags(op->map, NULL, op->x, op->y, NULL, NULL) & P_NO_MAGIC) {
-	    draw_ext_info(NDI_UNIQUE, 0, op, MSG_TYPE_SPELL, MSG_TYPE_SPELL_FAILURE,
-			  "The magic warps and you are turned inside out!", NULL);
+	    new_draw_info(NDI_UNIQUE, 0, op, "The magic warps and you are turned inside out!");
 	    hit_player(op,9998,op,AT_INTERNAL,1);
 
 	} else {
-	    draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_SPELL, MSG_TYPE_SPELL_FAILURE,
-			  "You lose control of the mana! The uncontrolled magic blasts you!",
-			  NULL);
+	    new_draw_info(NDI_UNIQUE, 0,op,"You lose control of the mana!  The uncontrolled magic blasts you!");
 	    tmp=create_archetype(LOOSE_MANA);
 	    tmp->level=skill->level;
 	    tmp->x=op->x;
@@ -1130,174 +904,69 @@ void spell_failure(object *op, int failure,int power, object *skill)
     }
 }
 
-/**
- * This transforms one random item of op to a flower.
- *
- * Only some items are considered, mostly magical ones.
- *
- * Transformed item is put in a force in a flower, weights are adjusted.
- *
- * See remove_force() in server/time.c to see object removal.
- *
- * @param op
- * player who is the victim.
- */
-static void transmute_item_to_flower(object* op) {
-    object* force;
-    object* item;
-    object* flower;
-    object* first = NULL;
-    int count = 0;
-    char name[HUGE_BUF];
+static int cast_party_spell(object *op, object *caster,int dir,object *spell_ob, char *stringarg)
+    {
+    int success;
+    player *pl;
+    object *spell;
 
-    for (item = op->inv; item; item = item->below) {
-        if (!item->invisible && (item->type == POTION || item->type == SCROLL || item->type == WAND || item->type == ROD || item->type == WEAPON)) {
-            if (!first)
-                first = item;
-            count++;
+    if ( !spell_ob->other_arch )
+        {
+        LOG( llevError, "cast_party_spell: empty other arch\n" );
+        return 0;
         }
-    }
+    spell = arch_to_object( spell_ob->other_arch );
 
-    if (count == 0)
-        return;
+    /* Always cast spell on caster */
+    success = cast_spell( op, caster, dir, spell, stringarg );
 
-    count = rndm(0, count-1);
-    for (item = first; item && count>0; item = item->below) {
-        if (!item->invisible && (item->type == POTION || item->type == SCROLL || item->type == WAND || item->type == ROD || item->type == WEAPON)) {
-        count--;
+    if ( caster->contr->party == NULL )
+        {
+        remove_ob( spell );
+        return success;
         }
+    for( pl=first_player; pl!=NULL; pl=pl->next )
+        if( ( pl->ob->contr->party == caster->contr->party ) && ( on_same_map( pl->ob, caster ) ) )
+            {
+            cast_spell( pl->ob, caster, pl->ob->facing, spell, stringarg );
+            }
+    remove_ob( spell );
+    return success;
     }
 
-    if (!item)
-        return;
-
-    force = create_archetype(FORCE_NAME);
-    force->duration = 100 + rndm(0,10)*100;
-    force->subtype = FORCE_TRANSFORMED_ITEM;
-    force->speed = 1;
-    update_ob_speed(force);
-
-    flower = create_archetype("flowers_permanent");
-
-    if (QUERY_FLAG(item, FLAG_APPLIED))
-        manual_apply(op, item, AP_NOPRINT | AP_IGNORE_CURSE | AP_UNAPPLY);
-    remove_ob(item);
-    flower->weight = item->nrof ? item->nrof * item->weight : item->weight;
-    item->weight = 0;
-    esrv_del_item(op->contr, item->count);
-    insert_ob_in_ob(item, force);
-
-    query_short_name(item, name, HUGE_BUF);
-    draw_ext_info_format(NDI_UNIQUE, 0,op,
-        MSG_TYPE_ITEM, MSG_TYPE_ITEM_CHANGE,
-        "Your %s turns to a flower!",
-        "Your %s turns to a flower!",
-        name);
-
-    insert_ob_in_ob(force, flower);
-    flower = insert_ob_in_ob(flower, op);
-    esrv_send_item(op, flower);
-}
-
-/**
- * Randomly swaps 2 stats of op.
+/* This is where the main dispatch when someone casts a spell.
  *
- * Swapping is merely a FORCE inserted into op's inventory.
- *
- * Used for spell casting when confused.
- *
- * @param op
- * player who is the victim.
- */
-static void swap_random_stats(object* op) {
-    object* force;
-    int first, second;
-
-    first = RANDOM()%NUM_STATS;
-    second = RANDOM()%(NUM_STATS-1);
-    if (second>=first)
-        second++;
-
-    draw_ext_info_format(NDI_UNIQUE, 0,op,
-        MSG_TYPE_VICTIM, MSG_TYPE_VICTIM_SPELL,
-        "You suddenly feel really weird!",
-        "You suddenly feel really weird!");
-
-    force = create_archetype(FORCE_NAME);
-    force->duration = 100 + rndm(0,10)*100;
-    force->speed = 1;
-    SET_FLAG(force, FLAG_APPLIED);
-    set_attr_value(&force->stats, second, get_attr_value(&op->stats, first) - get_attr_value(&op->stats, second));
-    set_attr_value(&force->stats, first, get_attr_value(&op->stats, second) - get_attr_value(&op->stats, first));
-    update_ob_speed(force);
-    insert_ob_in_ob(force, op);
-    change_abil(op,force);
-    fix_object(op);
-}
-
-/**
- * This does a random effect for op, which tried to cast a spell in a confused state.
- *
- * Note that random spell casting is handled in cast_spell itself.
- *
- * Used for spell casting when confused.
- *
- * @param op
- * player for which to produce a random effect.
- */
-static void handle_spell_confusion(object* op) {
-    switch (RANDOM()%2) {
-        case 0:
-            transmute_item_to_flower(op);
-            break;
-        case 1:
-            swap_random_stats(op);
-            break;
-    }
-}
-
-/**
- * Main dispatch when someone casts a spell.
- *
- * Will decrease mana/gr points, check for skill, confusion and such.
+ * op is the creature that is owner of the object that is casting the spell -
+ *    eg, the player or monster.
+ * caster is the actual object (wand, potion) casting the spell. can be
+ *    same as op.
+ * dir is the direction to cast in.  Note in some cases, if the spell
+ *    is self only, dir really doesn't make a difference.
+ * spell_ob is the spell object that is being cast.  From that,
+ *    we can determine what to do.
+ * stringarg is any options that are being used.  It can be NULL.  Almost
+ *    certainly, only players will set it.  It is basically used as optional
+ *    parameters to a spell (eg, item to create, information for marking runes,
+ *    etc.
+ * returns 1 on successful cast, or 0 on error.  These values should really
+ * be swapped, so that 0 is successful, and non zero is failure, with a code
+ * of what it failed.
  *
  * Note that this function is really a dispatch routine that calls other
  * functions - it just blindly returns what ever value those functions
  * return.  So if your writing a new function that is called from this,
- * it should also return 1 on success, 0 on failure.
+ * it shoudl also return 1 on success, 0 on failure.
  *
  * if it is a player casting the spell (op->type == PLAYER, op == caster),
- * this function will decrease the mana/grace appropriately.  For other
+ * this function will decrease teh mana/grace appropriately.  For other
  * objects, the caller should do what it considers appropriate.
- *
- * @param op
- * creature that is owner of the object that is casting the spell -
- *    eg, the player or monster.
- * @param caster
- * actual object (wand, potion) casting the spell. can be same as op.
- * @param dir
- * direction to cast in.  Note in some cases, if the spell
- * is self only, dir really doesn't make a difference.
- * @param spell_ob
- * spell object that is being cast.  From that, we can determine what to do.
- * *@param stringarg
- * any options that are being used.  It can be NULL.  Almost
- * certainly, only players will set it.  It is basically used as optional
- * parameters to a spell (eg, item to create, information for marking runes,
- * etc.
- * @return
- * 1 on successful cast, or 0 on error. These values should really
- * be swapped, so that 0 is successful, and non zero is failure, with a code
- * of what it failed.
- * @todo return a failure value?
  */
+
 int cast_spell(object *op, object *caster,int dir,object *spell_ob, char *stringarg) {
 
     const char *godname;
-    char buf[MAX_BUF];
     int success=0,mflags, cast_level=0, old_shoottype;
     object *skill=NULL;
-    int confusion_effect = 0;
 
     old_shoottype = op->contr ? op->contr->shoottype : 0;
 
@@ -1309,32 +978,15 @@ int cast_spell(object *op, object *caster,int dir,object *spell_ob, char *string
 
     /* the caller should set caster to op if appropriate */
     if (!caster) {
-        LOG(llevError,"cast_spell: null caster object passed\n");
-        return 0;
-    }
-    if (spell_ob->anim_suffix)
-        apply_anim_suffix(caster, spell_ob->anim_suffix);
-
-    /* Handle some random effect if confused. */
-    if (QUERY_FLAG(op, FLAG_CONFUSED) && caster == op && op->type == PLAYER) {
-        if (rndm(0, 5) < 4) {
-            spell_ob = find_random_spell_in_ob(op, NULL);
-            draw_ext_info_format(NDI_UNIQUE, 0,op,
-                MSG_TYPE_SPELL, MSG_TYPE_SPELL_FAILURE,
-                "In your confused state, you're not sure of what you cast!",
-                "In your confused state, you're not sure of what you cast!");
-        }
-        else
-            /* We fall through to deplate sp/gr, and do some checks. */
-            confusion_effect = 1;
+	LOG(llevError,"cast_spell: null caster object passed\n");
+	return 0;
     }
 
     /* if caster is a spell casting object, this normally shouldn't be
      * an issue, because they don't have any spellpaths set up.
      */
     if ((caster->path_denied & spell_ob->path_attuned) && !QUERY_FLAG(caster,FLAG_WIZ)) {
-	draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_SPELL, MSG_TYPE_SPELL_ERROR,
-		      "That spell path is denied to you.", NULL);
+	new_draw_info(NDI_UNIQUE, 0,op, "That spell path is denied to you.");
 	return 0;
     }
 
@@ -1352,16 +1004,12 @@ int cast_spell(object *op, object *caster,int dir,object *spell_ob, char *string
 	if (spell_ob->skill) {
 	    skill = find_skill_by_name(op, spell_ob->skill);
 	    if (!skill) {
-		draw_ext_info_format(NDI_UNIQUE, 0,op,
-				     MSG_TYPE_SKILL, MSG_TYPE_SKILL_MISSING,
-				     "You need the skill %s to cast %s.",
-				     "You need the skill %s to cast %s.",
-				     spell_ob->skill, spell_ob->name);
+		new_draw_info_format(NDI_UNIQUE, 0,op,"You need the skill %s to cast %s.",
+			spell_ob->skill, spell_ob->name);
 		return 0;
 	    }
 	    if (min_casting_level(op, spell_ob) > cast_level && !QUERY_FLAG(op, FLAG_WIZ)) {
-		draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-			      "You lack enough skill to cast that spell.", NULL);
+		new_draw_info(NDI_UNIQUE, 0,op, "You lack enough skill to cast that spell.");
 		return 0;
 	    }
 	}
@@ -1371,28 +1019,20 @@ int cast_spell(object *op, object *caster,int dir,object *spell_ob, char *string
 	if (!QUERY_FLAG(op, FLAG_WIZ)) {
 	    if (SP_level_spellpoint_cost(caster, spell_ob, SPELL_MANA) &&
 		SP_level_spellpoint_cost(caster, spell_ob, SPELL_MANA) >  op->stats.sp) {
-		draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_SPELL, MSG_TYPE_SPELL_ERROR,
-			      "You don't have enough mana.", NULL);
+		new_draw_info(NDI_UNIQUE, 0,op,"You don't have enough mana.");
 		return 0;
 	    }
 	    if (SP_level_spellpoint_cost(caster,spell_ob, SPELL_GRACE) &&
 		SP_level_spellpoint_cost(caster,spell_ob, SPELL_GRACE) >  op->stats.grace) {
 		if(random_roll(0, op->stats.Wis-1, op, PREFER_HIGH) + op->stats.grace -
 		   10*SP_level_spellpoint_cost(caster,spell_ob, SPELL_GRACE)/op->stats.maxgrace >0) {
-			draw_ext_info_format(NDI_UNIQUE, 0,op,
-				     MSG_TYPE_SPELL, MSG_TYPE_SPELL_INFO,
-				     "%s grants your prayer, though you are unworthy.",
-				     "%s grants your prayer, though you are unworthy.",
-				     godname);
+			new_draw_info_format(NDI_UNIQUE, 0,op,
+				     "%s grants your prayer, though you are unworthy.",godname);
 		}
 		else {
 		    prayer_failure(op,op->stats.grace,
 			   SP_level_spellpoint_cost(caster,spell_ob, SPELL_GRACE) - op->stats.grace);
-		    draw_ext_info_format(NDI_UNIQUE, 0,op,
-					 MSG_TYPE_SPELL, MSG_TYPE_SPELL_FAILURE,
-					 "%s ignores your prayer.",
-					 "%s ignores your prayer.",
-					 godname);
+		    new_draw_info_format(NDI_UNIQUE, 0,op,"%s ignores your prayer.",godname);
 		    return 0;
 		}
 	    }
@@ -1400,9 +1040,8 @@ int cast_spell(object *op, object *caster,int dir,object *spell_ob, char *string
 	    /* player/monster is trying to cast the spell.  might fumble it */
 	    if (spell_ob->stats.grace && random_roll(0, 99, op, PREFER_HIGH) <
 	      (spell_ob->level/(float)MAX(1,op->level) *cleric_chance[op->stats.Wis])) {
-                play_sound_player_only(op->contr, SOUND_TYPE_SPELL, spell_ob, 0, "fumble");
-		draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_SPELL, MSG_TYPE_SPELL_FAILURE,
-			      "You fumble the spell.", NULL);
+		play_sound_player_only(op->contr, SOUND_FUMBLE_SPELL,0,0);
+		new_draw_info(NDI_UNIQUE, 0,op,"You fumble the spell.");
 		if (settings.casting_time == TRUE) {
 		    op->casting_time = -1;
 		}
@@ -1413,10 +1052,7 @@ int cast_spell(object *op, object *caster,int dir,object *spell_ob, char *string
 		    op->contr->encumbrance +op->level - spell_ob->level +35;
 
 		if( failure < 0) {
-		    draw_ext_info(NDI_UNIQUE, 0,op,
-			  MSG_TYPE_SPELL, MSG_TYPE_SPELL_FAILURE,
-			  "You bungle the spell because you have too much heavy equipment in use.",
-			  NULL);
+		    new_draw_info(NDI_UNIQUE, 0,op,"You bungle the spell because you have too much heavy equipment in use.");
 		    if (settings.spell_failure_effects == TRUE)
 			spell_failure(op,failure,
 			  SP_level_spellpoint_cost(caster,spell_ob, SPELL_MANA),
@@ -1445,23 +1081,17 @@ int cast_spell(object *op, object *caster,int dir,object *spell_ob, char *string
 	    return 0;
 
 	if ((mflags & P_NO_CLERIC) && spell_ob->stats.grace)
-	    draw_ext_info_format(NDI_UNIQUE, 0,op, MSG_TYPE_SPELL, MSG_TYPE_SPELL_ERROR,
-				 "This ground is unholy!  %s ignores you.",
-				 "This ground is unholy!  %s ignores you.",
-				 godname);
+	    new_draw_info_format(NDI_UNIQUE, 0,op,"This ground is unholy!  %s ignores you.",godname);
 	else
 	switch(op->contr->shoottype) {
 	    case range_magic:
-		draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_SPELL, MSG_TYPE_SPELL_ERROR,
-			      "Something blocks your spellcasting.", NULL);
+		new_draw_info(NDI_UNIQUE, 0,op,"Something blocks your spellcasting.");
 		break;
 	    case range_misc:
-		draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_APPLY, MSG_TYPE_APPLY_ERROR,
-			      "Something blocks the magic of your item.", NULL);
+		new_draw_info(NDI_UNIQUE, 0,op,"Something blocks the magic of your item.");
 		break;
 	    case range_golem:
-		draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_APPLY, MSG_TYPE_APPLY_ERROR,
-			      "Something blocks the magic of your scroll.", NULL);
+		new_draw_info(NDI_UNIQUE, 0,op,"Something blocks the magic of your scroll.");
 		break;
 	    default:
 		break;
@@ -1470,58 +1100,55 @@ int cast_spell(object *op, object *caster,int dir,object *spell_ob, char *string
     }
 
     if (caster == op && settings.casting_time == TRUE && spell_ob->type == SPELL) {
-        if (op->casting_time==-1) { /* begin the casting */
-            op->casting_time = spell_ob->casting_time*PATH_TIME_MULT(op,spell_ob);
-            op->spell = spell_ob;
-            /* put the stringarg into the object struct so that when the
-            * spell is actually cast, it knows about the stringarg.
-            * necessary for the invoke command spells.
-            */
-            if(stringarg) {
-                op->spellarg = strdup_local(stringarg);
-            }
-                else op->spellarg=NULL;
-            return 0;
-        }
-        else if (op->casting_time != 0) {
-            if (op->type == PLAYER )
-                draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_SPELL, MSG_TYPE_SPELL_INFO,
-                    "You are casting!", NULL);
-            return 0;
-        } else {    /* casting_time == 0 */
-            op->casting_time = -1;
-            spell_ob = op->spell;
-            stringarg = op->spellarg;
-        }
+	if (op->casting_time==-1) { /* begin the casting */
+	    op->casting_time = spell_ob->casting_time*PATH_TIME_MULT(op,spell_ob);
+	    op->spell = spell_ob;
+	    /* put the stringarg into the object struct so that when the
+	     * spell is actually cast, it knows about the stringarg.
+	     * necessary for the invoke command spells.
+	     */
+	    if(stringarg) {
+		op->spellarg = strdup_local(stringarg);
+	    }
+	    else op->spellarg=NULL;
+	    return 0;
+	}
+	else if (op->casting_time != 0) {
+	    if (op->type == PLAYER )
+		new_draw_info(NDI_UNIQUE, 0,op,"You are casting!");
+	    return 0;
+	} else {    /* casting_time == 0 */
+	    op->casting_time = -1;
+	    spell_ob = op->spell;
+	    stringarg = op->spellarg;
+	}
     } else {
-        if (!QUERY_FLAG(caster, FLAG_WIZ)) {
-            /* Take into account how long it takes to cast the spell.
-             * if the player is casting it, then we use the time in
-             * the spell object.  If it is a spell object, have it
-             * take two ticks.  Things that cast spells on the players
-             * behalf (eg, altars, and whatever else) shouldn't cost
-             * the player any time.
-             * Ignore casting time for firewalls
-             */
-            if (caster == op && caster->type != FIREWALL) {
-                op->speed_left -= spell_ob->casting_time*PATH_TIME_MULT(op,spell_ob) * FABS(op->speed);
-                /* Other portions of the code may also decrement the speed of the player, so
-                 * put a lower limit so that the player isn't stuck here too long
-                 */
-                if ((spell_ob->casting_time > 0) &&
-                  op->speed_left < -spell_ob->casting_time*PATH_TIME_MULT(op,spell_ob) * FABS(op->speed))
-                    op->speed_left = -spell_ob->casting_time*PATH_TIME_MULT(op,spell_ob) * FABS(op->speed);
-            } else if (caster->type == WAND || caster->type == HORN ||
-              caster->type == ROD || caster->type == POTION ||
-              caster->type == SCROLL) {
-                op->speed_left -= 2 * FABS(op->speed);
-            }
-        }
+	/* Take into account how long it takes to cast the spell.
+	 * if the player is casting it, then we use the time in
+	 * the spell object.  If it is a spell object, have it
+	 * take two ticks.  Things that cast spells on the players
+	 * behalf (eg, altars, and whatever else) shouldn't cost
+	 * the player any time.
+	 * Ignore casting time for firewalls
+	 */
+	if (caster == op && caster->type != FIREWALL) {
+	    op->speed_left -= spell_ob->casting_time*PATH_TIME_MULT(op,spell_ob) * FABS(op->speed);
+	    /* Other portions of the code may also decrement the speed of the player, so
+	     * put a lower limit so that the player isn't stuck here too long
+	     */
+	    if ((spell_ob->casting_time > 0) &&
+		op->speed_left < -spell_ob->casting_time*PATH_TIME_MULT(op,spell_ob) * FABS(op->speed))
+		op->speed_left = -spell_ob->casting_time*PATH_TIME_MULT(op,spell_ob) * FABS(op->speed);
+	} else if (caster->type == WAND || caster->type == HORN ||
+		   caster->type == ROD || caster->type == POTION ||
+		   caster->type == SCROLL) {
+	    op->speed_left -= 2 * FABS(op->speed);
+	}
     }
 
-    if (op->type == PLAYER && op == caster && !QUERY_FLAG(caster, FLAG_WIZ)) {
-        op->stats.grace -= SP_level_spellpoint_cost(caster,spell_ob, SPELL_GRACE);
-        op->stats.sp -= SP_level_spellpoint_cost(caster,spell_ob, SPELL_MANA);
+    if (op->type == PLAYER && op == caster) {
+	op->stats.grace -= SP_level_spellpoint_cost(caster,spell_ob, SPELL_GRACE);
+	op->stats.sp -= SP_level_spellpoint_cost(caster,spell_ob, SPELL_MANA);
     }
 
     /* We want to try to find the skill to properly credit exp.
@@ -1531,14 +1158,8 @@ int cast_spell(object *op, object *caster,int dir,object *spell_ob, char *string
     if (op != caster && !skill && caster->skill) {
 	skill = find_skill_by_name(op, caster->skill);
 	if (!skill) {
-	    char name[MAX_BUF];
-
-	    query_name(caster, name, MAX_BUF);
-	    draw_ext_info_format(NDI_UNIQUE, 0,op,
-				 MSG_TYPE_SKILL, MSG_TYPE_SKILL_MISSING,
-				 "You lack the skill %s to use the %s",
-				 "You lack the skill %s to use the %s",
-				 caster->skill, name);
+	    new_draw_info_format(NDI_UNIQUE, 0,op,"You lack the skill %s to use the %s",
+			  caster->skill, query_name(caster));
 	    return 0;
 	}
 	change_skill(op, skill, 0);    /* needed for proper exp credit */
@@ -1553,18 +1174,6 @@ int cast_spell(object *op, object *caster,int dir,object *spell_ob, char *string
 
 	if (owner) skill = find_skill_by_name(owner, caster->skill);
     }
-
-    if (confusion_effect) {
-        /* If we get here, the confusion effect was 'random effect', so do it and bail out. */
-        draw_ext_info_format(NDI_UNIQUE, 0,op,
-            MSG_TYPE_SPELL, MSG_TYPE_SPELL_FAILURE,
-            "In your confused state, you can't control the magic!",
-            "In your confused state, you can't control the magic!");
-        handle_spell_confusion(op);
-        return 0;
-    }
-
-    play_sound_map(SOUND_TYPE_SPELL, caster, dir, spell_ob->name);
 
     switch(spell_ob->subtype) {
 	/* The order of case statements is same as the order they show up
@@ -1689,13 +1298,12 @@ int cast_spell(object *op, object *caster,int dir,object *spell_ob, char *string
 	    break;
 
 	case SP_POLYMORPH:
-#if 0
+#ifdef NO_POLYMORPH
 	    /* Not great, but at least provide feedback so if players do have
 	     * polymorph (ie, find it as a preset item or left over from before
   	     * it was disabled), they get some feedback.
 	     */
-	    draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_SPELL, MSG_TYPE_SPELL_FAILURE,
-			  "The spell fizzles", NULL);
+	    new_draw_info(NDI_UNIQUE, 0,op,"The spell fizzles");
 	    success = 0;
 #else
 	    success = cast_polymorph(op,caster,spell_ob, dir);
@@ -1725,11 +1333,8 @@ int cast_spell(object *op, object *caster,int dir,object *spell_ob, char *string
 	case SP_MOVING_BALL:
 	    if (spell_ob->path_repelled &&
 		(spell_ob->path_repelled & caster->path_attuned) != spell_ob->path_repelled) {
-		draw_ext_info_format(NDI_UNIQUE, 0, op,
-				     MSG_TYPE_SPELL, MSG_TYPE_SPELL_ERROR,
-				     "You lack the proper attunement to cast %s",
-				     "You lack the proper attunement to cast %s",
-				     spell_ob->name);
+		new_draw_info_format(NDI_UNIQUE, 0, op,
+			"You lack the proper attunement to cast %s", spell_ob->name);
 		success = 0;
 	    } else
 		success = fire_arch_from_position(op,caster,
@@ -1787,9 +1392,9 @@ int cast_spell(object *op, object *caster,int dir,object *spell_ob, char *string
 	    success= cast_create_town_portal (op,caster,spell_ob, dir);
 	    break;
 
-    case SP_ITEM_CURSE_BLESS:
-        success = cast_item_curse_or_curse(op, caster, spell_ob);
-        break;
+	case SP_PARTY_SPELL:
+	    success = cast_party_spell( op, caster, dir, spell_ob, stringarg );
+	    break;
 
 	default:
 	    LOG(llevError,"cast_spell: Unhandled spell subtype %d\n",
@@ -1799,6 +1404,7 @@ int cast_spell(object *op, object *caster,int dir,object *spell_ob, char *string
     }
 
     /* FIXME - we need some better sound suppport */
+/*    play_sound_map(op->map, op->x, op->y, SOUND_CAST_SPELL_0 + type);*/
     /* free the spell arg */
     if(settings.casting_time == TRUE && stringarg) {
 	free(stringarg);
@@ -1811,6 +1417,114 @@ int cast_spell(object *op, object *caster,int dir,object *spell_ob, char *string
     if (op->contr) op->contr->shoottype = old_shoottype;
 
     return success;
+}
+
+
+/* This is called from time.c/process_object().  That function
+ * calls this for any SPELL_EFFECT type objects.  This function
+ * then dispatches them to the appropriate specific routines.
+ */
+void move_spell_effect(object *op) {
+
+    switch (op->subtype) {
+	case SP_BOLT:
+	    move_bolt(op);
+	    break;
+
+	case SP_BULLET:
+	    move_bullet(op);
+	    break;
+
+	case SP_EXPLOSION:
+	    explosion(op);
+	    break;
+
+	case SP_CONE:
+	    move_cone(op);
+	    break;
+
+	case SP_BOMB:
+	    animate_bomb(op);
+	    break;
+
+	case SP_MAGIC_MISSILE:
+	    move_missile(op);
+	    break;
+
+	case SP_WORD_OF_RECALL:
+	    execute_word_of_recall(op);
+	    break;
+
+	case SP_MOVING_BALL:
+	    move_ball_spell(op);
+	    break;
+
+	case SP_SWARM:
+	    move_swarm_spell(op);
+	    break;
+
+	case SP_AURA:
+	    move_aura(op);
+	    break;
+
+    }
+}
+
+#if 0
+/* check_spell_effect is no longer used - should perhaps be removed.
+ * MSW 2006-06-02
+ */
+
+/* this checks to see if something special should happen if
+ * something runs into the object.
+ */
+static void check_spell_effect(object *op) {
+
+    switch (op->subtype) {
+	case SP_BOLT:
+	    move_bolt(op);
+	    return;
+
+	case SP_BULLET:
+	    check_bullet(op);
+	    return;
+    }
+
+}
+#endif
+
+
+/* This is called by move_apply.  Basically, if someone
+ * moves onto a spell effect and the walk_on or fly_on flags
+ * are set, this is called.  This should only be called for
+ * objects of the appropriate type.
+ */
+void apply_spell_effect(object *spell, object *victim)
+{
+    switch (spell->subtype) {
+	case SP_CONE:
+	    if (QUERY_FLAG(victim, FLAG_ALIVE) && spell->speed && spell->attacktype)
+		hit_player(victim, spell->stats.dam, spell, spell->attacktype, 0);
+	    break;
+
+	case SP_MAGIC_MISSILE:
+	    if (QUERY_FLAG (victim, FLAG_ALIVE)) {
+		tag_t spell_tag = spell->count;
+		hit_player (victim, spell->stats.dam, spell, spell->attacktype, 1);
+		if ( ! was_destroyed (spell, spell_tag)) {
+		    remove_ob (spell);
+		    free_object (spell);
+		}
+	    }
+	    break;
+
+	case SP_MOVING_BALL:
+	    if (QUERY_FLAG (victim, FLAG_ALIVE))
+		hit_player (victim, spell->stats.dam, spell, spell->attacktype, 1);
+	    else if (victim->material || victim->materialname)
+		save_throw_object (victim, spell->attacktype, spell);
+	    break;
+    }
 }
 
 /**
@@ -1851,14 +1565,15 @@ void check_spell_expiry(object* spell) {
 
     if ((key = get_ob_key_value(spell, "spell_expiry_warn_1")) != NULL) {
         if (spell->duration == atoi(key)) {
-            draw_ext_info_format(NDI_UNIQUE | NDI_NAVY, 0, spell->env, MSG_TYPE_SPELL, MSG_TYPE_SPELL_INFO, "The effects of your %s are draining out.", NULL, spell->name);
+            new_draw_info_format(NDI_UNIQUE | NDI_NAVY, 0, spell->env, "The effects of your %s are draining out.", spell->name);
             return;
         }
     }
     if ((key = get_ob_key_value(spell, "spell_expiry_warn_2")) != NULL) {
         if (spell->duration == atoi(key)) {
-            draw_ext_info_format(NDI_UNIQUE | NDI_NAVY, 0, spell->env, MSG_TYPE_SPELL, MSG_TYPE_SPELL_INFO, "The effects of your %s are about to expire.", NULL, spell->name);
+            new_draw_info_format(NDI_UNIQUE | NDI_NAVY, 0, spell->env, "The effects of your %s are about to expire.", spell->name);
             return;
         }
     }
 }
+

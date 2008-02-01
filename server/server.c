@@ -26,15 +26,9 @@
     The authors can be reached via e-mail at crossfire-devel@real-time.com
 */
 
-/**
- * @file
- * Main server functions.
- */
-
 #include <global.h>
 #include <object.h>
 #include <tod.h>
-#include <version.h>
 
 #ifdef HAVE_DES_H
 #include <des.h>
@@ -56,68 +50,90 @@
 #include <../random_maps/rproto.h>
 #include "path.h"
 
-void process_events();
+static void process_events (mapstruct *map);
 
-/** Ingame days. */
 static char days[7][4] = {
   "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 
-/**
- * Displays basic game version information.
- *
- * @param op
- * who is requesting the verison information.
- */
 void version(object *op) {
+  if(op!=NULL)
+    clear_win_info(op);
 
-    draw_ext_info_format(NDI_UNIQUE, 0, op, MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_VERSION,
-		       "This is Crossfire v%s",
-		       "This is Crossfire v%s",
-		       FULL_VERSION);
-    draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_VERSION,
-		"The authors can be reached at crossfire@metalforge.org", NULL);
+  new_draw_info_format(NDI_UNIQUE, 0, op, "This is Crossfire v%s",VERSION);
 
-}
-
-/**
- * Gives basic start information to player.
- *
- * @param op
- * player.
+/* If in a socket, don't print out the list of authors.  It confuses the
+ * crossclient program.
  */
+  if (op==NULL) return;
+  new_draw_info(NDI_UNIQUE, 0,op,"Authors and contributors to this program:");
+  new_draw_info(NDI_UNIQUE, 0,op,"mwedel@sonic.net (Mark Wedel)");
+  new_draw_info(NDI_UNIQUE, 0,op,"frankj@ifi.uio.no (Frank Tore Johansen)");
+  new_draw_info(NDI_UNIQUE, 0,op,"kjetilho@ifi.uio.no (Kjetil Torgrim Homme)");
+  new_draw_info(NDI_UNIQUE, 0,op,"tvangod@ecst.csuchico.edu (Tyler Van Gorder)");
+  new_draw_info(NDI_UNIQUE, 0,op,"elmroth@cd.chalmers.se (Tony Elmroth)");
+  new_draw_info(NDI_UNIQUE, 0,op,"dougal.scott@fcit.monasu.edu.au (Dougal Scott)");
+  new_draw_info(NDI_UNIQUE, 0,op,"wchuang@athena.mit.edu (William)");
+  new_draw_info(NDI_UNIQUE, 0,op,"ftww@cs.su.oz.au (Geoff Bailey)");
+  new_draw_info(NDI_UNIQUE, 0,op,"jorgens@flipper.pvv.unit.no (Kjetil Wiekhorst Jxrgensen)");
+  new_draw_info(NDI_UNIQUE, 0,op,"c.blackwood@rdt.monash.edu.au (Cameron Blackwood)");
+  new_draw_info(NDI_UNIQUE, 0,op,"jtraub+@cmu.edu (Joseph L. Traub)");
+  new_draw_info(NDI_UNIQUE, 0,op,"rgg@aaii.oz.au (Rupert G. Goldie)");
+  new_draw_info(NDI_UNIQUE, 0,op,"eanders+@cmu.edu (Eric A. Anderson)");
+  new_draw_info(NDI_UNIQUE, 0,op,"eneq@Prag.DoCS.UU.SE (Rickard Eneqvist)");
+  new_draw_info(NDI_UNIQUE, 0,op,"Jarkko.Sonninen@lut.fi (Jarkko Sonninen)");
+  new_draw_info(NDI_UNIQUE, 0,op,"kholland@sunlab.cit.cornell.du (Karl Holland)");
+  new_draw_info(NDI_UNIQUE, 0,op,"vick@bern.docs.uu.se (Mikael Lundgren)");
+  new_draw_info(NDI_UNIQUE, 0,op,"mol@meryl.csd.uu.se (Mikael Olsson)");
+  new_draw_info(NDI_UNIQUE, 0,op,"Tero.Haatanen@lut.fi (Tero Haatanen)");
+  new_draw_info(NDI_UNIQUE, 0,op,"ylitalo@student.docs.uu.se (Lasse Ylitalo)");
+  new_draw_info(NDI_UNIQUE, 0,op,"anipa@guru.magic.fi (Niilo Neuvo)");
+  new_draw_info(NDI_UNIQUE, 0,op,"mta@modeemi.cs.tut.fi (Markku J{rvinen)");
+  new_draw_info(NDI_UNIQUE, 0,op,"meunier@inf.enst.fr (Sylvain Meunier)");
+  new_draw_info(NDI_UNIQUE, 0,op,"jfosback@darmok.uoregon.edu (Jason Fosback)");
+  new_draw_info(NDI_UNIQUE, 0,op,"cedman@capitalist.princeton.edu (Carl Edman)");
+  new_draw_info(NDI_UNIQUE, 0,op,"henrich@crh.cl.msu.edu (Charles Henrich)");
+  new_draw_info(NDI_UNIQUE, 0,op,"schmid@fb3-s7.math.tu-berlin.de (Gregor Schmid)");
+  new_draw_info(NDI_UNIQUE, 0,op,"quinet@montefiore.ulg.ac.be (Raphael Quinet)");
+  new_draw_info(NDI_UNIQUE, 0,op,"jam@modeemi.cs.tut.fi (Jari Vanhala)");
+  new_draw_info(NDI_UNIQUE, 0,op,"kivinen@joker.cs.hut.fi (Tero Kivinen)");
+  new_draw_info(NDI_UNIQUE, 0,op,"peterm@soda.berkeley.edu (Peter Mardahl)");
+  new_draw_info(NDI_UNIQUE, 0,op,"matt@cs.odu.edu (Matthew Zeher)");
+  new_draw_info(NDI_UNIQUE, 0,op,"srt@sun-dimas.aero.org (Scott R. Turner)");
+  new_draw_info(NDI_UNIQUE, 0,op,"huma@netcom.com (Ben Fennema)");
+  new_draw_info(NDI_UNIQUE, 0,op,"njw@cs.city.ac.uk (Nick Williams)");
+  new_draw_info(NDI_UNIQUE, 0,op,"Wacren@Gin.ObsPM.Fr (Laurent Wacrenier)");
+  new_draw_info(NDI_UNIQUE, 0,op,"thomas@astro.psu.edu (Brian Thomas)");
+  new_draw_info(NDI_UNIQUE, 0,op,"jsm@axon.ksc.nasa.gov (John Steven Moerk)");
+  new_draw_info(NDI_UNIQUE, 0,op,"Delbecq David       [david.delbecq@mailandnews.com]");
+  new_draw_info(NDI_UNIQUE, 0,op,"Chachkoff Yann      [yann.chachkoff@mailandnews.com]\n");
+  new_draw_info(NDI_UNIQUE, 0,op,"Images and art:");
+  new_draw_info(NDI_UNIQUE, 0,op,"Peter Gardner");
+  new_draw_info(NDI_UNIQUE, 0,op,"David Gervais       [david_eg@mail.com]");
+  new_draw_info(NDI_UNIQUE, 0,op,"Mitsuhiro Itakura   [ita@gold.koma.jaeri.go.jp]");
+  new_draw_info(NDI_UNIQUE, 0,op,"Hansjoerg Malthaner [hansjoerg.malthaner@danet.de]");
+  new_draw_info(NDI_UNIQUE, 0,op,"M�ten Woxberg      [maxmc@telia.com]");
+  new_draw_info(NDI_UNIQUE, 0,op,"And many more!");
+}
+
 void start_info(object *op) {
+  char buf[MAX_BUF];
 
-    draw_ext_info_format(NDI_UNIQUE, 0,op,MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_LOGIN,
-		       "Welcome to Crossfire, v%s!\nPress `?' for help\n",
-		       "Welcome to Crossfire, v%s!\nPress `?' for help\n",
-		       VERSION);
-
-    draw_ext_info_format(NDI_UNIQUE | NDI_ALL | NDI_DK_ORANGE, 5, op,
-			 MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_PLAYER,
-			 "%s entered the game.",
-			 "%s entered the game.",
-			 op->name);
-
-    if(!op->contr->name_changed) {
-	draw_ext_info(NDI_UNIQUE, 0,op,MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_LOGIN,
-	      "Note that you must set your name with the name command to enter the highscore list.", NULL);
-    }
+  sprintf(buf,"Welcome to Crossfire, v%s!",VERSION);
+  new_draw_info(NDI_UNIQUE, 0,op,buf);
+  new_draw_info(NDI_UNIQUE, 0,op,"Press `?' for help");
+  new_draw_info(NDI_UNIQUE, 0,op," ");
+  new_draw_info_format(NDI_UNIQUE | NDI_ALL | NDI_DK_ORANGE, 5, op,
+	"%s entered the game.",op->name);
+  if(!op->contr->name_changed) {
+    new_draw_info(NDI_UNIQUE, 0,op,"Note that you must set your name with the name");
+    new_draw_info(NDI_UNIQUE, 0,op,"command to enter the highscore list.");
+  }
 }
 
 /**
- * Encrypt a string. Used for password storage on disk.
- *
  * Really, there is no reason to crypt the passwords  any system.  But easier
  * to just leave this enabled for backward compatibility.  Put the
  * simple case at top - no encryption - makes it easier to read.
- *
- * @param str
- * string to crypt.
- * @param salt
- * salt to crypt with.
- * @return
- * crypted str.
- * @todo make thread-safe?
  */
 char *crypt_string(char *str, char *salt) {
 #if defined(WIN32) || (defined(__FreeBSD__) && !defined(HAVE_LIBDES))
@@ -142,16 +158,6 @@ char *crypt_string(char *str, char *salt) {
 #endif
 }
 
-/**
- * Check if 2 passwords match.
- *
- * @param typed
- * entered password. Not crypted.
- * @param crypted
- * password to check against. Must be crypted.
- * @return
- * 1 if the passwords match, 0 else.
- */
 int check_password(char *typed,char *crypted) {
   return !strcmp(crypt_string(typed,crypted),crypted);
 }
@@ -161,9 +167,6 @@ int check_password(char *typed,char *crypted) {
  * savebed.  We do some error checking - its possible that the
  * savebed map may no longer exist, so we make sure the player
  * goes someplace.
- *
- * @param op
- * player.
  */
 void enter_player_savebed(object *op)
 {
@@ -197,15 +200,11 @@ void enter_player_savebed(object *op)
 }
 
 /**
- * Moves the player and pets from current map (if any) to
- * new map.
- *
- * @param op
- * player to move.
- * @param newmap
- * @param x
- * @param y
- * new location. If (x, y) point to an out of map point, will use default map coordinates.
+ *  enter_map():  Moves the player and pets from current map (if any) to
+ * new map.  map, x, y must be set.  map is the map we are moving the
+ * player to - it could be the map he just came from if the load failed for
+ * whatever reason.  If default map coordinates are to be used, then
+ * the function that calls this should figure them out.
  */
 static void enter_map(object *op, mapstruct *newmap, int x, int y) {
     mapstruct *oldmap = op->map;
@@ -218,8 +217,7 @@ static void enter_map(object *op, mapstruct *newmap, int x, int y) {
 	if (out_of_map(newmap, x, y)) {
 	    LOG(llevError,"enter_map: map %s provides invalid default enter location (%d, %d) > (%d, %d)\n",
 		newmap->path, x, y, MAP_WIDTH(newmap), MAP_HEIGHT(newmap));
-	    draw_ext_info(NDI_UNIQUE, 0, op, MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_FAILURE,
-			  "The exit is closed", NULL);
+	    new_draw_info(NDI_UNIQUE, 0, op, "The exit is closed");
 	    return;
 	}
     }
@@ -247,7 +245,7 @@ static void enter_map(object *op, mapstruct *newmap, int x, int y) {
 		newmap->path, x , y);
 	}
     } /* end if looking for free spot */
-
+	
 
     /* If it is a player login, he has yet to be inserted anyplace.
      * otherwise, we need to deal with removing the playe here.
@@ -271,6 +269,10 @@ static void enter_map(object *op, mapstruct *newmap, int x, int y) {
     if (op->contr) {
         send_background_music(op->contr, newmap->background_music);
     }
+
+    /** Hidden DMs don't appear on map. */
+    if (!op->contr->hidden)
+        newmap->players++;
 
     newmap->timeout=0;
     op->enemy = NULL;
@@ -299,8 +301,8 @@ static void enter_map(object *op, mapstruct *newmap, int x, int y) {
 		tmp->map = newmap;
 	    }
 	    insert_ob_in_map(op->contr->ranges[range_golem], newmap, NULL,0);
-	    op->contr->ranges[range_golem]->direction =
-		find_dir_2(op->x - op->contr->ranges[range_golem]->x,
+	    op->contr->ranges[range_golem]->direction = 
+		find_dir_2(op->x - op->contr->ranges[range_golem]->x, 
 			   op->y - op->contr->ranges[range_golem]->y);
 	}
     }
@@ -309,7 +311,7 @@ static void enter_map(object *op, mapstruct *newmap, int x, int y) {
     /* since the players map is already loaded, we don't need to worry
      * about pending objects.
      */
-    remove_all_pets();
+    remove_all_pets(newmap);
 
     /* If the player is changing maps, we need to do some special things
      * Do this after the player is on the new map - otherwise the force swap of the
@@ -319,7 +321,7 @@ static void enter_map(object *op, mapstruct *newmap, int x, int y) {
         if (oldmap) /* adjust old map */
         {
             if (oldmap->players <= 0) /* can be less than zero due to errors in tracking this */
-                set_map_timeout(oldmap);
+	        set_map_timeout(oldmap);
         }
     }
     swap_below_max (newmap->path);
@@ -328,12 +330,6 @@ static void enter_map(object *op, mapstruct *newmap, int x, int y) {
         map_newmap_cmd(op->contr);
 }
 
-/**
- * Applies the map timeout.
- *
- * @param oldmap
- * map to process.
- */
 void set_map_timeout(mapstruct *oldmap)
 {
 #if MAP_MAXTIMEOUT
@@ -357,61 +353,43 @@ void set_map_timeout(mapstruct *oldmap)
 
 
 /**
- * Takes a path and replaces all / with _
+ * clean_path takes a path and replaces all / with _
  * We do a strcpy so that we do not change the original string.
- *
- * @param file
- * path to clean.
- * @param newpath
- * buffer that will contain the cleaned path. Should be at least as long as file.
- * @param size
- * length of newpath.
- * @return
- * newpath.
  */
-static char *clean_path(const char *file, char* newpath, int size)
+static char *clean_path(const char *file)
 {
-    char *cp;
+    static char newpath[MAX_BUF],*cp;
 
-    snprintf(newpath, size, "%s", file);
+    strncpy(newpath, file, MAX_BUF-1);
+    newpath[MAX_BUF-1]='\0';
     for (cp=newpath; *cp!='\0'; cp++) {
-        if (*cp=='/')
-            *cp='_';
+	if (*cp=='/') *cp='_';
     }
     return newpath;
 }
 
 
 /**
- * Takes a path and replaces all _ with /
- * This basically undoes clean_path().
+ * unclean_path takes a path and replaces all _ with /
+ * This basically undoes clean path.
  * We do a strcpy so that we do not change the original string.
  * We are smart enough to start after the last / in case we
  * are getting passed a string that points to a unique map
  * path.
- *
- * @param src
- * path to unclean.
- * @param newpath
- * buffer that will contain the uncleaned path. Should be at least as long as file.
- * @param size
- * length of newpath.
- * @return
- * newpath.
  */
-static char *unclean_path(const char *src, char* newpath, int size)
+static char *unclean_path(const char *src)
 {
-    char *cp;
+    static char newpath[MAX_BUF],*cp;
 
     cp=strrchr(src, '/');
     if (cp)
-        snprintf(newpath, size, "%s", cp+1);
+	strncpy(newpath, cp+1, MAX_BUF-1);
     else
-        snprintf(newpath, size, "%s", src);
+	strncpy(newpath, src, MAX_BUF-1);
+    newpath[MAX_BUF-1]='\0';
 
     for (cp=newpath; *cp!='\0'; cp++) {
-        if (*cp=='_')
-            *cp='/';
+	if (*cp=='_') *cp='/';
     }
     return newpath;
 }
@@ -420,12 +398,8 @@ static char *unclean_path(const char *src, char* newpath, int size)
 /**
  * The player is trying to enter a randomly generated map.  In this case, generate the
  * random map as needed.
- *
- * @param pl
- * player.
- * @param exit_ob
- * exit containing random map parameters.
  */
+
 static void enter_random_map(object *pl, object *exit_ob)
 {
     mapstruct *new_map;
@@ -456,13 +430,13 @@ static void enter_random_map(object *pl, object *exit_ob)
 	cp = strrchr(rp.origin_map, '/');
 	if (!cp) cp = rp.origin_map;
 	/* Need to strip of any trailing digits, if it has them */
-	snprintf(buf, sizeof(buf), "%s", cp);
+	strcpy(buf, cp);
 	while (isdigit(buf[strlen(buf) - 1]))
 	    buf[strlen(buf) - 1] = 0;
 	cp = buf;
     }
 
-    snprintf(newmap_name, sizeof(newmap_name), "/random/%s%04d", cp+1, reference_number++);
+    sprintf(newmap_name,"/random/%s%04d",cp+1, reference_number++);
 
     /* now to generate the actual map. */
     new_map=generate_random_map(newmap_name,&rp, NULL);
@@ -478,26 +452,22 @@ static void enter_random_map(object *pl, object *exit_ob)
 	x=EXIT_X(exit_ob) = MAP_ENTER_X(new_map);
 	y=EXIT_Y(exit_ob) = MAP_ENTER_Y(new_map);
 	EXIT_PATH(exit_ob) = add_string(newmap_name);
-	snprintf(new_map->path, sizeof(new_map->path), "%s", newmap_name);
+	strcpy(new_map->path, newmap_name);
 	enter_map(pl, new_map, 	x, y);
     }
 }
 
 /**
  * The player is trying to enter a non-randomly generated template map.  In this
- * case, use a map file for a template.
- *
- * @param pl
- * player.
- * @param exit_ob
- * exit containing template map parameters.
+ * case, use a map file for a template
  */
+
 static void enter_fixed_template_map(object *pl, object *exit_ob)
 {
     mapstruct *new_map;
     char tmpnum[32], exitpath[HUGE_BUF], resultname[HUGE_BUF], tmpstring[HUGE_BUF], *sourcemap;
-    char new_map_name[MAX_BUF];
-
+    const char *new_map_name;
+    
     /* Split the exit path string into two parts, one
      * for where to store the map, and one for were
      * to generate the map from.
@@ -505,11 +475,7 @@ static void enter_fixed_template_map(object *pl, object *exit_ob)
     snprintf(exitpath, sizeof(exitpath), "%s", EXIT_PATH(exit_ob)+2);
     sourcemap = strchr(exitpath, '!');
     if (!sourcemap) {
-	draw_ext_info_format(NDI_UNIQUE, 0, pl,
-			     MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_FAILURE,
-			     "The %s is closed.",
-			     "The %s is closed.",
-			     exit_ob->name);
+	new_draw_info_format(NDI_UNIQUE, 0, pl, "The %s is closed.", exit_ob->name);
 	/* Should only occur when no source map is set.
 	 */
 	LOG(llevError,"enter_fixed_template_map: Exit %s (%d,%d) on map %s has no source template.\n",
@@ -517,63 +483,54 @@ static void enter_fixed_template_map(object *pl, object *exit_ob)
         return;
     }
     *sourcemap++ = '\0';
-
-    /* If we are not coming from a template map, we can use relative directories
+    
+    /* If we are not coming from a template map, we can use reletive directories
      * for the map to generate from.
      */
     if (!exit_ob->map->template) {
-        /* We can't use exitpath directly, as sourcemap points there. */
-        path_combine_and_normalize(exit_ob->map->path, sourcemap, tmpstring, sizeof(tmpstring));
-        snprintf(exitpath, sizeof(exitpath), tmpstring);
-        sourcemap = exitpath;
+        sourcemap = path_combine_and_normalize(exit_ob->map->path, sourcemap);
     }
-
+    
     /* Do replacement of %x, %y, and %n to the x coord of the exit, the y coord
      * of the exit, and the name of the map the exit is on, respectively.
      */
-    snprintf(tmpnum, sizeof(tmpnum), "%d", exit_ob->x);
+    sprintf(tmpnum ,"%d", exit_ob->x);
     replace(exitpath, "%x", tmpnum, resultname,  sizeof(resultname));
-
-    snprintf(tmpnum, sizeof(tmpnum), "%d", exit_ob->y);
-    snprintf(tmpstring, sizeof(tmpstring), "%s", resultname);
+    
+    sprintf(tmpnum ,"%d", exit_ob->y);
+    sprintf(tmpstring, "%s", resultname);
     replace(tmpstring, "%y", tmpnum, resultname,  sizeof(resultname));
-
-    snprintf(tmpstring, sizeof(tmpstring), "%s", resultname);
+    
+    sprintf(tmpstring, "%s", resultname);
     replace(tmpstring, "%n", exit_ob->map->name, resultname,  sizeof(resultname));
-
-    /* If we are coming from another template map, use reletive paths unless
+    
+    /* If we are coming from another template map, use reletive paths unless 
      * indicated otherwise.
      */
     if (exit_ob->map->template && (resultname[0] != '/')) {
-        path_combine_and_normalize(exit_ob->map->path, resultname, new_map_name, sizeof(new_map_name));
+        new_map_name = path_combine_and_normalize(exit_ob->map->path, resultname);
     } else {
-        create_template_pathname(resultname, new_map_name, sizeof(new_map_name));
+        new_map_name = create_template_pathname(resultname);
     }
-
+    
     /* Attempt to load the map, if unable to, then
      * create the map from the template.
      */
     new_map = ready_map_name(new_map_name, MAP_PLAYER_UNIQUE);
     if (!new_map) {
-        char path[MAX_BUF];
-        create_pathname(sourcemap, path, MAX_BUF);
-        new_map = load_original_map(path, MAP_PLAYER_UNIQUE);
+        new_map = load_original_map(create_pathname(sourcemap), MAP_PLAYER_UNIQUE);
         if (new_map) fix_auto_apply(new_map);
     }
-
+    
     if (new_map) {
         /* set the path of the map to where it should be
          * so we don't just save over the source map.
          */
-        snprintf(new_map->path, sizeof(new_map->path), "%s", new_map_name);
+        strcpy(new_map->path, new_map_name);
 	new_map->template = 1;
         enter_map(pl, new_map, EXIT_X(exit_ob), EXIT_Y(exit_ob));
     } else {
-	draw_ext_info_format(NDI_UNIQUE, 0, pl,
-			     MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_FAILURE,
-			     "The %s is closed.",
-			     "The %s is closed.",
-			     exit_ob->name);
+	new_draw_info_format(NDI_UNIQUE, 0, pl, "The %s is closed.", exit_ob->name);
 	/* Should only occur when an invalid source map is set.
 	 */
 	LOG(llevDebug,"enter_fixed_template_map: Exit %s (%d,%d) on map %s leads no where.\n",
@@ -585,39 +542,35 @@ static void enter_fixed_template_map(object *pl, object *exit_ob)
 /**
  * The player is trying to enter a randomly generated template map.  In this
  * case, generate the map as needed.
- *
- * @param pl
- * player.
- * @param exit_ob
- * exit containing random template map parameters.
  */
+
 static void enter_random_template_map(object *pl, object *exit_ob)
 {
     mapstruct *new_map;
     char tmpnum[32], resultname[HUGE_BUF], tmpstring[HUGE_BUF];
-    char new_map_name[MAX_BUF];
+    const char *new_map_name;
     RMParms rp;
-
+    
     /* Do replacement of %x, %y, and %n to the x coord of the exit, the y coord
      * of the exit, and the name of the map the exit is on, respectively.
      */
-    snprintf(tmpnum, sizeof(tmpnum), "%d", exit_ob->x);
+    sprintf(tmpnum ,"%d", exit_ob->x);
     replace(EXIT_PATH(exit_ob)+3, "%x", tmpnum, resultname,  sizeof(resultname));
-
-    snprintf(tmpnum, sizeof(tmpnum), "%d", exit_ob->y);
-    snprintf(tmpstring, sizeof(tmpstring), "%s", resultname);
+    
+    sprintf(tmpnum ,"%d", exit_ob->y);
+    sprintf(tmpstring, "%s", resultname);
     replace(tmpstring, "%y", tmpnum, resultname,  sizeof(resultname));
-
-    snprintf(tmpstring, sizeof(tmpstring), "%s", resultname);
+    
+    sprintf(tmpstring, "%s", resultname);
     replace(tmpstring, "%n", exit_ob->map->name, resultname,  sizeof(resultname));
-
-    /* If we are coming from another template map, use reletive paths unless
+    
+    /* If we are coming from another template map, use reletive paths unless 
      * indicated otherwise.
      */
     if (exit_ob->map->template && (resultname[0] != '/')) {
-        path_combine_and_normalize(exit_ob->map->path, resultname, new_map_name, sizeof(new_map_name));
+        new_map_name = path_combine_and_normalize(exit_ob->map->path, resultname);
     } else {
-        create_template_pathname(resultname, new_map_name, sizeof(new_map_name));
+        new_map_name = create_template_pathname(resultname);
     }
 
     new_map = ready_map_name(new_map_name, MAP_PLAYER_UNIQUE);
@@ -630,7 +583,7 @@ static void enter_random_template_map(object *pl, object *exit_ob)
 	rp.origin_x = exit_ob->x;
 	rp.origin_y = exit_ob->y;
 	strcpy(rp.origin_map, pl->map->path);
-
+	
 	/* now to generate the actual map. */
 	new_map=generate_random_map(new_map_name,&rp, NULL);
     }
@@ -653,25 +606,19 @@ static void enter_random_template_map(object *pl, object *exit_ob)
 
 
 /**
- * Player is entering a unique map.
- *
- * @param op
- * player.
- * @param exit_ob
- * exit containing unique map information.
+ * Code to enter/detect a character entering a unique map.
  */
 static void enter_unique_map(object *op, object *exit_ob)
 {
-    char apartment[HUGE_BUF], path[MAX_BUF];
+    char apartment[HUGE_BUF];
     mapstruct	*newmap;
 
     if (EXIT_PATH(exit_ob)[0]=='/') {
-	snprintf(apartment, sizeof(apartment), "%s/%s/%s/%s", settings.localdir,
-	    settings.playerdir, op->name, clean_path(EXIT_PATH(exit_ob), path, sizeof(path)));
+	sprintf(apartment, "%s/%s/%s/%s", settings.localdir,
+	    settings.playerdir, op->name, clean_path(EXIT_PATH(exit_ob)));
 	newmap = ready_map_name(apartment, MAP_PLAYER_UNIQUE);
 	if (!newmap) {
-        create_pathname(EXIT_PATH(exit_ob), path, sizeof(path));
-	    newmap = load_original_map(path, MAP_PLAYER_UNIQUE);
+	    newmap = load_original_map(create_pathname(EXIT_PATH(exit_ob)), MAP_PLAYER_UNIQUE);
 	    if (newmap) fix_auto_apply(newmap);
 	}
     } else { /* relative directory */
@@ -679,21 +626,20 @@ static void enter_unique_map(object *op, object *exit_ob)
 
 	if (exit_ob->map->unique) {
 
-	    unclean_path(exit_ob->map->path, reldir, sizeof(reldir));
+	    strcpy(reldir, unclean_path(exit_ob->map->path));
 
 	    /* Need to copy this over, as clean_path only has one static return buffer */
-	    clean_path(reldir, tmpc, sizeof(tmpc));
-	    /* Remove final component, if any */
+	    strcpy(tmpc, clean_path(reldir));
+	    /* Remove final component, if any */ 
 	    if ((cp=strrchr(tmpc, '_'))!=NULL) *cp=0;
 
-	    snprintf(apartment, sizeof(apartment), "%s/%s/%s/%s_%s", settings.localdir,
+	    sprintf(apartment, "%s/%s/%s/%s_%s", settings.localdir,
 		    settings.playerdir, op->name, tmpc,
-		    clean_path(EXIT_PATH(exit_ob), path, sizeof(path)));
+		    clean_path(EXIT_PATH(exit_ob)));
 
 	    newmap = ready_map_name(apartment, MAP_PLAYER_UNIQUE);
 	    if (!newmap) {
-            create_pathname(path_combine_and_normalize(reldir, EXIT_PATH(exit_ob), tmpc, sizeof(tmpc)), path, sizeof(path));
-		newmap = load_original_map(path, MAP_PLAYER_UNIQUE);
+		newmap = load_original_map(create_pathname(path_combine_and_normalize(reldir, EXIT_PATH(exit_ob))), MAP_PLAYER_UNIQUE);
 		if (newmap) fix_auto_apply(newmap);
 	    }
 	}
@@ -701,29 +647,23 @@ static void enter_unique_map(object *op, object *exit_ob)
 	    /* The exit is unique, but the map we are coming from is not unique.  So
 	     * use the basic logic - don't need to demangle the path name
 	     */
-        path_combine_and_normalize(exit_ob->map->path, EXIT_PATH(exit_ob), reldir, sizeof(reldir));
-	    snprintf(apartment, sizeof(apartment), "%s/%s/%s/%s", settings.localdir,
-		    settings.playerdir, op->name,
-		    clean_path(reldir, path, sizeof(path)));
+	    sprintf(apartment, "%s/%s/%s/%s", settings.localdir,
+		    settings.playerdir, op->name, 
+		    clean_path(path_combine_and_normalize(exit_ob->map->path, EXIT_PATH(exit_ob))));
 	    newmap = ready_map_name(apartment, MAP_PLAYER_UNIQUE);
 	    if (!newmap) {
-            path_combine_and_normalize(exit_ob->map->path, EXIT_PATH(exit_ob), reldir, sizeof(reldir));
-		newmap = ready_map_name(reldir, 0);
+		newmap = ready_map_name(path_combine_and_normalize(exit_ob->map->path, EXIT_PATH(exit_ob)), 0);
 		if (newmap) fix_auto_apply(newmap);
 	    }
 	}
     }
 
     if (newmap) {
-	snprintf(newmap->path, sizeof(newmap->path), "%s", apartment);
+	strcpy(newmap->path, apartment);
 	newmap->unique = 1;
 	enter_map(op, newmap, EXIT_X(exit_ob), EXIT_Y(exit_ob));
     } else {
-	draw_ext_info_format(NDI_UNIQUE, 0, op,
-			     MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_FAILURE,
-			     "The %s is closed.",
-			     "The %s is closed.",
-			     exit_ob->name);
+	new_draw_info_format(NDI_UNIQUE, 0, op, "The %s is closed.", exit_ob->name);
 	/* Perhaps not critical, but I would think that the unique maps
 	 * should be new enough this does not happen.  This also creates
 	 * a strange situation where some players could perhaps have visited
@@ -733,24 +673,20 @@ static void enter_unique_map(object *op, object *exit_ob)
 	LOG(llevDebug,"enter_unique_map: Exit %s (%d,%d) on map %s is leads no where.\n",
 		    exit_ob->name, exit_ob->x, exit_ob->y, exit_ob->map->path);
     }
-
+	
 }
 
 
 /**
- * Tries to move 'op' to exit_ob.
- *
- * This is used when loading the player.
+ * Tries to move 'op' to exit_ob.  op is the character or monster that is
+ * using the exit, where exit_ob is the exit object (boat, door, teleporter,
+ * etc.)  if exit_ob is null, then op->contr->maplevel contains that map to
+ * move the object to.  This is used when loading the player.
  *
  * Largely redone by MSW 2001-01-21 - this function was overly complex
  * and had some obscure bugs.
- *
- * @param op
- * character or monster that is using the exit.
- * @param exit_ob
- * exit object (boat, door, teleporter, etc.). if null, then op->contr->maplevel contains that map to
- * move the object to.
  */
+
 void enter_exit(object *op, object *exit_ob) {
     #define PORTAL_DESTINATION_NAME "Town portal destination" /* this one should really be in a header file */
     object *tmp;
@@ -761,11 +697,10 @@ void enter_exit(object *op, object *exit_ob) {
     if (op->type != PLAYER) return;
 
     /* Need to remove player from transport */
-    if (op->contr->transport)
-        ob_apply(op->contr->transport, op, AP_UNAPPLY);
+    if (op->contr->transport) apply_transport(op, op->contr->transport, AP_UNAPPLY);
 
     /* First, lets figure out what map the player is going to go to */
-    if (exit_ob){
+    if (exit_ob){ 
 
     /* check to see if we make a template map */
     if(EXIT_PATH(exit_ob)&&EXIT_PATH(exit_ob)[1]=='@') {
@@ -791,8 +726,9 @@ void enter_exit(object *op, object *exit_ob) {
         mapstruct	*newmap;
         if (exit_ob->map) {
             char tmp_path[HUGE_BUF];
-
-            path_combine_and_normalize(exit_ob->map->path, EXIT_PATH(exit_ob), tmp_path, sizeof(tmp_path));
+            tmp_path[0] = '\0';
+            strncpy(tmp_path, path_combine_and_normalize(exit_ob->map->path, EXIT_PATH(exit_ob)), HUGE_BUF);
+            tmp_path[HUGE_BUF - 1] = '\0';
             newmap = ready_map_name(tmp_path, 0);
             /* Random map was previously generated, but is no longer about.  Lets generate a new
              * map.
@@ -805,11 +741,7 @@ void enter_exit(object *op, object *exit_ob) {
                 if (exit_ob->msg) {
                     enter_random_map(op, exit_ob);
                 } else {
-                    draw_ext_info_format(NDI_UNIQUE, 0, op,
-					 MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_FAILURE,
-					 "The %s is closed.",
-					 "The %s is closed.",
-					 exit_ob->name);
+                    new_draw_info_format(NDI_UNIQUE, 0, op, "The %s is closed.", exit_ob->name);
                     return;
                 }
 
@@ -824,7 +756,7 @@ void enter_exit(object *op, object *exit_ob) {
             /* For word of recall and other force objects
              * They contain the full pathname of the map to go back to,
              * so we don't need to normalize it.
-             * But we do need to see if it is unique or not
+             * But we do need to see if it is unique or not 
              */
             if (!strncmp(EXIT_PATH(exit_ob), settings.localdir, strlen(settings.localdir)))
                 newmap = ready_map_name(EXIT_PATH(exit_ob), MAP_PLAYER_UNIQUE);
@@ -833,11 +765,7 @@ void enter_exit(object *op, object *exit_ob) {
         }
         if (!newmap) {
             if (exit_ob->name)
-                draw_ext_info_format(NDI_UNIQUE, 0, op,
-				     MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_FAILURE,
-				     "The %s is closed.",
-				     "The %s is closed.",
-				     exit_ob->name);
+                new_draw_info_format(NDI_UNIQUE, 0, op, "The %s is closed.", exit_ob->name);
                 /* don't cry to momma if name is not set - as in tmp objects
                  * used by the savebed code and character creation */
             return;
@@ -853,7 +781,7 @@ void enter_exit(object *op, object *exit_ob) {
             x=MAP_ENTER_X(newmap);
             y=MAP_ENTER_Y(newmap);
             LOG(llevDebug,"enter_exit: Exit %s (%d,%d) on map %s is 0 destination coordinates\n",
-                exit_ob->name?exit_ob->name:"(none)", exit_ob->x, exit_ob->y,
+                exit_ob->name?exit_ob->name:"(none)", exit_ob->x, exit_ob->y, 
                 exit_ob->map?exit_ob->map->path:"(none)");
         }
 
@@ -868,11 +796,11 @@ void enter_exit(object *op, object *exit_ob) {
                 free_object(tmp);
             }
 
-            path_combine_and_normalize(exit_ob->map->path, EXIT_PATH(exit_ob), op->contr->savebed_map, sizeof(op->contr->savebed_map));
+            strcpy(op->contr->savebed_map, path_combine_and_normalize(exit_ob->map->path, EXIT_PATH(exit_ob)));
             op->contr->bed_x = EXIT_X(exit_ob), op->contr->bed_y = EXIT_Y(exit_ob);
             save_player(op, 1);
             /* LOG(llevDebug,"enter_exit: Taking damned exit %s to (%d,%d) on map %s\n",
-             * exit_ob->name?exit_ob->name:"(none)", exit_ob->x, exit_ob->y,
+             * exit_ob->name?exit_ob->name:"(none)", exit_ob->x, exit_ob->y,  
              * path_combine_and_normalize(exit_ob->map->path, EXIT_PATH(exit_ob))); */
         }
 
@@ -915,12 +843,45 @@ void enter_exit(object *op, object *exit_ob) {
     }
 }
 
-/**
- * Do all player-related stuff before objects have been updated.
- *
- * @sa process_players2().
+#if 0
+/* process_active_maps no longer used - should perhaps be removed.
+ * MSW 2006-06-02
  */
-static void process_players1()
+
+/**
+ * process_active_maps(): Works like process_events(), but it only
+ * processes maps which a player is on.
+ * It will check that it isn't called too often, and abort
+ * if time since last call is less than MAX_TIME.
+ */
+
+static void process_active_maps(void) {
+  mapstruct *map;
+
+    /*
+     * If enough time has elapsed, do some work.
+     */
+    if(enough_elapsed_time()) {
+	for(map=first_map;map!=NULL;map=map->next) {
+	    if(map->in_memory == MAP_IN_MEMORY) {
+		if(players_on_map(map,TRUE))
+		    process_events(map);
+	    }
+	}
+    }
+}
+#endif
+
+/**
+ * process_players1 and process_players2 do all the player related stuff.
+ * I moved it out of process events and process_map.  This was to some
+ * extent for debugging as well as to get a better idea of the time used
+ * by the various functions.  process_players1() does the processing before
+ * objects have been updated, process_players2() does the processing that
+ * is needed after the players have been updated.
+ */
+
+static void process_players1(mapstruct *map)
 {
     int flag;
     player *pl,*plnext;
@@ -932,6 +893,8 @@ static void process_players1()
 	    plnext=pl->next; /* In case a player exits the game in handle_player() */
 
 	    if (pl->ob == NULL) continue;
+
+	    if (map!=NULL && pl->ob->map!=map) continue;
 
         /** Handle DM follow command */
         if (pl->followed_player) {
@@ -989,45 +952,36 @@ static void process_players1()
 	} /* end of for loop for all the players */
     } /* for flag */
     for(pl=first_player;pl!=NULL;pl=pl->next) {
-	int has_action=1;
-
-	pl->ob->weapon_speed_left += pl->ob->weapon_speed;
-	if (pl->ob->weapon_speed_left > 1.0) pl->ob->weapon_speed_left=1.0;
-
-        pl->socket.sounds_this_tick = 0;
-
+	if (map!=NULL && (pl->ob == NULL || pl->ob->map!=map))
+	    continue;
 	if (settings.casting_time == TRUE) {
 	    if (pl->ob->casting_time > 0){
 		pl->ob->casting_time--;
-		has_action=0;
+		pl->ob->start_holding = 1;
+	    }
+	    /* set spell_state so we can update the range in stats field */
+	    if ((pl->ob->casting_time == 0) && (pl->ob->start_holding ==1)){
+		pl->ob->start_holding = 0;
 	    }
 	}
-	/* If the character is idle (standing around resting) increase
-	 * regen rates.
-	 */
-	if (has_action && pl->ob->speed_left > 0) {
-	    pl->ob->last_heal -= 2;
-	    pl->ob->last_sp -= 2;
-	    pl->ob->last_grace -= 2;
-	    pl->ob->last_eat +=2;	/* Slow down food consumption */
-	}
 	do_some_living(pl->ob);
+/*	draw(pl->ob);*/	/* updated in socket code */
     }
 }
 
-/**
- * Do all player-related stuff after objects have been updated.
- *
- * @sa process_players1().
- *
- * @todo explain why 2 passes for players.
- */
-static void process_players2()
+static void process_players2(mapstruct *map)
 {
     player *pl;
 
     /* Then check if any players should use weapon-speed instead of speed */
     for(pl=first_player;pl!=NULL;pl=pl->next) {
+	if (map!=NULL) {
+	    if(pl->ob == NULL || QUERY_FLAG(pl->ob,FLAG_REMOVED))
+		continue;
+	    else if(pl->loading != NULL) /* Player is blocked */
+		pl->ob->speed_left -= pl->ob->speed;
+	    if (pl->ob->map!=map) continue;
+	}
 
 	/* The code that did weapon_sp handling here was out of place -
 	 * this isn't called until after the player has finished there
@@ -1035,6 +989,8 @@ static void process_players2()
 	 * checking.
 	 */
 	if (pl->has_hit) {
+	    if (pl->ob->speed_left > pl->weapon_sp) pl->ob->speed_left = pl->weapon_sp;
+
 	    /* This needs to be here - if the player is running, we need to
 	     * clear this each tick, but new commands are not being received
 	     * so execute_newserver_command() is never called
@@ -1048,16 +1004,14 @@ static void process_players2()
 
 #define SPEED_DEBUG
 
-/**
- * Process all active objects.
- */
-void process_events ()
+
+static void process_events (mapstruct *map)
 {
     object *op;
     object marker;
     tag_t tag;
 
-    process_players1();
+    process_players1 (map);
 
     memset(&marker, 0, sizeof(object));
     /* Put marker object at beginning of active list */
@@ -1110,15 +1064,9 @@ void process_events ()
         if (QUERY_FLAG (op, FLAG_REMOVED) && op->type != PLAYER &&
             op->map && op->map->in_memory != MAP_IN_MEMORY)
         {
-            StringBuffer *sb;
-            char *diff;
-
             LOG (llevError, "BUG: process_events(): Removed object on list\n");
-            sb = stringbuffer_new();
-            dump_object(op, sb);
-            diff = stringbuffer_finish(sb);
-            LOG(llevError, "%s\n", diff);
-            free(diff);
+            dump_object(op);
+            LOG(llevError, "%s\n", errmsg);
             free_object(op);
             continue;
         }
@@ -1132,7 +1080,7 @@ void process_events ()
         }
 
         if (op->map == NULL && op->env == NULL && op->name &&
-            op->type != MAP)
+            op->type != MAP && map == NULL)
         {
             LOG (llevError, "BUG: process_events(): Object without map or "
                 "inventory is on active list: %s (%d)\n", op->name, op->count);
@@ -1140,6 +1088,9 @@ void process_events ()
             update_ob_speed (op);
             continue;
 	}
+
+        if (map != NULL && op->map != map)
+            continue;
 
 	/* Seen some cases where process_object() is crashing because
 	 * the object is on a swapped out map.  But can't be sure if
@@ -1157,10 +1108,8 @@ void process_events ()
         /* Animate the object.  Bug of feature that andim_speed
          * is based on ticks, and not the creatures speed?
          */
-        if ((op->anim_speed && op->last_anim >= op->anim_speed)
-            ||(op->temp_animation_id && op->last_anim >= op->temp_anim_speed))
+        if (op->anim_speed && op->last_anim >= op->anim_speed)
         {
-            op->state++;
             if ((op->type==PLAYER)||(op->type==MONSTER))
                 animate_object(op, op->facing);
             else
@@ -1174,6 +1123,20 @@ void process_events ()
 
         if (op->speed_left > 0)
         {
+#if 0
+	    /* I've seen occasional crashes in move_symptom() with it
+	     * crashing because op is removed - add some debugging to
+	     * track if it is removed at this point.
+	     * This unfortunately is a bit too verbose it seems - not sure
+	     * why - I think what happens is a map is freed or something and
+	     * some objects get 'lost' - removed never to be reclaimed.
+	     * removed objects generally shouldn't exist.
+	     */
+	    if (QUERY_FLAG(op, FLAG_REMOVED)) {
+		LOG(llevDebug,"process_events: calling process_object with removed object %s\n",
+		    op->name?op->name:"null");
+	    }
+#endif
             --op->speed_left;
             process_object (op);
             if (was_destroyed (op, tag))
@@ -1191,14 +1154,9 @@ void process_events ()
     else
         active_objects = NULL;
 
-    process_players2();
+    process_players2 (map);
 }
 
-/**
- * Remove temporary map files.
- *
- * @todo check logic, why is file only removed if map is in memory?
- */
 void clean_tmp_files(void) {
   mapstruct *m, *next;
 
@@ -1222,7 +1180,7 @@ void clean_tmp_files(void) {
 	  if (settings.recycle_tmp_maps == TRUE)
 	      swap_map(m);
 	  else {
-	      save_map(m, SAVE_MODE_NORMAL); /* note we save here into a overlay map */
+	      new_save_map(m, 0); /* note we save here into a overlay map */
 	      clean_tmp_map(m);
 	  }
       }
@@ -1230,16 +1188,16 @@ void clean_tmp_files(void) {
   write_todclock(); /* lets just write the clock here */
 }
 
-/** Clean up everything and exit. */
+/** clean up everything before exiting */
 void cleanup(void)
 {
     LOG(llevDebug,"Cleanup called.  freeing data.\n");
     clean_tmp_files();
     write_book_archive();
-
 #ifdef MEMORY_DEBUG
     free_all_maps();
     free_style_maps();
+    free_all_object_data();
     free_all_archs();
     free_all_treasures();
     free_all_images();
@@ -1248,29 +1206,23 @@ void cleanup(void)
     free_all_readable();
     free_all_god();
     free_all_anim();
-    free_loader();
-    free_weather();
-    free_globals();
-    free_server();
-    free_all_object_data();
     /* See what the string data that is out there that hasn't been freed. */
-/*    LOG(llevDebug, "%s", ss_dump_table(0xff));*/
+/*    LOG(llevDebug, "%s\n", ss_dump_table(0xff));*/
 #endif
     exit(0);
 }
 
-/**
- * Player logs out, or was disconnected.
- *
- * @param pl
- * player.
- * @param draw_exit
- * if set, display leaving message to other players.
- * @todo check for pl != NULL should include the 'left the game', just in case (or remove it?)
- */
 void leave(player *pl, int draw_exit) {
+    char buf[MAX_BUF];
 
     if (pl!=NULL) {
+	/* We do this so that the socket handling routine can do the final
+	 * cleanup.  We also leave that loop to actually handle the freeing
+	 * of the data.
+	 */
+        if (draw_exit==0)
+        {
+        }
 	pl->socket.status=Ns_Dead;
 	LOG(llevInfo,"LOGOUT: Player named %s from ip %s\n", pl->ob->name,
 	    pl->socket.host);
@@ -1291,16 +1243,13 @@ void leave(player *pl, int draw_exit) {
 		pl->transport->contr = NULL;
 
 	    if (pl->transport->contr) {
-            char name[MAX_BUF];
-            query_name(pl->transport, name, MAX_BUF);
-		draw_ext_info_format(NDI_UNIQUE, 0, pl->transport->contr->ob,
-		     MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_PLAYER,
+		new_draw_info_format(NDI_UNIQUE, 0, pl->transport->contr->ob,
 		     "%s has left.  You are now the captain of %s",
-		     "%s has left.  You are now the captain of %s",
-				     pl->ob->name, name);
+				     pl->ob->name, query_name(pl->transport));
 	    }
 	}
 
+	(void) sprintf(buf,"%s left the game.",pl->ob->name);
 	if (pl->ob->map) {
 	    if (pl->ob->map->in_memory==MAP_IN_MEMORY)
 		pl->ob->map->timeout = MAP_TIMEOUT(pl->ob->map);
@@ -1312,26 +1261,14 @@ void leave(player *pl, int draw_exit) {
 	pl->ob->type = DEAD_OBJECT; /* To avoid problems with inventory window */
     }
     /* If a hidden dm dropped connection do not create
-    * inconsistencies by showing that they have left the game
+    * inconsistencies by showing that they have left the game 
     */
-    if (!(QUERY_FLAG(pl->ob,FLAG_WIZ) && pl->ob->contr->hidden) &&
-        (pl!=NULL && draw_exit) &&
-	   (pl->state != ST_GET_NAME && pl->state!=ST_GET_PASSWORD && pl->state != ST_CONFIRM_PASSWORD))
-
-	    draw_ext_info_format(NDI_UNIQUE | NDI_ALL | NDI_DK_ORANGE, 5, NULL,
-			  MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_PLAYER,
-			  "%s left the game.",
-			  "%s left the game.",
-			  pl->ob->name);
+    if (!(QUERY_FLAG(pl->ob,FLAG_WIZ) && pl->ob->contr->hidden) && 
+        (pl!=NULL && draw_exit) && 
+	   (pl->state != ST_GET_NAME && pl->state!=ST_GET_PASSWORD && pl->state != ST_CONFIRM_PASSWORD)) 
+	    new_draw_info(NDI_UNIQUE | NDI_ALL | NDI_DK_ORANGE, 5, NULL, buf);
 }
 
-/**
- * Checks if server should be started.
- *
- * @return
- * 1 if play is forbidden, 0 if ok.
- * @todo document forbidden stuff.
- */
 int forbid_play(void)
 {
 #if !defined(_IBMR2) && !defined(___IBMR2) && defined(PERM_FILE)
@@ -1344,15 +1281,15 @@ int forbid_play(void)
     clock = time (NULL);
     tm = (struct tm *) localtime (&clock);
 
-    snprintf(buf, sizeof(buf), "%s/%s", settings.confdir, PERM_FILE);
+    sprintf (buf, "%s/%s", settings.confdir, PERM_FILE);
     if ((fp = open_and_uncompress(buf, 0, &comp)) == NULL)
 	return 0;
 
-    while (fgets (buf, sizeof(buf), fp)) {
+    while (fgets (buf, MAX_BUF, fp)) {
 	if (buf[0]=='#') continue;
 	if (!strncmp (buf, "msg", 3)) {
 	    if (forbit)
-		while (fgets (buf, sizeof(buf), fp))  /* print message */
+		while (fgets (buf, MAX_BUF, fp))  /* print message */
 		    fputs (buf, logfile);
 	    break;
 
@@ -1362,7 +1299,7 @@ int forbid_play(void)
 	}
 
 	for (i=0; i< 7; i++) {
-	    if (!strncmp (buf, days[i], 3) && (tm->tm_wday == i) &&
+	    if (!strncmp (buf, days[i], 3) && (tm->tm_wday == i) && 
 		(tm->tm_hour >= start) && (tm->tm_hour < stop))
 		forbit = 1;
 	}
@@ -1376,11 +1313,8 @@ int forbid_play(void)
 #endif
 }
 
-extern unsigned long todtick;
-
 /**
- * Collection of functions to call from time to time.
- *
+ *  do_specials() is a collection of functions to call from time to time.
  * Modified 2000-1-14 MSW to use the global pticks count to determine how
  * often to do things.  This will allow us to spred them out more often.
  * I use prime numbers for the factor count - in that way, it is less likely
@@ -1392,6 +1326,9 @@ extern unsigned long todtick;
  * I also think this code makes it easier to see how often we really are
  * doing the various things.
  */
+
+extern unsigned long todtick;
+
 static void do_specials(void) {
 
 #ifdef WATCHDOG
@@ -1424,16 +1361,6 @@ static void do_specials(void) {
       fix_luck();
 }
 
-/**
- * Server main function.
- *
- * @param argc
- * length of argv.
- * @param argv
- * command-line options.
- * @return
- * 0.
- */
 int server_main(int argc, char **argv)
 {
 #ifdef WIN32 /* ---win32 this sets the win32 from 0d0a to 0a handling */
@@ -1454,12 +1381,12 @@ int server_main(int argc, char **argv)
       {
 #else
   for(;;) {
-#endif
+#endif 
     nroferrors = 0;
 
     doeric_server();
-    process_events();    /* "do" something with objects with speed */
-    cftimer_process_timers();/* Process the crossfire Timers */
+    process_events(NULL);    /* "do" something with objects with speed */
+    cftimer_process_timers();/* Process the crossfire Timers */    
     /* Lauwenmark : Here we handle the CLOCK global event */
     execute_global_event(EVENT_CLOCK);
     check_active_maps(); /* Removes unused maps after a certain timeout */

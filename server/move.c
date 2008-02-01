@@ -6,7 +6,7 @@
 /*
     CrossFire, A Multiplayer game for X-windows
 
-    Copyright (C) 2002-2006 Mark Wedel & Crossfire Development Team
+    Copyright (C) 2002 Mark Wedel & Crossfire Development Team
     Copyright (C) 1992 Frank Tore Johansen
 
     This program is free software; you can redistribute it and/or modify
@@ -26,11 +26,6 @@
     The author can be reached via e-mail to crossfire-devel@real-time.com
 */
 
-/**
- * @file
- * Those functions handle object moving and pushing.
- */
-
 #include <global.h>
 #ifndef __CEXTRACT__
 #include <sproto.h>
@@ -39,15 +34,11 @@
 static int roll_ob(object *op, int dir, object *pusher);
 
 /**
- * Try to move op in the direction "dir".
- * @param op
- * what to move.
- * @param dir
- * moving direction.
- * @retval 0
- * something blocks the passage.
- * @retval 1
- * op was moved..
+ * move_object() tries to move object op in the direction "dir".
+ * If it fails (something blocks the passage), it returns 0,
+ * otherwise 1.
+ * This is an improvement from the previous move_ob(), which
+ * removed and inserted objects even if they were unable to move.
  */
 
 int move_object(object *op, int dir) {
@@ -56,19 +47,14 @@ int move_object(object *op, int dir) {
 
 
 /**
- * Op is trying to move in direction dir.
- *
- * @param op
- * what is moving.
- * @param dir
- * what direction op wants to move.
- * @param originator
- * typically the same as op, but can be different if originator is causing op to
- * move (originator is pushing op).
- * @retval 0
- * op is not able to move to the desired space.
- * @retval 1
- * op was moved.
+ * object op is trying to move in direction dir.
+ * originator is typically the same as op, but
+ * can be different if originator is causing op to
+ * move (originator is pushing op)
+ * returns 0 if the object is not able to move to the
+ * desired space, 1 otherwise (in which case we also 
+ * move the object accordingly.  This function is
+ * very similiar to move_object.
   */
 int move_ob (object *op, int dir, object *originator)
 {
@@ -177,25 +163,15 @@ int move_ob (object *op, int dir, object *originator)
 
 
 /**
- * Move an object (even linked objects) to another spot
+ * transfer_ob(): Move an object (even linked objects) to another spot
  * on the same map.
  *
  * Does nothing if there is no free spot.
  *
- * @param op
- * what to move.
- * @param x
- * @param y
- * new coordinates.
- * @param randomly
- * if true, use find_free_spot() to find the destination, otherwise
+ * randomly: If true, use find_free_spot() to find the destination, otherwise
  * use find_first_free_spot().
- * @param originator
- * what is causing op to move.
- * @retval 1
- * op was destroyed.
- * @retval 0
- * op was moved.
+ *
+ * Return value: 1 if object was destroyed, 0 otherwise.
  */
 
 int transfer_ob (object *op, int x, int y, int randomly, object *originator)
@@ -225,23 +201,16 @@ int transfer_ob (object *op, int x, int y, int randomly, object *originator)
 }
 
 /**
- * Teleport an item around a nearby random teleporter of specified type.
- *
+ * Return value: 1 if object was destroyed, 0 otherwise.
+ * Modified so that instead of passing the 'originator' that had no
+ * real use, instead we pass the 'user' of the teleporter.  All the
+ * callers know what they wanted to teleporter (move_teleporter or
+ * shop map code)
+ * tele_type is the type of teleporter we want to match against -
+ * currently, this is either set to SHOP_MAT or TELEPORTER.
  * It is basically used so that shop_mats and normal teleporters can
  * be used close to each other and not have the player put to the
  * one of another type.
- *
- * @param teleporter
- * what is teleporting user.
- * @param tele_type
- * what object type user can be put on. this is either set to SHOP_MAT or TELEPORTER.
- * @param user
- * what object to teleport.
- * @retval 1
- * user was destroyed.
- * @retval 0
- * user is still valid, but may have moved or not.
- * @todo fix weird return values.
  */
 int teleport (object *teleporter, uint8 tele_type, object *user)
 {
@@ -296,7 +265,7 @@ int teleport (object *teleporter, uint8 tele_type, object *user)
     if (k==-1) {
 	if (tele_type == SHOP_MAT && user->type == PLAYER) {
 	    for (k=1; k<9; k++) {
-		if (get_map_flags(other_teleporter->map, &m,
+		if (get_map_flags(other_teleporter->map, &m, 
 			other_teleporter->x + freearr_x[k],
 			other_teleporter->y + freearr_y[k], &sx,&sy) &
 			P_OUT_OF_MAP) continue;
@@ -330,65 +299,35 @@ int teleport (object *teleporter, uint8 tele_type, object *user)
     return (tmp == NULL);
 }
 
-/**
- * An object is pushed by another which is trying to take its place.
- *
- * @param op
- * what is being pushed.
- * @param dir
- * pushing direction.
- * @param pusher
- * what is pushing op.
- */
 void recursive_roll(object *op,int dir,object *pusher) {
-    char name[MAX_BUF];
-    query_name(op, name, MAX_BUF);
-    if(!roll_ob(op,dir,pusher)) {
-	draw_ext_info_format(NDI_UNIQUE, 0, pusher,
-			     MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_FAILURE,
-			     "You fail to push the %s.",
-			     "You fail to push the %s.",
-			     name);
-	return;
-    }
-    (void) move_ob(pusher,dir,pusher);
-    draw_ext_info_format(NDI_BLACK, 0, pusher,
-			  MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_SUCCESS,
-			 "You move the %s.",
-			 "You move the %s.",
-			 name);
+  if(!roll_ob(op,dir,pusher)) {
+    new_draw_info_format(NDI_UNIQUE, 0, pusher,
+	"You fail to push the %s.",query_name(op));
     return;
+  }
+  (void) move_ob(pusher,dir,pusher);
+  new_draw_info_format(NDI_BLACK, 0, pusher,
+	"You move the %s.",query_name(op));
+  return;
 }
 
 /**
- * Checks if an objects fits on a specified spot.
- *
  * This is a new version of blocked, this one handles objects
  * that can be passed through by monsters with the CAN_PASS_THRU defined.
  *
- * Very new version handles also multipart objects
+ * very new version handles also multipart objects
  * This is currently only used for the boulder roll code.
- *
- * @param op
- * what object to fit.
- * @param m
- * @param x
- * @param y
- * where to put op.
- * @retval 1
- * object does not fit.
- * @retval 0
- * object fits.
+ * Returns 1 if object does not fit, 0 if it does.
  */
 
-static int try_fit (object *op, mapstruct *m, int x, int y)
+static int try_fit (object *op, mapstruct *m, int x, int y) 
 {
     object *tmp, *more;
     sint16 tx, ty;
     int mflags;
     mapstruct *m2;
 
-    if (op->head)
+    if (op->head) 
 	op = op->head;
 
     for (more = op; more ; more = more->more) {
@@ -415,22 +354,9 @@ static int try_fit (object *op, mapstruct *m, int x, int y)
 }
 
 /**
- * An object is being pushed, and may push other objects.
- *
- * This is not perfect yet.
+ * this is not perfect yet. 
  * it does not roll objects behind multipart objects properly.
  * Support for rolling multipart objects is questionable.
- *
- * @param op
- * what is being pushed.
- * @param dir
- * pushing direction.
- * @param pusher
- * what is pushing op.
- * @retval 0
- * op couldn't move.
- * @retval 1
- * op, and potentially other objects, moved.
  */
 
 static int roll_ob(object *op,int dir, object *pusher) {
@@ -440,13 +366,13 @@ static int roll_ob(object *op,int dir, object *pusher) {
     mapstruct *m;
     MoveType	move_block;
 
-    if (op->head)
+    if (op->head) 
 	op = op->head;
 
     x=op->x+freearr_x[dir];
     y=op->y+freearr_y[dir];
 
-    if(!QUERY_FLAG(op,FLAG_CAN_ROLL) ||
+    if(!QUERY_FLAG(op,FLAG_CAN_ROLL) || 
        (op->weight &&
        random_roll(0, op->weight/50000-1, pusher, PREFER_LOW) > pusher->stats.Str))
 	return 0;
@@ -478,21 +404,7 @@ static int roll_ob(object *op,int dir, object *pusher) {
     return 1;
 }
 
-/**
- * Something is pushing some other object.
- *
- * @param who
- * object being pushed.
- * @param dir
- * pushing direction.
- * @param pusher
- * what is pushing who.
- * @retval 1
- * if pushing invokes a attack
- * @retval 0
- * no attack during pushing.
- * @todo fix return value which is weird for last case.
- */
+/** returns 1 if pushing invokes a attack, 0 when not */
 int push_ob(object *who, int dir, object *pusher) {
     int str1, str2;
     object *owner;
@@ -503,10 +415,10 @@ int push_ob(object *who, int dir, object *pusher) {
 
     /* Wake up sleeping monsters that may be pushed */
     CLEAR_FLAG(who,FLAG_SLEEP);
-
+  
     /* player change place with his pets or summoned creature */
     /* TODO: allow multi arch pushing. Can't be very difficult */
-    if (who->more == NULL && (owner == pusher || (owner != NULL && owner->type == PLAYER && owner->contr->party != NULL && owner->contr->party == pusher->contr->party))) {
+    if (who->more == NULL && owner == pusher) {
 	int temp;
 	mapstruct *m;
 
@@ -548,36 +460,27 @@ int push_ob(object *who, int dir, object *pusher) {
     if(owner != pusher &&  pusher->type == PLAYER && who->type != PLAYER &&
       !QUERY_FLAG(who,FLAG_FRIENDLY)&& !QUERY_FLAG(who,FLAG_NEUTRAL)) {
 	if(pusher->contr->run_on) /* only when we run */ {
-	    draw_ext_info_format(NDI_UNIQUE, 0, pusher,
-				 MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_FAILURE,
-				 "You start to attack %s !!",
-				 "You start to attack %s !!",
-				 who->name);
+	    new_draw_info_format(NDI_UNIQUE, 0, pusher,
+              "You start to attack %s !!",who->name);
 	    CLEAR_FLAG(who,FLAG_UNAGGRESSIVE); /* the sucker don't like you anymore */
 	    who->enemy = pusher;
 	    return 1;
 	}
-	else
+	else 
 	{
-	    draw_ext_info_format(NDI_UNIQUE, 0, pusher,
-				  MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_FAILURE,
-				 "You avoid attacking %s.",
-				 "You avoid attacking %s.",
-				 who->name);
+	    new_draw_info_format(NDI_UNIQUE, 0, pusher,
+				 "You avoid attacking %s .",who->name);
 	}
     }
 
     /* now, lets test stand still. we NEVER can push stand_still monsters. */
     if(QUERY_FLAG(who,FLAG_STAND_STILL))
     {
-	draw_ext_info_format(NDI_UNIQUE, 0, pusher,
-			     MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_FAILURE,
-			     "You can't push %s.",
-			     "You can't push %s.",
-			     who->name);
+	new_draw_info_format(NDI_UNIQUE, 0, pusher,
+          "You can't push %s.",who->name);
 	return 0;
     }
-
+  
     /* This block is basically if you are pushing friendly but
      * non pet creaturs.
      * It basically does a random strength comparision to
@@ -588,16 +491,13 @@ int push_ob(object *who, int dir, object *pusher) {
     str1 = (who->stats.Str>0?who->stats.Str:who->level);
     str2 = (pusher->stats.Str>0?pusher->stats.Str:pusher->level);
     if(QUERY_FLAG(who,FLAG_WIZ) ||
-       random_roll(str1, str1/2+str1*2, who, PREFER_HIGH) >=
+       random_roll(str1, str1/2+str1*2, who, PREFER_HIGH) >= 
        random_roll(str2, str2/2+str2*2, pusher, PREFER_HIGH) ||
        !move_object(who,dir))
     {
 	if (who ->type == PLAYER) {
-	    draw_ext_info_format(NDI_UNIQUE, 0, who,
-				 MSG_TYPE_VICTIM,MSG_TYPE_VICTIM_WAS_PUSHED,
-				 "%s tried to push you.",
-				 "%s tried to push you.",
-				 pusher->name);
+	    new_draw_info_format(NDI_UNIQUE, 0, who,
+		 "%s tried to push you.",pusher->name);
 	}
 	return 0;
     }
@@ -606,19 +506,13 @@ int push_ob(object *who, int dir, object *pusher) {
      * Let everyone know the status.
      */
     if (who->type == PLAYER) {
-	draw_ext_info_format(NDI_UNIQUE, 0, who,
-			     MSG_TYPE_VICTIM,MSG_TYPE_VICTIM_WAS_PUSHED,
-			     "%s pushed you.",
-			     "%s pushed you.",
-			     pusher->name);
+	new_draw_info_format(NDI_UNIQUE, 0, who,
+			     "%s pushed you.",pusher->name);
     }
     if (pusher->type == PLAYER) {
-	draw_ext_info_format(NDI_UNIQUE, 0, pusher,
-			     MSG_TYPE_VICTIM,MSG_TYPE_VICTIM_WAS_PUSHED,
-			     "You pushed %s back.",
-			     "You pushed %s back.",
-			     who->name);
+	new_draw_info_format(NDI_UNIQUE, 0, pusher,
+		"You pushed %s back.", who->name);
     }
-
+  
     return 1;
 }

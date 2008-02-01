@@ -24,10 +24,10 @@
 #   The author can be reached via e-mail to mwedel@scruz.net
 
 
-bin_PROGRAMS = crossfire-server
+bin_PROGRAMS = crossfire
 
 noinst_LIBRARIES = libserver.a
-crossfire_server_SOURCES = main.c
+crossfire_SOURCES = main.c
 libserver_a_SOURCES = \
 	alchemy.c\
 	apply.c\
@@ -45,14 +45,13 @@ libserver_a_SOURCES = \
 	commands.c\
 	daemon.c\
 	disease.c\
+	egoitem.c \
 	hiscore.c\
 	gods.c\
 	init.c\
 	login.c\
 	monster.c\
 	move.c\
-        ob_methods.c\
-        ob_types.c\
 	pets.c\
 	player.c\
 	plugins.c\
@@ -64,6 +63,7 @@ libserver_a_SOURCES = \
 	spell_attack.c\
 	spell_effect.c\
 	spell_util.c\
+	swamp.c\
 	swap.c\
 	time.c\
 	timers.c\
@@ -76,13 +76,13 @@ AM_CPPFLAGS = -I$(top_srcdir)/include -DDATADIR=\"$(pkgdatadir)\" -DCONFDIR=\"$(
 
 if HAVE_LIBDL
 LIBDL=-ldl
-crossfire_server_LDFLAGS=-export-dynamic
+crossfire_LDFLAGS=-export-dynamic
 else
 LIBDL=
-crossfire_server_LDFLAGS=
+crossfire_LDFLAGS=
 endif
-crossfire_server_LDADD = libserver.a ../common/libcross.a ../random_maps/librandom_map.a \
-		../socket/libsocket.a ../types/libtypes.a $(LIBDL)
+crossfire_LDADD = libserver.a ../common/libcross.a ../random_maps/librandom_map.a \
+		../socket/libsocket.a $(LIBDL)
 
 ../common/libcross.a:
 	( cd ../common ; make libcross.a )
@@ -93,14 +93,11 @@ crossfire_server_LDADD = libserver.a ../common/libcross.a ../random_maps/librand
 ../socket/libsocket.a:
 	( cd ../socket ; make libsocket.a )
 
-../types/libtypes.a:
-	( cd ../types ; make libtypes.a )
-
 # Check if everything is installed as it should
 installcheck-local:
-	$(bindir)/crossfire-server -o
+	$(bindir)/crossfire -o
 
 proto:
 	cproto -D__CEXTRACT__ -o ../include/sproto.h $(CPPFLAGS) $(AM_CPPFLAGS) \
-		`echo $(libserver_a_SOURCES) " " | $(AWK) -v RS=" " '/.c$$/ { print }'`
+		`echo $(SOURCES) " " | $(AWK) -v RS=" " '/.c$$/ { print }'`
 	chmod 644 ../include/sproto.h

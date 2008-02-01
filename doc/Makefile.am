@@ -27,10 +27,10 @@ SUBDIRS = scripts Developers playbook spoiler spell-docs spoiler-html playbook-h
 
 dist_noinst_DATA = handbook.ps spoiler.ps
 dist_noinst_SCRIPTS = include_html.pl
-dist_man6_MANS = crossfire-server.man crossfire-config.man \
+dist_man6_MANS = crossedit.man crossfire.man crossfire-config.man \
 	crossloop.web.man crossloop.man
 
-EXTRA_DIST = PlayerStats \
+EXTRA_DIST = Crossedit.doc PlayerStats \
 	README RunTimeCommands SurvivalGuide alchemy.doc \
 	experience metaserver multigod plugins skills.doc \
 	spellcasters_guide_to_runes
@@ -49,10 +49,11 @@ crosslib.doc:
 
 # workaround for bug in automake 1.6.2 & 1.6.3 (& probably others)
 uninstall-local:
+	rm -f $(DESTDIR)$(man6dir)/crossedit.6*
 	rm -f $(DESTDIR)$(man6dir)/crossfire.6*
 	rm -f $(DESTDIR)$(man6dir)/crossfire-config.6*
 
-archive: spoiler playbook
+archive: spoiler playbook 
 	$(mkinstalldirs) $(DTOP)
 	cp $(EXTRA_DIST) $(DTOP)
 	cp spoiler.ps handbook.ps $(DTOP)

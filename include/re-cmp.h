@@ -1,22 +1,20 @@
-/**
- * @file
+/* re-cmp.h
  * Datastructures for representing a subset of regular expressions.
  *
- * @author
- * Kjetil T. Homme \<kjetilho@ifi.uio.no\> May 1993
+ * Author: Kjetil T. Homme <kjetilho@ifi.uio.no> May 1993
  */
-
+ 
 #ifndef RE_CMP_H
 #define RE_CMP_H
 
 /*   C o n f i g u r a t i o n
  */
 
-#define SAFE_CHECKS	/**< Regexp's with syntax errors will core dump if
+#define SAFE_CHECKS	/* Regexp's with syntax errors will core dump if
 			 * this is undefined.
 			 */
 
-#define RE_TOKEN_MAX 64	/**< Max amount of tokens in a regexp.
+#define RE_TOKEN_MAX 64	/* Max amount of tokens in a regexp.
 			 * Each token uses ~264 bytes. They are allocated
 			 * as needed, but never de-allocated.
 			 * E.g. [A-Za-z0-9_] counts as one token, so 64
@@ -41,24 +39,24 @@
 
 #define uchar	unsigned char
 #define Boolean	uchar
-#define True	1	/**< Changing this value will break the code */
+#define True	1	/* Changing this value will break the code */
 #define False	0
 
 typedef enum {
-    sel_any, 		/**< corresponds to eg . */
-    sel_end,		/**< corresponds to eg \$ */
-    sel_single, 	/**< corresponds to eg q */
-    sel_range,  	/**< corresponds to eg [A-F] */
-    sel_array,  	/**< corresponds to eg [AF-RqO-T] */
-    sel_not_single,	/**< corresponds to eg [^f] */
-    sel_not_range	/**< corresponds to eg [^A-F] */
+    sel_any, 		/* corresponds to e.g. .		*/
+    sel_end,		/*         "           $		*/
+    sel_single, 	/*         "           q		*/
+    sel_range,  	/*         "           [A-F]		*/
+    sel_array,  	/*         "           [AF-RqO-T]	*/
+    sel_not_single,	/*         "           [^f]		*/
+    sel_not_range	/*	   "           [^A-F]		*/
 } selection_type;
 
 typedef enum {
-    rep_once,	        /**< corresponds to no meta-char */
-    rep_once_or_more,   /**< corresponds to + */
-    rep_null_or_once,   /**< corresponds to eg ? */
-    rep_null_or_more	/**< corresponds to eg * */
+    rep_once,		/* corresponds to no meta-char	*/
+    rep_once_or_more,	/*        "       +		*/
+    rep_null_or_once,	/*        "       ?		*/
+    rep_null_or_more	/*        "       *		*/
 } repetetion_type;
 
 typedef struct {

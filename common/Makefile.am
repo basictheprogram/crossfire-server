@@ -37,7 +37,6 @@ libcross_a_SOURCES = \
 	image.c \
 	init.c\
 	item.c\
-	languages.c\
 	links.c\
 	living.c\
 	loader.l\
@@ -48,6 +47,7 @@ libcross_a_SOURCES = \
 	path.c\
 	porting.c\
 	player.c\
+	quest.c\
 	re-cmp.c\
 	readable.c\
 	recipe.c\

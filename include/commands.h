@@ -26,11 +26,6 @@
     The author can be reached via e-mail to mark@pyramid.com
 */
 
-/**
- * @file
- * Defines and structures related to commands the player can send.
- */
-
 #ifndef COMMANDS_H
 #define COMMANDS_H
 
@@ -51,25 +46,21 @@
  * be initialized in one of the source files.
  */
 
-/** One command function. */
 typedef int (*command_function)(object *op, char *params);
 
-/** Represents one command. */
-typedef struct {
-  const char *name;         /**< Command name. */
-  command_function func;    /**< Pointer to command function. */
-  float	time;               /**< How long it takes to execute this command. */
+typedef struct {		/* global list's structure */
+  const char *name;
+  command_function func;
+  float	time;			/* How long it takes to execute this command */
 } command_array_struct;
 
 
-extern command_array_struct Commands[], WizCommands [], CommunicationCommands[];
+extern command_array_struct Commands[],NewServerCommands [],SocketCommands[],
+	WizCommands [], CommunicationCommands[];
 
-extern const int CommandsSize, WizCommandsSize, CommunicationCommandSize;
+extern const int CommandsSize,NewServerCommandSize,
+	SocketCommandsSize, WizCommandsSize, CommunicationCommandSize;
 
-/**
- * @defgroup EMOTE_xxx Emotes players can use to communicate
- */
-/*@{*/
 #define EMOTE_NOD	1
 #define EMOTE_DANCE	2
 #define EMOTE_KISS	3
@@ -124,6 +115,5 @@ extern const int CommandsSize, WizCommandsSize, CommunicationCommandSize;
 #define EMOTE_BLEED	52
 #define EMOTE_CRINGE	53
 #define EMOTE_THINK	54
-/*@}*/
 
 #endif /* COMMANDS_H */

@@ -26,7 +26,7 @@
     The authors can be reached via e-mail at crossfire-devel@real-time.com
 */
 
-/*
+/* 
  * This is the unit tests file for common/shstr.c
  */
 
@@ -42,7 +42,7 @@ extern const char * find_string(const char *str);
 extern void free_string(const char *str);
 extern int buf_overflow (const char *buf1, const char *buf2, int bufsize);
 */
-void setup(void) {
+void setup(void) { 
     init_hash_table();
 }
 
@@ -57,9 +57,7 @@ START_TEST (test_add_string)
     const char * str2;
     const char * str3;
     char * temp;
-#ifndef MANY_CORES
     fail_unless (add_string(NULL) == NULL, "add_string should null when receiving a null as parameter.");
-#endif
     str1 = add_string("Hello world");
     fail_unless (str1 != NULL, "add_string should not return null when receiving content.");
     temp = malloc (strlen(str1)+1);
@@ -81,7 +79,7 @@ START_TEST (test_add_refcount)
     str1 = add_string("Crossfire Rulez");
     str2 = add_refcount(str1);
     fail_unless(str1==str2, "result of add_refcount (%p) should be the same as original pointer (%p).",str2,str1);
-    fail_unless(query_refcount(str1)==2,
+    fail_unless(query_refcount(str1)==2, 
                 "add_refcount (%p) should have made refcount to value 2 but was %d",
                 str1,query_refcount(str1));
 }
@@ -91,7 +89,7 @@ START_TEST (test_query_refcount)
 {
     const char* str1;
     str1 = add_string("Hello World");
-    fail_unless(query_refcount(str1) == 1,
+    fail_unless(query_refcount(str1) == 1, 
                 "After add_string, query_refcount should return 1 but returned %d(0x%X) for %s",
                 query_refcount(str1),query_refcount(str1),str1);
     add_string("Hello World");
@@ -99,18 +97,18 @@ START_TEST (test_query_refcount)
                 "After twice add_string with same string, query_refcount should return 2 but returned %d(0x%X) for %s",
                 query_refcount(str1),query_refcount(str1),str1);
     add_refcount(str1);
-    fail_unless(query_refcount(str1) == 3,
+    fail_unless(query_refcount(str1) == 3, 
                 "After call to add_refcount, query_refcount should now return 3 but returned %d(0x%X) for %s",
                 query_refcount(str1),query_refcount(str1),str1);
 }
 END_TEST
-
+        
 START_TEST (test_find_string)
 {
     const char* str1;
     const char* str2;
     const char* result;
-
+    
     str1 = add_string("Hello world");
     str2 = add_string("Bonjour le monde");
     result = find_string("Hello world");
@@ -122,7 +120,7 @@ START_TEST (test_find_string)
                 "find_string for %s should return %p but returned %p(%s).",
                 str2, str2, result, result);
     result = find_string("Hola mundo");
-    fail_unless(result == NULL,
+    fail_unless(result == NULL, 
                 "Searching for an inexistant string should return NULL but returned %p(%s)", result, result);
     str1 = add_string("");
     result = find_string("");
@@ -135,7 +133,7 @@ START_TEST (test_find_string)
                  result,result);
 }
 END_TEST
-
+        
 
 START_TEST (test_free_string)
 {
@@ -182,7 +180,7 @@ Suite *shstr_suite(void)
   Suite *s = suite_create("shstr");
   TCase *tc_core = tcase_create("Core");
     /*setup and teardown will be called before each test in testcase 'tc_core' */
-  tcase_add_checked_fixture(tc_core,setup,teardown);
+  tcase_add_checked_fixture(tc_core,setup,teardown); 
 
   suite_add_tcase (s, tc_core);
   tcase_add_test(tc_core, test_add_string);

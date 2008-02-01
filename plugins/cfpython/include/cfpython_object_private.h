@@ -150,7 +150,6 @@ static PyObject* Object_GetGodGiven(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetIsPet(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetAttackMovement(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetDuration(Crossfire_Object* whoptr, void* closure);
-static PyObject* Object_GetGlowRadius(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetNoDamage(Crossfire_Object* whoptr, void* closure);
 static PyObject* Object_GetRandomMovement(Crossfire_Object* whoptr, void* closure);
 
@@ -235,8 +234,6 @@ static int Object_SetGodGiven(Crossfire_Object* whoptr, PyObject* value, void* c
 static int Object_SetIsPet(Crossfire_Object* whoptr, PyObject* value, void* closure);
 static int Object_SetAttackMovement(Crossfire_Object* whoptr, PyObject* value, void* closure);
 static int Object_SetDuration(Crossfire_Object* whoptr, PyObject* value, void* closure);
-static int Object_SetGlowRadius(Crossfire_Object* whoptr, PyObject* value, void* closure);
-static int Object_SetAnimated(Crossfire_Object* whoptr, PyObject* value, void* closure);
 static int Object_SetNoDamage(Crossfire_Object* whoptr, PyObject* value, void* closure);
 static int Object_SetRandomMovement(Crossfire_Object* whoptr, PyObject* value, void* closure);
 
@@ -274,7 +271,6 @@ static PyObject* Crossfire_Object_CreateTimer(Crossfire_Object* who, PyObject* a
 static PyObject* Crossfire_Object_AddExp(Crossfire_Object* who, PyObject* args);
 static PyObject* Crossfire_Object_Move(Crossfire_Object* who, PyObject* args);
 static PyObject* Crossfire_Object_ChangeAbil(Crossfire_Object* who, PyObject* args);
-static PyObject* Crossfire_Object_Event(Crossfire_Object* who, PyObject* args);
 
 static int Crossfire_Object_InternalCompare(Crossfire_Object* left, Crossfire_Object* right);
 
@@ -409,8 +405,6 @@ static PyGetSetDef Object_getseters[] = {
     { "IsPet",          (getter)Object_GetIsPet,     (setter)Object_SetIsPet, NULL, NULL },
     { "AttackMovement", (getter)Object_GetAttackMovement, (setter)Object_SetAttackMovement, NULL, NULL },
     { "Duration",       (getter)Object_GetDuration,     (setter)Object_SetDuration, NULL, NULL },
-    { "GlowRadius",     (getter)Object_GetGlowRadius,   (setter)Object_SetGlowRadius, NULL, NULL },
-    { "Animated",       NULL,   (setter)Object_SetAnimated, NULL, NULL },
     { "NoDamage",       (getter)Object_GetNoDamage, (setter)Object_SetNoDamage, NULL, NULL },
     { "RandomMovement", (getter)Object_GetRandomMovement, (setter)Object_SetRandomMovement, NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
@@ -450,7 +444,6 @@ static PyMethodDef ObjectMethods[] = {
     { "AddExp",         (PyCFunction)Crossfire_Object_AddExp,       METH_VARARGS},
     { "Move",           (PyCFunction)Crossfire_Object_Move,         METH_VARARGS},
     { "ChangeAbil",     (PyCFunction)Crossfire_Object_ChangeAbil,   METH_VARARGS},
-    { "Event",          (PyCFunction)Crossfire_Object_Event,        METH_VARARGS},
     {NULL, NULL, 0}
 };
 

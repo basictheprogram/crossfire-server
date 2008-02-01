@@ -26,25 +26,26 @@
     The authors can be reached via e-mail at crossfire-devel@real-time.com
 */
 
-/**
- * @file
- * Attack-related definitions.
- */
 
 #ifndef ATTACK_H
 #define ATTACK_H
 
-/**
- * @defgroup Attacktypes Attack types
- * - ATNR_xxx is the attack number that is indexed into the
- * the resist array in the object structure.
- * - ATM_xxx is the message number
- * - AT_xxx is the bitmask in the ::obj::attacktype field.
+/* These are default values for converting from simple protected/immune/vuln
+ * to thre partial resistances
  */
-/*@{*/
+#define RESIST_IMMUNE	100
+#define RESIST_PROT	30
+#define RESIST_VULN	-100
+
+/*
+ * Attacktypes:
+ * ATNR_... is the attack number that is indexed into the
+ * the resist array in the object structure.
+ */
+
 #define NROFATTACKS		26
-#define NROFATTACKMESS		21
-#define MAXATTACKMESS		21
+#define NROFATTACKMESS		20
+#define MAXATTACKMESS		20
 
 /* attack message numbers must be less than NROFATTACKMESS */
 
@@ -67,7 +68,6 @@
 #define ATM_BLUD	16
 #define ATM_DOOR	17
 #define ATM_SUFFER	18
-#define ATM_WRAITH_FEED	19
 
 /* Note that the last ATNR_ should be one less than NROFATTACKS above
  * since the ATNR starts counting at zero.
@@ -122,13 +122,12 @@
 #define AT_CHAOS        0x00040000 /*  262144 peterm@soda.berkeley.edu*/
 #define AT_COUNTERSPELL 0x00080000 /*  524288 peterm@soda.berkeley.edu*/
 #define AT_GODPOWER	0x00100000 /* 1048576  peterm@soda.berkeley.edu */
-#define AT_HOLYWORD	0x00200000 /* 2097152 race selective attack thomas@astro.psu.edu */
-#define AT_BLIND	0x00400000 /* 4194304 thomas@astro.psu.edu */
+#define AT_HOLYWORD	0x00200000 /* 2097152 race selective attack thomas@astro.psu.edu */ 
+#define AT_BLIND	0x00400000 /* 4194304 thomas@astro.psu.edu */ 
 #define AT_INTERNAL	0x00800000 /* Only used for internal calculations */
 #define AT_LIFE_STEALING \
 			0x01000000 /* 16777216 for hp drain */
 #define AT_DISEASE	0x02000000 /* 33554432 disease attacktypes */
-/*@}*/
 
 /* attacktypes_load is suffixed to resist_ when saving objects.
  * (so the line may be 'resist_fire' 20 for example).  These are never
@@ -142,7 +141,7 @@
  * and not have mystery values appear.
  */
 
-/** Attack messages structure. */
+/* attack messages structure */
 typedef struct attackmess {
   int level;
   char *buf1;
@@ -169,7 +168,6 @@ EXTERN char *resist_save[NROFATTACKS];
  * as for example: resist_life stealing 50!
  */
 #else
-/** Attack types. */
 EXTERN const char* const resist_save[NROFATTACKS] = {
 "physical ", "magic ", "fire ", "electricity ", "cold ", "confusion ", "acid ",
 "drain ", "weaponmagic ", "ghosthit ", "poison ", "slow ", "paralyze ",
@@ -178,7 +176,7 @@ EXTERN const char* const resist_save[NROFATTACKS] = {
 "disease "
 };
 
-/** Short description of names of the attacktypes */
+/* Short description of names of the attacktypes */
 EXTERN const char* const attacktype_desc[NROFATTACKS] = {
 "physical", "magic", "fire", "electricity", "cold", "confusion", "acid",
 "drain", "weapon magic", "ghost hit", "poison", "slow", "paralyze",
@@ -187,20 +185,20 @@ EXTERN const char* const attacktype_desc[NROFATTACKS] = {
 "disease"
 };
 
-/** Attack types to show to the player. */
+/* This is the array that is what the player sees. */
+
 EXTERN const char* const resist_plus[NROFATTACKS] = {
-"armour", "resist magic", "resist fire", "resist electricity", "resist cold",
-"resist confusion", "resist acid", "resist drain",
+"armour", "resist magic", "resist fire", "resist electricity", "resist cold", 
+"resist confusion", "resist acid", "resist drain", 
 "resist weaponmagic", "resist ghosthit", "resist poison", "resist slow",
-"resist paralyzation", "resist turn undead", "resist fear",
+"resist paralyzation", "resist turn undead", "resist fear", 
 "resist cancellation", "resist depletion", "resist death", "resist chaos",
 "resist counterspell", "resist god power", "resist holy word",
 "resist blindness" ,  "resist internal", "resist life stealing",
 "resist diseases"
 };
 
-/**
- * These are the descriptions of the resistances displayed when a
+/* These are the descriptions of the resistances displayed when a
  * player puts on/takes off an item. See change_abil() in living.c.
  */
 EXTERN const char* const change_resist_msg[NROFATTACKS] = {
@@ -212,15 +210,14 @@ EXTERN const char* const change_resist_msg[NROFATTACKS] = {
 };
 
 
-/**
- * If you want to weight things so certain resistances show up more often than
+/* If you want to weight things so certain resistances show up more often than
  * others, just add more entries in the table for the protections you want to
  * show up.
  */
-EXTERN int resist_table[] = {ATNR_PHYSICAL, ATNR_MAGIC, ATNR_FIRE,
+EXTERN int resist_table[] = {ATNR_PHYSICAL, ATNR_MAGIC, ATNR_FIRE, 
     ATNR_ELECTRICITY,ATNR_COLD, ATNR_CONFUSION, ATNR_ACID, ATNR_DRAIN,
     ATNR_GHOSTHIT, ATNR_POISON, ATNR_SLOW, ATNR_PARALYZE, ATNR_TURN_UNDEAD,
-    ATNR_FEAR, ATNR_DEPLETE, ATNR_DEATH, ATNR_HOLYWORD, ATNR_BLIND,
+    ATNR_FEAR, ATNR_DEPLETE, ATNR_DEATH, ATNR_HOLYWORD, ATNR_BLIND, 
     ATNR_LIFE_STEALING, ATNR_DISEASE};
 
 

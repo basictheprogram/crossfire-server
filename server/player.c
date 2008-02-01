@@ -6,7 +6,7 @@
 /*
     CrossFire, A Multiplayer game for X-windows
 
-    Copyright (C) 2002,2006-2007 Mark Wedel & Crossfire Development Team
+    Copyright (C) 2002,2007 Mark Wedel & Crossfire Development Team
     Copyright (C) 1992 Frank Tore Johansen
 
     This program is free software; you can redistribute it and/or modify
@@ -26,12 +26,6 @@
     The author can be reached via e-mail to crossfire-devel@real-time.com
 */
 
-/**
- * @file
- * Player-related functions, including those used during the login and creation phases.
- * @todo describe login/creation functions/cycles.
- */
-
 #include <global.h>
 #ifndef WIN32 /* ---win32 remove headers */
 #include <pwd.h>
@@ -49,37 +43,17 @@
 static archetype *get_player_archetype(archetype* at);
 static int action_makes_visible (object *op);
 
-/**
- * Find a player by her full name.
- *
- * @param plname
- * name to find.
- * @return
- * matching player, or NULL if no match.
- */
 player *find_player(const char *plname)
 {
-    player *pl;
-    char name[MAX_BUF];
-    for(pl=first_player;pl!=NULL;pl=pl->next)
-    {
-        if(pl->ob != NULL) {
-            query_name(pl->ob, name, MAX_BUF);
-            if (!strcmp(name,plname))
-                return pl;
-        }
-    };
-    return NULL;
+  player *pl;
+  for(pl=first_player;pl!=NULL;pl=pl->next)
+  {
+    if(pl->ob != NULL && !strcmp(query_name(pl->ob),plname))
+        return pl;
+  };
+  return NULL;
 }
 
-/**
- * Find a player by a partial name.
- *
- * @param plname
- * name to match.
- * @return
- * matching player if only one matching, or one perfectly matching, NULL if no match or more than one.
- */
 player* find_player_partial_name( const char* plname )
     {
     player* pl;
@@ -104,19 +78,13 @@ player* find_player_partial_name( const char* plname )
     return found;
     }
 
-/**
- * Sends the message of the day to the player.
- *
- * @param op
- * player to send to.
- */
 void display_motd(const object *op) {
     char buf[MAX_BUF];
     char motd[HUGE_BUF];
     FILE *fp;
     int comp;
     int size;
-
+    
     sprintf(buf, "%s/%s", settings.confdir, settings.motd);
     if ((fp=open_and_uncompress(buf, 0, &comp)) == NULL) {
 	return;
@@ -129,24 +97,17 @@ void display_motd(const object *op) {
       strncat(motd+size,buf,HUGE_BUF-size);
       size+=strlen(buf);
     }
-    draw_ext_info(NDI_UNIQUE | NDI_GREEN, 0, op, MSG_TYPE_MOTD, MSG_SUBTYPE_NONE,
-		  motd, NULL);
+    draw_ext_info(NDI_UNIQUE | NDI_GREEN, 0, op, MSG_TYPE_MOTD, MSG_SUBTYPE_NONE, motd, NULL);
     close_and_delete(fp, comp);
 }
 
-/**
- * Send the rules to a player.
- *
- * @param op
- * player to send rules to.
- */
 void send_rules(const object *op) {
     char buf[MAX_BUF];
     char rules[HUGE_BUF];
     FILE *fp;
     int comp;
     int size;
-
+    
     sprintf(buf, "%s/%s", settings.confdir, settings.rules);
     if ((fp=open_and_uncompress(buf, 0, &comp)) == NULL) {
     return;
@@ -164,17 +125,10 @@ void send_rules(const object *op) {
       strncat(rules+size,buf,HUGE_BUF-size);
       size+=strlen(buf);
     }
-    draw_ext_info(NDI_UNIQUE | NDI_GREEN, 0, op, MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_RULES,
-		  rules, NULL);
+    draw_ext_info(NDI_UNIQUE | NDI_GREEN, 0, op, MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_RULES, rules, NULL);
     close_and_delete(fp, comp);
 }
 
-/**
- * Send the news to a player.
- *
- * @param op
- * player to send to.
- */
 void send_news(const object *op) {
     char buf[MAX_BUF];
     char news[HUGE_BUF];
@@ -182,7 +136,7 @@ void send_news(const object *op) {
     FILE *fp;
     int comp;
     int size;
-
+    
     sprintf(buf, "%s/%s", settings.confdir, settings.news);
     if ((fp=open_and_uncompress(buf, 0, &comp)) == NULL)
         return;
@@ -191,13 +145,13 @@ void send_news(const object *op) {
     size=0;
     while (fgets(buf, MAX_BUF, fp) != NULL) {
       if( *buf == '#')
-        continue;
+        continue; 
       if ( *buf =='%'){ /* send one news */
           if (size>0)
-              draw_ext_info_format(NDI_UNIQUE | NDI_GREEN, 0, op,
+              draw_ext_info_format(NDI_UNIQUE | NDI_GREEN, 0, op, 
                   MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_NEWS,
-                  "%s:\n%s",
-                  "%s:\n%s",
+                  "%s\n%s",
+                  "!! informations: %s\n%s",
                   subject, news); /*send previously read news*/
           strcpy(subject,buf+1);
           strip_endline(subject);
@@ -214,23 +168,15 @@ void send_news(const object *op) {
           size+=strlen(buf);
       }
     }
-
-    draw_ext_info_format(NDI_UNIQUE | NDI_GREEN, 0, op,
+    
+    draw_ext_info_format(NDI_UNIQUE | NDI_GREEN, 0, op, 
         MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_NEWS,
-        "%s:\n%s",
-        "%s:\n%s",
+        "%s\n%s",
+        "!! informations: %s\n%s\n",
         subject, news);
     close_and_delete(fp, comp);
 }
 
-/**
- * Is the player name valid.
- *
- * @param cp
- * name to test.
- * @return
- * 0 if invalid, 1 if valid.
- */
 int playername_ok(const char *cp) {
     /* Don't allow - or _ as first character in the name */
     if (*cp == '-' || *cp == '_') return 0;
@@ -241,20 +187,15 @@ int playername_ok(const char *cp) {
     return 1;
 }
 
-/**
- * Create a player's object, initialize a player's structure.
- *
- * This no longer sets the player map.  Also, it now updates
+/* This no longer sets the player map.  Also, it now updates
  * all the pointers so the caller doesn't need to do that.
  * Caller is responsible for setting the correct map.
  *
  * Redo this to do both get_player_ob and get_player.
  * Hopefully this will be less bugfree and simpler.
- *
- * @param p
- * if NULL, a new player structure is created, else p is recycled.
- * @return
- * initialized player structure.
+ * Returns the player structure.  If 'p' is null,
+ * we create a new one.  Otherwise, we recycle
+ * the one that is passed.
  */
 static player* get_player(player *p) {
     object *op=arch_to_object(get_player_archetype(NULL));
@@ -287,7 +228,7 @@ static player* get_player(player *p) {
     /* Clears basically the entire player structure except
      * for next and socket.
      */
-    memset((void*)((char*)p + offsetof(player, maplevel)), 0,
+    memset((void*)((char*)p + offsetof(player, maplevel)), 0, 
 	    sizeof(player) - offsetof(player, maplevel));
 
     /* There are some elements we want initialized to non zero value -
@@ -303,9 +244,9 @@ static player* get_player(player *p) {
 #ifdef AUTOSAVE
     p->last_save_tick = 9999999;
 #endif
-
+    
     strcpy(p->savebed_map, first_map_path);  /* Init. respawn position */
-
+    
     op->contr=p; /* this aren't yet in archetype */
     p->ob = op;
     op->speed_left=0.5;
@@ -313,7 +254,6 @@ static player* get_player(player *p) {
     op->direction=5;     /* So player faces south */
     op->stats.wc=2;
     op->run_away = 25; /* Then we panick... */
-    p->socket.monitor_spells = 0; /* this needs to be set before roll_stats() as it calls fix_object() that sends the spells. */
 
     roll_stats(op);
     p->state=ST_ROLL_STAT;
@@ -329,14 +269,13 @@ static player* get_player(player *p) {
     p->peaceful=1;			/* default peaceful */
     p->do_los=1;
     p->explore=0;
-    p->no_shout=0;			/* default can shout */
-    p->language = 0;
+	p->no_shout=0;			/* default can shout */
 
     strncpy(p->title, op->arch->clone.name, sizeof(p->title)-1);
     p->title[sizeof(p->title)-1] = '\0';
     op->race = add_string (op->arch->clone.race);
 
-    CLEAR_FLAG(op,FLAG_READY_SKILL);
+    CLEAR_FLAG(op,FLAG_READY_SKILL); 
 
     /* we need to clear these to -1 and not zero - otherwise,
      * if a player quits and starts a new character, we wont
@@ -359,12 +298,7 @@ static player* get_player(player *p) {
 }
 
 
-/**
- * This loads the first map an puts the player on it.
- *
- * @param op
- * player to put on map.
- */
+/* This loads the first map an puts the player on it. */
 static void set_first_map(object *op)
 {
     strcpy(op->contr->maplevel, first_map_path);
@@ -375,14 +309,10 @@ static void set_first_map(object *op)
 
 /**
  * Tries to add player on the connection passwd in ns.
- *
- * Player object is created and put on the first map, rules/news/motd are sent.
- *
- * @param ns
- * connection.
- * @return
- * 0.
+ * All we can really get in this is some settings like host and display
+ * mode.
  */
+
 int add_player(socket_struct *ns) {
     player *p;
 
@@ -413,15 +343,9 @@ int add_player(socket_struct *ns) {
     return 0;
 }
 
-/**
- * Get next player archetype from archetype list.
- * Not very efficient routine, but used only creating new players.
- * @note there MUST be at least one player archetype! Will exit() if none.
- *
- * @param at
- * archetype to search from.
- * @return
- * next player archetype available.
+/* get_player_archetype() return next player archetype from archetype
+ * list. Not very efficient routine, but used only creating new players.
+ * Note: there MUST be at least one player archetype!
  */
 static archetype *get_player_archetype(archetype* at)
 {
@@ -440,14 +364,7 @@ static archetype *get_player_archetype(archetype* at)
     }
 }
 
-/**
- * Finds the nearest visible player for some object.
- *
- * @param mon
- * what object is searching a player.
- * @return
- * player, or NULL if nothing suitable.
- */
+
 object *get_nearest_player(object *mon) {
     object *op = NULL;
     player *pl = NULL;
@@ -476,8 +393,8 @@ object *get_nearest_player(object *mon) {
 	/* Remove special check for player from this.  First, it looks to cause
 	 * some crashes (ol->ob->contr not set properly?), but secondly, a more
 	 * complicated method of state checking would be needed in any case -
-	 * as it was, a clever player could type quit, and the function would
-	 * skip them over while waiting for confirmation.  Remove
+	 * as it was, a clever player could type quit, and the function would  
+	 * skip them over while waiting for confirmation.  Remove 
 	 * on_same_map check, as can_detect_enemy also does this
 	 */
 	if (!can_detect_enemy(mon,ol->ob,&rv))
@@ -489,29 +406,29 @@ object *get_nearest_player(object *mon) {
 	}
     }
     for (pl=first_player; pl != NULL; pl=pl->next) {
-	if (can_detect_enemy(mon, pl->ob,&rv)) {
+	if (on_same_map(mon, pl->ob)&& can_detect_enemy(mon, pl->ob,&rv)) {
+
 	    if(lastdist>rv.distance) {
 		op=pl->ob;
 		lastdist=rv.distance;
 	    }
 	}
     }
+#if 0
+    LOG(llevDebug,"get_nearest_player() finds player: %s\n",op?op->name:"(null)");
+#endif
     return op;
 }
 
-/**
- * This value basically determines how large a detour a monster will take from
- * the direction path when looking for a path to the player.
- *
- * The values are in the amount of direction the deviation is.
- *
- * I believe this can safely go to 2, 3 is questionable, 4 will likely
- * result in a monster paths backtracking.  
+/* I believe this can safely go to 2, 3 is questionable, 4 will likely
+ * result in a monster paths backtracking.  It basically determines how large a 
+ * detour a monster will take from the direction path when looking
+ * for a path to the player.  The values are in the amount of direction
+ * the deviation is
  */
 #define DETOUR_AMOUNT	2
 
-/**
- * This is used to prevent infinite loops.  Consider a case where the
+/* This is used to prevent infinite loops.  Consider a case where the
  * player is in a chamber (with gate closed), and monsters are outside.
  * with DETOUR_AMOUNT==2, the function will turn each corner, trying to
  * find a path into the chamber.  This is a good thing, but since there
@@ -526,10 +443,8 @@ object *get_nearest_player(object *mon) {
 #define MAX_SPACES	50
 
 
-/**
- * Returns the direction to the player, if valid.  Returns 0 otherwise.
- *
- * Modified to verify there is a path to the player.  Does this by stepping towards
+/* Returns the direction to the player, if valid.  Returns 0 otherwise.
+ * modified to verify there is a path to the player.  Does this by stepping towards
  * player and if path is blocked then see if blockage is close enough to player that
  * direction to player is changed (ie zig or zag).  Continue zig zag until either
  * reach player or path is blocked.  Thus, will only return true if there is a free
@@ -537,25 +452,16 @@ object *get_nearest_player(object *mon) {
  * player hiding along a corridor at right angles to the corridor with the monster.
  *
  * Modified by MSW 2001-08-06 to handle tiled maps. Various notes:
- * - With DETOUR_AMOUNT being 2, it should still go and find players hiding
+ * 1) With DETOUR_AMOUNT being 2, it should still go and find players hiding
  * down corriders.
- * - I think the old code was broken if the first direction the monster
+ * 2) I think the old code was broken if the first direction the monster
  * should move was blocked - the code would store the first direction without
  * verifying that the player can actually move in that direction.  The new
  * code does not store anything in firstdir until we have verified that the
  * monster can in fact move one space in that direction.
- * - I'm not sure how good this code will be for moving multipart monsters,
+ * 3) I'm not sure how good this code will be for moving multipart monsters,
  * since only simple checks to blocked are being called, which could mean the monster
  * is blocking itself.
- *
- * @param mon
- * source object.
- * @param pl
- * target.
- * @param mindiff
- * minimal distance mon and pl should have.
- * @return
- * direction from mon to pl, 0 if can't get there.
  */
 int path_to_player(object *mon, object *pl, unsigned mindiff) {
     rv_vector	rv;
@@ -581,7 +487,7 @@ int path_to_player(object *mon, object *pl, unsigned mindiff) {
 	lastmap = m;
 	x = lastx + freearr_x[dir];
 	y = lasty + freearr_y[dir];
-
+	
 	mflags = get_map_flags(m, &m, x, y, &x, &y);
 	blocked = (mflags & P_OUT_OF_MAP) ? MOVE_ALL : GET_MAP_MOVE_BLOCK(m, x, y);
 
@@ -603,7 +509,7 @@ int path_to_player(object *mon, object *pl, unsigned mindiff) {
 	    } else {
 		/* direct path is blocked - try taking a side step to
 		 * either the left or right.
-		 * Note increase the values in the loop below to be
+		 * Note increase the values in the loop below to be 
 		 * more than -1/1 respectively will mean the monster takes
 		 * bigger detour.  Have to be careful about these values getting
 		 * too big (3 or maybe 4 or higher) as the monster may just try
@@ -622,7 +528,7 @@ int path_to_player(object *mon, object *pl, unsigned mindiff) {
 		     * the last direction the creature has successfully
 		     * moved.
 		     */
-
+		    
 		    x = lastx + freearr_x[absdir(lastdir+i)];
 		    y = lasty + freearr_y[absdir(lastdir+i)];
 		    m = lastmap;
@@ -667,16 +573,6 @@ int path_to_player(object *mon, object *pl, unsigned mindiff) {
     return firstdir;
 }
 
-/**
- * Gives a new player her initial items.
- *
- * They will be god-given, and suitable for the player's race/restrictions.
- *
- * @param pl
- * player.
- * @param items
- * treasure list containing the items.
- */
 void give_initial_items(object *pl,treasurelist *items) {
     object *op,*next=NULL;
 
@@ -685,15 +581,15 @@ void give_initial_items(object *pl,treasurelist *items) {
 
     for (op=pl->inv; op; op=next) {
 	next = op->below;
-
+	
 	/* Forces get applied per default, unless they have the
-         * flag "neutral" set. Sorry but I can't think of a better way
+         * flag "neutral" set. Sorry but I can't think of a better way 
 	 */
   	if(op->type==FORCE && !QUERY_FLAG(op, FLAG_NEUTRAL))
 	    SET_FLAG(op,FLAG_APPLIED);
-
+	
 	/* we never give weapons/armour if these cannot be used
-         * by this player due to race restrictions
+         * by this player due to race restrictions 
 	 */
 	if (pl->type == PLAYER) {
         if ((!QUERY_FLAG(pl, FLAG_USE_ARMOUR) && IS_ARMOR(op)) ||
@@ -769,36 +665,18 @@ void give_initial_items(object *pl,treasurelist *items) {
     }
 }
 
-/**
- * Waiting for the player's name.
- *
- * @param op
- * player.
- */
 void get_name(object *op) {
     op->contr->write_buf[0]='\0';
     op->contr->state=ST_GET_NAME;
     send_query(&op->contr->socket,0,"What is your name?\n:");
 }
 
-/**
- * Waiting for the player's password.
- *
- * @param op
- * player.
- */
 void get_password(object *op) {
     op->contr->write_buf[0]='\0';
     op->contr->state=ST_GET_PASSWORD;
     send_query(&op->contr->socket,CS_QUERY_HIDEINPUT, "What is your password?\n:");
 }
 
-/**
- * Ask the player whether to play again or disconnect.
- *
- * @param op
- * player.
- */
 void play_again(object *op)
 {
     op->contr->state=ST_PLAY_AGAIN;
@@ -812,7 +690,7 @@ void play_again(object *op)
      * to leave it to play_again to remove the object in all
      * cases.
      */
-    if (!QUERY_FLAG(op, FLAG_REMOVED))
+    if (!QUERY_FLAG(op, FLAG_REMOVED)) 
 	remove_ob(op);
     /* Need to set this to null - otherwise, it could point to garbage,
      * and draw() doesn't check to see if the player is removed, only if
@@ -821,19 +699,7 @@ void play_again(object *op)
     op->map = NULL;
 }
 
-/**
- * Player replied to play again / disconnect.
- *
- * @param op
- * player.
- * @param key
- * received choice.
- * @retval 0
- * player is playing again.
- * @retval 2
- * player wants to disconnect.
- * @todo check why 2?
- */
+
 int receive_play_again(object *op, char key)
 {
     if(key=='q'||key=='Q') {
@@ -856,8 +722,7 @@ int receive_play_again(object *op, char key)
 	FREE_AND_CLEAR_STR(op->name_pl);
 
 	/* Lets put a space in here */
-	draw_ext_info(NDI_UNIQUE, 0, op, MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_LOGIN,
-		      "\n", "\n");
+	new_draw_info(NDI_UNIQUE, 0, op, "\n");
 	get_name(op);
 	op->name = name;		/* Already added a refcount above */
 	op->name_pl = add_string(name);
@@ -869,12 +734,6 @@ int receive_play_again(object *op, char key)
     return 0;
 }
 
-/**
- * Ask the player to confirm her password during creation.
- *
- * @param op
- * player.
- */
 void confirm_password(object *op) {
 
     op->contr->write_buf[0]='\0';
@@ -882,14 +741,6 @@ void confirm_password(object *op) {
     send_query(&op->contr->socket, CS_QUERY_HIDEINPUT, "Please type your password again.\n:");
 }
 
-/**
- * Ask the player for the password of the party she wants to join.
- *
- * @param op
- * player.
- * @param party
- * party op wishes to join.
- */
 void get_party_password(object *op, partylist *party) {
     if (party == NULL) {
 	LOG(llevError, "get_party_password(): tried to make player %s join a NULL party\n", op->name);
@@ -902,12 +753,7 @@ void get_party_password(object *op, partylist *party) {
 }
 
 
-/**
- * This rolls four 1-6 rolls and sums the best 3 of the 4.
- *
- * @return
- * sum of rolls.
- */
+/* This rolls four 1-6 rolls and sums the best 3 of the 4. */
 int roll_stat(void) {
     int a[4],i,j,k;
 
@@ -925,12 +771,6 @@ int roll_stat(void) {
     return k;
 }
 
-/**
- * Roll the initial player's statistics.
- *
- * @param op
- * player to roll for.
- */
 void roll_stats(object *op) {
     int sum=0;
     int i = 0, j = 0;
@@ -947,7 +787,7 @@ void roll_stats(object *op) {
 	sum=op->stats.Str+op->stats.Dex+op->stats.Int+
 	    op->stats.Con+op->stats.Wis+op->stats.Pow+
 	    op->stats.Cha;
-    } while (sum!=105);	/* 116 used to be best possible character */
+    } while(sum<82||sum>116);
 
     /* Sort the stats so that rerolling is easier... */
     statsort[0] = op->stats.Str;
@@ -995,40 +835,28 @@ void roll_stats(object *op) {
     op->contr->levsp[1] = 6;
     op->contr->levgrace[1] = 3;
 
-    fix_object(op);
+    fix_player(op);
     op->stats.hp = op->stats.maxhp;
     op->stats.sp = op->stats.maxsp;
     op->stats.grace = op->stats.maxgrace;
     op->contr->orig_stats=op->stats;
 }
 
-/**
- * Ask the player what to do with the statistics.
- *
- * @param op
- * player.
- */
 void roll_again(object *op)
 {
     esrv_new_player(op->contr, 0);
     send_query(&op->contr->socket,CS_QUERY_SINGLECHAR,"[y] to roll new stats [n] to use stats\n[1-7] [1-7] to swap stats.\nRoll again (y/n/1-7)?  ");
 }
 
-/**
- * Player finishes selecting what stats to swap.
- *
- * @param op
- * player.
- * @param Swap_Second
- * second statistic to swap.
- * @todo why the reinit of exp/ac/...?
- */
 static void swap_stat(object *op,int Swap_Second)
 {
     signed char tmp;
+    char buf[MAX_BUF];
 
     if ( op->contr->Swap_First == -1 ) {
-	LOG(llevError,"player.c:swap_stat() - Swap_First is -1\n");
+	new_draw_info(NDI_UNIQUE, 0,op,"How the hell did you get here?!?!!!");
+	new_draw_info(NDI_UNIQUE, 0,op,"Error in swap_stat code,");
+	new_draw_info(NDI_UNIQUE, 0,op,"mail korg@rdt.monash.edu.au");
 	return;
     }
 
@@ -1039,11 +867,8 @@ static void swap_stat(object *op,int Swap_Second)
 
     set_attr_value(&op->contr->orig_stats, Swap_Second, tmp);
 
-    draw_ext_info_format(NDI_UNIQUE, 0,op, MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_NEWPLAYER,
-		  "%s done\n",
-		  "%s done\n",
-		  short_stat_name[Swap_Second]);
-
+    sprintf(buf,"%s done\n", short_stat_name[Swap_Second]);
+    new_draw_info(NDI_UNIQUE, 0,op, buf);
     op->stats.Str = op->contr->orig_stats.Str;
     op->stats.Dex = op->contr->orig_stats.Dex;
     op->stats.Con = op->contr->orig_stats.Con;
@@ -1061,7 +886,7 @@ static void swap_stat(object *op,int Swap_Second)
     op->contr->levsp[1] = 6;
     op->contr->levgrace[1] = 3;
 
-    fix_object(op);
+    fix_player(op);
     op->stats.hp = op->stats.maxhp;
     op->stats.sp = op->stats.maxsp;
     op->stats.grace = op->stats.maxgrace;
@@ -1070,37 +895,24 @@ static void swap_stat(object *op,int Swap_Second)
 }
 
 
-/**
- * Player is currently swapping stats.
- *
- * This code has been greatly reduced, because with set_attr_value
+/* This code has been greatly reduced, because with set_attr_value
  * and get_attr_value, the stats can be accessed just numeric
  * ids.  stat_trans is a table that translate the number entered
  * into the actual stat.  It is needed because the order the stats
  * are displayed in the stat window is not the same as how
  * the number's access that stat.  The table does that translation.
- *
- * @param op
- * player.
- * @param key
- * received key.
- * @return
- * 0 or 1.
- * @todo check return value.
  */
 int key_roll_stat(object *op, char key)
 {
     int keynum = key -'0';
+    char buf[MAX_BUF];
     static sint8 stat_trans[] = {-1, STR, DEX, CON, INT, WIS, POW, CHA};
 
     if (keynum>0 && keynum<=7) {
 	if (op->contr->Swap_First==-1) {
 	    op->contr->Swap_First=stat_trans[keynum];
-	    draw_ext_info_format(NDI_UNIQUE, 0,op,
-			 MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_NEWPLAYER,
-			  "%s ->",
-			  "%s ->",
-			  short_stat_name[stat_trans[keynum]]);
+	    sprintf(buf,"%s ->", short_stat_name[stat_trans[keynum]]);
+	    new_draw_info(NDI_UNIQUE, 0,op,buf);
 	}
 	else
 	    swap_stat(op,stat_trans[keynum]);
@@ -1117,15 +929,19 @@ int key_roll_stat(object *op, char key)
 		break;
 	    }
 
+#if 0
+	    /* So that enter_exit will put us at startx/starty */
+	    op->x= -1;
+
+	    enter_exit(op,NULL);
+#endif
 	    SET_ANIMATION(op, 2);     /* So player faces south */
 	    /* Enter exit adds a player otherwise */
 	    add_statbonus(op);
 	    send_query(&op->contr->socket,CS_QUERY_SINGLECHAR,"Now choose a character.\nPress any key to change outlook.\nPress `d' when you're pleased.\n");
 	    op->contr->state = ST_CHANGE_CLASS;
 	    if (op->msg)
-		draw_ext_info(NDI_BLUE, 0, op,
-			      MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_NEWPLAYER,
-			      op->msg, op->msg);
+		new_draw_info(NDI_BLUE, 0, op, op->msg);
 	    return 0;
 	}
      case 'y':
@@ -1146,19 +962,11 @@ int key_roll_stat(object *op, char key)
     return 0;
 }
 
-/**
- * This function takes the key that is passed, and does the
+/* This function takes the key that is passed, and does the
  * appropriate action with it (change race, or other things).
  * The function name is for historical reasons - now we have
  * separate race and class; this actually changes the RACE,
  * not the class.
- *
- * @param op
- * player.
- * @param key
- * key to handle.
- * @return
- * 0.
  */
 
 int key_change_class(object *op, char key)
@@ -1203,7 +1011,7 @@ int key_change_class(object *op, char key)
 	give_initial_items(op,op->randomitems);
 	link_player_skills(op);
 	esrv_send_inventory(op, op);
-    fix_object(op);
+	fix_player(op);
 
         /* This moves the player to a different start map, if there
          * is one for this race
@@ -1211,26 +1019,17 @@ int key_change_class(object *op, char key)
         if(*first_map_ext_path) {
             object *tmp;
             char mapname[MAX_BUF];
-            mapstruct* oldmap;
-
-            oldmap = op->map;
 
             snprintf(mapname, MAX_BUF-1, "%s/%s",
                      first_map_ext_path, op->arch->name);
-            /*printf("%s\n", mapname);*/
+            printf("%s\n", mapname);
             tmp=get_object();
             EXIT_PATH(tmp) = add_string(mapname);
             EXIT_X(tmp) = op->x;
             EXIT_Y(tmp) = op->y;
-            enter_exit(op,tmp);
-
-            if (oldmap != op->map) {
-                /* map exists, update bed of reality location, in case player dies */
-                op->contr->bed_x = op->x;
-                op->contr->bed_y = op->y;
-                snprintf(op->contr->savebed_map, sizeof(op->contr->savebed_map), mapname);
-            }
-
+            enter_exit(op,tmp); /* we don't really care if it succeeded;
+                                 * if the map isn't there, then stay on the
+                                 * default initial map */
             free_object(tmp);
         } else {
             LOG(llevDebug,"first_map_ext_path not set\n");
@@ -1266,35 +1065,23 @@ int key_change_class(object *op, char key)
     }
     update_object(op,UP_OBJ_FACE);
     esrv_update_item(UPD_FACE,op,op);
-    fix_object(op);
+    fix_player(op);
     op->stats.hp=op->stats.maxhp;
     op->stats.sp=op->stats.maxsp;
     op->stats.grace=0;
-    if (op->msg)
-	draw_ext_info(NDI_BLUE, 0, op, MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_NEWPLAYER,
-		      op->msg, op->msg);
+    if (op->msg) 
+	new_draw_info(NDI_BLUE, 0, op, op->msg);
     send_query(&op->contr->socket,CS_QUERY_SINGLECHAR,"Press any key for the next race.\nPress `d' to play this race.\n");
     return 0;
 }
 
-/**
- * We receive the reply to the 'quit confirmation' message.
- *
- * @param op
- * player.
- * @param key
- * reply.
- * @return
- * 1.
- */
 int key_confirm_quit(object *op, char key)
 {
     char buf[MAX_BUF];
 
     if(key!='y'&&key!='Y'&&key!='q'&&key!='Q') {
 	op->contr->state=ST_PLAYING;
-	draw_ext_info(NDI_UNIQUE, 0,op,MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_LOGIN,
-		      "OK, continuing to play.", NULL);
+	new_draw_info(NDI_UNIQUE, 0,op,"OK, continuing to play.");
 	return 1;
     }
 
@@ -1303,11 +1090,8 @@ int key_confirm_quit(object *op, char key)
     terminate_all_pets(op);
     remove_ob(op);
     op->direction=0;
-    draw_ext_info_format(NDI_UNIQUE | NDI_ALL | NDI_DK_ORANGE, 5, NULL,
-			 MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_PLAYER,
-			 "%s quits the game.",
-			 "%s quits the game.",
-			 op->name);
+    new_draw_info_format(NDI_UNIQUE | NDI_ALL | NDI_DK_ORANGE, 5, NULL,
+	"%s quits the game.",op->name);
 
     strcpy(op->contr->killer,"quit");
     check_score(op,0);
@@ -1328,19 +1112,13 @@ int key_confirm_quit(object *op, char key)
 	    if (!strncmp(mp->path, buf, strlen(buf)))
 		delete_map(mp);
 	}
-
+	
 	delete_character(op->name);
     }
     play_again(op);
     return 1;
 }
 
-/**
- * The player is scared, and should flee. If she can't, then she isn't scared anymore.
- *
- * @param op
- * player.
- */
 static void flee_player(object *op) {
     int dir,diff;
     rv_vector rv;
@@ -1388,14 +1166,9 @@ static void flee_player(object *op) {
 }
 
 
-/**
- * Sees if there is stuff to be picked up/picks up stuff, for players only.
- * @param op
- * player to check for.
- * @retval 1
- * player should keep on moving.
- * @retval 0
- * player should stop.
+/* check_pick sees if there is stuff to be picked up/picks up stuff.
+ * IT returns 1 if the player should keep on moving, 0 if he should
+ * stop.
  */
 int check_pick(object *op) {
   object *tmp, *next;
@@ -1476,12 +1249,15 @@ int check_pick(object *op) {
       if(op->contr->mode & PU_DEBUG)
       {
 	/* some debugging code to figure out item information */
-	draw_ext_info_format(NDI_UNIQUE, 0,op, MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_DEBUG,
-		      "item name: %s    item type: %d    weight/value: %d",
-		      "item name: %s    item type: %d    weight/value: %d",
-		      tmp->name?tmp->name:tmp->arch->name, tmp->type,
-		      (int)(query_cost(tmp, op, F_TRUE)*100 / (tmp->weight * MAX(tmp->nrof,1))));
-
+	if(tmp->name!=NULL)
+	  sprintf(putstring,"item name: %s    item type: %d    weight/value: %d",
+	      tmp->name, tmp->type,
+	      (int)(query_cost(tmp, op, F_TRUE)*100 / (tmp->weight * MAX(tmp->nrof,1))));
+	else
+	  sprintf(putstring,"item name: %s    item type: %d    weight/value: %d",
+	      tmp->arch->name, tmp->type,
+	      (int)(query_cost(tmp, op, F_TRUE)*100 / (tmp->weight * MAX(tmp->nrof,1))));
+	new_draw_info(NDI_UNIQUE, 0,op,putstring);
 
 	sprintf(putstring,"...flags: ");
 	for(k=0;k<4;k++)
@@ -1495,8 +1271,7 @@ int check_pick(object *op) {
 	    }
 	  }
 	}
-	draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_SUCCESS,
-		      putstring, putstring);
+	new_draw_info(NDI_UNIQUE, 0,op,putstring);
       }
       /* philosophy:
        * It's easy to grab an item type from a pile, as long as it's
@@ -1553,17 +1328,17 @@ int check_pick(object *op) {
 
       /* spellbooks, skillscrolls and normal books/scrolls */
       if(op->contr->mode & PU_SPELLBOOK)
-	if (tmp->type == SPELLBOOK)
+	if (tmp->type == SPELLBOOK) 
 	{ pick_up(op, tmp); if(0)fprintf(stderr,"SPELLBOOK\n"); continue; }
       if(op->contr->mode & PU_SKILLSCROLL)
-	if (tmp->type == SKILLSCROLL)
+	if (tmp->type == SKILLSCROLL) 
 	{ pick_up(op, tmp); if(0)fprintf(stderr,"SKILLSCROLL\n"); continue; }
       if(op->contr->mode & PU_READABLES)
-	if (tmp->type == BOOK || tmp->type == SCROLL)
+	if (tmp->type == BOOK || tmp->type == SCROLL) 
 	{ pick_up(op, tmp); if(0)fprintf(stderr,"READABLES\n"); continue; }
 
     /* wands/staves/rods/horns */
-    if (op->contr->mode & PU_MAGIC_DEVICE)
+    if (op->contr->mode & PU_MAGIC_DEVICE) 
 	if (tmp->type == WAND || tmp->type == ROD || tmp->type == HORN)
 	{ pick_up(op, tmp); if(0)fprintf(stderr,"MAGIC_DEVICE\n"); continue; }
 
@@ -1574,7 +1349,7 @@ int check_pick(object *op) {
 
       if(op->contr->mode & PU_VALUABLES)
       {
-	if (tmp->type == MONEY || tmp->type == GEM)
+	if (tmp->type == MONEY || tmp->type == GEM) 
 	{ pick_up(op, tmp); if(0)fprintf(stderr,"MONEY/GEM\n"); continue; }
       }
 
@@ -1585,7 +1360,7 @@ int check_pick(object *op) {
 
       /* bows and arrows. Bows are good for selling! */
       if(op->contr->mode & PU_BOW)
-	if (tmp->type == BOW)
+	if (tmp->type == BOW) 
 	{ pick_up(op, tmp); if(0)fprintf(stderr,"BOW\n"); continue; }
       if(op->contr->mode & PU_ARROW)
 	if (tmp->type == ARROW)
@@ -1593,49 +1368,49 @@ int check_pick(object *op) {
 
       /* all kinds of armor etc. */
       if(op->contr->mode & PU_ARMOUR)
-	if (tmp->type == ARMOUR)
+	if (tmp->type == ARMOUR) 
 	{ pick_up(op, tmp); if(0)fprintf(stderr,"ARMOUR\n"); continue; }
       if(op->contr->mode & PU_HELMET)
-	if (tmp->type == HELMET)
+	if (tmp->type == HELMET) 
 	{ pick_up(op, tmp); if(0)fprintf(stderr,"HELMET\n"); continue; }
       if(op->contr->mode & PU_SHIELD)
-	if (tmp->type == SHIELD)
+	if (tmp->type == SHIELD) 
 	{ pick_up(op, tmp); if(0)fprintf(stderr,"SHIELD\n"); continue; }
       if(op->contr->mode & PU_BOOTS)
-	if (tmp->type == BOOTS)
+	if (tmp->type == BOOTS) 
 	{ pick_up(op, tmp); if(0)fprintf(stderr,"BOOTS\n"); continue; }
       if(op->contr->mode & PU_GLOVES)
-	if (tmp->type == GLOVES)
+	if (tmp->type == GLOVES) 
 	{ pick_up(op, tmp); if(0)fprintf(stderr,"GLOVES\n"); continue; }
       if(op->contr->mode & PU_CLOAK)
-	if (tmp->type == CLOAK)
+	if (tmp->type == CLOAK) 
 	{ pick_up(op, tmp); if(0)fprintf(stderr,"GLOVES\n"); continue; }
 
       /* hoping to catch throwing daggers here */
       if(op->contr->mode & PU_MISSILEWEAPON)
-	if(tmp->type == WEAPON && QUERY_FLAG(tmp, FLAG_IS_THROWN))
+	if(tmp->type == WEAPON && QUERY_FLAG(tmp, FLAG_IS_THROWN)) 
 	{ pick_up(op, tmp); if(0)fprintf(stderr,"MISSILEWEAPON\n"); continue; }
 
       /* careful: chairs and tables are weapons! */
       if(op->contr->mode & PU_ALLWEAPON)
       {
-	if(tmp->type == WEAPON && tmp->name!=NULL)
+	if(tmp->type == WEAPON && tmp->name!=NULL) 
 	{
 	  if(strstr(tmp->name,"table")==NULL && strstr(tmp->arch->name,"table")==NULL &&
-	      strstr(tmp->name,"chair") && strstr(tmp->arch->name,"chair")==NULL)
+	      strstr(tmp->name,"chair") && strstr(tmp->arch->name,"chair")==NULL) 
 	  { pick_up(op, tmp); if(0)fprintf(stderr,"WEAPON\n"); continue; }
 	}
-	if(tmp->type == WEAPON && tmp->name==NULL)
+	if(tmp->type == WEAPON && tmp->name==NULL) 
 	{
 	  if(strstr(tmp->arch->name,"table")==NULL &&
-	      strstr(tmp->arch->name,"chair")==NULL)
+	      strstr(tmp->arch->name,"chair")==NULL) 
 	  { pick_up(op, tmp); if(0)fprintf(stderr,"WEAPON\n"); continue; }
 	}
       }
 
       /* misc stuff that's useful */
       if(op->contr->mode & PU_KEY)
-	if (tmp->type == KEY || tmp->type == SPECIAL_KEY)
+	if (tmp->type == KEY || tmp->type == SPECIAL_KEY) 
 	{ pick_up(op, tmp); if(0)fprintf(stderr,"KEY\n"); continue; }
 
       /* any of the last 4 bits set means we use the ratio for value
@@ -1650,6 +1425,15 @@ int check_pick(object *op) {
 	if ((query_cost(tmp, op, F_TRUE)*100 / (tmp->weight * MAX(tmp->nrof, 1))) >= wvratio)
 	{
 	  pick_up(op, tmp);
+#if 0
+	  fprintf(stderr,"HIGH WEIGHT/VALUE [");
+	  if(tmp->name!=NULL) {
+	    fprintf(stderr,"%s", tmp->name);
+	  }
+	  else fprintf(stderr,"%s",tmp->arch->name);
+	  fprintf(stderr,",%d] = ", tmp->type);
+	  fprintf(stderr,"%d\n",(int)(query_cost(tmp,op,F_TRUE)*100 / (tmp->weight * MAX(tmp->nrof,1))));
+#endif
 	  continue;
 	}
       }
@@ -1658,17 +1442,9 @@ int check_pick(object *op) {
   return ! stop;
 }
 
-/**
- * Find an arrow in the inventory and after that
- *  in the right type container (quiver). Pointer to the
+/*  Find an arrow in the inventory and after that
+ *  in the right type container (quiver). Pointer to the 
  *  found object is returned.
- *
- * @param op
- * object to find arrow for.
- * @param type
- * what arrow race to search for.
- * @return
- * suitable arrow, NULL if none found.
  */
 static object *find_arrow(object *op, const char *type)
 {
@@ -1683,23 +1459,12 @@ static object *find_arrow(object *op, const char *type)
     return tmp;
 }
 
-/**
- * Similar to find_arrow(), but looks for (roughly) the best arrow to use
+/* Similar to find_arrow, but looks for (roughly) the best arrow to use
  * against the target.  A full test is not performed, simply a basic test
  * of resistances.  The archer is making a quick guess at what he sees down
  * the hall.  Failing that it does it's best to pick the highest plus arrow.
- *
- * @param op
- * who to search arrows for.
- * @param target
- * what op is aiming at.
- * @param type
- * arrow race to search for.
- * @param[out] better
- * will contain the arrow's value if not NULL.
- * @return
- * suitable arrow, NULL if none found.
  */
+
 static object *find_better_arrow(object *op, object *target, const char *type, int *better)
 {
     object *tmp = NULL, *arrow, *ntmp;
@@ -1722,8 +1487,7 @@ static object *find_better_arrow(object *op, object *target, const char *type, i
 	    if (target->race != NULL && arrow->slaying != NULL &&
 		strstr(arrow->slaying, target->race)) {
 		if (arrow->attacktype & AT_DEATH) {
-            if (better)
-		      *better = 100;
+		    *better = 100;
 		    return arrow;
 		} else {
 		    tmp = arrow;
@@ -1752,23 +1516,17 @@ static object *find_better_arrow(object *op, object *target, const char *type, i
     if (tmp == NULL && arrow == NULL)
 	return find_arrow(op, type);
 
-    if (better)
-        *better = betterby;
+    *better = betterby;
     return tmp;
 }
 
-/**
- * Looks in a given direction, finds the first valid target, and calls
- * find_better_arrow() to find a decent arrow to use.
- * @param op
- * shooter.
- * @param type
- * arrow's race to search for (the bow's usually).
- * @param dir
- * fire direction.
- * @return
- * suitable arrow, or NULL if none found.
+/* looks in a given direction, finds the first valid target, and calls
+ * find_better_arrow to find a decent arrow to use.
+ * op = the shooter
+ * type = bow->race
+ * dir = fire direction
  */
+
 static object *pick_arrow_target(object *op, const char *type, int dir)
 {
     object *tmp = NULL;
@@ -1819,28 +1577,19 @@ static object *pick_arrow_target(object *op, const char *type, int dir)
     if (tmp->head)
 	tmp = tmp->head;
 
-    return find_better_arrow(op, tmp, type, NULL);
+    return find_better_arrow(op, tmp, type, &i);
 }
 
-/**
- * Creature (monster or player) fires a bow.
- *
- * @param op
- * object firing the bow.
- * @param arrow
- * object to fire.
- * @param dir
- * direction of fire.
- * @param wc_mod
- * any special modifier to give (used in special player fire modes)
- * @param sx
- * @param sy
- * coordinates to fire arrow from - also used in some of the special player fire modes.
- * @return
+/* Creature fires a bow - op can be monster or player.  Returns 
  * 1 if bow was actually fired, 0 otherwise.
- * @todo describe player firing modes.
+ * op is the object firing the bow.
+ * part is for multipart creatures - the part firing the bow.
+ * dir is the direction of fire.
+ * wc_mod is any special modifier to give (used in special player fire modes)
+ * sx, sy are coordinates to fire arrow from - also used in some of the special
+ * player fire modes.
  */
-int fire_bow(object *op, object *arrow, int dir, int wc_mod,
+int fire_bow(object *op, object *part, object *arrow, int dir, int wc_mod,
              sint16 sx, sint16 sy)
 {
     object *left, *bow;
@@ -1849,11 +1598,10 @@ int fire_bow(object *op, object *arrow, int dir, int wc_mod,
     mapstruct	*m;
 
     if (!dir) {
-	draw_ext_info(NDI_UNIQUE, 0, op, MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_ERROR,
-		      "You can't shoot yourself!", NULL);
+	new_draw_info(NDI_UNIQUE, 0, op, "You can't shoot yourself!");
 	return 0;
     }
-    if (op->type == PLAYER)
+    if (op->type == PLAYER) 
 	bow=op->contr->ranges[range_bow];
     else {
 	for(bow=op->inv; bow; bow=bow->below)
@@ -1869,10 +1617,7 @@ int fire_bow(object *op, object *arrow, int dir, int wc_mod,
 	}
     }
     if( !bow->race || !bow->skill) {
-	draw_ext_info_format(NDI_UNIQUE, 0, op, MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_ERROR,
-			     "Your %s is broken.",
-			     "Your %s is broken.",
-			     bow->name);
+	new_draw_info_format(NDI_UNIQUE, 0, op, "Your %s is broken.", bow->name);
 	return 0;
     }
 
@@ -1887,12 +1632,9 @@ int fire_bow(object *op, object *arrow, int dir, int wc_mod,
     if (arrow == NULL) {
 	if ((arrow=find_arrow(op, bow->race)) == NULL) {
 	    if (op->type == PLAYER)
-		draw_ext_info_format(NDI_UNIQUE, 0, op,
-				     MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_ERROR,
-				     "You have no %s left.",
-				     "You have no %s left.",
-				     bow->race);
-	    /* FLAG_READY_BOW will get reset if the monsters picks up some arrows */
+		new_draw_info_format(NDI_UNIQUE, 0, op,
+		    "You have no %s left.", bow->race);
+     /* FLAG_READY_BOW will get reset if the monsters picks up some arrows */
 	    else
 		CLEAR_FLAG(op, FLAG_READY_BOW);
 	    return 0;
@@ -1915,13 +1657,10 @@ int fire_bow(object *op, object *arrow, int dir, int wc_mod,
 
     left = arrow; /* these are arrows left to the player */
     left_tag = left->count;
-    arrow = get_split_ob(arrow, 1, NULL, 0);
+    arrow = get_split_ob(arrow, 1);
     if (arrow == NULL) {
-	draw_ext_info_format(NDI_UNIQUE, 0, op,
-			     MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_ERROR,
-			     "You have no %s left.",
-			     "You have no %s left.",
-			     bow->race);
+	new_draw_info_format(NDI_UNIQUE, 0, op, "You have no %s left.",
+	     bow->race);
 	return 0;
     }
     set_owner(arrow, op);
@@ -1934,12 +1673,12 @@ int fire_bow(object *op, object *arrow, int dir, int wc_mod,
 
     if (op->type == PLAYER) {
 	op->speed_left = 0.01 - (float)FABS(op->speed) * 100 / bowspeed;
-    fix_object(op);
+	fix_player(op);
     }
 
     SET_ANIMATION(arrow, arrow->direction);
     arrow->stats.sp = arrow->stats.wc; /* save original wc and dam */
-    arrow->stats.hp = arrow->stats.dam;
+    arrow->stats.hp = arrow->stats.dam; 
     arrow->stats.grace = arrow->attacktype;
     if (arrow->slaying != NULL)
 	arrow->spellarg = strdup_local(arrow->slaying);
@@ -1947,7 +1686,7 @@ int fire_bow(object *op, object *arrow, int dir, int wc_mod,
     /* Note that this was different for monsters - they got their level
      * added to the damage.  I think the strength bonus is more proper.
      */
-
+     
     arrow->stats.dam += (QUERY_FLAG(bow, FLAG_NO_STRENGTH) ?
 	    0 : dam_bonus[op->stats.Str]) +
 	    bow->stats.dam + bow->magic + arrow->magic;
@@ -1964,7 +1703,7 @@ int fire_bow(object *op, object *arrow, int dir, int wc_mod,
     arrow->speed_left = 0;
 
     if (op->type == PLAYER) {
-	arrow->stats.wc = 20 - bow->magic - arrow->magic -
+	arrow->stats.wc = 20 - bow->magic - arrow->magic - 
 	    (op->chosen_skill?op->chosen_skill->level:op->level) -
 	    dex_bonus[op->stats.Dex] - thaco_bonus[op->stats.Str] -
 	    arrow->stats.wc - bow->stats.wc + wc_mod;
@@ -1986,139 +1725,111 @@ int fire_bow(object *op, object *arrow, int dir, int wc_mod,
     arrow->move_type = MOVE_FLY_LOW;
     arrow->move_on = MOVE_FLY_LOW | MOVE_WALK;
 
+    play_sound_map(op->map, op->x, op->y, SOUND_FIRE_ARROW);
     tag = arrow->count;
     insert_ob_in_map(arrow, m, op, 0);
 
-    if (!was_destroyed(arrow, tag)) {
-        play_sound_map(SOUND_TYPE_ITEM, arrow, arrow->direction, "fire");
-        ob_process(arrow);
-    }
+    if (!was_destroyed(arrow, tag))
+	move_arrow(arrow);
 
     return 1;
 }
 
-/**
- * Special fire code for players - this takes into
+/* Special fire code for players - this takes into
  * account the special fire modes players can have
  * but monsters can't.  Putting that code here
- * makes the fire_bow() code much cleaner.
- *
- * This function should only be called if 'op' is a player,
+ * makes the fire_bow code much cleaner.
+ * this function should only be called if 'op' is a player,
  * hence the function name.
- *
- * @param op
- * player.
- * @param dir
- * firing direction.
- * @return
- * 1 if arrow was fired, 0 else.
  */
 static int player_fire_bow(object *op, int dir)
 {
     int ret=0, wcmod=0;
 
     if (op->contr->bowtype == bow_bestarrow) {
-	ret = fire_bow(op, pick_arrow_target(op, op->contr->ranges[range_bow]->race, dir),
+	ret = fire_bow(op, op,
+	    pick_arrow_target(op, op->contr->ranges[range_bow]->race, dir),
 	    dir, 0, op->x, op->y);
     } else if (op->contr->bowtype >= bow_n && op->contr->bowtype <= bow_nw) {
 	if (!similar_direction(dir, op->contr->bowtype - bow_n + 1))
 	    wcmod =-1;
-	ret = fire_bow(op, NULL, op->contr->bowtype - bow_n + 1, wcmod,
+	ret = fire_bow(op, op, NULL, op->contr->bowtype - bow_n + 1, wcmod,
 	    op->x, op->y);
     } else if (op->contr->bowtype == bow_threewide) {
-	ret = fire_bow(op, NULL, dir, 0, op->x, op->y);
-	ret |= fire_bow(op, NULL, dir, -5, op->x + freearr_x[absdir(dir+2)], op->y + freearr_y[absdir(dir+2)]);
-	ret |= fire_bow(op, NULL, dir, -5, op->x + freearr_x[absdir(dir-2)], op->y + freearr_y[absdir(dir-2)]);
+	ret = fire_bow(op, op, NULL, dir, 0, op->x, op->y);
+	ret |= fire_bow(op, op, NULL, dir, -5, op->x + freearr_x[absdir(dir+2)], op->y + freearr_y[absdir(dir+2)]);
+	ret |= fire_bow(op, op, NULL, dir, -5, op->x + freearr_x[absdir(dir-2)], op->y + freearr_y[absdir(dir-2)]);
     } else if (op->contr->bowtype == bow_spreadshot) {
-	ret |= fire_bow(op, NULL, dir, 0, op->x, op->y);
-	ret |= fire_bow(op, NULL, absdir(dir-1), -5, op->x, op->y);
-	ret |= fire_bow(op, NULL, absdir(dir+1), -5, op->x, op->y);
+	ret |= fire_bow(op, op, NULL, dir, 0, op->x, op->y);
+	ret |= fire_bow(op, op, NULL, absdir(dir-1), -5, op->x, op->y);
+	ret |= fire_bow(op, op, NULL, absdir(dir+1), -5, op->x, op->y);
 
     } else {
 	/* Simple case */
-	ret = fire_bow(op, NULL, dir, 0, op->x, op->y);
+	ret = fire_bow(op, op, NULL, dir, 0, op->x, op->y);
     }
     return ret;
 }
 
 
-/**
- * Fires a misc (wand/rod/horn) object in 'dir'.
+/* Fires a misc (wand/rod/horn) object in 'dir'.
  * Broken apart from 'fire' to keep it more readable.
- *
- * @param op
- * player firing.
- * @param dir
- * firing direction.
- *
- * @warning
- * op must be a player (contr != NULL).
  */
 static void fire_misc_object(object *op, int dir)
 {
     object  *item;
-    char name[MAX_BUF];
 
     if (!op->contr->ranges[range_misc]) {
-        draw_ext_info(NDI_UNIQUE, 0,op,MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_ERROR,
-            "You have no range item readied.", NULL);
-        return;
+	new_draw_info(NDI_UNIQUE, 0,op,"You have range item readied.");
+	return;
     }
 
     item = op->contr->ranges[range_misc];
     if (!item->inv) {
-        LOG(llevError,"Object %s lacks a spell\n", item->name);
-        return;
+	LOG(llevError,"Object %s lacks a spell\n", item->name);
+	return;
     }
     if (item->type == WAND) {
-        if(item->stats.food<=0) {
-            play_sound_player_only(op->contr, SOUND_TYPE_ITEM, item, 0, "poof");
-            query_base_name(item, 0, name, MAX_BUF);
-            draw_ext_info_format(NDI_UNIQUE, 0,op,
-                MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_FAILURE,
-                "The %s goes poof.",
-                "The %s goes poof.",
-                name);
-            return;
-        }
+	if(item->stats.food<=0) {
+	    play_sound_player_only(op->contr, SOUND_WAND_POOF,0,0);
+	    new_draw_info_format(NDI_UNIQUE, 0,op,"The %s goes poof.", query_base_name(item, 0));
+	    return;
+	}
     } else if (item->type == ROD || item->type==HORN) {
-        if(item->stats.hp<SP_level_spellpoint_cost(item, item->inv, SPELL_HIGHEST)) {
-            play_sound_player_only(op->contr, SOUND_TYPE_ITEM, item, 0, "poof");
-            query_base_name(item,0, name, MAX_BUF);
-            if (item->type== ROD)
-                draw_ext_info_format(NDI_UNIQUE, 0,op,
-                    MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_FAILURE,
-                    "The %s whines for a while, but nothing happens.",
-                    "The %s whines for a while, but nothing happens.",
-                    name);
-            else
-                draw_ext_info_format(NDI_UNIQUE, 0,op,
-                    MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_FAILURE,
-                    "The %s needs more time to charge.",
-                    "The %s needs more time to charge.",
-                    name);
-            return;
-        }
+	if(item->stats.hp<MAX(item->inv->stats.sp, item->inv->stats.grace)) {
+	    play_sound_player_only(op->contr, SOUND_WAND_POOF,0,0);
+	    if (item->type== ROD)
+		new_draw_info_format(NDI_UNIQUE, 0,op,
+			     "The %s whines for a while, but nothing happens.", query_base_name(item,0));
+		else
+	    new_draw_info_format(NDI_UNIQUE, 0,op,
+			  "The %s needs more time to charge.", query_base_name(item,0));
+	    return;
+	}
     }
 
     if(cast_spell(op,item,dir,item->inv,NULL)) {
-        SET_FLAG(op, FLAG_BEEN_APPLIED); /* You now know something about it */
-        if (item->type == WAND) {
-            drain_wand_charge(item);
-        }
-        else if (item->type == ROD || item->type==HORN) {
-            drain_rod_charge(item);
-        }
+	SET_FLAG(op, FLAG_BEEN_APPLIED); /* You now know something about it */
+	if (item->type == WAND) {
+	    if (!(--item->stats.food)) {
+		object *tmp;
+		if (item->arch) {
+		    CLEAR_FLAG(item, FLAG_ANIMATE);
+		    item->face = item->arch->clone.face;
+		    item->speed = 0;
+		    update_ob_speed(item);
+		}
+		if ((tmp=get_player_container(item)))
+		    esrv_update_item(UPD_ANIM, tmp, item);
+	    }
+	}
+	else if (item->type == ROD || item->type==HORN) {
+	    drain_rod_charge(item);
+	}
     }
 }
 
-/**
- * Received a fire command for the player - go and do it.
- *
- * @param op
- * player.
- * @param dir
- * direction to fire into.
+/* Received a fire command for the player - go and do it.
  */
 void fire(object *op,int dir) {
     int spellcost=0;
@@ -2143,59 +1854,45 @@ void fire(object *op,int dir) {
 	    return;
 
 	case range_golem: /* Control summoned monsters from scrolls */
-	    if(op->contr->ranges[range_golem]==NULL ||
+	    if(op->contr->ranges[range_golem]==NULL || 
 	       op->contr->golem_count != op->contr->ranges[range_golem]->count) {
 		op->contr->ranges[range_golem] = NULL;
 		op->contr->shoottype=range_none;
 		op->contr->golem_count = 0;
 	    }
-	    else
+	    else 
 		control_golem(op->contr->ranges[range_golem], dir);
 	    return;
 
 	case range_skill:
-	    if(!op->chosen_skill) {
+	    if(!op->chosen_skill) { 
 		if(op->type==PLAYER)
-		    draw_ext_info(NDI_UNIQUE, 0,op,
-				  MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_ERROR,
-				  "You have no applicable skill to use.", NULL);
+		    new_draw_info(NDI_UNIQUE, 0,op,"You have no applicable skill to use.");
 		return;
 	    }
 	    (void) do_skill(op,op,op->chosen_skill,dir,NULL);
 	    return;
-
-	case range_builder:
-	    apply_map_builder( op, dir );
-	    return;
-
+    case range_builder:
+        apply_map_builder( op, dir );
+        return;
 	default:
-	    draw_ext_info(NDI_UNIQUE, 0,op,MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_ERROR,
-			  "Illegal shoot type.", NULL);
+	    new_draw_info(NDI_UNIQUE, 0,op,"Illegal shoot type.");
 	    return;
     }
 }
 
 
 
-/**
- * We try to find a key for the door as passed.  If we find a key
- * and player can use it (based on the usekeys settings), we return the key, otherwise NULL.
- *
+/* We try to find a key for the door as passed.  If we find a key
+ * and successfully use it, we return the key, otherwise NULL
  * This function merges both normal and locked door, since the logic
  * for both is the same - just the specific key is different.
- *
+ * pl is the player, 
+ * inv is the objects inventory to searched 
+ * door is the door we are trying to match against.
  * This function can be called recursively to search containers.
- *
- * @param pl
- * player.
- * @param container
- * inventory to searched for keys.
- * @param door
- * door we are trying to match against.
- * @return
- * key to use, NULL if none found or usekeys mode doesn't let reach the key.
- * @todo document use key modes.
  */
+
 object * find_key(object *pl, object *container, object *door)
 {
     object *tmp,*key;
@@ -2206,7 +1903,7 @@ object * find_key(object *pl, object *container, object *door)
     /* First, lets try to find a key in the top level inventory */
     for (tmp=container->inv; tmp!=NULL; tmp=tmp->below) {
 	if (door->type==DOOR && tmp->type==KEY) break;
-	/* For sanity, we should really check door type, but other stuff
+	/* For sanity, we should really check door type, but other stuff 
 	 * (like containers) can be locked with special keys
 	 */
 	if (tmp->slaying && tmp->type==SPECIAL_KEY &&
@@ -2250,29 +1947,19 @@ object * find_key(object *pl, object *container, object *door)
 	    (pl->contr->usekeys == keyrings &&
 	     (!container->race || strcmp(container->race, "keys")))
 	      ) {
-        char name_tmp[MAX_BUF], name_cont[MAX_BUF];
-        query_name(tmp, name_tmp, MAX_BUF);
-        query_name(container, name_cont, MAX_BUF);
-	    draw_ext_info_format(NDI_UNIQUE|NDI_BROWN, 0, pl,
-			 MSG_TYPE_ITEM, MSG_TYPE_ITEM_INFO,
-			 "The %s in your %s vibrates as you approach the door",
-			 "The %s in your %s vibrates as you approach the door",
-			 name_tmp, name_cont);
+	    new_draw_info_format(NDI_UNIQUE|NDI_BROWN, 0, pl, 
+		"The %s in your %s vibrates as you approach the door",
+		query_name(tmp), query_name(container));
 	    return NULL;
 	}
     }
     return tmp;
 }
 
-/**
- * Player is "attacking" a door. Will try to open it with a key, or warn if can't open it.
- *
- * Moved out of move_player_attack().
- *
- * @retval 1
- * player has opened the door with a key such that the caller should not do anything more.
- * @retval 0
- * nothing happened.
+/* moved door processing out of move_player_attack.
+ * returns 1 if player has opened the door with a key
+ * such that the caller should not do anything more,
+ * 0 otherwise
  */
 static int player_attack_door(object *op, object *door)
 {
@@ -2287,54 +1974,41 @@ static int player_attack_door(object *op, object *door)
     if (key) {
 	object *container=key->env;
 
-	play_sound_map(SOUND_TYPE_GROUND, door, 0, "open");
+	play_sound_map(op->map, op->x, op->y, SOUND_OPEN_DOOR);
 	if(action_makes_visible(op)) make_visible(op);
 	if(door->inv &&(door->inv->type ==RUNE || door->inv->type ==TRAP)) spring_trap(door->inv,op);
 	if (door->type == DOOR) {
 	    hit_player(door,9998,op,AT_PHYSICAL,1); /* Break through the door */
 	}
 	else if(door->type==LOCKED_DOOR) {
-        char name[HUGE_BUF];
-        query_short_name(key, name, HUGE_BUF);
-	    draw_ext_info_format(NDI_UNIQUE, NDI_BROWN, op,
-				 MSG_TYPE_ITEM, MSG_TYPE_ITEM_REMOVE,
-				 "You open the door with the %s",
-				 "You open the door with the %s",
-				 name);
-	    remove_locked_door(door); /* remove door without violence ;-) */
+	    new_draw_info_format(NDI_UNIQUE, NDI_BROWN, op, 
+		     "You open the door with the %s", query_short_name(key));
+	    remove_door2(door); /* remove door without violence ;-) */
 	}
 	/* Do this after we print the message */
 	decrease_ob(key); /* Use up one of the keys */
 	/* Need to update the weight the container the key was in */
-	if (container != op)
+	if (container != op) 
 	    esrv_update_item(UPD_WEIGHT, op, container);
 	return 1; /* Nothing more to do below */
     } else if (door->type==LOCKED_DOOR) {
 	/* Might as well return now - no other way to open this */
-	 draw_ext_info(NDI_UNIQUE | NDI_NAVY, 0, op,
-		       MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_NOKEY,
-		       door->msg, door->msg);
+	 new_draw_info(NDI_UNIQUE | NDI_NAVY, 0, op, door->msg);
 	return 1;
     }
     return 0;
 }
 
-/**
- * The player is also actually going to try and move (not fire weapons).
- *
- * This function is just part of a breakup from move_player().
+/* This function is just part of a breakup from move_player.
  * It should keep the code cleaner.
  * When this is called, the players direction has been updated
- * (taking into account confusion).
- *
- * @param op
- * player moving.
- * @param dir
- * moving direction.
+ * (taking into account confusion.)  The player is also actually
+ * going to try and move (not fire weapons).
  */
+
 void move_player_attack(object *op, int dir)
 {
-    object *tmp, *mon, *tpl, *mon_owner;
+    object *tmp, *mon, *tpl;
     sint16 nx, ny;
     int on_battleground;
     mapstruct *m;
@@ -2361,7 +2035,7 @@ void move_player_attack(object *op, int dir)
 	    if (!m) return; /* Don't think this should happen */
 	}
 	else m =tpl->map;
-
+    
 	if ((tmp=get_map_ob(m,nx,ny))==NULL) {
 	    /*	LOG(llevError,"player_move_attack: get_map_ob returns NULL, but player can not more there.\n");*/
 	    return;
@@ -2416,14 +2090,12 @@ void move_player_attack(object *op, int dir)
 	 * peaceful.  Our assumption is the creature is a pet if the
 	 * player owns it and it is either friendly or unagressive.
 	 */
-	mon_owner = get_owner(mon);
-	if ((op->type==PLAYER) &&
-	    (mon_owner == op || (mon_owner != NULL && mon_owner->type == PLAYER && mon_owner->contr->party != NULL && mon_owner->contr->party == op->contr->party)) &&
+	if ((op->type==PLAYER) && get_owner(mon)==op && 
 	    (QUERY_FLAG(mon,FLAG_UNAGGRESSIVE) ||  QUERY_FLAG(mon, FLAG_FRIENDLY)))
 	{
 	    /* If we're braced, we don't want to switch places with it */
 	    if (op->contr->braced) return;
-	    play_sound_map(SOUND_TYPE_LIVING, mon, dir, "push");
+	    play_sound_map(tpl->map, tpl->x, tpl->y, SOUND_PUSH_PLAYER);
 	    (void) push_ob(mon,dir,op);
 	    if(op->contr->tmp_invis||op->hide) make_visible(op);
 	    return;
@@ -2435,14 +2107,13 @@ void move_player_attack(object *op, int dir)
 	 * attack them either.
 	 */
 	if ((mon->type==PLAYER || mon->enemy != op) &&
-	    (mon->type==PLAYER || QUERY_FLAG(mon,FLAG_UNAGGRESSIVE) || QUERY_FLAG(mon, FLAG_FRIENDLY)) &&
+	    (mon->type==PLAYER || QUERY_FLAG(mon,FLAG_UNAGGRESSIVE) || QUERY_FLAG(mon, FLAG_FRIENDLY)) && 
 	    (op->contr->peaceful && !on_battleground)) {
 	    if (!op->contr->braced) {
-		play_sound_map(SOUND_TYPE_LIVING, mon, dir, "push");
+		play_sound_map(tpl->map, tpl->x, tpl->y, SOUND_PUSH_PLAYER);
 		(void) push_ob(mon,dir,op);
 	    } else {
-		draw_ext_info(0, 0,op,MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_NOATTACK,
-			      "You withhold your attack", NULL);
+		new_draw_info(0, 0,op,"You withhold your attack");
 	    }
 	    if(op->contr->tmp_invis||op->hide) make_visible(op);
 	}
@@ -2471,11 +2142,11 @@ void move_player_attack(object *op, int dir)
 	     * it here is better than process_players2, which basically
 	     * incurred a 1 tick offset.
 	     */
-	    if (op->weapon_speed_left < 0) {
-		op->speed_left = -0.01;
-		return;
+	    if (!op->contr->has_hit) {
+		op->speed_left += op->speed / op->contr->weapon_sp;
+
+		op->contr->has_hit = 1; /* The last action was to hit, so use weapon_sp */
 	    }
-	    op->weapon_speed_left -= 1.0;
 
 	    skill_attack(mon, op, 0, NULL, NULL);
 
@@ -2496,16 +2167,6 @@ void move_player_attack(object *op, int dir)
     } /* if player should attack something */
 }
 
-/**
- * Player gave us a direction, check whether to move or fire.
- *
- * @param op
- * player.
- * @param dir
- * direction to move/fire.
- * @return
- * 0.
- */
 int move_player(object *op,int dir) {
     int pick;
     object *transport = op->contr->transport;
@@ -2546,13 +2207,7 @@ int move_player(object *op,int dir) {
 	 */
 	transport->speed_left -= 1.0;
 	if (op->speed_left < 0.0) op->speed_left = -0.01;
-
-    }
-    else {
-        /* it is important to change the animation now, as fire or move_player_attack can start a compound animation,
-         * and leave us with state = 0, which we don't want to change again. */
-        op->state++; /* player moved, so change animation. */
-        animate_object(op, op->facing);
+	    
     }
 
     if(op->contr->fire_on) {
@@ -2571,20 +2226,20 @@ int move_player(object *op,int dir) {
     } else {
 	op->direction=0;
     }
+    /* Update how the player looks.  Use the facing, so direction may
+     * get reset to zero.  This allows for full animation capabilities
+     * for players.
+     */
+    if (!transport) animate_object(op, op->facing);
     return 0;
 }
 
-/**
- * Handles commands the player can send us, and various checks on
- * invisibility, golem and such.
- *
+/* This is similar to handle_player, below, but is only used by the
+ * new client/server stuff.
  * This is sort of special, in that the new client/server actually uses
  * the new speed values for commands.
  *
- * @param op
- * player to handle.
- * @return
- * true if there are more actions we can do.
+ * Returns true if there are more actions we can do.
  */
 int handle_newcs_player(object *op)
 {
@@ -2595,13 +2250,12 @@ int handle_newcs_player(object *op)
 	 * alternate it here for it to work correctly.
 	 */
 	if (pticks & 2) op->invisible--;
-    }
+    } 
     else if(op->invisible&&!(QUERY_FLAG(op,FLAG_MAKE_INVIS))) {
 	op->invisible--;
 	if(!op->invisible) {
 	    make_visible(op);
-	    draw_ext_info(NDI_UNIQUE, 0, op, MSG_TYPE_SPELL, MSG_TYPE_SPELL_END,
-			  "Your invisibility spell runs out.", NULL);
+	    new_draw_info(NDI_UNIQUE, 0, op, "Your invisibility spell runs out.");
 	}
     }
 
@@ -2619,8 +2273,8 @@ int handle_newcs_player(object *op)
      * destroys the golem looks correct, and it doesn't always happen, so
      * put this in a a workaround to clean up the golem pointer.
      */
-    if (op->contr->ranges[range_golem] &&
-	((op->contr->golem_count != op->contr->ranges[range_golem]->count) ||
+    if (op->contr->ranges[range_golem] && 
+	((op->contr->golem_count != op->contr->ranges[range_golem]->count) || 
 	 QUERY_FLAG(op->contr->ranges[range_golem], FLAG_REMOVED))) {
 	op->contr->ranges[range_golem] = NULL;
 	op->contr->golem_count = 0;
@@ -2648,15 +2302,8 @@ int handle_newcs_player(object *op)
     return 0;
 }
 
-/**
- * Can the player be saved by an item?
- *
- * @param op
- * player to try to save.
- * @retval 1
- * player had his life saved by an item, first item saving life is removed.
- * @retval 0
- * player had no life-saving item.
+/* Returns 1 if player had his life saved by an item.
+ * In this case, first item saving life is removed.
  */
 static int save_life(object *op) {
     object *tmp;
@@ -2666,13 +2313,10 @@ static int save_life(object *op) {
 
     for(tmp=op->inv;tmp!=NULL;tmp=tmp->below)
 	if(QUERY_FLAG(tmp, FLAG_APPLIED)&&QUERY_FLAG(tmp,FLAG_LIFESAVE)) {
-            char name[MAX_BUF];
-            query_name(tmp, name, MAX_BUF);
-            play_sound_map(SOUND_TYPE_ITEM, tmp, 0, "evaporate");
-	    draw_ext_info_format(NDI_UNIQUE, 0,op, MSG_TYPE_ITEM, MSG_TYPE_ITEM_REMOVE,
-				 "Your %s vibrates violently, then evaporates.",
-				 "Your %s vibrates violently, then evaporates.",
-				 name);
+	    play_sound_map(op->map, op->x, op->y, SOUND_OB_EVAPORATE);
+	    new_draw_info_format(NDI_UNIQUE, 0,op,"Your %s vibrates violently, then evaporates.",query_name(tmp));
+	    if (op->contr)
+			esrv_del_item(op->contr, tmp->count);
 	    remove_ob(tmp);
 	    free_object(tmp);
 	    CLEAR_FLAG(op, FLAG_LIFESAVE);
@@ -2680,7 +2324,7 @@ static int save_life(object *op) {
 		op->stats.hp = op->stats.maxhp;
 	    if(op->stats.food<0)
 		op->stats.food = 999;
-        fix_object(op);
+	    fix_player(op);
 	    return 1;
 	}
     LOG(llevError,"Error: LIFESAVE set without applied object.\n");
@@ -2689,15 +2333,10 @@ static int save_life(object *op) {
     return 0;
 }
 
-/**
- * This goes throws the inventory and removes unpaid objects, and puts them
+/* This goes throws the inventory and removes unpaid objects, and puts them
  * back in the map (location and map determined by values of env).  This
- * function will descend into containers.
- *
- * @param op
- * object to start the search from.
- * @param env
- * top-level container, should be in a map.
+ * function will descend into containers.  op is the object to start the search
+ * from.
  */
 static void remove_unpaid_objects(object *op, object *env)
 {
@@ -2711,6 +2350,8 @@ static void remove_unpaid_objects(object *op, object *env)
 	    remove_ob(op);
 	    op->x = env->x;
 	    op->y = env->y;
+	    if (env->type == PLAYER)
+		esrv_del_item(env->contr, op->count);
 	    insert_ob_in_map(op, env->map, NULL,0);
 	}
 	else if (op->inv) remove_unpaid_objects(op->inv, env);
@@ -2719,19 +2360,11 @@ static void remove_unpaid_objects(object *op, object *env)
 }
 
 
-/**
- * Create a text for a player's gravestobe.
- *
+/* Returns pointer a static string containing gravestone text
  * Moved from apply.c to player.c - player.c is what
  * actually uses this function.  player.c may not be quite the
- * best, a misc file for object actions is probably better,
+ * best, a misc file for object actions is probably better, 
  * but there isn't one in the server directory.
- *
- * @param op
- * player.
- * @return
- * pointer a static string containing gravestone text.
- * @todo remove static buffer, use safe string functions.
  */
 static const char *gravestone_text (object *op)
 {
@@ -2763,12 +2396,8 @@ static const char *gravestone_text (object *op)
     return buf2;
 }
 
-/**
- * Regenerate hp/sp/gr, decreases food. This only works for players.
+/* Regenerate hp/sp/gr, decreases food. This only works for players.
  * Will grab food if needed, or kill player.
- *
- * @param op
- * player to regenerate for.
  */
 void do_some_living(object *op) {
   int last_food=op->stats.food;
@@ -2793,12 +2422,12 @@ void do_some_living(object *op) {
 
     /* these next three if clauses make it possible to SLOW DOWN
        hp/grace/spellpoint regeneration. */
-    if(op->contr->gen_hp >= 0 )
+    if(op->contr->gen_hp >= 0 ) 
       gen_hp=(op->contr->gen_hp+1)*op->stats.maxhp;
     else {
       gen_hp = op->stats.maxhp;
       rate_hp -= rate_hp/2 * op->contr->gen_hp;
-    }
+    }  
     if(op->contr->gen_sp >= 0 )
       gen_sp=(op->contr->gen_sp+1)*op->stats.maxsp;
     else {
@@ -2854,7 +2483,7 @@ void do_some_living(object *op) {
 	if(max_grace>1) {
 	    over_grace = (gen_grace<20 ? 30 : gen_grace+10)/rate_grace;
 	    if (over_grace > 0) {
-		op->stats.sp += over_grace
+		op->stats.sp += over_grace 
 		    + (random_roll(0, rate_grace-1, op, PREFER_HIGH) > ((gen_grace<20 ? 30 : gen_grace+10)%rate_grace))? -1 : 0;
 		op->last_grace=0;
 	    } else {
@@ -2866,8 +2495,8 @@ void do_some_living(object *op) {
       /* wearing stuff doesn't detract from grace generation. */
     }
 
-    /* Regenerate Hit Points (unless you are a wraith player) */
-    if(--op->last_heal<0 && !is_wraith_pl(op)) {
+    /* Regenerate Hit Points */
+    if(--op->last_heal<0) {
       if(op->stats.hp<op->stats.maxhp) {
 	op->stats.hp++;
  	/* dms do not consume food */
@@ -2880,10 +2509,10 @@ void do_some_living(object *op) {
  	     op->stats.food=last_food;
          }
       }
-      if(max_hp>1 && !is_wraith_pl(op)) {
+      if(max_hp>1) {
 	over_hp = (gen_hp<20 ? 30 : gen_hp+10)/rate_hp;
 	if (over_hp > 0) {
-	  op->stats.sp += over_hp
+	  op->stats.sp += over_hp 
 	    + (RANDOM()%rate_hp > ((gen_hp<20 ? 30 : gen_hp+10)%rate_hp))? -1 : 0;
 	  op->last_heal=0;
 	} else {
@@ -2908,17 +2537,12 @@ void do_some_living(object *op) {
   }
 
     if(op->contr->state==ST_PLAYING&&op->stats.food<0&&op->stats.hp>=0) {
-         if (is_wraith_pl(op))
-            draw_ext_info(NDI_UNIQUE, 0,op,MSG_TYPE_ITEM, MSG_TYPE_ITEM_REMOVE,"You feel a hunger for living flesh.", NULL);
-         else {
 	object *tmp, *flesh=NULL;
 
 	for(tmp=op->inv;tmp!=NULL;tmp=tmp->below) {
 	    if(!QUERY_FLAG(tmp, FLAG_UNPAID)) {
 		if (tmp->type==FOOD || tmp->type==DRINK || tmp->type==POISON) {
-		    draw_ext_info(NDI_UNIQUE, 0,op,
-				  MSG_TYPE_ITEM, MSG_TYPE_ITEM_REMOVE,
-				  "You blindly grab for a bite of food.", NULL);
+		    new_draw_info(NDI_UNIQUE, 0,op,"You blindly grab for a bite of food.");
 		    manual_apply(op,tmp,0);
 		    if(op->stats.food>=0||op->stats.hp<0)
 			break;
@@ -2930,31 +2554,24 @@ void do_some_living(object *op) {
 	 * eat flesh instead.
 	 */
 	if (op->stats.food<0 && op->stats.hp>=0 && flesh) {
-	    draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_ITEM, MSG_TYPE_ITEM_REMOVE,
-			  "You blindly grab for a bite of food.", NULL);
+	    new_draw_info(NDI_UNIQUE, 0,op,"You blindly grab for a bite of food.");
 	    manual_apply(op,flesh,0);
 	}
-         } /* end not wraith */
     } /* end if player is starving */
 
     while(op->stats.food<0&&op->stats.hp>0)
 	op->stats.food++,op->stats.hp--;
 
-    if (!op->contr->state&&!QUERY_FLAG(op,FLAG_WIZ)&&(op->stats.hp<0||op->stats.food<0))
+    if (!op->contr->state&&!QUERY_FLAG(op,FLAG_WIZ)&&(op->stats.hp<0||op->stats.food<0)) 
 	kill_player(op);
 }
 
-/**
- * Grab and destroy some treasure.
- *
- * @param op
- * object to loot.
- */
-static void loot_object(object *op) {
+
+static void loot_object(object *op) { /* Grab and destroy some treasure */
     object *tmp,*tmp2,*next;
 
     if (op->container) { /* close open sack first */
-        apply_container (op, op->container);
+        esrv_apply_container (op, op->container);
     }
 
     for(tmp=op->inv;tmp!=NULL;tmp=next) {
@@ -2965,10 +2582,10 @@ static void loot_object(object *op) {
         if (tmp->type == CONTAINER) { /* empty container to ground */
             loot_object(tmp);
         }
-        if(!QUERY_FLAG(tmp, FLAG_UNIQUE) && (QUERY_FLAG(tmp, FLAG_STARTEQUIP)
+        if(!QUERY_FLAG(tmp, FLAG_UNIQUE) && (QUERY_FLAG(tmp, FLAG_STARTEQUIP) 
             || QUERY_FLAG(tmp,FLAG_NO_DROP) || !(RANDOM()%3))) {
                 if(tmp->nrof>1) {
-                    tmp2=get_split_ob(tmp,1+RANDOM()%(tmp->nrof-1), NULL, 0);
+                    tmp2=get_split_ob(tmp,1+RANDOM()%(tmp->nrof-1));
                     free_object(tmp2);
                     insert_ob_in_map(tmp,op->map,NULL,0);
                 } else
@@ -2979,18 +2596,10 @@ static void loot_object(object *op) {
 }
 
 
-/**
- * When a player should die (lack of hp, food, etc), we call this.
- *
- * If the player can not be saved (permadeath, no lifesave), this will take care of removing the player file.
- *
- * Will remove diseases, apply death penalties, and so on.
- *
- * Takes battleground into account.
- *
- * @param op
- * player in jeopardy.
- * @todo describe battleground.
+/* If the player should die (lack of hp, food, etc), we call this.
+ * op is the player in jeopardy.  If the player can not be saved (not
+ * permadeath, no lifesave), this will take care of removing the player
+ * file.
  */
 void kill_player(object *op)
 {
@@ -3015,21 +2624,18 @@ void kill_player(object *op)
      * Look at op_on_battleground() for more info       --AndreasV
      */
     if (op_on_battleground(op, &x, &y)) {
-	draw_ext_info(NDI_UNIQUE | NDI_NAVY, 0,op,
-		      MSG_TYPE_VICTIM,  MSG_TYPE_VICTIM_DIED,
-		      "You have been defeated in combat!\n"
-		      "Local medics have saved your life...",
-		      NULL);
-
+	new_draw_info(NDI_UNIQUE | NDI_NAVY, 0,op,
+		    "You have been defeated in combat!");
+	new_draw_info(NDI_UNIQUE | NDI_NAVY, 0,op,
+		    "Local medics have saved your life...");
+      
 	/* restore player */
 	at = find_archetype("poisoning");
         tmp=present_arch_in_ob(at,op);
 	if (tmp) {
 	    remove_ob(tmp);
 	    free_object(tmp);
-	    draw_ext_info(NDI_UNIQUE, 0,op,
-			  MSG_TYPE_ATTRIBUTE, MSG_TYPE_ATTRIBUTE_BAD_EFFECT_END,
-			  "Your body feels cleansed", NULL);
+	    new_draw_info(NDI_UNIQUE, 0,op, "Your body feels cleansed");
 	}
 
 	at = find_archetype("confusion");
@@ -3037,15 +2643,13 @@ void kill_player(object *op)
 	if (tmp) {
 	    remove_ob(tmp);
 	    free_object(tmp);
-            draw_ext_info(NDI_UNIQUE, 0,tmp,
-			  MSG_TYPE_ATTRIBUTE, MSG_TYPE_ATTRIBUTE_BAD_EFFECT_END,
-			  "Your mind feels clearer", NULL);
+            new_draw_info(NDI_UNIQUE, 0,tmp, "Your mind feels clearer");
 	}
 
 	cure_disease(op,0);  /* remove any disease */
 	op->stats.hp=op->stats.maxhp;
 	if (op->stats.food<=0) op->stats.food=999;
-
+      
 	/* create a bodypart-trophy to make the winner happy */
 	tmp=arch_to_object(find_archetype("finger"));
         if (tmp != NULL)
@@ -3062,7 +2666,7 @@ void kill_player(object *op)
 	    tmp->x = op->x, tmp->y = op->y;
 	    insert_ob_in_map(tmp,op->map,op,0);
 	}
-
+      
 	/* teleport defeated player to new destination*/
 	transfer_ob(op, x, y, 0, NULL);
 	op->contr->braced=0;
@@ -3074,13 +2678,11 @@ void kill_player(object *op)
             return;
 
     /* Lauwenmark: Handle for the global death event */
-    execute_global_event(EVENT_PLAYER_DEATH, op);
+        execute_global_event(EVENT_PLAYER_DEATH, op);
     if(op->stats.food<0) {
 	if (op->contr->explore) {
-	    draw_ext_info(NDI_UNIQUE, 0,op,
-			  MSG_TYPE_VICTIM, MSG_TYPE_VICTIM_DIED,
-			  "You would have starved, but you are "
-			  "in explore mode, so...", NULL);
+	    new_draw_info(NDI_UNIQUE, 0,op,"You would have starved, but you are");
+	    new_draw_info(NDI_UNIQUE, 0,op,"in explore mode, so...");
 	    op->stats.food=999;
 	    return;
 	}
@@ -3089,16 +2691,14 @@ void kill_player(object *op)
     }
     else {
 	if (op->contr->explore) {
-	    draw_ext_info(NDI_UNIQUE, 0,op,
-			  MSG_TYPE_VICTIM, MSG_TYPE_VICTIM_DIED,
-			  "You would have died, but you are "
-			  "in explore mode, so...", NULL);
+	    new_draw_info(NDI_UNIQUE, 0,op,"You would have died, but you are");
+	    new_draw_info(NDI_UNIQUE, 0,op,"in explore mode, so...");
 	    op->stats.hp=op->stats.maxhp;
 	    return;
 	}
 	sprintf(buf,"%s died.",op->name);
     }
-    play_sound_player_only(op->contr, SOUND_TYPE_LIVING, op, 0, "death");
+    play_sound_player_only(op->contr, SOUND_PLAYER_DIES,0,0);
 
     /*  save the map location for corpse, gravestone*/
     x=op->x;y=op->y;map=op->map;
@@ -3137,20 +2737,18 @@ void kill_player(object *op)
 		/* Pick a random stat and take a point off it.  Tell the player
 		 * what he lost.
 		 */
-		i = RANDOM() % 7;
+		i = RANDOM() % 7; 
 		change_attr_value(&(op->stats), i,-1);
 		check_stat_bounds(&(op->stats));
 		change_attr_value(&(op->contr->orig_stats), i,-1);
 		check_stat_bounds(&(op->contr->orig_stats));
-		draw_ext_info(NDI_UNIQUE, 0,op,
-			      MSG_TYPE_ATTRIBUTE, MSG_TYPE_ATTRIBUTE_STAT_LOSS,
-			      lose_msg[i], lose_msg[i]);
+		new_draw_info(NDI_UNIQUE, 0,op, lose_msg[i]);
 		lost_a_stat = 1;
 	    } else {
 		/* deplete a stat */
 		archetype *deparch=find_archetype("depletion");
 		object *dep;
-
+            
 		i = RANDOM() % 7;
 		dep = present_arch_in_ob(deparch,op);
 		if(!dep) {
@@ -3172,7 +2770,7 @@ void kill_player(object *op)
 			/* There is a maximum depletion total per level. */
 			if (this_stat < -1 - op->level/BALSL_MAX_LOSS_RATIO) {
 			    lose_this_stat = 0;
-			    /* Take loss chance vs keep chance to see if we
+			    /* Take loss chance vs keep chance to see if we 
 			       retain the stat. */
 			} else {
 			    if (random_roll(0, loss_chance + keep_chance-1,
@@ -3184,7 +2782,7 @@ void kill_player(object *op)
 			}
 		    }
 		}
-
+            
 		if (lose_this_stat) {
 		    this_stat = get_attr_value(&(dep->stats), i);
 		    /* We could try to do something clever like find another
@@ -3196,10 +2794,8 @@ void kill_player(object *op)
 		    if (this_stat>=-50) {
 			change_attr_value(&(dep->stats), i, -1);
 			SET_FLAG(dep, FLAG_APPLIED);
-			draw_ext_info(NDI_UNIQUE, 0,op,
-				      MSG_TYPE_ATTRIBUTE, MSG_TYPE_ATTRIBUTE_STAT_LOSS,
-				      lose_msg[i], lose_msg[i]);
-            fix_object(op);
+			new_draw_info(NDI_UNIQUE, 0,op, lose_msg[i]);
+			fix_player(op);
 			lost_a_stat = 1;
 		    }
 		}
@@ -3212,16 +2808,12 @@ void kill_player(object *op)
 		   Should I be using something else? GD */
 		const char *god = determine_god(op);
 		if (god && (strcmp(god, "none")))
-		    draw_ext_info_format(NDI_UNIQUE, 0, op,
-			 MSG_TYPE_ATTRIBUTE, MSG_TYPE_ATTRIBUTE_GOD,
-			 "For a brief moment you feel the holy presence of %s protecting you",
-			 "For a brief moment you feel the holy presence of %s protecting you",
-			 god);
+		    new_draw_info_format(NDI_UNIQUE, 0, op, "For a brief "
+			"moment you feel the holy presence of %s protecting"
+			" you.", god);
 		else
-		    draw_ext_info(NDI_UNIQUE, 0, op,
-			  MSG_TYPE_ATTRIBUTE, MSG_TYPE_ATTRIBUTE_GOD,
-			  "For a brief moment you feel a holy presence protecting you.",
-			  NULL);
+		    new_draw_info(NDI_UNIQUE, 0, op, "For a brief moment you"
+			" feel a holy presence protecting you.");
 	    }
 
 	/* Put a gravestone up where the character 'almost' died.  List the
@@ -3243,16 +2835,14 @@ void kill_player(object *op)
 
 
 
-	/* restore player: remove any poisoning, disease and confusion the
+	/* restore player: remove any poisoning, disease and confusion the 
          * character may be suffering.*/
 	at = find_archetype("poisoning");
         tmp=present_arch_in_ob(at,op);
 	if (tmp) {
 	    remove_ob(tmp);
 	    free_object(tmp);
-	    draw_ext_info(NDI_UNIQUE, 0,op,
-			  MSG_TYPE_ATTRIBUTE, MSG_TYPE_ATTRIBUTE_BAD_EFFECT_END,
-			  "Your body feels cleansed", NULL);
+	    new_draw_info(NDI_UNIQUE, 0,op, "Your body feels cleansed");
 	}
 
 	at = find_archetype("confusion");
@@ -3260,15 +2850,13 @@ void kill_player(object *op)
 	if (tmp) {
 	    remove_ob(tmp);
 	    free_object(tmp);
-            draw_ext_info(NDI_UNIQUE, 0,tmp,
-			  MSG_TYPE_ATTRIBUTE, MSG_TYPE_ATTRIBUTE_BAD_EFFECT_END,
-			  "Your mind feels clearer", NULL);
+            new_draw_info(NDI_UNIQUE, 0,tmp, "Your mind feels clearer");
 	}
 	cure_disease(op,0);  /* remove any disease */
 
 	/* Subtract the experience points, if we died cause of food, give
          * us food, and reset HP's...
-         */
+         */	
 	apply_death_exp_penalty(op);
 	if(op->stats.food < 100) op->stats.food = 900;
 	op->stats.hp = op->stats.maxhp;
@@ -3313,14 +2901,12 @@ void kill_player(object *op)
 		    force->resist[at] = 100;
 	    }
 	    insert_ob_in_ob(force, op);
-        fix_object(op);
-
+	    fix_player(op);
+	    
 	}
-
+        
 	/* Tell the player they have died */
-	draw_ext_info(NDI_UNIQUE, 0,op,
-		      MSG_TYPE_VICTIM, MSG_TYPE_VICTIM_DIED,
-		      "YOU HAVE DIED.", NULL);
+	new_draw_info(NDI_UNIQUE, 0,op,"YOU HAVE DIED.");
 	return;
     } /* NOT_PERMADETH */
     else {
@@ -3331,11 +2917,7 @@ void kill_player(object *op)
 	op->contr->party=NULL;
 	if (settings.set_title == TRUE)
 	    op->contr->own_title[0]='\0';
-
-	/* buf should be the kill message */
-	draw_ext_info(NDI_UNIQUE|NDI_ALL, 0,NULL,
-		      MSG_TYPE_VICTIM, MSG_TYPE_VICTIM_DIED,
-		      buf, buf);
+	new_draw_info(NDI_UNIQUE|NDI_ALL, 0,NULL, buf);
 	check_score(op,0);
 	if(op->contr->ranges[range_golem]!=NULL) {
 	    remove_friendly_object(op->contr->ranges[range_golem]);
@@ -3389,28 +2971,23 @@ void kill_player(object *op)
     }
 }
 
-/**
- * Check recursively the weight of all players, and fix
+/* fix_weight(): Check recursively the weight of all players, and fix
  * what needs to be fixed.  Refresh windows and fix speed if anything
  * was changed.
- *
- * @todo is this still useful?
  */
+
 void fix_weight(void) {
   player *pl;
   for (pl = first_player; pl != NULL; pl = pl->next) {
     int old = pl->ob->carrying, sum = sum_weight(pl->ob);
     if(old == sum)
       continue;
-    fix_object(pl->ob);
+    fix_player(pl->ob);
     LOG(llevDebug,"Fixed inventory in %s (%d -> %d)\n",
 	pl->ob->name, old, sum);
   }
 }
 
-/**
- * Fixes luck of players, slowly move it towards 0.
- */
 void fix_luck(void) {
   player *pl;
   for (pl = first_player; pl != NULL; pl = pl->next)
@@ -3419,21 +2996,14 @@ void fix_luck(void) {
 }
 
 
-/**
- * Handles op throwing objects of type 'DUST'.
+/* Handles op throwing objects of type 'DUST'.
  * This is much simpler in the new spell code - we basically
  * just treat this as any other spell casting object.
- *
- * @param op
- * object throwing.
- * @param throw_ob
- * what to throw.
- * @param dir
- * direction to throw into.
  */
+ 
 void cast_dust (object *op, object *throw_ob, int dir) {
     object *skop, *spob;
-
+ 
     skop = find_skill_by_name(op, throw_ob->skill);
 
     /* casting POTION 'dusts' is really a use_magic_item skill */
@@ -3444,23 +3014,14 @@ void cast_dust (object *op, object *throw_ob, int dir) {
     }
     spob = throw_ob->inv;
     if (op->type==PLAYER && spob)
-	draw_ext_info_format(NDI_UNIQUE, 0,op, MSG_TYPE_APPLY, MSG_TYPE_APPLY_SUCCESS,
-			     "You cast %s.",
-			     "You cast %s.",
-			     spob->name);
+	new_draw_info_format(NDI_UNIQUE, 0,op,"You cast %s.",spob->name);
 
     cast_spell(op, throw_ob, dir, spob, NULL);
-
+ 
     if(!QUERY_FLAG(throw_ob,FLAG_REMOVED)) remove_ob(throw_ob);
     free_object(throw_ob);
 }
 
-/**
- * Makes an object visible again.
- *
- * @param op
- * what to make visible.
- */
 void make_visible (object *op) {
     op->hide = 0;
     op->invisible = 0;
@@ -3471,17 +3032,9 @@ void make_visible (object *op) {
     update_object(op,UP_OBJ_FACE);
 }
 
-/**
- * Is the object a true undead?
- *
- * @param op
- * object to test.
- * @return
- * 1 if undead, 0 else.
- */
 int is_true_undead(object *op) {
   object *tmp=NULL;
-
+  
   if(QUERY_FLAG(&op->arch->clone,FLAG_UNDEAD)) return 1;
 
   if(op->type==PLAYER)
@@ -3491,16 +3044,11 @@ int is_true_undead(object *op) {
   return 0;
 }
 
-/**
- * Look at the surrounding terrain to determine
+/* Look at the surrounding terrain to determine
  * the hideability of this object. Positive levels
  * indicate greater hideability.
- *
- * @param ob
- * object that may want to hide.
- * @return
- * the higher the value, the easier to hide here.
  */
+
 int hideability(object *ob) {
     int i,level=0, mflag;
     sint16 x,y;
@@ -3517,7 +3065,7 @@ int hideability(object *ob) {
     if(has_carried_lights(ob)) level =- (10 + (2*ob->map->darkness));
 
     /* scan through all nearby squares for terrain to hide in */
-    for(i=0,x=ob->x,y=ob->y;i<9;i++,x=ob->x+freearr_x[i],y=ob->y+freearr_y[i]) {
+    for(i=0,x=ob->x,y=ob->y;i<9;i++,x=ob->x+freearr_x[i],y=ob->y+freearr_y[i]) { 
 	mflag = get_map_flags(ob->map, NULL, x, y, NULL, NULL);
 	if (mflag & P_OUT_OF_MAP) { continue; }
 	if(mflag & P_BLOCKSVIEW) /* something to hide near! */
@@ -3525,18 +3073,17 @@ int hideability(object *ob) {
 	else /* open terrain! */
 	    level -= 1;
     }
-
+  
+#if 0
+    LOG(llevDebug,"hideability of %s is %d\n",ob->name,level);
+#endif
     return level;
 }
 
-/**
- * For hidden creatures - a chance of becoming 'unhidden'
+/* For Hidden creatures - a chance of becoming 'unhidden'
  * every time they move - as we subtract off 'invisibility'
  * AND, for players, if they move into a ridiculously unhideable
  * spot (surrounded by clear terrain in broad daylight). -b.t.
- *
- * @param op
- * object moving.
  */
 void do_hidden_move (object *op) {
     int hide=0, num=random_roll(0, 19, op, PREFER_LOW);
@@ -3549,8 +3096,7 @@ void do_hidden_move (object *op) {
     /* its *extremely* hard to run and sneak/hide at the same time! */
     if(op->type==PLAYER && op->contr->run_on) {
 	if(!skop || num >= skop->level) {
-	    draw_ext_info(NDI_UNIQUE,0,op, MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-			  "You ran too much! You are no longer hidden!", NULL);
+	    new_draw_info(NDI_UNIQUE,0,op,"You ran too much! You are no longer hidden!");
 	    make_visible(op);
 	    return;
 	} else num += 20;
@@ -3560,23 +3106,15 @@ void do_hidden_move (object *op) {
     num -= hide;
     if((op->type==PLAYER && hide<-10) || ((op->invisible-=num)<=0)) {
 	make_visible(op);
-	if(op->type==PLAYER) draw_ext_info(NDI_UNIQUE, 0,op,
-		   MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-		   "You moved out of hiding! You are visible!", NULL);
+	if(op->type==PLAYER) new_draw_info(NDI_UNIQUE, 0,op,
+		   "You moved out of hiding! You are visible!");
     }
     else if (op->type == PLAYER && skop) {
 	change_exp(op, calc_skill_exp(op, NULL, skop), skop->skill, 0);
     }
 }
 
-/**
- * Determine if who is standing near a hostile creature.
- *
- * @param who
- * object to check.
- * @return
- * 1 if near a monster, 0 else.
- */
+/* determine if who is standing near a hostile creature. */
 int stand_near_hostile( object *who ) {
     object *tmp=NULL;
     int i,friendly=0,player=0, mflags;
@@ -3585,7 +3123,7 @@ int stand_near_hostile( object *who ) {
 
     if(!who) return 0;
 
-    if(who->type==PLAYER) player=1;
+    if(who->type==PLAYER) player=1; 
     else friendly = QUERY_FLAG(who,FLAG_FRIENDLY);
 
     /* search adjacent squares */
@@ -3599,47 +3137,34 @@ int stand_near_hostile( object *who ) {
 	 */
 	if (mflags & P_OUT_OF_MAP) continue;
 	if (OB_TYPE_MOVE_BLOCK(who, GET_MAP_MOVE_BLOCK(m, x, y))) continue;
-
+    
 	for(tmp=get_map_ob(m,x,y);tmp;tmp=tmp->above) {
 	    if((player||friendly)
-	       &&QUERY_FLAG(tmp,FLAG_MONSTER)&&!QUERY_FLAG(tmp,FLAG_UNAGGRESSIVE))
+	       &&QUERY_FLAG(tmp,FLAG_MONSTER)&&!QUERY_FLAG(tmp,FLAG_UNAGGRESSIVE)) 
 		return 1;
 	    else if(tmp->type==PLAYER)
 	    {
 		/*don't let a hidden DM prevent you from hiding*/
 		if(!QUERY_FLAG(tmp, FLAG_WIZ) || tmp->contr->hidden == 0)
 		    return 1;
-	    }
+	    }  
 	}
     }
     return 0;
 }
 
-/**
- * Check the player los field for viewability of the
+/* Check the player los field for viewability of the 
  * object op. This function works fine for monsters,
- * but we dont worry if the object isnt the top one in
+ * but we dont worry if the object isnt the top one in 
  * a pile (say a coin under a table would return "viewable"
  * by this routine). Another question, should we be
- * concerned with the direction the player is looking
+ * concerned with the direction the player is looking 
  * in? Realistically, most of use cant see stuff behind
  * our backs...on the other hand, does the "facing" direction
  * imply the way your head, or body is facing? Its possible
  * for them to differ. Sigh, this fctn could get a bit more complex.
- * -b.t.
- *
+ * -b.t. 
  * This function is now map tiling safe.
- *
- * @param pl
- * player that may see op.
- * @param op
- * what may be seen by pl.
- * @retval -1
- * pl isn't a player
- * @retval 0
- * pl can't see op.
- * @retval 1
- * pl can see op.
  */
 int player_can_view (object *pl,object *op) {
     rv_vector rv;
@@ -3656,7 +3181,7 @@ int player_can_view (object *pl,object *op) {
 
     /* starting with the 'head' part, lets loop
      * through the object and find if it has any
-     * part that is in the los array but isnt on
+     * part that is in the los array but isnt on 
      * a blocked los square.
      * we use the archetype to figure out offsets.
      */
@@ -3670,67 +3195,47 @@ int player_can_view (object *pl,object *op) {
 	 */
 	if (FABS(dx) <= (pl->contr->socket.mapx/2) &&
 	    FABS(dy) <= (pl->contr->socket.mapy/2) &&
-	    !pl->contr->blocked_los[dx + (pl->contr->socket.mapx/2)][dy+(pl->contr->socket.mapy/2)] )
+	    !pl->contr->blocked_los[dx + (pl->contr->socket.mapx/2)][dy+(pl->contr->socket.mapy/2)] ) 
 	    return 1;
 	op = op->more;
     }
     return 0;
 }
 
-/**
- * We call this when there is a possibility for our action disturbing our hiding
+/* routine for both players and monsters. We call this when
+ * there is a possibility for our action distrubing our hiding
  * place or invisiblity spell. Artefact invisiblity is not
- * effected by this. If we arent invisible to begin with, we
- * return 0.
- *
- * This routine works for both players and monsters. 
- *
- * @param op
- * object to check.
- * @return
- * 1 if op isn't invisible anymore, 0 else.
+ * effected by this. If we arent invisible to begin with, we 
+ * return 0. 
  */
 static int action_makes_visible (object *op) {
 
     if(op->invisible && QUERY_FLAG(op,FLAG_ALIVE)) {
-	if(QUERY_FLAG(op,FLAG_MAKE_INVIS))
-	    return 0;
+	if(QUERY_FLAG(op,FLAG_MAKE_INVIS)) 
+	    return 0; 
 
 	if (op->contr && op->contr->tmp_invis == 0) return 0;
 
 	/* If monsters, they should become visible */
-	if(op->hide || !op->contr || (op->contr && op->contr->tmp_invis)) {
-	    draw_ext_info_format(NDI_UNIQUE, 0,op, MSG_TYPE_MISC, MSG_SUBTYPE_NONE,
-				 "You become %s!",
-				 "You become %s!",
-				 op->hide?"unhidden":"visible");
-	    return 1;
+	if(op->hide || !op->contr || (op->contr && op->contr->tmp_invis)) { 
+	    new_draw_info_format(NDI_UNIQUE, 0,op,"You become %s!",op->hide?"unhidden":"visible");
+	    return 1; 
 	}
     }
     return 0;
 }
 
-/**
- * Checks if the given object op (usually a player) is standing on a valid battleground-tile.
- *
- * Function returns TRUE/FALSE. If true x, y returns the battleground
+/* op_on_battleground - checks if the given object op (usually
+ * a player) is standing on a valid battleground-tile,
+ * function returns TRUE/FALSE. If true x, y returns the battleground
  * -exit-coord. (and if x, y not NULL)
- *
  * 19 March 2005 - josh@woosworld.net modifed to check if the battleground also has slaying, maxhp, and maxsp set
  * and if those are all set and the player has a marker that matches the slaying send them to a different x, y
  * Default is to do the same as before, so only people wanting to have different points need worry about this
- *
- * @param op
- * object to check.
- * @param[out] x
- * @param[out] y
- * will contain the exit coordinates for the battleground if returns 1.
- * @return
- * 1 if op is on battleground, 0 else.
  */
 int op_on_battleground (object *op, int *x, int *y) {
   object *tmp;
-
+  
   /* A battleground-tile needs the following attributes to be valid:
    * is_floor 1 (has to be the FIRST floor beneath the player's feet),
    * name="battleground", no_pick 1, type=58 (type BATTLEGROUND)
@@ -3751,9 +3256,9 @@ int op_on_battleground (object *op, int *x, int *y) {
 		         if (x != NULL && y != NULL)
 		           *x=EXIT_ALT_X(tmp), *y=EXIT_ALT_Y(tmp);
 	                 return 1;
-		     }
+		     }    
 	        }
-	    }
+	    }    
 	    if (x != NULL && y != NULL)
 		*x=EXIT_X(tmp), *y=EXIT_Y(tmp);
 	    return 1;
@@ -3764,15 +3269,13 @@ int op_on_battleground (object *op, int *x, int *y) {
   return 0;
 }
 
-/**
- * When a dragon-player gains a new stage of evolution, he gets some treasure.
+/* When a dragon-player gains a new stage of evolution,
+ * he gets some treasure
  *
- * @param who
- * the dragon player.
- * @param atnr
- * the attack-number of the ability focus.
- * @param level
- * ability level.
+ * attributes:
+ *      object *who        the dragon player
+ *      int atnr           the attack-number of the ability focus
+ *      int level          ability level
  */
 void dragon_ability_gain(object *who, int atnr, int level) {
     treasurelist *trlist = NULL;    /* treasurelist */
@@ -3781,7 +3284,7 @@ void dragon_ability_gain(object *who, int atnr, int level) {
     object *item;		    /* treasure object */
     char buf[MAX_BUF];		    /* tmp. string buffer */
     int i=0, j=0;
-
+  
     /* get the appropriate treasurelist */
     if (atnr == ATNR_FIRE)
 	trlist = find_treasurelist("dragon_ability_fire");
@@ -3791,18 +3294,18 @@ void dragon_ability_gain(object *who, int atnr, int level) {
 	trlist = find_treasurelist("dragon_ability_elec");
     else if (atnr == ATNR_POISON)
 	trlist = find_treasurelist("dragon_ability_poison");
-
+  
     if (trlist == NULL || who->type != PLAYER)
 	return;
-
+  
     for (i=0, tr = trlist->items; tr != NULL && i<level-1;
 	 tr = tr->next, i++);
-
+  
     if (tr == NULL || tr->item == NULL) {
 	/* LOG(llevDebug, "-> no more treasure for %s\n", change_resist_msg[atnr]); */
 	return;
     }
-
+  
     /* everything seems okay - now bring on the gift: */
     item = &(tr->item->clone);
 
@@ -3810,11 +3313,7 @@ void dragon_ability_gain(object *who, int atnr, int level) {
 	if (check_spell_known (who, item->name))
 	    return;
 
-	draw_ext_info_format(NDI_UNIQUE|NDI_BLUE, 0, who,
-			     MSG_TYPE_ATTRIBUTE, MSG_TYPE_ATTRIBUTE_RACE,
-			     "You gained the ability of %s",
-			     "You gained the ability of %s",
-			     item->name);
+	new_draw_info_format(NDI_UNIQUE|NDI_BLUE, 0, who, "You gained the ability of %s", item->name);
 	do_learn_spell (who, item, 0);
 	return;
     }
@@ -3829,11 +3328,7 @@ void dragon_ability_gain(object *who, int atnr, int level) {
 	if (check_spell_known (who, item->inv->name))
 	    return;
 	if (item->invisible) {
-	    draw_ext_info_format(NDI_UNIQUE|NDI_BLUE, 0, who,
-				 MSG_TYPE_ATTRIBUTE, MSG_TYPE_ATTRIBUTE_RACE,
-				 "You gained the ability of %s",
-				 "You gained the ability of %s",
-				 item->inv->name);
+	    new_draw_info_format(NDI_UNIQUE|NDI_BLUE, 0, who, "You gained the ability of %s", item->inv->name);
 	    do_learn_spell (who, item->inv, 0);
 	    return;
 	}
@@ -3852,11 +3347,9 @@ void dragon_ability_gain(object *who, int atnr, int level) {
 
 		/* always add physical if there's none */
 		skop->attacktype |= AT_PHYSICAL;
-
+	
 		if (item->msg != NULL)
-		    draw_ext_info(NDI_UNIQUE|NDI_BLUE, 0, who,
-				  MSG_TYPE_ATTRIBUTE, MSG_TYPE_ATTRIBUTE_RACE,
-				  item->msg, item->msg);
+		    new_draw_info(NDI_UNIQUE|NDI_BLUE, 0, who, item->msg);
 
 		/* Give player new face */
 		if (item->animation_id) {
@@ -3877,28 +3370,26 @@ void dragon_ability_gain(object *who, int atnr, int level) {
 	for (skin=who->inv; skin!=NULL && strcmp(skin->arch->name, "dragon_skin_force")!=0;
 	     skin=skin->below);
 	if (skin == NULL) return;
-
+    
 	/* adding new spellpath attunements */
 	if (item->path_attuned > 0 && !(skin->path_attuned & item->path_attuned)) {
 	    skin->path_attuned |= item->path_attuned; /* add attunement to skin */
-
+      
 	    /* print message */
 	    sprintf(buf, "You feel attuned to ");
 	    for(i=0, j=0; i<NRSPELLPATHS; i++) {
 		if(item->path_attuned & (1<<i)) {
-		    if (j)
+		    if (j) 
 			strcat(buf," and ");
-		    else
-			j = 1;
+		    else 
+			j = 1; 
 		    strcat(buf, spellpathnames[i]);
 		}
 	    }
 	    strcat(buf,".");
-	    draw_ext_info(NDI_UNIQUE|NDI_BLUE, 0, who,
-			  MSG_TYPE_ATTRIBUTE, MSG_TYPE_ATTRIBUTE_RACE,
-			  buf, buf);
+	    new_draw_info(NDI_UNIQUE|NDI_BLUE, 0, who, buf);
 	}
-
+    
 	/* evtl. adding flags: */
 	if(QUERY_FLAG(item, FLAG_XRAYS))
 	    SET_FLAG(skin, FLAG_XRAYS);
@@ -3906,37 +3397,23 @@ void dragon_ability_gain(object *who, int atnr, int level) {
 	    SET_FLAG(skin, FLAG_STEALTH);
 	if(QUERY_FLAG(item, FLAG_SEE_IN_DARK))
 	    SET_FLAG(skin, FLAG_SEE_IN_DARK);
-
+    
 	/* print message if there is one */
 	if (item->msg != NULL)
-	    draw_ext_info(NDI_UNIQUE|NDI_BLUE, 0, who,
-			  MSG_TYPE_ATTRIBUTE, MSG_TYPE_ATTRIBUTE_RACE,
-			  item->msg, item->msg);
+	    new_draw_info(NDI_UNIQUE|NDI_BLUE, 0, who, item->msg);
     }
     else {
-        /* generate misc. treasure */
-        char name[HUGE_BUF];
-        tmp = arch_to_object (tr->item);
-        query_short_name(tmp, name, HUGE_BUF);
-	draw_ext_info_format(NDI_UNIQUE|NDI_BLUE, 0, who,
-			     MSG_TYPE_ITEM, MSG_TYPE_ITEM_ADD,
-			     "You gained %s",
-			     "You gained %s",
-			     name);
+	/* generate misc. treasure */
+	tmp = arch_to_object (tr->item);
+	new_draw_info_format(NDI_UNIQUE|NDI_BLUE, 0, who, "You gained %s", query_short_name(tmp));
 	tmp = insert_ob_in_ob (tmp, who);
 	if (who->type == PLAYER)
 	    esrv_send_item(who, tmp);
     }
 }
 
-/**
- * Unready an object for a player. This function does nothing if the object was
+/* Unready an object for a player. This function does nothing if the object was
  * not readied.
- *
- * @param pl
- * player.
- * @param ob
- * object to unready.
  */
 void player_unready_range_ob(player *pl, object *ob) {
     rangetype i;

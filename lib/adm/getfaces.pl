@@ -47,7 +47,7 @@ if ($ARGV[0]) { $curpath=$ARGV[0]; }
 $fcount = 0;
 
 
-#create an internal database of animations defined in .face files to reference to
+#create an internal database of animations defined in .face files to reference to 
 File::Find::find({wanted => \&facehandle, follow => 1, no_chdir => 1 }, $curpath);
 
 
@@ -57,9 +57,9 @@ if ($stdinlimit) {
 		$oldface = $_;
 		if ($imagefileflag or $imagemagickflag) {$_ =~ s/\./\.base\./; $_=$_.".png";}
 		$stdinlist{$_}++;
-		if ($stdinlimit=~/extend/i) {
+		if ($stdinlimit=~/extend/i) { 
 			if (!$imagemagickflag) {
-				print "$_\n";
+				print "$_\n"; 
 			}
 			$unique{$_}++;
 			$fcount++;
@@ -87,22 +87,22 @@ Try `./getface.pl --help' for more information.
 
 sub help {
 	$usagemessage = "Usage: getfaces.pl [OPTION]... [PATH]
-List faces used by archtypes that fit given criteria.
+List faces used by archtypes that fit given criteria. 
 
 Settings:
   --showfile               before each face, list the .arc that is using it
-  --showobject             before each face, list the name of the object
+  --showobject             before each face, list the name of the object 
                            that is using it
-  --duplicate              show duplicate entries of faces for each object
+  --duplicate              show duplicate entries of faces for each object 
                            using the face
   --inclusive              normally the logic of the criteria is exclusive,
                            this option makes the criteria behave inclusively
-  --imagefile              insert tileset data (assuming tileset 'base') and
+  --imagefile              insert tileset data (assuming tileset 'base') and 
                            .png extension into the image name such that it can
                            be used to easily locate the image file.
   --stdin=MODE             read data from stdin. MODE can either be 'extend'
-                           'exclude' or 'limit'. The limit mode means that we
-                           will only output faces that are are listed in what
+                           'exclude' or 'limit'. The limit mode means that we 
+                           will only output faces that are are listed in what 
                            stdin. The extend mode prepends stdin to the output
                            and will not repeat those faces again unless
                            duplicate is enabled. Exclude will cause it to not
@@ -123,7 +123,7 @@ Graphical Display:
                            *long* time.
 
 Criteria:
-  --nopass                 Only list faces for objects with move_block set
+  --nopass                 Only list faces for objects with no_pass 1
   --floor                  Only list faces for objects with is_floor 1
   --alive                  Only list faces for objects with alive 1 (note that
                            this is not an accurate way to detect monsters or
@@ -142,18 +142,18 @@ Criteria:
   --type=NUM               Only list faces for objects which have a type of NUM
   --subtype=NUM            Only list faces for objects which have a subtype of
                            NUM
-  --race=PATTERN           Only list faces for objects with a race that
+  --race=PATTERN           Only list faces for objects with a race that 
                            matches PATTERN
-  --slay=PATTERN           Only list faces for objects with a slaying that
+  --slay=PATTERN           Only list faces for objects with a slaying that 
                            matches PATTERN
-  --searchname=PATTERN     Only list faces for objects with a name that
+  --searchname=PATTERN     Only list faces for objects with a name that 
                            matches PATTERN
-  --searchbody=PATTERN     Only list faces for objects with a object data that
+  --searchbody=PATTERN     Only list faces for objects with a object data that 
                            matches PATTERN
 
-PATH is the path of the archtypes directory, and if no PATH is given it
+PATH is the path of the archtypes directory, and if no PATH is given it 
 defaults to ../arch
-PATTERN is always in the form of a perl regexp, though plaintext usually
+PATTERN is always in the form of a perl regexp, though plaintext usually 
 works too.
 ";
 	die $usagemessage;
@@ -173,7 +173,7 @@ if (/^.*\.arc\z/s) {
 			#because that's the fully open frame.
 			if ((($itype =~ /^91$/) or ($itype =~ /^26$/)) and ($animcount==1) and $nopass) {next;} else {
 				$_ =~ s/\s+$//; $_=$_."\n";
-				$faces = $faces.$_;
+				$faces = $faces.$_; 
 				next;
 			}
 		}
@@ -200,7 +200,7 @@ if (/^.*\.arc\z/s) {
 		if ($_ =~ /^name /) { chomp($pname=$words[1]); }
 		if ($_ =~ /^end$/) { $newob=1; $obstatus=0; $countframes=0; $doneobject=1; }
 		if ($_ =~ /^anim$/) { $countframes=1; $hasobject=1 }
-		if ($_ =~ /^move_block [^0]/) {$inopass=1;}
+		if ($_ =~ /^no_pass 1/) {$inopass=1;}
 		if ($_ =~ /^alive 1/) {$ialive=1;}
 		if ($_ =~ /^is_floor 1/) {$ifloor=1;}
 		if ($_ =~ /^monster 1/) {$imonster=1;}
@@ -221,7 +221,7 @@ if (/^.*\.arc\z/s) {
 			#we're done with an object.
 			$faces = $faces."$face\n";
 			#check if it fits critera
-
+	
 			if ($inclusiveflags) {
 				$nopasscheck = ($inopass and $nopass);
 				$monstercheck = ((($imonster and not ($iteardown or ($itype =~ /^62$/) or ($itype =~ /^101$/)))) and $monster);
@@ -288,7 +288,7 @@ if (/^.*\.arc\z/s) {
 					}
 				}
 			}
-
+	
 			$morestatus=0;
 			$doneobject=0;
 		}
@@ -302,7 +302,7 @@ if (/^.*\.face\z/s) {
 	open (FACEDATA, $File::Find::name) || die "Couldn't open $File::Find::name";
 	while ($record = <FACEDATA>)	{
 		@words = split(/ /,$record);
-		if ($record =~ /^mina/) {
+		if ($record =~ /^mina/) { 
 			$countframes=0;
 			$animfaces{$aname} = $afaces;
 			$afaces="";
@@ -339,4 +339,3 @@ sub imagemagickdisp {
 	print "Face images read. Displaying faces...\n";
 	exec(split(/ /, ($viewcommand.$montagefile) ));
 }
-

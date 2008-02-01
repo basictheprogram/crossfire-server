@@ -828,11 +828,6 @@ static PyObject* Object_GetDuration(Crossfire_Object* whoptr, void* closure)
     EXISTCHECK(whoptr);
     return Py_BuildValue("i", cf_object_get_int_property(whoptr->obj, CFAPI_OBJECT_PROP_DURATION));
 }
-static PyObject* Object_GetGlowRadius(Crossfire_Object* whoptr, void* closure)
-{
-    EXISTCHECK(whoptr);
-    return Py_BuildValue("i", cf_object_get_int_property(whoptr->obj,CFAPI_OBJECT_PROP_GLOW_RADIUS));
-}
 
 /** Setters */
 static int Object_SetMessage(Crossfire_Object* whoptr, PyObject* value, void* closure)
@@ -1864,27 +1859,6 @@ static int Object_SetDuration(Crossfire_Object* whoptr, PyObject* value, void* c
     cf_object_set_int_property(whoptr->obj, CFAPI_OBJECT_PROP_DURATION, val);
     return 0;
 }
-static int Object_SetGlowRadius(Crossfire_Object* whoptr, PyObject* value, void* closure)
-{
-    int val;
-
-    EXISTCHECK_INT(whoptr);
-    if (!PyArg_Parse(value,"i",&val))
-        return -1;
-
-    cf_object_set_int_property(whoptr->obj, CFAPI_OBJECT_PROP_GLOW_RADIUS, val);
-    return 0;
-}
-static int Object_SetAnimated(Crossfire_Object* whoptr, PyObject* value, void* closure)
-{
-    int val;
-
-    EXISTCHECK_INT(whoptr);
-    if (!PyArg_Parse(value,"i",&val))
-        return -1;
-    cf_object_set_flag(whoptr->obj, FLAG_ANIMATE, val );
-    return 0;
-}
 
 /* Methods. */
 
@@ -1936,6 +1910,19 @@ static PyObject* Crossfire_Object_Fix( Crossfire_Object* who, PyObject* args )
     Py_INCREF(Py_None);
     return Py_None;
 }
+static PyObject* Crossfire_Object_Pickup( Crossfire_Object* who, PyObject* args )
+{
+    Crossfire_Object* what;
+
+    if (!PyArg_ParseTuple(args,"O",&what))
+        return NULL;
+    EXISTCHECK(who);
+    EXISTCHECK(what);
+
+    cf_object_pickup(who->obj, what->obj);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
 static PyObject* Crossfire_Object_Take( Crossfire_Object* who, PyObject* args )
 {
     Crossfire_Object* whoptr;
@@ -1945,7 +1932,7 @@ static PyObject* Crossfire_Object_Take( Crossfire_Object* who, PyObject* args )
     EXISTCHECK(who);
     EXISTCHECK(whoptr);
 
-    cf_object_pickup(whoptr->obj, who->obj);
+    cf_object_take(whoptr->obj, who->obj);
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -2282,12 +2269,6 @@ static PyObject* Crossfire_Object_InsertInto(Crossfire_Object* who, PyObject* ar
     EXISTCHECK(who);
     EXISTCHECK(op);
 
-    /* we can only insert removed object, so first remove it
-     * from it's current container
-     */
-    if (!cf_object_get_flag(who->obj,FLAG_REMOVED)) {
-        cf_object_remove(who->obj);
-    }
     myob = cf_object_insert_in_ob(who->obj, op->obj);
 
     return Crossfire_Object_wrap(myob);
@@ -2325,26 +2306,6 @@ static PyObject* Crossfire_Object_Move(Crossfire_Object* who, PyObject* args) {
         return NULL;
     EXISTCHECK(who);
     return Py_BuildValue("i", cf_object_move(who->obj,dir, who->obj));
-}
-
-static PyObject* Crossfire_Object_Event(Crossfire_Object* who, PyObject* args) {
-    int fix;
-    const char* message = NULL;
-    object* op1=NULL;
-    object* op2=NULL;
-    object* op3=NULL;
-    Crossfire_Object* activator = NULL;
-    Crossfire_Object* third = NULL;
-
-    if (!PyArg_ParseTuple(args,"OOsi", &activator, &third, &message, &fix))
-        return NULL;
-    EXISTCHECK(who);
-    EXISTCHECK(activator);
-    EXISTCHECK(third);
-    op1 = who->obj;
-    op2 = activator->obj;
-    op3 = third->obj;
-    return Py_BuildValue("i", cf_object_user_event(op1,op2,op3,message,fix));
 }
 
 static int Crossfire_Object_InternalCompare(Crossfire_Object* left, Crossfire_Object* right)

@@ -22,14 +22,14 @@ HTML = gods.html appC.html stats.gif potion.html flesh.html food.html rings.html
 	keys.html horns.html holysymbol.html handbutt.html guild.html \
 	gatedoor.html fr_wall.html foodone.html dir_spin.html br_wall.html \
 	bows.html chap3.html skills.html equip.html stats.html char.html \
-	bonus.html chap2.html handbook.html
+	bonus.html chap2.html handbook.html 
 
 HANDBOOK = handbook.html chap1.html chap2.html chap3.html chap4.html chap5.html chap6.html appC.html
 
 CLEANFILES = items .bmaps in_monput in_items in_spells in_stats in_equip \
-	*x*.ppm tmp.ppm work.ppm in_char items *.png $(HTML)
+	*x*.ppm tmp.ppm work.ppm in_char items *.gif $(HTML)
 
-CROSSBIN = ../../server/crossfire-server
+CROSSBIN = ../../server/crossfire
 INCDIR = $(top_srcdir)/include
 DTOP = $(top_srcdir)/$(PACKAGE)-doc
 PERL = @PERL@
@@ -248,3 +248,4 @@ archive: $(HANDBOOK)
 	cp $(HANDBOOK) $(DTOP)/handbook-html
 	cp $(FIG) $(DTOP)/handbook-html/fig
 	cp *.gif $(DTOP)/handbook-html
+	

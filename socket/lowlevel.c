@@ -90,7 +90,7 @@ void SockList_AddInt64(SockList *sl, uint64 data)
 
 void SockList_AddString(SockList *sl, const char *data)
 {
-    sprintf((char*)&sl->buf[sl->len], data);
+    sprintf(&sl->buf[sl->len], data);
     sl->len += strlen(data);
 }
 
@@ -120,12 +120,11 @@ short GetShort_String(const unsigned char *data) {
  * (As passed) is the size of the buffer allocated in the socklist.  We make
  * the assumption the buffer is at least 2 bytes long.
  */
-
+ 
 int SockList_ReadPacket(int fd, SockList *sl, int len)
 {
     int stat,toread;
     extern int errno;
-    char err[MAX_BUF];
 
     /* Sanity check - shouldn't happen */
     if (sl->len < 0) {
@@ -158,11 +157,11 @@ int SockList_ReadPacket(int fd, SockList *sl, int len)
 	    }
 #else
             if (errno == ECONNRESET) {
-                    LOG(llevDebug, "ReadPacket got error %s, returning -1\n", strerror_local(errno, err, sizeof(err)));
+                    LOG(llevDebug, "ReadPacket got error %s, returning -1\n", strerror_local(errno));
                     return -1;
             }
   	    if (errno != EAGAIN && errno !=EWOULDBLOCK) {
-		    LOG(llevDebug, "ReadPacket got error %s, returning 0\n", strerror_local(errno, err, sizeof(err)));
+		    LOG(llevDebug, "ReadPacket got error %s, returning 0\n", strerror_local(errno));
             }
 #endif
 	    return 0;	/*Error */
@@ -217,7 +216,7 @@ int SockList_ReadPacket(int fd, SockList *sl, int len)
 	    }
 #else
 	if (errno != EAGAIN && errno !=EWOULDBLOCK) {
-		LOG(llevDebug, "ReadPacket got error %s, returning 0\n", strerror_local(errno, err, sizeof(err)));
+		LOG(llevDebug, "ReadPacket got error %s, returning 0\n", strerror_local(errno));
 	    }
 #endif
 	    return 0;	/*Error */
@@ -280,6 +279,10 @@ static void add_to_buffer(socket_struct *ns, const unsigned char *buf, int len)
 	memcpy(ns->outputbuffer.data, buf+avail, len-avail);
     }
     ns->outputbuffer.len += len;
+#if 0
+    LOG(llevDebug,"Added %d to output buffer, total length now %d, start=%d\n", len,
+	ns->outputbuffer.len, ns->outputbuffer.start);
+#endif
 }
 
 /**
@@ -317,9 +320,8 @@ void write_socket_buffer(socket_struct *ns)
 		LOG(llevError,"New socket write failed (wsb) (%d).\n", WSAGetLastError());
 #else
 	if (errno !=EWOULDBLOCK) {
-        char err[MAX_BUF];
 		LOG(llevError,"New socket write failed (wsb) (%d: %s).\n",
-		    errno, strerror_local(errno, err, sizeof(err)));
+		    errno, strerror_local(errno));
 #endif
 		ns->status=Ns_Dead;
 		return;
@@ -352,13 +354,12 @@ static void Write_To_Socket(socket_struct *ns, const unsigned char *buf, int len
 {
     int amt=0;
     const unsigned char *pos=buf;
-    char err[MAX_BUF];
 
     if (ns->status == Ns_Dead || !buf) {
 	LOG(llevDebug,"Write_To_Socket called with dead socket\n");
 	return;
     }
-
+ 
 #ifndef __GNU__ /* This caused problems on Hurd */
     if (!ns->can_write) {
 	add_to_buffer(ns, buf, len);
@@ -383,7 +384,7 @@ static void Write_To_Socket(socket_struct *ns, const unsigned char *buf, int len
 #else
 	if (errno !=EWOULDBLOCK) {
 		LOG(llevError,"New socket write failed WTS (%d: %s).\n", /* ---WIN32 */
-		    errno, strerror_local(errno, err, sizeof(err)));
+		    errno, strerror_local(errno));
 #endif
 		ns->status=Ns_Dead;
 		return;
@@ -448,7 +449,8 @@ void Send_With_Handling(socket_struct *ns, const SockList *msg)
     }
     sbuf[0] = ((uint32)(msg->len) >> 8) & 0xFF;
     sbuf[1] = ((uint32)(msg->len)) & 0xFF;
-    Write_To_Socket(ns, sbuf, 2);
+    if (ns->status != Ns_Old) 
+	Write_To_Socket(ns, sbuf, 2);
     Write_To_Socket(ns, msg->buf, msg->len);
 }
 

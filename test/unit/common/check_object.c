@@ -26,7 +26,7 @@
     The authors can be reached via e-mail at crossfire-devel@real-time.com
 */
 
-/*
+/* 
  * This is the unit tests file for common/object.c
  */
 
@@ -35,8 +35,6 @@
 #include <check.h>
 #include <loader.h>
 #include <toolkit_common.h>
-
-#include "stringbuffer.h"
 
 
 void setup(void) {
@@ -209,18 +207,14 @@ START_TEST (test_dump_object)
   object *ob1;
   object *ob2;
   object *ob3;
-  StringBuffer *sb;
-  char *result;
   ob1 = cctk_create_game_object(NULL);
   ob2 = cctk_create_game_object(NULL);
   ob3 = cctk_create_game_object(NULL);
   insert_ob_in_ob(ob2,ob1);
   insert_ob_in_ob(ob3,ob2);
-  sb = stringbuffer_new();
-  dump_object(ob1, sb);
-  result = stringbuffer_finish(sb);
-  fail_unless(strstr(result, "arch") != NULL, "The object dump should contain 'arch' but was %s", sb);
-  free(result);
+  strcpy(errmsg,"----");
+  dump_object(ob1);
+  fail_unless(strstr(errmsg,"arch")!=NULL,"The object dump should contain 'arch' but was %s",errmsg);
 }
 END_TEST
 
@@ -236,7 +230,7 @@ START_TEST (test_dump_all_objects)
   ob1 = cctk_create_game_object(NULL);
   ob2 = cctk_create_game_object(NULL);
   ob3 = cctk_create_game_object(NULL);
-  dump_all_objects(); /*Should not crash, that all i can test*/
+  dump_all_objects(); /*Should not crash, that all i can test*/ 
 }
 END_TEST
 
@@ -310,12 +304,15 @@ START_TEST (test_clear_owner)
 {
   object *ob1;
   object *ob2;
+  int refcount;
   ob1 = cctk_create_game_object(NULL);
   ob2 = cctk_create_game_object(NULL);
   set_owner(ob2,ob1);
+  refcount = ob1->refcount;
   fail_unless(ob2->owner!=NULL,"Prior to testing clear_owner, owner of ob2 was wrongly initialized");
   clear_owner(ob2);
   fail_unless(ob2->owner==NULL,"After clear_owner ob2 still had an owner");
+  fail_unless(ob1->refcount<refcount,"After clear_owner of ob2, ob1 refcont should be decreased. Before clear_ower:%d , after %d",refcount,ob1->refcount);
 }
 END_TEST
 
@@ -327,8 +324,10 @@ START_TEST (test_set_owner)
 {
   object *ob1;
   object *ob2;
+  int refcount;
   ob1 = cctk_create_game_object(NULL);
   ob2 = cctk_create_game_object(NULL);
+  refcount = ob1->refcount;
   set_owner(ob2,ob1);
   fail_unless(ob2->owner==ob1,"After set_owner ob2(%p) owner should be ob1(%p) but was (%p)",ob2,ob1,ob2->owner);
 }
@@ -360,7 +359,7 @@ END_TEST
 START_TEST (test_reset_object)
 {
   object *ob1;
-
+  object *result;
   ob1 = cctk_create_game_object(NULL);
   reset_object(ob1);
   fail_unless(ob1->name == NULL,"Field name of ob1 was not NULLified by reset_object");
@@ -472,7 +471,7 @@ START_TEST (test_update_turn_face)
   object *ob1;
   New_Face *face1;
   New_Face *face2;
-
+  const char* reference;
   ob1 = cctk_create_game_object("xan");
   ob1->direction=1;
   update_turn_face(ob1);
@@ -481,7 +480,7 @@ START_TEST (test_update_turn_face)
   update_turn_face(ob1);
   face2=ob1->face;
   fail_unless(face2!=face1,"2 opposite direction should provide different faces after update_turn_face");
-
+  
 }
 END_TEST
 
@@ -656,7 +655,7 @@ START_TEST (test_sub_weight)
   fail_unless(sum==18,"Sum of object's inventory should be 18 (30*0.6+10) but was %lu.",sum);
   sub_weight(ob4,10);
   fail_unless(ob1->carrying==12,"after call to sub_weight, carrying of ob1 should be 22 but was %d",ob1->carrying);
-
+  
 }
 END_TEST
 
@@ -699,7 +698,7 @@ START_TEST (test_merge_ob)
   ob1->name=add_string("test");
   ob2->name=add_string("test2");
   ob3->name=add_string("test3");
-
+  
 }
 END_TEST
 
@@ -709,137 +708,18 @@ END_TEST
  */
 START_TEST (test_insert_ob_in_map_at)
 {
-    mapstruct* map;
-    object* first = NULL;
-    object* got = NULL;
-
-    map = get_empty_map(5, 5);
-    fail_unless(map != NULL, "get_empty_map returned NULL.");
-
-    /* Single tile object */
-    first = cctk_create_game_object("barrel");
-    fail_unless(first != NULL, "create barrel failed");
-
-    got = insert_ob_in_map_at(first, map, NULL, 0, 0, 0);
-    fail_unless(got == first, "item shouldn't be destroyed");
-
-    first = cctk_create_game_object("dragon");
-    fail_unless(first != NULL, "create dragon failed");
-    fail_unless(first->more != NULL, "no other body part");
-
-    got = insert_ob_in_map_at(first, map, NULL, 0, 1, 1);
-    fail_unless(got == first, "item shouldn't be destroyed");
-
-    fail_unless(GET_MAP_OB(map, 1, 1) == first, "item isn't on 1,1");
-    fail_unless(GET_MAP_OB(map, 2, 1) != NULL, "no item on 2,1");
-    fail_unless(GET_MAP_OB(map, 2, 1)->head == first, "head of 2,1 isn't 1,1");
+    /*TESTME*/
 }
 END_TEST
 
 
 /** This is the test to check the behaviour of the method
  *  object *insert_ob_in_map(object *op, mapstruct *m, object *originator, int flag);
+void replace_insert_ob_in_map(const char *arch_string, object *op);
  */
 START_TEST (test_insert_ob_in_map)
 {
-    mapstruct* map;
-    object* first = NULL;
-    object* second = NULL;
-    object* third = NULL;
-    object* floor = NULL;
-    object* got = NULL;
-
-    map = get_empty_map(5, 5);
-    fail_unless(map != NULL, "get_empty_map returned NULL.");
-
-    /* First, simple tests for insertion. */
-    floor = cctk_create_game_object("woodfloor");
-    fail_unless(floor != NULL, "create woodfloor failed");
-    floor->x = 3;
-    floor->y = 3;
-
-    got = insert_ob_in_map(floor, map, NULL, 0);
-    fail_unless(got == floor, "woodfloor shouldn't disappear");
-    fail_unless(floor == GET_MAP_OB(map, 3, 3), "woodfloor should be first object");
-
-    first = cctk_create_game_object("barrel");
-    fail_unless(first != NULL, "create barrel failed");
-    first->x = 3;
-    first->y = 3;
-
-    got = insert_ob_in_map(first, map, NULL, 0);
-    fail_unless(got == first, "barrel shouldn't disappear");
-    fail_unless(floor == GET_MAP_OB(map, 3, 3), "woodfloor should still be first object");
-    fail_unless(floor->above == first, "barrel should be above floor");
-
-    second = cctk_create_game_object("gem");
-    fail_unless(second != NULL, "create gem failed");
-    second->nrof = 1;
-    second->x = 3;
-    second->y = 3;
-
-    got = insert_ob_in_map(second, map, NULL, INS_ABOVE_FLOOR_ONLY);
-    fail_unless(got == second, "gem shouldn't disappear");
-    fail_unless(floor == GET_MAP_OB(map, 3, 3), "woodfloor should still be first object");
-    fail_unless(floor->above == second, "gem should be above floor");
-    fail_unless(second->above == first, "barrel should be above gem");
-
-    third = cctk_create_game_object("bed_1");
-    fail_unless(third != NULL, "create bed_1 failed");
-    third->nrof = 1;
-    third->x = 3;
-    third->y = 3;
-
-    got = insert_ob_in_map(third, map, first, INS_BELOW_ORIGINATOR);
-    fail_unless(got == third, "bed_1 shouldn't disappear");
-    fail_unless(floor == GET_MAP_OB(map, 3, 3), "woodfloor should still be first object");
-    fail_unless(third->above == first, "bed should be below barrel");
-    fail_unless(third->below == second, "bed should be above gem");
-
-    /* Merging tests. */
-    third = cctk_create_game_object("gem");
-    fail_unless(third != NULL, "create gem failed");
-    third->nrof = 1;
-    third->x = 3;
-    third->y = 3;
-
-    got = insert_ob_in_map(third, map, NULL, 0);
-    fail_unless(got == third, "gem shouldn't disappear");
-    fail_unless(QUERY_FLAG(second, FLAG_FREED), "first gem should have been removed.");
-    fail_unless(third->nrof == 2, "second gem should have nrof 2");
-
-    second = cctk_create_game_object("gem");
-    fail_unless(second != NULL, "create gem failed");
-    second->nrof = 1;
-    second->x = 3;
-    second->y = 3;
-    second->value = 1;
-
-    got = insert_ob_in_map(second, map, NULL, 0);
-    fail_unless(got == second, "modified gem shouldn't disappear");
-    fail_unless(second->nrof == 1, "modified gem should have nrof 1");
-
-    /* Now check sacrificing, on another spot.
-      Can't work here, as altar logic is in server.
-      -> move that there.
-     */
-/*    first = cctk_create_game_object("altar");
-    fail_unless(first != NULL, "create altar failed");
-    first->x = 2;
-    first->y = 2;
-    first->stats.food = 5;
-    first->value = 0;
-    fail_unless(insert_ob_in_map(first, map, NULL, 0) == first, "altar shouldn't disappear");
-    fail_unless(GET_MAP_MOVE_ON(map, 2, 2) & MOVE_WALK == MOVE_WALK, "floor should have MOVE_WALK set");
-
-    second = cctk_create_game_object("food");
-    fail_unless(second != NULL, "create food failed");
-    second->nrof = 5;
-    second->x = 2;
-    second->y = 2;
-    got = insert_ob_in_map(second, map, NULL, 0);
-    fail_unless(got == NULL, "insert_ob_in_map(food) should have returned NULL");
-    fail_unless(QUERY_FLAG(second, FLAG_FREED), "food should have been freed");*/
+    /*TESTME*/
 }
 END_TEST
 
@@ -849,50 +729,7 @@ END_TEST
  */
 START_TEST (test_replace_insert_ob_in_map)
 {
-    mapstruct* map;
-    object* first = NULL, *second = NULL, *third = NULL;
-    tag_t tag_first, tag_second, tag_third;
-    object* got = NULL;
-
-    map = get_empty_map(5, 5);
-    fail_unless(map != NULL, "get_empty_map returned NULL.");
-
-    /* Single tile object */
-    first = cctk_create_game_object("barrel");
-    fail_unless(first != NULL, "create barrel failed");
-    tag_first = first->count;
-
-    got = insert_ob_in_map_at(first, map, NULL, 0, 0, 0);
-    fail_unless(got == first, "item shouldn't be destroyed");
-
-    second = cctk_create_game_object("table");
-    fail_unless(second != NULL, "create table failed");
-
-    got = insert_ob_in_map_at(second, map, NULL, 0, 0, 0);
-    fail_unless(got == second, "second item shouldn't be destroyed");
-    tag_second = second->count;
-
-    third = cctk_create_game_object("barrel");
-    fail_unless(third != NULL, "create 2nd barrel failed");
-    got = insert_ob_in_map_at(third, map, NULL, 0, 0, 0);
-    fail_unless(got == third, "second barrel shouldn't be destroyed");
-    tag_third = third->count;
-
-    fail_unless(GET_MAP_OB(map, 0, 0) == first, "item at 0,0 isn't barrel");
-    fail_unless(GET_MAP_OB(map, 0, 0)->above == second, "second item at 0,0 isn't table");
-    fail_unless(GET_MAP_OB(map, 0, 0)->above->above == third, "third item at 0,0 isn't barrel");
-
-    replace_insert_ob_in_map("barrel", second);
-
-    fail_unless(GET_MAP_OB(map, 0, 0) != first, "item at 0, 0 is still first?");
-    fail_unless(was_destroyed(first, tag_first), "1st barrel should be destroyed");
-    fail_unless(!was_destroyed(second, tag_second), "table shouldn't be destroyed");
-    fail_unless(was_destroyed(third, tag_third), "2nd barrel should be destroyed");
-
-    fail_unless(GET_MAP_OB(map, 0, 0) != NULL, "no item at 0,0 after replace_insert_ob_in_map");
-    fail_unless(GET_MAP_OB(map, 0, 0) != second, "second at bottom at 0,0 after replace_insert_ob_in_map");
-    fail_unless(GET_MAP_OB(map, 0, 0)->above == second, "table isn't above new barrel");
-    fail_unless(strcmp(GET_MAP_OB(map, 0, 0)->arch->name, "barrel") == 0, "item at 0,0 is not a barrel after replace_insert_ob_in_map");
+    /*TESTME*/
 }
 END_TEST
 
@@ -902,26 +739,7 @@ END_TEST
  */
 START_TEST (test_get_split_ob)
 {
-    object* first = NULL;
-    object* second = NULL;
-    char err[50];
-
-    first = cctk_create_game_object("gem");
-    fail_unless(first != NULL, "create gem failed");
-    first->nrof = 5;
-
-    second = get_split_ob(first, 2, err, sizeof(err));
-    fail_unless(second != NULL, "should return an item");
-    fail_unless(second->nrof == 2, "2 expected to split");
-    fail_unless(first->nrof == 3, "3 should be left");
-
-    second = get_split_ob(first, 3, err, sizeof(err));
-    fail_unless(second != NULL, "should return an item");
-    fail_unless(QUERY_FLAG(first, FLAG_FREED), "first should be freed");
-
-    first = get_split_ob(second, 10, err, sizeof(err));
-    fail_unless(first == NULL, "should return NULL");
-    fail_unless(second->nrof == 3, "3 should be left");
+    /*TESTME*/
 }
 END_TEST
 
@@ -931,19 +749,7 @@ END_TEST
  */
 START_TEST (test_decrease_ob_nr)
 {
-    object* first = NULL;
-    object* second = NULL;
-
-    first = cctk_create_game_object("gem");
-    fail_unless(first != NULL, "create gem failed");
-    first->nrof = 5;
-
-    second = decrease_ob_nr(first, 3);
-    fail_unless(second == first, "gem shouldn't be destroyed");
-
-    second = decrease_ob_nr(first, 2);
-    fail_unless(second == NULL, "decrease_ob_nr should return NULL");
-    fail_unless(QUERY_FLAG(first, FLAG_FREED), "gem should have been freed");
+    /*TESTME*/
 }
 END_TEST
 
@@ -963,31 +769,7 @@ END_TEST
  */
 START_TEST (test_insert_ob_in_ob)
 {
-    object* container = NULL;
-    object* item = NULL;
-
-    item = cctk_create_game_object("gem");
-    fail_unless(item != NULL, "create gem failed");
-    item->weight = 50;
-
-    /* Bookshelves have no weight reduction. */
-    container = cctk_create_game_object("bookshelf");
-    fail_unless(container != NULL, "create bookshelf failed");
-
-    insert_ob_in_ob(item, container);
-    fail_unless(container->inv == item, "item not inserted");
-    fail_unless(container->carrying == 50, "container should carry 50 and not %d", container->carrying);
-
-    remove_ob(item);
-    fail_unless(container->carrying == 0, "container should carry 0 and not %d", container->carrying);
-
-    /* Sacks have a Str of 10, so will reduce the weight. */
-    container = cctk_create_game_object("sack");
-    fail_unless(container != NULL, "create sack failed");
-
-    insert_ob_in_ob(item, container);
-    fail_unless(container->inv == item, "item not inserted");
-    fail_unless(container->carrying == 45, "container should carry 45 and not %d", container->carrying);
+    /*TESTME*/
 }
 END_TEST
 
@@ -1248,7 +1030,7 @@ END_TEST
 START_TEST (test_item_matched_string)
 {
     object *pl;
-    object *o1, *o2;
+    object *o1, *o2, *o3, *o4;
     int val;
 
     pl = cctk_create_game_object("kobold");
@@ -1260,14 +1042,14 @@ START_TEST (test_item_matched_string)
     fail_unless(o1 != NULL, "couldn't find cloak archetype");
     o1->title = add_string("of Gorokh");
     CLEAR_FLAG(o1, FLAG_IDENTIFIED);
-
+					    
     val = item_matched_string(pl, o1, "all");
     fail_unless(val == 1, "all didn't match cloak");
     val = item_matched_string(pl, o1, "Gorokh");
     fail_unless(val == 0, "unidentified cloak matched title with value %d", val);
     val = item_matched_string(pl, o1, "random");
     fail_unless(val == 0, "unidentified cloak matched random value with value %d", val);
-
+								    
     SET_FLAG(o1, FLAG_IDENTIFIED);
     val = item_matched_string(pl, o1, "Gorokh");
     fail_unless(val != 0, "identified cloak didn't match title with value %d", val);
@@ -1290,7 +1072,7 @@ Suite *object_suite(void)
   Suite *s = suite_create("object");
   TCase *tc_core = tcase_create("Core");
     /*setup and teardown will be called before each test in testcase 'tc_core' */
-  tcase_add_unchecked_fixture(tc_core,setup,teardown);
+  tcase_add_unchecked_fixture(tc_core,setup,teardown); 
 
   suite_add_tcase (s, tc_core);
   tcase_add_test(tc_core, test_can_merge);
@@ -1365,8 +1147,6 @@ int main(void)
   Suite *s = object_suite();
   sr = srunner_create(s);
   srunner_set_xml(sr,LOGDIR "/unit/common/object.xml");
-  /* if you wish to debug, uncomment the following line. */
-/*  srunner_set_fork_status (sr, CK_NOFORK);*/
 
   srunner_run_all(sr, CK_ENV); /*verbosity from env variable*/
   nf = srunner_ntests_failed(sr);

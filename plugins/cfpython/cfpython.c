@@ -111,12 +111,7 @@ static PyObject* getTime(PyObject* self, PyObject* args);
 static PyObject* destroyTimer(PyObject* self, PyObject* args);
 static PyObject* getMapHasBeenLoaded(PyObject* self, PyObject* args);
 static PyObject* findAnimation(PyObject* self, PyObject* args);
-static PyObject* log_message(PyObject* self, PyObject* args);
 static PyObject* findFace(PyObject* self, PyObject* args);
-static PyObject* getSeasonName(PyObject* self, PyObject* args);
-static PyObject* getMonthName(PyObject* self, PyObject* args);
-static PyObject* getWeekdayName(PyObject* self, PyObject* args);
-static PyObject* getPeriodofdayName(PyObject* self, PyObject* args);
 
 /** Set up an Python exception object. */
 static void set_exception(const char *fmt, ...)
@@ -169,13 +164,8 @@ static PyMethodDef CFPythonMethods[] = {
     {"GetTime",             getTime,                METH_VARARGS},
     {"DestroyTimer",        destroyTimer,           METH_VARARGS},
     {"MapHasBeenLoaded",    getMapHasBeenLoaded,    METH_VARARGS},
-    {"Log",                 log_message,            METH_VARARGS},
     {"FindFace",            findFace,               METH_VARARGS},
     {"FindAnimation",       findAnimation,          METH_VARARGS},
-    {"GetSeasonName",       getSeasonName,          METH_VARARGS},
-    {"GetMonthName",        getMonthName,           METH_VARARGS},
-    {"GetWeekdayName",      getWeekdayName,         METH_VARARGS},
-    {"GetPeriodofdayName",  getPeriodofdayName,     METH_VARARGS},
     {NULL, NULL, 0}
 };
 
@@ -307,6 +297,48 @@ static PyObject* createMap(PyObject* self, PyObject* args)
     return Crossfire_Map_wrap(map);
 }
 
+static PyObject* getCostFlagTrue(PyObject* self, PyObject* args)
+{
+    int i = F_TRUE;
+    if (!PyArg_ParseTuple(args, "", NULL))
+        return NULL;
+    return Py_BuildValue("i", i);
+}
+static PyObject* getCostFlagBuy(PyObject* self, PyObject* args)
+{
+    int i = F_BUY;
+    if (!PyArg_ParseTuple(args, "", NULL))
+        return NULL;
+    return Py_BuildValue("i", i);
+}
+static PyObject* getCostFlagSell(PyObject* self, PyObject* args)
+{
+    int i = F_SELL;
+    if (!PyArg_ParseTuple(args, "", NULL))
+        return NULL;
+    return Py_BuildValue("i", i);
+}
+static PyObject* getCostFlagNoBargain(PyObject* self, PyObject* args)
+{
+    int i = F_NO_BARGAIN;
+    if (!PyArg_ParseTuple(args, "", NULL))
+        return NULL;
+    return Py_BuildValue("i", i);
+}
+static PyObject* getCostFlagIdentified(PyObject* self, PyObject* args)
+{
+    int i = F_IDENTIFIED;
+    if (!PyArg_ParseTuple(args, "", NULL))
+        return NULL;
+    return Py_BuildValue("i", i);
+}
+static PyObject* getCostFlagNotCursed(PyObject* self, PyObject* args)
+{
+    int i = F_NOT_CURSED;
+    if (!PyArg_ParseTuple(args, "", NULL))
+        return NULL;
+    return Py_BuildValue("i", i);
+}
 static PyObject* getMapDirectory(PyObject* self, PyObject* args)
 {
     if (!PyArg_ParseTuple(args, "", NULL))
@@ -402,10 +434,6 @@ static PyObject* getScriptParameters(PyObject* self, PyObject* args)
 {
     if (!PyArg_ParseTuple(args, "", NULL))
         return NULL;
-    if (!current_context->options) {
-        Py_INCREF(Py_None);
-        return Py_None;
-    }
     return Py_BuildValue("s", current_context->options);
 }
 
@@ -586,7 +614,6 @@ static PyObject* getTime(PyObject* self, PyObject* args)
     PyList_Append(list, Py_BuildValue("i",tod.dayofweek));
     PyList_Append(list, Py_BuildValue("i",tod.weekofmonth));
     PyList_Append(list, Py_BuildValue("i",tod.season));
-    PyList_Append(list, Py_BuildValue("i",tod.periodofday));
 
     return list;
     }
@@ -615,36 +642,6 @@ static PyObject* findFace(PyObject* self, PyObject* args)
     return Py_BuildValue("i", cf_find_face(name, 0));
 }
 
-static PyObject* log_message(PyObject* self, PyObject* args){
-    LogLevel level;
-    int intLevel;
-    char* message;
-    if (!PyArg_ParseTuple(args,"is",&intLevel,&message))
-	return NULL;
-    switch (intLevel) {
-        case llevError: 
-            level=llevError;
-            break;
-        case llevInfo: 
-            level=llevInfo;
-            break;
-        case llevDebug: 
-            level=llevDebug;
-            break;
-        case llevMonster: 
-            level=llevMonster;
-            break;
-        default:
-            return NULL;
-    }
-    if ( (message!=NULL) && (message[strlen(message)]=='\n'))
-	cf_log(level,"CFPython: %s",message);
-    else
-	cf_log(level,"CFPython: %s\n",message);
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
 static PyObject* findAnimation(PyObject* self, PyObject* args)
 {
     char* name;
@@ -653,38 +650,6 @@ static PyObject* findAnimation(PyObject* self, PyObject* args)
     return Py_BuildValue("i", cf_find_animation(name));
 }
 
-
-static PyObject* getSeasonName(PyObject* self, PyObject* args)
-{
-    int i;
-    if (!PyArg_ParseTuple(args, "i", &i))
-        return NULL;
-    return Py_BuildValue("s", cf_get_season_name(i));
-}
-
-static PyObject* getMonthName(PyObject* self, PyObject* args)
-{
-    int i;
-    if (!PyArg_ParseTuple(args, "i", &i))
-        return NULL;
-    return Py_BuildValue("s", cf_get_month_name(i));
-}
-
-static PyObject* getWeekdayName(PyObject* self, PyObject* args)
-{
-    int i;
-    if (!PyArg_ParseTuple(args, "i", &i))
-        return NULL;
-    return Py_BuildValue("s", cf_get_weekday_name(i));
-}
-
-static PyObject* getPeriodofdayName(PyObject* self, PyObject* args)
-{
-    int i;
-    if (!PyArg_ParseTuple(args, "i", &i))
-        return NULL;
-    return Py_BuildValue("s", cf_get_periodofday_name(i));
-}
 void initContextStack()
 {
     current_context = NULL;
@@ -738,9 +703,8 @@ static PyCodeObject *compilePython(char *filename) {
     }
     if(stat(filename, &stat_buf)) {
         cf_log(llevDebug, "cfpython - The Script file %s can't be stat:ed\n", filename);
-        if(scriptfile) {
+        if(scriptfile)
             Py_DECREF(scriptfile);
-	}
         return NULL;
     }
 
@@ -806,9 +770,8 @@ static PyCodeObject *compilePython(char *filename) {
 
     cf_free_string(sh_path);
 
-    if(scriptfile) {
+    if(scriptfile)
         Py_DECREF(scriptfile);
-    }
 
     if (run)
         return run->code;
@@ -887,32 +850,6 @@ static void addConstants(PyObject* module, const char* name, CFConstant* constan
     PyDict_SetItemString(PyModule_GetDict(module), tmp, dict);
     Py_DECREF(dict);
 }
-/**
- * Do half the job of addConstants. It only 
- * Set constantc, but not a hashtable to get constant
- * names from values. To be used for collections of constants
- * which are not unique but still are usefull for scripts
- */
-static void addSimpleConstants(PyObject* module, const char* name, CFConstant* constants)
-{
-    int i = 0;
-    char tmp[1024];
-    PyObject* new;
-
-    strncpy(tmp, "Crossfire_", 1024);
-    strncat(tmp, name, 1024 - strlen(tmp));
-
-    new = Py_InitModule(tmp, NULL);
-
-    while ( constants[i].name != NULL)
-    {
-        PyModule_AddIntConstant(new, constants[i].name, constants[i].value);
-        i++;
-    }
-    PyDict_SetItemString(PyModule_GetDict(module), name, new);
-    Py_DECREF(new);
-
-}
 
 static void initConstants(PyObject* module)
 {
@@ -960,6 +897,7 @@ static void initConstants(PyObject* module)
         { "HORN", HORN },
         { "MONEY", MONEY },
         { "CLASS", CLASS },
+        { "GRAVESTONE", GRAVESTONE },
         { "AMULET", AMULET },
         { "PLAYERMOVER", PLAYERMOVER },
         { "TELEPORTER", TELEPORTER },
@@ -982,6 +920,7 @@ static void initConstants(PyObject* module)
         { "PEACEMAKER", PEACEMAKER },
         { "GEM", GEM },
         { "FIREWALL", FIREWALL },
+        { "ANVIL", ANVIL },
         { "CHECK_INV", CHECK_INV },
         { "MOOD_FLOOR", MOOD_FLOOR },
         { "EXIT", EXIT },
@@ -994,12 +933,17 @@ static void initConstants(PyObject* module)
         { "INORGANIC", INORGANIC },
         { "SKILL_TOOL", SKILL_TOOL },
         { "LIGHTER", LIGHTER },
+        { "TRAP_PART", TRAP_PART },
         { "WALL", WALL },
+        { "LIGHT_SOURCE", LIGHT_SOURCE },
         { "MISC_OBJECT", MISC_OBJECT },
         { "MONSTER", MONSTER },
+        { "SPAWN_GENERATOR", SPAWN_GENERATOR },
         { "LAMP", LAMP },
         { "DUPLICATOR", DUPLICATOR },
+        { "TOOL", TOOL },
         { "SPELLBOOK", SPELLBOOK },
+        { "BUILDFAC", BUILDFAC },
         { "CLOAK", CLOAK },
         { "SPINNER", SPINNER },
         { "GATE", GATE },
@@ -1016,6 +960,8 @@ static void initConstants(PyObject* module)
         { "BRACERS", BRACERS },
         { "POISONING", POISONING },
         { "SAVEBED", SAVEBED },
+        { "POISONCLOUD", POISONCLOUD },
+        { "FIREHOLES", FIREHOLES },
         { "WAND", WAND },
         { "SCROLL", SCROLL },
         { "DIRECTOR", DIRECTOR },
@@ -1030,7 +976,7 @@ static void initConstants(PyObject* module)
         { "SKILLSCROLL", SKILLSCROLL },
         { "DEEP_SWAMP", DEEP_SWAMP },
         { "IDENTIFY_ALTAR", IDENTIFY_ALTAR },
-        { "SHOP_INVENTORY", SHOP_INVENTORY },
+        { "MENU", MENU },
         { "RUNE", RUNE },
         { "TRAP", TRAP },
         { "POWER_CRYSTAL", POWER_CRYSTAL },
@@ -1039,6 +985,8 @@ static void initConstants(PyObject* module)
         { "SYMPTOM", SYMPTOM },
         { "BUILDER", BUILDER },
         { "MATERIAL", MATERIAL },
+        { "ITEM_TRANSFORMER", ITEM_TRANSFORMER },
+        { "QUEST", QUEST },
         { NULL, 0 } };
 
     static CFConstant cstMove[] = {
@@ -1167,17 +1115,6 @@ static void initConstants(PyObject* module)
         { "KICK", EVENT_KICK },
         { "MAPUNLOAD", EVENT_MAPUNLOAD },
         { "MAPLOAD", EVENT_MAPLOAD },
-        { "USER", EVENT_USER },
-        { NULL, 0 } };
-
-
-    static CFConstant cstTime[] = {
-        { "HOURS_PER_DAY", HOURS_PER_DAY },
-        { "DAYS_PER_WEEK", DAYS_PER_WEEK },
-        { "WEEKS_PER_MONTH", WEEKS_PER_MONTH },
-        { "MONTHS_PER_YEAR", MONTHS_PER_YEAR },
-        { "SEASONS_PER_YEAR", SEASONS_PER_YEAR },
-        { "PERIODS_PER_DAY", PERIODS_PER_DAY },
         { NULL, 0 } };
 
     addConstants(module, "Direction", cstDirection);
@@ -1188,10 +1125,7 @@ static void initConstants(PyObject* module)
     addConstants(module, "AttackType", cstAttackType);
     addConstants(module, "AttackTypeNumber", cstAttackTypeNumber);
     addConstants(module, "EventType", cstEventType);
-    addSimpleConstants(module, "Time", cstTime);
 }
-extern PyMODINIT_FUNC
-initcjson(void);
 
 CF_PLUGIN int initPlugin(const char* iversion, f_plug_api gethooksptr)
 {
@@ -1233,11 +1167,6 @@ CF_PLUGIN int initPlugin(const char* iversion, f_plug_api gethooksptr)
     PyModule_AddObject(m, "Party", (PyObject*)&Crossfire_PartyType);
     PyModule_AddObject(m, "Region", (PyObject*)&Crossfire_RegionType);
 
-    PyModule_AddObject(m, "LogError", Py_BuildValue("i", llevError));
-    PyModule_AddObject(m, "LogInfo", Py_BuildValue("i", llevInfo));
-    PyModule_AddObject(m, "LogDebug", Py_BuildValue("i", llevDebug));
-    PyModule_AddObject(m, "LogMonster", Py_BuildValue("i", llevMonster));
-
     CFPythonError = PyErr_NewException("Crossfire.error", NULL, NULL);
     PyDict_SetItemString(d, "error", CFPythonError);
     for (i = 0; i < NR_CUSTOM_CMD; i++) {
@@ -1248,9 +1177,6 @@ CF_PLUGIN int initPlugin(const char* iversion, f_plug_api gethooksptr)
     initConstants(m);
     private_data = PyDict_New();
     shared_data = PyDict_New();
-    
-    /* add cjson module*/
-    initcjson();
     return 0;
 }
 
@@ -1322,13 +1248,11 @@ CF_PLUGIN int runPluginCommand(object* op, char* params)
     context->third       = NULL;
     context->fix         = 0;
     snprintf(context->script, sizeof(context->script), "%s", buf);
-    if (params)
-        snprintf(context->options, sizeof(context->options), "%s", params);
-    else
-        context->options[0] = 0;
+    snprintf(context->options, sizeof(context->options), "%s", params);
     context->returnvalue = 1; /* Default is "command successful" */
 
     current_command = -999;
+
     if (!do_script(context, 0)) {
         freeContext(context);
         return rv;

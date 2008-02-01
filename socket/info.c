@@ -6,7 +6,7 @@
 /*
     CrossFire, A Multiplayer game for X-windows
 
-    Copyright (C) 2002,2006 Mark Wedel & Crossfire Development Team
+    Copyright (C) 2002 Mark Wedel & Crossfire Development Team
     Copyright (C) 1992 Frank Tore Johansen
 
     This program is free software; you can redistribute it and/or modify
@@ -43,7 +43,7 @@
 #include <skills.h>
 
 /**
- * Draws a normal message on the client.  It is pretty
+ * Draws a normal message on the client.  It is pretty 
  * much the same thing as the draw_info above, but takes a color
  * parameter.  the esrv_drawinfo functions should probably be
  * replaced with this, just using black as the color.
@@ -52,13 +52,17 @@ static void esrv_print_msg(socket_struct *ns,int color, const char *str)
 {
     char buf[HUGE_BUF];
 
+    if (ns->status == Ns_Old) {
+	snprintf(buf,HUGE_BUF,"%s\n", str);
+    } else {
 	snprintf(buf,HUGE_BUF, "drawinfo %d %s", color, str);
+    }
 /*    LOG(llevDebug,"sending %s to socket, len=%d\n", buf, strlen(buf));*/
     Write_String_To_Socket(ns, buf, strlen(buf));
 }
 
 /**
- * Draws   an extended message on the client.
+ * Draws   an extended message on the client. 
  * ns      the socket to send message to
  * color   color informations (used mainly if client does not support message type)
  * type,
@@ -113,12 +117,8 @@ void flush_output_element(const object *pl, Output_Buf *outputs)
     char tbuf[MAX_BUF];
 
     if (outputs->buf==NULL) return;
-    if (outputs->count > 1) {
-	snprintf(tbuf,MAX_BUF, "%d times %s", outputs->count, outputs->buf);
-	print_message(NDI_BLACK, pl, tbuf);
-    } else {
-	print_message(NDI_BLACK, pl, outputs->buf);
-    }
+    snprintf(tbuf,MAX_BUF, "%d times %s", outputs->count, outputs->buf);
+    print_message(NDI_BLACK, pl, tbuf);
     free_string(outputs->buf);
     outputs->buf=NULL;
     outputs->first_update=0;	/* This way, it will be reused */
@@ -149,7 +149,7 @@ static void check_output_buffers(const object *pl, const char *buf)
     }
     else {
 	for (i=0; i<NUM_OUTPUT_BUFS; i++) {
-	    if (pl->contr->outputs[i].buf &&
+	    if (pl->contr->outputs[i].buf && 
 		!strcmp(buf, pl->contr->outputs[i].buf)) break;
 	    else if (pl->contr->outputs[i].first_update <
 		pl->contr->outputs[oldest].first_update)
@@ -174,169 +174,164 @@ static void check_output_buffers(const object *pl, const char *buf)
 	}
     }
 }
+	    
+
 
 /**
  * Sends message to player(s).
  *
- * @param flags Various flags - mostly color, plus a few specials.
+ * flags is various flags - mostly color, plus a few specials.
  *
- * @param pri Priority.  It is a little odd - the lower the value, the more
+ * pri is priority.  It is a little odd - the lower the value, the more
  * important it is.  Thus, 0 gets sent no matter what.  Otherwise, the
  * value must be less than the listening level that the player has set.
  * Unfortunately, there is no clear guideline on what each level does what.
  *
- * @param pl Can be passed as NULL - in fact, this will be done if NDI_ALL is
- * set in the flags.
+ * pl can be passed as NULL - in fact, this will be done if NDI_ALL is set
+ * in the flags.
  *
  * If message is black, and not NDI_UNIQUE, gets sent through output buffers.
- * If the client supports the new readables, this is sent to the client without
- * processing in the output buffers.
  *
- * @param type The type MSG_TYPE for the type of message.
- *
- * @param subtype The type MSG_TYPE for the type of message.
- *
- * @param message The message to send for clients that support draw_ext_info.
- *
- * @param oldmessage is for clients that do not support it.  oldmessage can be
- * NULL, in which case this function will strip out the tags of message.
  */
-void draw_ext_info(
-        int flags, int pri, const object *pl, uint8 type,
-        uint8 subtype, const char* message, const char* oldmessage){
 
+void new_draw_info(int flags, int pri, const object *pl, const char *buf)
+{
 
     if ((flags & NDI_ALL) || (flags & NDI_ALL_DMS)) {
         player *tmppl;
+	int i;
 
         for (tmppl=first_player; tmppl!=NULL; tmppl=tmppl->next) {
             if ((flags & NDI_ALL_DMS) && !QUERY_FLAG(tmppl->ob, FLAG_WIZ))
                 continue;
-            draw_ext_info((flags & ~NDI_ALL & ~NDI_ALL_DMS), pri, tmppl->ob, type, subtype,
-                message, oldmessage);
+            new_draw_info((flags & ~NDI_ALL & ~NDI_ALL_DMS), pri, tmppl->ob, buf);
         }
 
-        return;
-    }
+	if (!flags & NDI_ALL_DMS)
+            for (i=1; i<socket_info.allocated_sockets; i++) {
+	        if (init_sockets[i].status == Ns_Old && init_sockets[i].old_mode != Old_Listen && pri< 10) {
+	            cs_write_string(&init_sockets[i], buf, strlen(buf));
+		    /* Most messages don't have a newline, so add one */
+		    cs_write_string(&init_sockets[i], "\n", 1);
+		}
+	    }
 
+	return;
+    }
     if(!pl || (pl->type==PLAYER && pl->contr==NULL)) {
 	/* Write to the socket? */
-	print_message(0, NULL, oldmessage);
+	print_message(0, NULL, buf);
 	return;
     }
     if (pl->type!=PLAYER) return;
     if (pri>=pl->contr->listening) return;
 
-    /* If the client doesn't support the readables, need to convert
-     * it to old format.  If oldmessage is specified, it is presumed
-     * that no conversion is needed (if the caller isn't sure, it
-     * should pass NULL for oldmessage).
-     */
-    if (!CLIENT_SUPPORT_READABLES(&pl->contr->socket,type)){
-        char *buf;
+    if ((flags&NDI_COLOR_MASK)==NDI_BLACK && !(flags &NDI_UNIQUE)) {
+	/* following prints stuff out, as appropriate */
+	check_output_buffers(pl, buf);
+    }
+    else {
+	print_message(flags&NDI_COLOR_MASK, pl, buf);
+    }
+}
 
-        if (oldmessage) {
-            buf = (char*)oldmessage;
-        } else {
-            buf = strdup_local(message);
-            if (buf == NULL) {
-                LOG(llevError, "info::draw_ext_info -> Out of memory!\n");
-                return;
-            }
+/**
+ * Wrapper for new_draw_info printf-like.
+ *
+ * This is a pretty trivial function, but it allows us to use printf style
+ * formatting, so instead of the calling function having to do it, we do
+ * it here.  It may also have advantages in the future for reduction of
+ * client/server bandwidth (client could keep track of various strings
+ */
+
+void new_draw_info_format(int flags, int pri, const object *pl, const char *format, ...)
+{
+    char buf[HUGE_BUF];
+
+    va_list ap;
+    va_start(ap, format);
+
+    vsnprintf(buf, HUGE_BUF, format, ap);
+
+    va_end(ap);
+
+    new_draw_info(flags, pri, pl, buf);
+}
+
+
+void draw_ext_info(
+        int flags, int pri, const object *pl, uint8 type, 
+        uint8 subtype, const char* message, const char* oldmessage){
+            
+    if(!pl || (pl->type!=PLAYER) || (pl->contr==NULL))
+        return;
+        
+    if (pri>=pl->contr->listening) return;
+
+    if (!CLIENT_SUPPORT_READABLES(&pl->contr->socket,type)){
+        char *buf = (char*)malloc(strlen(oldmessage==NULL?message:oldmessage)+1);
+        if (buf==NULL)
+            LOG(llevError,"info::draw_ext_info -> Out of memory!\n");
+        else{
+            strcpy(buf,oldmessage==NULL?message:oldmessage);
             strip_media_tag(buf);
-        }
-        if ((flags&NDI_COLOR_MASK)==NDI_BLACK && !(flags &NDI_UNIQUE)) {
-            /* following prints stuff out, as appropriate */
-            check_output_buffers(pl, buf);
-        } else {
-            print_message(flags & NDI_COLOR_MASK, pl, buf);
-        }
-        if (!oldmessage)
+            new_draw_info(flags, pri, pl, buf);
             free(buf);
+        }
     } else {
         esrv_print_ext_msg(&pl->contr->socket,flags&NDI_COLOR_MASK,type,subtype,message);
     }
 }
 
-/**
- * Sends message to player(s).
- *
- *  This function is the same as draw_ext_info, but takes varargs format.
- *  Otherwise, the meaning of all the fields is the same.  This is perhaps not
- *  the most efficient as we do vnsprintf on both the old and newbuf, but it
- *  simplifies the code greatly since we can just call draw_ext_info.  Also,
- *  hopefully at some point, need for old_format will go away.
- *
- * @param flags Various flags - mostly color, plus a few specials.
- *
- * @param pri Priority.  It is a little odd - the lower the value, the more
- * important it is.  Thus, 0 gets sent no matter what.  Otherwise, the
- * value must be less than the listening level that the player has set.
- * Unfortunately, there is no clear guideline on what each level does what.
- *
- * @param pl Can be passed as NULL - in fact, this will be done if NDI_ALL is
- * set in the flags.
- *
- * If message is black, and not NDI_UNIQUE, gets sent through output buffers.
- * If the client supports the new readables, this is sent to the client without
- * processing in the output buffers.
- *
- * @param type The type MSG_TYPE for the type of message.
- *
- * @param subtype The type MSG_TYPE for the type of message.
- *
- * @param new_format
- *
- * @param old_format
- */
 void draw_ext_info_format(
-	int flags, int pri, const object *pl, uint8 type,
-        uint8 subtype,
-        const char* new_format,
-	const char* old_format,
+	int flags, int pri, const object *pl, uint8 type, 
+        uint8 subtype, 
+        const char* new_format, 
+	const char* old_format, 
 	...)
 {
+            
+    char buf[HUGE_BUF];
 
-    char newbuf[HUGE_BUF], oldbuf[HUGE_BUF];
-    va_list ap;
+    if(!pl || (pl->type!=PLAYER) || (pl->contr==NULL))
+	return;
+		
+    if (pri>=pl->contr->listening) return;
 
-    if (!old_format)
-        old_format = new_format;
+    if (!CLIENT_SUPPORT_READABLES(&pl->contr->socket,type)){
+	va_list ap;
 
-    va_start(ap, old_format);
-    vsnprintf(oldbuf, HUGE_BUF, old_format, ap);
-    va_end(ap);
-    va_start(ap, old_format);
-    vsnprintf(newbuf, HUGE_BUF, new_format, ap);
-    va_end(ap);
+	LOG(llevDebug,"Non supported extension text type for client.\n");
+	va_start(ap, old_format);
+	vsnprintf(buf, HUGE_BUF, old_format, ap);
+	va_end(ap);
 
-    draw_ext_info(flags, pri, pl, type, subtype, newbuf, oldbuf);
+	/* Should this be here?  old_format must be set, so in theory, the caller
+	 * should not put tags in it.  But what about cases where it may be using
+	 * data external to the call itself (eg, op->msg, where the message
+	 * itself may contain tags?)
+	 */
+	strip_media_tag(buf);
+	new_draw_info(flags, pri, pl, buf);
+	return;
+    } else {
+	va_list ap;
+	va_start(ap, old_format);
+	vsnprintf(buf, HUGE_BUF, new_format, ap);
+	va_end(ap);
+	esrv_print_ext_msg(&pl->contr->socket,flags&NDI_COLOR_MASK,type,subtype,buf);
+    }
 }
-
-/**
- * Writes to everyone on the specified map
- */
-
-void ext_info_map(int color, const mapstruct *map, uint8 type, uint8 subtype, const char *str1, const char *str2) {
-    player *pl;
-
-    for(pl = first_player; pl != NULL; pl = pl->next)
-	if(pl->ob != NULL && pl->ob->map == map) {
-	    draw_ext_info(color, 0, pl->ob, type, subtype, str1, str2);
-	}
-}
-
 /**
  * Writes to everyone on the map *except* op.  This is useful for emotions.
  */
 
-void ext_info_map_except(int color, const mapstruct *map, const object *op, uint8 type,
-			 uint8 subtype, const char *str1, const char *str2) {
+void new_info_map_except(int color, const mapstruct *map, const object *op, const char *str) {
     player *pl;
 
     for(pl = first_player; pl != NULL; pl = pl->next)
 	if(pl->ob != NULL && pl->ob->map == map && pl->ob != op) {
-	    draw_ext_info(color, 0, pl->ob, type, subtype, str1, str2);
+	    new_draw_info(color, 0, pl->ob, str);
 	}
 }
 
@@ -344,25 +339,45 @@ void ext_info_map_except(int color, const mapstruct *map, const object *op, uint
  * Writes to everyone on the map except op1 and op2
  */
 
-void ext_info_map_except2(int color, const mapstruct *map, const object *op1, const object *op2,
-			  int type, int subtype, const char *str1, const char *str2) {
+void new_info_map_except2(int color, const mapstruct *map, const object *op1, const object *op2,
+			  const char *str) {
     player *pl;
 
     for(pl = first_player; pl != NULL; pl = pl->next)
 	if(pl->ob != NULL && pl->ob->map == map
 	   && pl->ob != op1 && pl->ob != op2) {
-	    draw_ext_info(color, 0, pl->ob, type, subtype, str1, str2);
+	    new_draw_info(color, 0, pl->ob, str);
 	}
-
 }
 
+/**
+ * Writes to everyone on the specified map
+ */
+
+void new_info_map(int color, const mapstruct *map, const char *str) {
+    player *pl;
+
+    for(pl = first_player; pl != NULL; pl = pl->next)
+	if(pl->ob != NULL && pl->ob->map == map) {
+	    new_draw_info(color, 0, pl->ob, str);
+	}
+}
+
+
+/**
+ * This does nothing now.  However, in theory, we should probably send
+ * something to the client and let the client figure out how it might want
+ * to handle this
+ */
+void clear_win_info(object *op)
+{
+}
 
 /**
  * Get player's current range attack in obuf.
  */
 void rangetostring(const object *pl,char *obuf)
 {
-    char name[MAX_BUF];
     switch(pl->contr->shoottype) {
 	case range_none:
 	    strcpy(obuf,"Range: nothing");
@@ -377,8 +392,7 @@ void rangetostring(const object *pl,char *obuf)
 		    break;
 	    if(op==NULL) break;
 
-        query_base_name(op, 0, name, MAX_BUF);
-	    sprintf (obuf, "Range: %s (%s)", name,
+	    sprintf (obuf, "Range: %s (%s)", query_base_name(op, 0), 
 		     op->race ? op->race : "nothing");
 	    }
 	    break;
@@ -393,19 +407,17 @@ void rangetostring(const object *pl,char *obuf)
 			sprintf(obuf,"Range: Casting spell (%s)",
 				pl->spell->name);
 		} else
-		    sprintf(obuf,"Range: spell (%s)",
+		    sprintf(obuf,"Range: spell (%s)", 
 			    pl->contr->ranges[range_magic]->name);
 	    } else
-		sprintf(obuf,"Range: spell (%s)",
+		sprintf(obuf,"Range: spell (%s)", 
 			pl->contr->ranges[range_magic]->name);
 	    break;
 
 	case range_misc:
-        if (pl->contr->ranges[range_misc])
-            query_base_name(pl->contr->ranges[range_misc],0, name, MAX_BUF);
-        else
-            strncpy(name, "none", MAX_BUF);
-	    sprintf(obuf,"Range: %s", name);
+	    sprintf(obuf,"Range: %s", 
+		    pl->contr->ranges[range_misc]?
+		    query_base_name(pl->contr->ranges[range_misc],0): "none");
 	    break;
 
 	/* range_scroll is only used for controlling golems.  If the
@@ -426,8 +438,7 @@ void rangetostring(const object *pl,char *obuf)
 	    break;
 
     case range_builder:
-        query_base_name( pl->contr->ranges[ range_builder ], 0, name, MAX_BUF );
-        sprintf( obuf, "Builder: %s", name );
+        sprintf( obuf, "Builder: %s", query_base_name( pl->contr->ranges[ range_builder ], 0 ) );
         break;
 
 	default:
@@ -488,12 +499,12 @@ static void magic_mapping_mark_recursive(object *pl, char *map_mark, int px, int
 		}
 		if (ob) f = ob->face;
 		else f = blank_face;
-
+		
 		/* Should probably have P_NO_MAGIC here also, but then shops don't
 		 * work.
 		 */
 		if (mflags & P_BLOCKSVIEW)
-		    map_mark[MAGIC_MAP_HALF + x + MAGIC_MAP_SIZE* (MAGIC_MAP_HALF + y)] =
+		    map_mark[MAGIC_MAP_HALF + x + MAGIC_MAP_SIZE* (MAGIC_MAP_HALF + y)] = 
 			FACE_WALL | (f?f->magicmap:0);
 		else {
 		    map_mark[MAGIC_MAP_HALF + x + MAGIC_MAP_SIZE* (MAGIC_MAP_HALF + y)] = FACE_FLOOR | (f?f->magicmap:0);
@@ -566,7 +577,7 @@ void magic_mapping_mark(object *pl, char *map_mark, int strength)
  * Mark Wedel
  */
 
-void draw_magic_map(object *pl)
+void draw_magic_map(object *pl) 
 {
     int x,y;
     char *map_mark = (char *) calloc(MAGIC_MAP_SIZE*MAGIC_MAP_SIZE, 1);
@@ -577,7 +588,7 @@ void draw_magic_map(object *pl)
 	LOG(llevError,"Non player object called draw_map.\n");
 	return;
     }
-
+   
     /* First, we figure out what spaces are 'reachable' by the player */
     magic_mapping_mark(pl, map_mark, 3);
 
@@ -605,14 +616,41 @@ void draw_magic_map(object *pl)
     snprintf((char*)sl.buf, MAXSOCKSENDBUF, "magicmap %d %d %d %d ", (xmax-xmin+1), (ymax-ymin+1),
 	    MAGIC_MAP_HALF - xmin, MAGIC_MAP_HALF - ymin);
     sl.len=strlen((char*)sl.buf);
-
+    
     for (y = ymin; y <= ymax; y++) {
 	for (x = xmin; x <= xmax; x++) {
 	    sl.buf[sl.len++]= map_mark[x+MAGIC_MAP_SIZE*y] & ~FACE_FLOOR;
 	} /* x loop */
     } /* y loop */
-
+    
     Send_With_Handling(&pl->contr->socket, &sl);
     free(sl.buf);
     free(map_mark);
+}
+
+
+/**
+ * Send a kill log record to sockets
+ */
+
+void log_kill(const char *Who,
+            const char *What, int WhatType,
+            const char *With, int WithType)
+{
+    int i;
+    size_t len;
+    char buf[MAX_BUF];
+
+    if (With!=NULL) {
+	snprintf(buf, MAX_BUF, "%s\t%s\t%d\t%s\t%d\n",Who,What,WhatType,With,WithType);
+    }
+    else {
+	snprintf(buf,MAX_BUF, "%s\t%s\t%d\n",Who,What,WhatType);
+    }
+    len=strlen(buf);
+    for(i=1; i<socket_info.allocated_sockets; i++) {
+	if (init_sockets[i].old_mode == Old_Listen) {
+	    cs_write_string(&init_sockets[i], buf, len);
+	}
+    }
 }

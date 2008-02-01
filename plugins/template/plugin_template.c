@@ -23,13 +23,18 @@
 /*  You should have received a copy of the GNU General Public License        */
 /*  along with this program; if not, write to the Free Software              */
 /*  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                */
-/*                                                                           */
-/*****************************************************************************/
+/*                                                                           */ /*****************************************************************************/
 
 /* First let's include the header file needed                                */
 
 #include <plugin_template.h>
 #include <stdarg.h>
+
+f_plug_api gethook;
+f_plug_api registerGlobalEvent;
+f_plug_api unregisterGlobalEvent;
+f_plug_api systemDirectory;
+f_plug_api reCmp;
 
 CFPContext* context_stack;
 CFPContext* current_context;
@@ -69,83 +74,75 @@ CFPContext* popContext()
         return NULL;
 }
 
-CF_PLUGIN int initPlugin(const char* iversion, f_plug_api gethooksptr)
+int initPlugin(const char* iversion, f_plug_api gethooksptr)
 {
-    cf_init_plugin( gethooksptr );
-
-    cf_log(llevDebug, PLUGIN_VERSION " init\n");
+    gethook = gethooksptr;
+    int i;
+    printf("Template 2.0a init\n");
 
     /* Place your initialization code here */
     return 0;
 }
 
-CF_PLUGIN void* getPluginProperty(int* type, ...)
+void* getPluginProperty(int* type, ...)
 {
     va_list args;
-    const char* propname;
-    int i, size;
-    command_array_struct* rtn_cmd;
-    char* buf;
-
+    char* propname;
+    int i;
     va_start(args, type);
-    propname = va_arg(args, const char *);
+    propname = va_arg(args, char *);
+    printf("Property name: %s\n", propname);
 
-    if (!strcmp(propname, "command?")) {
-        const char* cmdname;
-        cmdname = va_arg(args, const char *);
-        rtn_cmd = va_arg(args, command_array_struct*);
+    if (!strcmp(propname, "Identification"))
+    {
         va_end(args);
-
-        /** Check if plugin handles custom command */
-        return NULL;
-    } else if (!strcmp(propname, "Identification")) {
-        buf = va_arg(args, char*);
-        size = va_arg(args, int);
-        va_end(args);
-        snprintf(buf, size, PLUGIN_NAME);
-        return NULL;
-    } else if (!strcmp(propname, "FullName")) {
-        buf = va_arg(args, char*);
-        size = va_arg(args, int);
-        va_end(args);
-        snprintf(buf, size, PLUGIN_VERSION);
-        return NULL;
+        return PLUGIN_NAME;
     }
-    va_end(args);
+    else if (!strcmp(propname, "FullName"))
+    {
+        va_end(args);
+        return PLUGIN_VERSION;
+    }
     return NULL;
 }
 
-CF_PLUGIN int runPluginCommand(object* op, char* params)
+int runPluginCommand(object* op, char* params)
 {
     return -1;
 }
 
-CF_PLUGIN int postInitPlugin()
+int postInitPlugin()
 {
-    cf_log(llevDebug, PLUGIN_VERSION " post init\n");
+    int hooktype = 1;
+    int rtype = 0;
+
+    printf("Template 2.0a post init\n");
+    registerGlobalEvent =   gethook(&rtype,hooktype,"cfapi_system_register_global_event");
+    unregisterGlobalEvent = gethook(&rtype,hooktype,"cfapi_system_unregister_global_event");
+    systemDirectory       = gethook(&rtype,hooktype,"cfapi_system_directory");
+    reCmp                 = gethook(&rtype,hooktype,"cfapi_system_re_cmp");
+    cf_init_plugin( gethook );
     initContextStack();
     /* Pick the global events you want to monitor from this plugin */
-    /*
-    cf_system_register_global_event(EVENT_BORN,PLUGIN_NAME,globalEventListener);
-    cf_system_register_global_event(EVENT_CLOCK,PLUGIN_NAME,globalEventListener);
-    cf_system_register_global_event(EVENT_CRASH,PLUGIN_NAME,globalEventListener);
-    cf_system_register_global_event(EVENT_PLAYER_DEATH,PLUGIN_NAME,globalEventListener);
-    cf_system_register_global_event(EVENT_GKILL,PLUGIN_NAME,globalEventListener);
-    cf_system_register_global_event(EVENT_LOGIN,PLUGIN_NAME,globalEventListener);
-    cf_system_register_global_event(EVENT_LOGOUT,PLUGIN_NAME,globalEventListener);
-    cf_system_register_global_event(EVENT_MAPENTER,PLUGIN_NAME,globalEventListener);
-    cf_system_register_global_event(EVENT_MAPLEAVE,PLUGIN_NAME,globalEventListener);
-    cf_system_register_global_event(EVENT_MAPRESET,PLUGIN_NAME,globalEventListener);
-    cf_system_register_global_event(EVENT_REMOVE,PLUGIN_NAME,globalEventListener);
-    cf_system_register_global_event(EVENT_SHOUT,PLUGIN_NAME,globalEventListener);
-    cf_system_register_global_event(EVENT_TELL,PLUGIN_NAME,globalEventListener);
-    cf_system_register_global_event(EVENT_MUZZLE,PLUGIN_NAME,globalEventListener);
-    cf_system_register_global_event(EVENT_KICK,PLUGIN_NAME,globalEventListener);
-    */
+    /*registerGlobalEvent(NULL,EVENT_BORN,PLUGIN_NAME,globalEventListener);
+    registerGlobalEvent(NULL,EVENT_CLOCK,PLUGIN_NAME,globalEventListener);
+    registerGlobalEvent(NULL,EVENT_CRASH,PLUGIN_NAME,globalEventListener);
+    registerGlobalEvent(NULL,EVENT_PLAYER_DEATH,PLUGIN_NAME,globalEventListener);
+    registerGlobalEvent(NULL,EVENT_GKILL,PLUGIN_NAME,globalEventListener);
+    registerGlobalEvent(NULL,EVENT_LOGIN,PLUGIN_NAME,globalEventListener);
+    registerGlobalEvent(NULL,EVENT_LOGOUT,PLUGIN_NAME,globalEventListener);
+    registerGlobalEvent(NULL,EVENT_MAPENTER,PLUGIN_NAME,globalEventListener);
+    registerGlobalEvent(NULL,EVENT_MAPLEAVE,PLUGIN_NAME,globalEventListener);
+    registerGlobalEvent(NULL,EVENT_MAPRESET,PLUGIN_NAME,globalEventListener);
+    registerGlobalEvent(NULL,EVENT_REMOVE,PLUGIN_NAME,globalEventListener);
+    registerGlobalEvent(NULL,EVENT_SHOUT,PLUGIN_NAME,globalEventListener);
+    registerGlobalEvent(NULL,EVENT_TELL,PLUGIN_NAME,globalEventListener);
+    registerGlobalEvent(NULL,EVENT_MUZZLE,PLUGIN_NAME,globalEventListener);
+    registerGlobalEvent(NULL,EVENT_KICK,PLUGIN_NAME,globalEventListener);*/
     return 0;
 }
 
-CF_PLUGIN void* globalEventListener(int* type, ...)
+void* globalEventListener(int* type, ...)
 {
     va_list args;
     static int rv=0;
@@ -165,7 +162,6 @@ CF_PLUGIN void* globalEventListener(int* type, ...)
     context->who         = NULL;
     context->activator   = NULL;
     context->third       = NULL;
-    context->event       = NULL;
     rv = context->returnvalue = 0;
     switch(context->event_code)
     {
@@ -246,12 +242,12 @@ CF_PLUGIN void* globalEventListener(int* type, ...)
     context = popContext();
     rv = context->returnvalue;
     free(context);
-    cf_log(llevDebug, "*********** Execution complete ****************\n");
+    printf("*********** Execution complete ****************\n");
 
     return &rv;
 }
 
-CF_PLUGIN void* eventListener(int* type, ...)
+void* eventListener(int* type, ...)
 {
     static int rv=0;
     va_list args;
@@ -265,15 +261,14 @@ CF_PLUGIN void* eventListener(int* type, ...)
     va_start(args,type);
 
     context->who         = va_arg(args, object*);
+    context->event_code  = va_arg(args,int);
     context->activator   = va_arg(args, object*);
     context->third       = va_arg(args, object*);
     buf                  = va_arg(args, char*);
     if (buf !=0)
         strcpy(context->message,buf);
     context->fix         = va_arg(args, int);
-    context->event       = va_arg(args, object*);
-    context->event_code  = context->event->subtype;
-    strncpy(context->options, context->event->name, sizeof(context->options));
+    strcpy(context->options,va_arg(args, char*));
     context->returnvalue = 0;
     va_end(args);
 
@@ -282,12 +277,13 @@ CF_PLUGIN void* eventListener(int* type, ...)
     context = popContext();
     rv = context->returnvalue;
     free(context);
-    cf_log(llevDebug, "Execution complete");
+    printf("Execution complete");
     return &rv;
 }
 
-CF_PLUGIN int   closePlugin()
+int   closePlugin()
 {
-    cf_log(llevDebug, PLUGIN_VERSION " closing\n");
+    printf("Template 2.0a closing\n");
     return 0;
 }
+

@@ -3,12 +3,12 @@
 TEX   =	handbook.tex title.tex chap1.tex chap2.tex chap3.tex chap4.tex\
 	chap5.tex chap6.tex chap7.tex appA.tex appB.tex appC.tex
 
-dist_noinst_SCRIPTS = make_index.pl
+dist_noinst_SCRIPTS = make_index.pl 
 
 EXTRA_DIST = Makefile.in bonus-extract char-extract items-extract generic-extract\
  	gods-extract levels-extract local.sty skills-extract skills2-extract\
 	spellpath-extract statskmod-extract treas1-extract treas2-extract \
-	$(TEX) handbook.idx sorter empty.pbm fig/screen_dia.ps
+	$(TEX) handbook.idx sorter empty.pbm fig/screen_dia.ps 
 
 TABLES=	bonus.tex char.tex equip.tex index.tex gods.tex levels.tex skills.tex\
 	skill_stat.tex statskmod.tex spellpath.tex version.tex
@@ -25,7 +25,7 @@ ICONS =	altar.tex arm_mail.tex br_wall.tex books.tex bows.tex cauldron.tex \
 CLEANFILES = $(TABLES) $(ICONS) items .bmaps in_* *.ps *x*.ppm tmp.ppm work.ppm \
 	     handbook.toc handbook.lot handbook.dvi handbook.log handbook.aux handbook.idx
 
-CROSSBIN = ../../server/crossfire-server
+CROSSBIN = ../../server/crossfire
 PERL = @PERL@
 
 handbook: ../handbook.ps
@@ -239,3 +239,4 @@ sign.tex: items sorter
 
 wands.tex: items sorter
 	egrep -e "^109 " items | $(AWK) -F'&' -f generic-extract | sort > wands.tex
+

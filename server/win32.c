@@ -20,13 +20,6 @@
     The author can be reached via e-mail to frankj@ifi.uio.no.
 */
 
-/**
- * @file
- * Windows-related compatibility functions.
- *
- * This file should probably not be used apart under Windows.
- */
-
 #include <global.h>
 
 #include <stdarg.h>
@@ -35,22 +28,26 @@
 #include <errno.h>
 #include <mmsystem.h>
 
-/** Timezone structure, for gettimeofday(). */
 struct timezone {
 	int tz_minuteswest;
 	int tz_dsttime;
 };
 
-/**
- * Gets the time of the day.
- *
- * @param[out] time_Info
- * will receive the time of the day.
- * @param[out] timezone_Info
- * will receive the timezone info.
- * @return
- * 0.
- */
+
+struct itimerval {
+	struct timeval it_interval;	/* next value */
+	struct timeval it_value;	/* current value */
+};
+
+#define ITIMER_REAL    0		/*generates sigalrm */
+#define ITIMER_VIRTUAL 1		/*generates sigvtalrm */
+#define ITIMER_VIRT    1		/*generates sigvtalrm */
+#define ITIMER_PROF    2		/*generates sigprof */
+
+
+/* Functions to capsule or serve linux style function
+ * for Windows Visual C++ 
+*/
 int gettimeofday(struct timeval *time_Info, struct timezone *timezone_Info)
 {
 	/* Get the time, if they want it */
@@ -68,14 +65,6 @@ int gettimeofday(struct timeval *time_Info, struct timezone *timezone_Info)
 	return 0;
 }
 
-/**
- * Opens a directory for reading. The handle should be disposed through closedir().
- *
- * @param dir
- * directory path.
- * @return
- * directory handle, NULL if failure.
- */
 DIR *opendir(const char *dir)
 {
 	DIR *dp;
@@ -105,15 +94,6 @@ DIR *opendir(const char *dir)
 	return dp;
 }
 
-/**
- * Returns the next file/directory for specified directory handle, obtained through
- * a call to opendir().
- *
- * @param dp
- * handle.
- * @return
- * next file/directory, NULL if end reached.
- */
 struct dirent *readdir(DIR * dp)
 {
 	if (!dp || dp->finished)
@@ -140,14 +120,6 @@ struct dirent *readdir(DIR * dp)
 	return &(dp->dent);
 }
 
-/**
- * Dispose of a directory handle.
- *
- * @param dp
- * handle to free. Will become invalid.
- * @return
- * 0.
- */
 int closedir(DIR * dp)
 {
 	if (!dp)
@@ -161,12 +133,6 @@ int closedir(DIR * dp)
 	return 0;
 }
 
-/**
- * Restart a directory listing from the beginning.
- *
- * @param dir_Info
- * handle to rewing.
- */
 void rewinddir(DIR *dir_Info)
 {
 	/* Re-set to the beginning */
@@ -202,26 +168,18 @@ void rewinddir(DIR *dir_Info)
 
  */
 
-/** Will be set to FALSE when the server should stop running because the service is turned off. */
 int bRunning;
 
 #ifndef PYTHON_PLUGIN_EXPORTS
 
 SERVICE_STATUS m_ServiceStatus;
 SERVICE_STATUS_HANDLE m_ServiceStatusHandle;
-/** Internal name of the service. */
 #define SERVICE_NAME        "Crossfire"
-/** Name that will appear in the service list. */
 #define SERVICE_DISPLAY     "Crossfire server"
-/** Description of the service. */
 #define SERVICE_DESCRIPTION "Crossfire is a multiplayer online RPG game."
 
 #include <winsvc.h>
 
-/**
- * Registers the server to the service manager.
- * @sa service_unregister().
- */
 void service_register( )
     {
 	char strDir[ 1024 ];
@@ -232,26 +190,26 @@ void service_register( )
     strcat( strDir, " -srv" );
 
 	schSCManager = OpenSCManager( NULL,NULL,SC_MANAGER_ALL_ACCESS );
-
+ 
 	if (schSCManager == NULL)
         {
         printf( "openscmanager failed" );
 		exit( 1 );
         }
 
-    schService = CreateService(schSCManager, SERVICE_NAME, SERVICE_DISPLAY,           // service name to display
-        SERVICE_ALL_ACCESS,        // desired access
-        SERVICE_WIN32_OWN_PROCESS, // service type
-        SERVICE_DEMAND_START,      // start type
-        SERVICE_ERROR_NORMAL,      // error control type
-        strDir,        // service's binary
-        NULL,                      // no load ordering group
-        NULL,                      // no tag identifier
-        NULL,                      // no dependencies
-        NULL,                      // LocalSystem account
-        NULL);                     // no password
-
-    if (schService == NULL)
+    schService = CreateService(schSCManager, SERVICE_NAME, SERVICE_DISPLAY,           // service name to display 
+        SERVICE_ALL_ACCESS,        // desired access 
+        SERVICE_WIN32_OWN_PROCESS, // service type 
+        SERVICE_DEMAND_START,      // start type 
+        SERVICE_ERROR_NORMAL,      // error control type 
+        strDir,        // service's binary 
+        NULL,                      // no load ordering group 
+        NULL,                      // no tag identifier 
+        NULL,                      // no dependencies 
+        NULL,                      // LocalSystem account 
+        NULL);                     // no password 
+ 
+    if (schService == NULL) 
         {
         printf( "createservice failed" );
         exit( 1 );
@@ -264,17 +222,13 @@ void service_register( )
     exit( 0 );
     }
 
-/**
- * Removes the Crossfire service from the service manager.
- * @sa service_register().
- */
 void service_unregister( )
     {
 	HANDLE schSCManager;
 	SC_HANDLE hService;
 
 	schSCManager = OpenSCManager(NULL,NULL,SC_MANAGER_ALL_ACCESS);
-
+ 
 	if (schSCManager == NULL)
         {
         printf( "open failed" );
@@ -283,7 +237,7 @@ void service_unregister( )
 
 	hService=OpenService(schSCManager, SERVICE_NAME, SERVICE_ALL_ACCESS);
 
-	if (hService == NULL)
+	if (hService == NULL) 
         {
         printf( "openservice failed" );
 		exit( 1 );
@@ -310,30 +264,24 @@ void service_unregister( )
     exit( 0 );
     }
 
-/**
- * Main service dispatch routine.
- *
- * @param Opcode
- * service operation, like pause/start/stop.
- */
 void WINAPI ServiceCtrlHandler(DWORD Opcode)
     {
-    switch(Opcode)
+    switch(Opcode) 
         {
-        case SERVICE_CONTROL_PAUSE:
-            m_ServiceStatus.dwCurrentState = SERVICE_PAUSED;
-            break;
+        case SERVICE_CONTROL_PAUSE: 
+            m_ServiceStatus.dwCurrentState = SERVICE_PAUSED; 
+            break; 
+ 
+        case SERVICE_CONTROL_CONTINUE: 
+            m_ServiceStatus.dwCurrentState = SERVICE_RUNNING; 
+            break; 
 
-        case SERVICE_CONTROL_CONTINUE:
-            m_ServiceStatus.dwCurrentState = SERVICE_RUNNING;
-            break;
-
-        case SERVICE_CONTROL_STOP:
-            m_ServiceStatus.dwWin32ExitCode = 0;
-            m_ServiceStatus.dwCurrentState  = SERVICE_STOPPED;
-            m_ServiceStatus.dwCheckPoint    = 0;
-            m_ServiceStatus.dwWaitHint      = 0;
-
+        case SERVICE_CONTROL_STOP: 
+            m_ServiceStatus.dwWin32ExitCode = 0; 
+            m_ServiceStatus.dwCurrentState  = SERVICE_STOPPED; 
+            m_ServiceStatus.dwCheckPoint    = 0; 
+            m_ServiceStatus.dwWaitHint      = 0; 
+ 
             SetServiceStatus (m_ServiceStatusHandle,&m_ServiceStatus);
 
 			bRunning = 0;
@@ -341,22 +289,15 @@ void WINAPI ServiceCtrlHandler(DWORD Opcode)
             LOG( llevInfo, "Service stopped.\n" );
 
 			break;
-
-        case SERVICE_CONTROL_INTERROGATE:
-            break;
-        }
-    return;
+ 
+        case SERVICE_CONTROL_INTERROGATE: 
+            break; 
+        }      
+    return; 
     }
 
 extern int main( int argc, char** argv );
 
-/**
- * Main service entrypoint.
- *
- * @param argc
- * @param argv
- * arguments to the service.
- */
 void WINAPI ServiceMain(DWORD argc, LPTSTR *argv)
     {
 	char strDir[ 1024 ];
@@ -368,23 +309,23 @@ void WINAPI ServiceMain(DWORD argc, LPTSTR *argv)
         *strSlash = '\0';
     chdir( strDir );
 
-    m_ServiceStatus.dwServiceType        = SERVICE_WIN32;
-    m_ServiceStatus.dwCurrentState       = SERVICE_START_PENDING;
-    m_ServiceStatus.dwControlsAccepted   = SERVICE_ACCEPT_STOP;
-    m_ServiceStatus.dwWin32ExitCode      = 0;
-    m_ServiceStatus.dwServiceSpecificExitCode = 0;
-    m_ServiceStatus.dwCheckPoint         = 0;
-    m_ServiceStatus.dwWaitHint           = 0;
-
+    m_ServiceStatus.dwServiceType        = SERVICE_WIN32; 
+    m_ServiceStatus.dwCurrentState       = SERVICE_START_PENDING; 
+    m_ServiceStatus.dwControlsAccepted   = SERVICE_ACCEPT_STOP; 
+    m_ServiceStatus.dwWin32ExitCode      = 0; 
+    m_ServiceStatus.dwServiceSpecificExitCode = 0; 
+    m_ServiceStatus.dwCheckPoint         = 0; 
+    m_ServiceStatus.dwWaitHint           = 0; 
+ 
     m_ServiceStatusHandle = RegisterServiceCtrlHandler( SERVICE_NAME, ServiceCtrlHandler );
-    if (m_ServiceStatusHandle == (SERVICE_STATUS_HANDLE)0)
-        {
-        return;
-        }
+    if (m_ServiceStatusHandle == (SERVICE_STATUS_HANDLE)0) 
+        { 
+        return; 
+        }     
 
-    m_ServiceStatus.dwCurrentState       = SERVICE_RUNNING;
-    m_ServiceStatus.dwCheckPoint         = 0;
-    m_ServiceStatus.dwWaitHint           = 0;
+    m_ServiceStatus.dwCurrentState       = SERVICE_RUNNING; 
+    m_ServiceStatus.dwCheckPoint         = 0; 
+    m_ServiceStatus.dwWaitHint           = 0;  
     SetServiceStatus (m_ServiceStatusHandle, &m_ServiceStatus);
 
     bRunning = 1;
@@ -393,12 +334,9 @@ void WINAPI ServiceMain(DWORD argc, LPTSTR *argv)
     return;
     }
 
-/**
- * Service entry point.
- */
 void service_handle( )
     {
-    SERVICE_TABLE_ENTRY DispatchTable[ ] = { { SERVICE_NAME, ServiceMain },{ NULL, NULL } };
+    SERVICE_TABLE_ENTRY DispatchTable[ ] = { { SERVICE_NAME, ServiceMain },{ NULL, NULL } };  
 	StartServiceCtrlDispatcher( DispatchTable );
     exit( 0 );
     }

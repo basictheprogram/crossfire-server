@@ -26,19 +26,10 @@
     The authors can be reached via e-mail at crossfire-devel@real-time.com
 */
 
-/**
- * @file
- * Material structures and defines.
- */
-
 /* #defines are needed by living.h, so they must be loaded early */
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
-/**
- * @defgroup M_xxx Material types.
- */
-/*@{*/
 #define NROFMATERIALS		13
 
 #define M_PAPER			1
@@ -56,9 +47,7 @@
 #define M_ICE			4096
 #define M_SPECIAL		8192	/* when displaying names, don't show the
 								   materialname */
-/*@}*/
 
-/** One material type. */
 typedef struct _materialtype {
     const char	*name;
 	const char 	*description;
@@ -80,3 +69,4 @@ typedef struct _materialtype {
 EXTERN materialtype_t *materialt;
 
 #endif	/* MATERIAL_H */
+

@@ -26,11 +26,6 @@
     The authors can be reached via e-mail at crossfire-devel@real-time.com
 */
 
-/**
- * @file
- * Standard includes.
- */
-
 #ifndef INCLUDES_H
 #define INCLUDES_H
 
@@ -104,7 +99,6 @@
 #include "define.h"
 #include "logger.h"
 #include "newclient.h"
-#include "languages.h"
 
 #ifndef TRUE
 #define TRUE 1
@@ -121,3 +115,4 @@ time_t mktime(struct tm *);
 
 
 #endif /* INCLUDES_H */
+

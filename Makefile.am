@@ -1,10 +1,11 @@
 XSLTENGINE= @XSLTENGINE@
+CROSSEDIT = @CROSSEDIT@
 
 if HAVE_CHECK
   UNIT_TEST = test
 endif
 
-SUBDIRS = include common random_maps socket types server lib utils doc plugins devel $(UNIT_TEST)
+SUBDIRS = common random_maps socket server include lib utils doc plugins devel $(UNIT_TEST) $(CROSSEDIT)
 
 EXTRA_DIST = AUTHORS ChangeLog COPYING DEVELOPERS autogen.sh run_win32.bat
 
@@ -18,7 +19,9 @@ proto:
 	(cd common; make proto)
 	(cd server; make proto)
 	(cd plugins; make proto)
-	(cd types; make proto)
+	@if [ "X$(NO_X)" != "Xyes" ]; then \
+		(cd crossedit; make proto) \
+	fi
 
 clean-local:
 	$(RM) configtest.out configtest.xml configtest.xsl

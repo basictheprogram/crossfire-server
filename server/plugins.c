@@ -58,7 +58,7 @@
 #include <timers.h>
 #endif
 
-#define NR_OF_HOOKS 88
+#define NR_OF_HOOKS 82
 
 static const hook_entry plug_hooks[NR_OF_HOOKS] =
 {
@@ -109,7 +109,8 @@ static const hook_entry plug_hooks[NR_OF_HOOKS] =
     {cfapi_object_pay_item,         44, "cfapi_object_pay_item"},
     {cfapi_object_transfer,         45, "cfapi_object_transfer"},
     {cfapi_object_drop,             46, "cfapi_object_drop"},
-    {cfapi_object_change_abil,      47, "cfapi_object_change_abil"},
+    {cfapi_object_take,             47, "cfapi_object_take"},
+    {cfapi_object_change_abil,      70, "cfapi_object_change_abil"},
     {cfapi_object_find_archetype_inside, 48, "cfapi_object_find_archetype_inside"},
     {cfapi_object_say,              49, "cfapi_object_say"},
     {cfapi_map_get_map,             50, "cfapi_map_get_map"},
@@ -143,12 +144,6 @@ static const hook_entry plug_hooks[NR_OF_HOOKS] =
     {cfapi_friendlylist_get_next,   79, "cfapi_friendlylist_get_next"},
     {cfapi_set_random_map_variable, 80, "cfapi_set_random_map_variable"},
     {cfapi_system_find_face,        81, "cfapi_system_find_face"},
-    {cfapi_get_season_name,         82, "cfapi_system_get_season_name"},
-    {cfapi_get_month_name,          83, "cfapi_system_get_month_name"},
-    {cfapi_get_weekday_name,        84, "cfapi_system_get_weekday_name"},
-    {cfapi_get_periodofday_name,    85, "cfapi_system_get_periodofday_name"},
-    {cfapi_map_trigger_connected,   86, "cfapi_map_trigger_connected"},
-    {cfapi_object_user_event,       87, "cfapi_object_user_event"}
 };
 int plugin_number = 0;
 crossfire_plugin* plugins_list = NULL;
@@ -205,9 +200,37 @@ static void send_changed_object(object *op)
     }
 }
 
-int user_event(object* op, object* activator, object* third, const char* message, int fix)
+/**
+ * Notify clients about a removed object.
+ *
+ * @param op the object about to be removed from its environment; it must still
+ * be present in its environment
+ */
+static void send_removed_object(object *op)
 {
-    return execute_event(op,EVENT_USER, activator, third, message, fix);
+    object* tmp;
+    player *pl;
+
+    if (op->env == NULL) {
+        /* no action necessary: remove_ob() notifies the client */
+        return;
+    }
+    if (op->invisible)
+        /* invisible items aren't sent to client anyway. */
+        return;
+
+    tmp = get_player_container(op->env);
+    if (!tmp) {
+        for (pl = first_player; pl; pl = pl->next)
+            if (pl->ob->container == op->env)
+                break;
+        if (pl)
+            tmp = pl->ob;
+        else
+            tmp = NULL;
+    }
+    if (tmp)
+        esrv_del_item(tmp->contr, op->count);
 }
 
 int execute_event(object* op, int eventcode, object* activator, object* third, const char* message, int fix)
@@ -237,11 +260,13 @@ int execute_event(object* op, int eventcode, object* activator, object* third, c
             if (tmp->title == NULL) {
                 object *env = object_get_env_recursive(tmp);
                 LOG(llevError, "Event object without title at %d/%d in map %s\n", env->x, env->y, env->map->name);
+                send_removed_object(tmp);
                 remove_ob(tmp);
                 free_object(tmp);
             } else if (tmp->slaying == NULL) {
                 object *env = object_get_env_recursive(tmp);
                 LOG(llevError, "Event object without slaying at %d/%d in map %s\n", env->x, env->y, env->map->name);
+                send_removed_object(tmp);
                 remove_ob(tmp);
                 free_object(tmp);
             } else {
@@ -249,6 +274,7 @@ int execute_event(object* op, int eventcode, object* activator, object* third, c
                 if (plugin == NULL) {
                     object *env = object_get_env_recursive(tmp);
                     LOG(llevError, "The requested plugin doesn't exit: %s at %d/%d in map %s\n", tmp->title, env->x, env->y, env->map->name);
+                    send_removed_object(tmp);
                     remove_ob(tmp);
                     free_object(tmp);
                 } else {
@@ -279,7 +305,7 @@ int execute_global_event(int eventcode, ...)
     object* op;
     object* op2;
     player* pl;
-    const char* buf;
+    char* buf;
     int i, rt;
     crossfire_plugin* cp;
     if (plugins_list == NULL)
@@ -936,65 +962,6 @@ void *cfapi_get_time(int *type, ...)
     return NULL;
 }
 
-#define string_get_int(name) \
-va_list args;\
-    int index;\
-    const char** str;\
-    va_start(args, type);\
-    index = va_arg(args, int);\
-    str = va_arg(args, const char**);\
-    va_end(args);\
-    *str = name(index);\
-    *type = CFAPI_STRING;\
-    return NULL;\
-/**
- * Wrapper for get_season_name().
- *
- * @param type
- * will be CFAPI_STRING. Other parameters are int index and char** where to store result string
- * @return
- * NULL.
- */
-void *cfapi_get_season_name(int *type, ...)
-{
-    string_get_int(get_season_name)
-}
-/**
- * Wrapper for get_season_name().
- *
- * @param type
- * will be CFAPI_STRING. Other parameters are int index and char** where to store result string
- * @return
- * NULL.
- */
-void *cfapi_get_weekday_name(int *type, ...)
-{
-    string_get_int(get_weekday)
-}
-/**
- * Wrapper for get_season_name().
- *
- * @param type
- * will be CFAPI_STRING. Other parameters are int index and char** where to store result string
- * @return
- * NULL.
- */
-void *cfapi_get_month_name(int *type, ...)
-{
-    string_get_int(get_month_name)
-}
-/**
- * Wrapper for get_season_name().
- *
- * @param type
- * will be CFAPI_STRING. Other parameters are int index and char** where to store result string
- * @return
- * NULL.
- */
-void *cfapi_get_periodofday_name(int *type, ...)
-{
-    string_get_int(get_periodofday)
-}
 /**
  * Wrapper for cfapi_timer_create().
  * @param type
@@ -1193,11 +1160,11 @@ void* cfapi_map_create_path(int* type, ...)
     switch (ctype)
     {
     case 0:
-        create_pathname(str, name, size);
+        snprintf(name, size, create_pathname(str));
         break;
 
     case 1:
-        create_overlay_pathname(str, name, MAX_BUF);
+        snprintf(name, size, create_overlay_pathname(str));
         break;
 
     /*case 2:
@@ -1502,7 +1469,7 @@ void* cfapi_map_message(int* type, ...)
     va_end(args);
 
     /* function should be extended to take message types probably */
-    ext_info_map(color, map, MSG_TYPE_MISC, MSG_SUBTYPE_NONE, string, string);
+    new_info_map(color, map, string);
     *type = CFAPI_NONE;
     return NULL;
 }
@@ -1565,7 +1532,7 @@ void* cfapi_map_present_arch_by_name(int* type, ...)
 
     va_end(args);
 
-    *robj = present_arch(try_find_archetype(msg), map, x, y);
+    *robj = present_arch(find_archetype(msg), map, x, y);
     *type = CFAPI_POBJECT;
     return NULL;
 }
@@ -1795,7 +1762,7 @@ void* cfapi_object_get_property(int* type, ...)
         case CFAPI_OBJECT_PROP_NAME:
             rbuffer = va_arg(args, char*);
             rbufsize = va_arg(args, int);
-            query_name(op, rbuffer, rbufsize);
+            snprintf(rbuffer, rbufsize, query_name(op));
             *type = CFAPI_STRING;
             break;
 
@@ -2137,7 +2104,7 @@ void* cfapi_object_get_property(int* type, ...)
         case CFAPI_OBJECT_PROP_SHORT_NAME:
             rbuffer = va_arg(args, char*);
             rbufsize = va_arg(args, int);
-            query_short_name(op, rbuffer, rbufsize);
+            snprintf(rbuffer, rbufsize, query_short_name(op));
             *type = CFAPI_STRING;
             break;
 
@@ -2147,7 +2114,7 @@ void* cfapi_object_get_property(int* type, ...)
                 i = va_arg(args, int);
                 rbuffer = va_arg(args, char*);
                 rbufsize = va_arg(args, int);
-                query_base_name(op, i, rbuffer, rbufsize);
+                snprintf(rbuffer, rbufsize, query_base_name(op, i));
                 *type = CFAPI_STRING;
             }
             break;
@@ -2473,37 +2440,6 @@ void* cfapi_object_get_property(int* type, ...)
 }
 
 /**
- * Utility function to copy the string to op->msg and ensure there is a final newline.
- *
- * @param op
- * object to copy to.
- * @param msg
- * message to copy.
- */
-static void copy_message(object* op, const char* msg) {
-    char* temp;
-    int size;
-
-    if (!msg)
-        return;
-
-    size = strlen(msg);
-
-    if (msg[0] != 0 && msg[size - 1] == '\n') {
-        FREE_AND_COPY(op->msg, msg);
-        return;
-    }
-
-    temp = malloc(size + 2);
-    if (!temp)
-        fatal(OUT_OF_MEMORY);
-    snprintf(temp, size + 2, "%s\n", msg);
-    FREE_AND_COPY(op->msg, temp);
-    free(temp);
-}
-
-
-/**
  * Sets the property of an object.
  * Will send changes to client if required.
  * First argument should be an object*, second an integer..
@@ -2576,7 +2512,7 @@ void* cfapi_object_set_property(int* type, ...)
         case CFAPI_OBJECT_PROP_MESSAGE:
             sarg = va_arg(args, char*);
             *type = CFAPI_STRING;
-            copy_message(op, sarg);
+            FREE_AND_COPY(op->msg, sarg);
             break;
 
         case CFAPI_OBJECT_PROP_LORE:
@@ -2624,7 +2560,7 @@ void* cfapi_object_set_property(int* type, ...)
                     }
                     else {
                         sum_weight(tmp);
-                        fix_object(tmp);
+                        fix_player(tmp);
                     }
                     if (tmp)
                         esrv_update_item(UPD_NROF, tmp, op);
@@ -2779,10 +2715,10 @@ void* cfapi_object_set_property(int* type, ...)
                             tmp = NULL;
                     } else {
                         sum_weight(tmp);
-                        fix_object(tmp);
+                        fix_player(tmp);
                     }
                     if (tmp)
-                        esrv_update_item(UPD_WEIGHT, tmp, op);
+                        esrv_send_item(tmp, op);
                 }
                 else
                 {
@@ -2790,7 +2726,7 @@ void* cfapi_object_set_property(int* type, ...)
 
                     for (tmp = above; tmp != NULL; tmp = tmp->above)
                         if (tmp->type == PLAYER)
-                            esrv_update_item(UPD_WEIGHT, tmp, op);
+                            esrv_send_item(tmp, op);
                 }
             }
             break;
@@ -2804,16 +2740,7 @@ void* cfapi_object_set_property(int* type, ...)
         case CFAPI_OBJECT_PROP_GLOW_RADIUS:
             iarg = va_arg(args, int);
             *type = CFAPI_INT;
-	    if (op->glow_radius !=iarg){
-                object* tmp;
-                op->glow_radius = iarg;
-                tmp=object_get_env_recursive(op);
-                if (tmp->map!=NULL){
-                    SET_MAP_FLAGS(tmp->map, tmp->x, tmp->y,  P_NEED_UPDATE);
-                    update_position(tmp->map, tmp->x, tmp->y);
-                    update_all_los(tmp->map,tmp->x,tmp->y);
-                }
-            }
+            op->glow_radius = iarg;
             break;
 
         case CFAPI_OBJECT_PROP_PERM_EXP:
@@ -3199,7 +3126,7 @@ void* cfapi_object_describe(int* type, ...)
     va_end(args);
 
     *type = CFAPI_STRING;
-    describe_item(op, owner, desc, size);
+    snprintf(desc, size, describe_item(op, owner));
     return NULL;
 }
 void* cfapi_object_drain(int* type, ...)
@@ -3232,7 +3159,7 @@ void* cfapi_object_fix(int* type, ...)
 
     va_end(args);
 
-    fix_object(op);
+    fix_player(op);
 
     *type = CFAPI_NONE;
     return NULL;
@@ -3290,6 +3217,7 @@ void* cfapi_object_remove(int* type, ...)
 
     va_end(args);
 
+    send_removed_object(op);
     remove_ob(op);
     *type = CFAPI_NONE;
     return NULL;
@@ -3420,7 +3348,9 @@ void* cfapi_object_create(int* type, ...)
     {
     case 0:
         robj = va_arg(args, object**);
+        va_end(args);
         *robj = get_object();
+        return;
         break;
 
     case 1: /* Named object. Nearly the old plugin behavior, but we don't add artifact suffixes */
@@ -3432,7 +3362,7 @@ void* cfapi_object_create(int* type, ...)
             robj = va_arg(args, object**);
             va_end(args);
 
-            at = try_find_archetype(sval);
+            at = find_archetype(sval);
             if (!at)
                 at = find_archetype_by_object_name(sval);
             if (at) {
@@ -3445,10 +3375,10 @@ void* cfapi_object_create(int* type, ...)
 
     default:
         *type = CFAPI_NONE;
+        va_end(args);
+        return NULL;
         break;
     }
-    va_end(args);
-    return NULL;
 }
 void* cfapi_object_insert(int* type, ...)
 {
@@ -3569,7 +3499,7 @@ void* cfapi_object_split(int* type, ...)
     va_end(args);
 
     *type = CFAPI_POBJECT;
-    *split = get_split_ob(op, nr, buf, size);
+    *split = get_split_ob(op, nr);
     return NULL;
 }
 
@@ -3793,34 +3723,6 @@ void* cfapi_object_check_trigger(int* type, ...)
 }
 
 /**
- * Wrapper for trigger_connected().
- * @param type
- * Will be CFAPI_NONE.
- * @param objectlink* the link to trigger. Can be obtained from map structure
- * @param cause the cause object of triggering, can be NULL
- * @param state the state to trigger. 0=APPLY_RELEASE other=APPLY_PUSH
- * Other params include the objectlink to trigger, the cause of the trigger and the state of trigger
- * @return
- * NULL.
- */
-void* cfapi_map_trigger_connected(int* type, ...)
-{
-    objectlink* ol;
-    object* cause;
-    int state;
-    va_list args;
-
-    va_start(args, type);
-    ol = va_arg(args, objectlink*);
-    cause = va_arg(args, object*);
-    state = va_arg(args, int);
-    va_end(args);
-    trigger_connected(ol,cause,state);
-    *type = CFAPI_NONE;
-    return NULL;
-}
-
-/**
  * Wrapper for query_cost().
  * @param type
  * Will be CFAPI_INT.
@@ -3933,7 +3835,7 @@ void* cfapi_object_forget_spell(int* type, ...)
     op = va_arg(args, object*);
     sp = va_arg(args, object*);
     va_end(args);
-    query_name(sp, name, MAX_BUF);
+    snprintf(name, sizeof(name), query_name(sp));
     do_forget_spell(op, name);
     *type = CFAPI_NONE;
     return NULL;
@@ -4093,13 +3995,13 @@ void* cfapi_object_find_archetype_inside(int* type, ...)
     case 0: /* By name, either exact or from query_name */
         str = va_arg(args, char*);
         robj = va_arg(args, object**);
-        *robj = present_arch_in_ob(try_find_archetype(str), op);
+        *robj = present_arch_in_ob(find_archetype(str), op);
         if (*robj == NULL) {
             object* tmp;
             char name[MAX_BUF];
             /* Search by query_name instead */
             for (tmp = op->inv; tmp; tmp = tmp->below) {
-                query_name(tmp, name, MAX_BUF);
+                snprintf(name, sizeof(name), query_name(tmp));
                 if (!strncmp(name, str, strlen(str)))
                     *robj = tmp;
                 if (!strncmp(tmp->name, str, strlen(str)))
@@ -4147,6 +4049,22 @@ void* cfapi_object_drop(int* type, ...)
         author->contr->socket.update_look = 1;
     }
 
+    return NULL;
+}
+
+void* cfapi_object_take(int* type, ...)
+{
+    object *op;
+    object *author;
+    va_list args;
+
+    va_start(args, type);
+    op = va_arg(args, object*);
+    author = va_arg(args, object*);
+    va_end(args);
+    pick_up(author, op);
+
+    *type = CFAPI_NONE;
     return NULL;
 }
 
@@ -4323,6 +4241,7 @@ void* cfapi_object_teleport(int *type, ...)
         }
 
         if (!QUERY_FLAG(who, FLAG_REMOVED)) {
+            send_removed_object(who);
             remove_ob(who);
         }
 
@@ -4623,31 +4542,6 @@ void* cfapi_generate_random_map(int *type, ...) {
     va_end(args);
 
     *ret = generate_random_map(name, rp, use_layout);
-
-    return NULL;
-}
-
-void* cfapi_object_user_event(int* type, ...)
-{
-    object* op;
-    object* activator;
-    object* third;
-    const char* message;
-    int fix;
-    int* ret;
-    va_list args;
-
-    va_start(args, type);
-    op = va_arg(args, object*);
-    activator = va_arg(args, object*);
-    third = va_arg(args, object*);
-    message = va_arg(args, const char*);
-    fix = va_arg(args, int);
-    ret = va_arg(args, int*);
-    va_end(args);
-
-    *ret = user_event(op, activator, third, message, fix);
-    *type = CFAPI_INT;
 
     return NULL;
 }

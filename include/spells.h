@@ -26,18 +26,9 @@
     The authors can be reached via e-mail at crossfire-devel@real-time.com
 */
 
-/**
- * @file
- * Spell-related defines: spellpath, subtypes, ...
- */
-
 #ifndef SPELLS_H
 #define SPELLS_H
 
-/**
- * @defgroup PATH_xxx Spell path
- */
-/*@{*/
 #define PATH_NULL	0x00000000      /* 0 */
 #define PATH_PROT	0x00000001      /* 1 */
 #define PATH_FIRE	0x00000002      /* 2 */
@@ -59,39 +50,28 @@
 #define PATH_WOUNDING	0x00020000	/* 131072 */
 #define PATH_DEATH	0x00040000	/* 262144 */
 #define PATH_LIGHT	0x00080000	/* 524288 */
-/*@}*/
 
-/** Multiplier for spell points / grace based on the attenuation. */
 #define PATH_SP_MULT(op,spell) (((op->path_attuned & spell->path_attuned) ? 0.8 : 1) * \
 				((op->path_repelled & spell->path_attuned) ? 1.25 : 1))
 
-/** Number of spell paths. */
 #define NRSPELLPATHS	20
 extern const char* const spellpathnames[NRSPELLPATHS];
 
-/**
- * Number of spells.
- * The only place this is really used is to allocate an array
- * when printing out the spells the player knows.
+/* The only place this is really used is to allocate an array
+ * when printing out the spells the player knows. 
  */
 #define NROFREALSPELLS	1024
 
-/**
- * @defgroup SPELL_xxx Spell/grace points
- * This is passed to SP_level_spellpoint_cost() to determine
+/* this is passed to SP_level_spellpoint_cost to determine
  * what to check.  These values are also used in other places
  * when we want to pass into a function if it is a cleric spell
  * or a wizard (mana) spell.
  */
-/*@{*/
 #define SPELL_MANA	0x1
 #define SPELL_GRACE	0x2
 #define SPELL_HIGHEST	0x3
-/*@}*/
 
-/**
- * @defgroup SP_xxx Spell subtypes
- * This is the subtype for the ::SPELL type.  Start at 1 so that
+/* This is the subtype for the spells.  Start at 1 so that
  * it is easy to see 0 as an uninitialized value.
  * Note that for some spells, subtype pretty accurately
  * describes the entire spell (SP_DETECT_MAGIC).  But for other, the subtype
@@ -100,7 +80,7 @@ extern const char* const spellpathnames[NRSPELLPATHS];
  * No effort is made to match these new numbers with the old ones,
  * and given there is not a 1:1 mapping, you can't do that anyways.
  */
-/*@{*/
+
 #define SP_RAISE_DEAD	    1
 #define SP_RUNE		    2
 #define SP_MAKE_MARK	    3
@@ -148,40 +128,22 @@ extern const char* const spellpathnames[NRSPELLPATHS];
 #define SP_CAUSE_DISEASE    45
 #define SP_AURA		    46
 #define SP_TOWN_PORTAL	    47
-/*#define SP_PARTY_SPELL      48*/
-#define SP_ITEM_CURSE_BLESS 49
-/*@}*/
+#define SP_PARTY_SPELL      48
 
-/**
- * @defgroup POT_xxx Potion subtypes.
- * Subtypes for ::POTION.
- */
-/*@{*/
+/* Potion subtypes */
 #define POT_SPELL	    1
 #define POT_DUST	    2
 #define POT_FIGURINE	    3
 #define POT_BALM	    4
-/*@}*/
 
-/**
- * @defgroup FORCE_xxx Force subtypes
- *
- * This is for the ::FORCE subtypes.
- */
-/*@{*/
+/* This is for the force subtypes */
 #define FORCE_CONFUSION		1
 #define FORCE_CHANGE_ABILITY	2
-#define FORCE_TRANSFORMED_ITEM  3
-/*@}*/
 
-/**
- * Multiplier for the casting time based on path attenuation.
- */
 #define PATH_TIME_MULT(op,spell) (((op->path_attuned & spell->path_attuned) ? 0.8 : 1) * \
 				((op->path_repelled & spell->path_attuned) ? 1.25 : 1))
 
-/**
- * These are some hard coded values that are used within the code
+/* These are some hard coded values that are used within the code
  * for spell failure effects or pieces of spells.  Rather
  * then hardcode the names, use defines so it is easier to
  * update if necessary.
@@ -195,8 +157,7 @@ extern const char* const spellpathnames[NRSPELLPATHS];
 #define GENERIC_RUNE	"generic_rune"
 #define HOLY_POSSESSION	"spell_holy_possession"
 #define FORCE_NAME	"force"		/* instead of it being hardcoded */
-/**
- * This is used for fumbles - this arch is all set up to do
+/* This is used for fumbles - this arch is all set up to do
  * the right just by inserting it
  */
 #define EXPLODING_FIREBALL  "exploding_fireball"

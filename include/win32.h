@@ -1,19 +1,16 @@
 #ifndef WIN32_H
 #define WIN32_H
 
-/**
- * @file
+/*
  * Structures and types used to implement opendir/readdir/closedir
- * on Windows 95/NT and set the loe level defines.
- *
- * Also some Windows-specific includes and tweaks.
+ * on Windows 95/NT and set the loe level defines
  */
 
 #if !defined(AFX_STDAFX_H__31666CA1_2474_11D5_AE6C_F07569C10000__INCLUDED_)
 #define AFX_STDAFX_H__31666CA1_2474_11D5_AE6C_F07569C10000__INCLUDED_
 
 /* Define the version here.  In Unixland, it's defined on the command line now. */
-#define VERSION "1.9.1 (trunk) snapshot 20061229"
+#define VERSION "1.9.0 snapshot 20060520"
 
 #pragma warning(disable: 4761) /* integral size mismatch in argument; conversion supplied */
 
@@ -23,7 +20,7 @@
 
 #endif /* !defined(AFX_STDAFX_H__31666CA1_2474_11D5_AE6C_F07569C10000__INCLUDED_) */
 
-#define WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN	
 #include <windows.h>
 #include <windowsx.h>
 #include <mmsystem.h>

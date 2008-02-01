@@ -5,5 +5,4 @@ config.status
 configtest.out
 configtest.xml
 configtest.xsl
-configure.in
 libtool

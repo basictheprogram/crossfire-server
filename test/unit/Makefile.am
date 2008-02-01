@@ -1,4 +1,6 @@
-SUBDIRS = common random_maps socket server
+CROSSEDIT = @CROSSEDIT@
+
+SUBDIRS = common random_maps socket server $(CROSSEDIT)
 
 CHECK_ROOT=../
 CHECK_FOLDER=unit
@@ -11,3 +13,4 @@ clean-local:
 
 check-local: check-html
 clean-local: clean-unit
+

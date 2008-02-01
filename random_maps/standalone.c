@@ -6,7 +6,7 @@
 /*
     CrossFire, A Multiplayer game for X-windows
 
-    Copyright (C) 2002-2006 Mark Wedel & Crossfire Development Team
+    Copyright (C) 2002 Mark Wedel & Crossfire Development Team
     Copyright (C) 1992 Frank Tore Johansen
 
     This program is free software; you can redistribute it and/or modify
@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
   load_parameters(fp, LO_NEWFILE, &rp);
   fclose(fp);
   newMap = generate_random_map(OutFileName, &rp, NULL);
-  save_map(newMap,SAVE_MODE_INPLACE);
+  new_save_map(newMap,1); 
   exit(0);
 }
 
@@ -170,61 +170,74 @@ void fix_auto_apply(mapstruct *m) {
  * Added as part of glue cleaning.
  * Ryo 2005-07-15
  **/
-
-
-void draw_ext_info(int flags, int pri, const object *pl, uint8 type, uint8 subtype, const char *txt, const char *txt2)
+ 
+void new_draw_info(int a, int b, const object *ob, const char *txt)
     {
     fprintf(logfile, "%s\n", txt);
     }
-
-void draw_ext_info_format(
-        int flags, int pri, const object *pl, uint8 type,
-        uint8 subtype,
-        const char* new_format,
-        const char* old_format,
-        ...)
-{
-    va_list ap;
-    va_start(ap, old_format);
-    vfprintf(logfile, old_format, ap);
-    va_end(ap);
-}
-
-
-void ext_info_map(int color, const mapstruct *map, uint8 type, uint8 subtype, const char *str1, const char *str2)
-{
-    fprintf(logfile, "ext_info_map: %s\n", str2);
-}
-
+void new_info_map(int color, const mapstruct *map, const char *str)
+    {
+    fprintf(logfile, "new_info_map: %s\n", str);
+    }
+ 
 void move_teleporter( object* ob)
     {
     }
-
+ 
 void move_firewall( object* ob)
     {
     }
-
+ 
 void move_duplicator( object* ob)
     {
     }
-
+ 
 void move_marker( object* ob)
     {
     }
-
+ 
 void move_creator( object* ob)
     {
     }
-
+ 
 void emergency_save( int x )
     {
     }
-
+ 
 void clean_tmp_files( void )
     {
     }
-
+ 
 void esrv_send_item( object* ob, object* obx )
+    {
+    }
+ 
+void dragon_ability_gain( object* ob, int x, int y )
+    {
+    }
+ 
+void weather_effect( const char* c )
+    {
+    }
+ 
+void set_darkness_map( mapstruct* m)
+    {
+    }
+ 
+void move_apply( object* ob, object* obt, object* obx )
+    {
+    }
+ 
+object* find_skill_by_number( object* ob, int x )
+    {
+    return NULL;
+    }
+ 
+void esrv_del_item(player *pl, int tag)
+    {
+    }
+ 
+void esrv_update_spells(player *pl)
     {
     }
 
@@ -232,40 +245,10 @@ void esrv_update_item(int flags, object *pl, object *op)
 {
 }
 
-void dragon_ability_gain( object* ob, int x, int y )
-    {
-    }
-
-void weather_effect(mapstruct *m)
-    {
-    }
-
-void set_darkness_map( mapstruct* m)
-    {
-    }
-
-int ob_move_on(object* op, object* victim, object* originator)
-    {
-	return 0;
-    }
-
-object* find_skill_by_number(object *who, int skillno)
-    {
-    return NULL;
-    }
-
-void esrv_del_item(player *pl, int tag)
-    {
-    }
-
-void esrv_update_spells(player *pl)
-    {
-    }
-
 void monster_check_apply( object* ob, object* obt )
     {
     }
-
+ 
 void trap_adjust( object* ob, int x )
     {
     }
@@ -279,3 +262,4 @@ int execute_global_event(int eventcode, ...)
     {
     return 0;
     }
+

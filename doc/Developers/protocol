@@ -234,9 +234,9 @@ S->C: version <csval> [scval [vinfo]]
 	the server will never send back.
 
 C->S: addme
-	Tells the server that it should add me (the client) to the game.
-	Generally, the client will always send this command, but I suppose there
-	can be actions the client wants to do before being added.
+    Tells the server that it should add me (the client) to the game.
+    Generally, the client will always send this command, but I suppose there
+    can be actions the client wants to do before being added.
 
 S->C: addme_failed
 S->C: addme_success
@@ -261,40 +261,53 @@ Also see the setfacemode command below.
 ******************************************************************************
 COMMANDS RELATING TO PLAYER INPUT AND OUTPUT IN THE INFO WINDOW
 
+C->S: command [count] <txt>
+    command is the protocol command.  It is the <txt> segment which actually
+    includes the command (ie, north, fire, etc.)  There should not be any
+    binary data in the <txt> segment.
+
+    count is an optional value for the number of objects/repeat count
+    (ie, typically used for dropping, but count can be used in other
+    cases)
+
+    Client sends a command to the server.  Ordinary commands (ie, north,
+    west, apply, maps, etc), might be sent, commands with options may be sent
+    (ie, 'invoke create food of booze', 'cast medium fireball').  There are a
+    few special commands that can also be sent.
+
+    'fire' command is a special case.  The server will handle repeat firing.
+
+    'fire_stop' will be sent to inform the server to stop firing.  A
+    different command name has been chosen to make things easier on the
+    server ('fire_stop' should be a 0 time command, with the rest of the
+    fire commands actually taking some time.)  In some cases, 'fire_stop'
+    may be sent almost immediately after the first fire (in cases where the
+    player only wants to fire once).
+
 C->S: ncom <packet> <repeat> <command>
-	(ncom = new command)
-	Client sends a command to the server.  Ordinary commands (ie, north,
-	west, apply, maps, etc), might be sent, commands with options may be sent
-	(ie, 'invoke create food of booze', 'cast medium fireball').  There are a
-	few special commands that can also be sent.
+     (ncom = new command)
+     This is a replacement for the 'command' above.  packet is a 16
+     bit value which represents what command this is (used is
+     command below). At current time, only the lowest 8 bits should
+     be used (255 should be a plenty large window) - the other 8 bits
+     are reserved for future flags
 
-	Packet is a 16 bit arbitrary value the server will send back through comc
-	to inform the client of execution end.
+     repeat is a 32 bit value and is the repeat value.
 
-	repeat is a 32 bit value and is the repeat value, or a count value used
-	for instance for dropping.
-
-	command is the actual command data (north, whatever).
-
-	'fire' command is a special case.  The server will handle repeat firing.
-
-	'fire_stop' will be sent to inform the server to stop firing.  A
-	different command name has been chosen to make things easier on the
-	server ('fire_stop' should be a 0 time command, with the rest of the
-	fire commands actually taking some time.)  In some cases, 'fire_stop'
-	may be sent almost immediately after the first fire (in cases where the
-	player only wants to fire once).
+     command is the actual command data (north, whatever).  Notes
+     under command above also apply here.
 
 S->C: comc <packet> <time>
-	(comc = completed command)
-	This is used in the window of the ncom command above.  packet is
-	the command number we just executed (16 bit binary), and time
-	is a 32 bit value represent how many milliseconds the player is
-	currently taking to execute commands.  This information can be
-	used by the client to do some throttling.
+     (comc = completed command)
+     This is used in the window of the ncom command above.  packet is
+     the command number we just executed (16 bit binary), and time
+     is a 32 bit value represent how many milliseconds the player is
+     currently taking to execute commands.  This information can be
+     used by the client to do some throttling.
 
 C->S: reply <text>
-	Sends <text> as a reply to the last query command sent.
+    Sends <text> as a reply to the last query command sent.
+
 
 S->C: drawinfo <color> <text>
 	Tell the client to draw whatever text in color.  Color are specified
@@ -322,9 +335,9 @@ S->C: query <flags> [text]
 	be multi line, delimited by newlines.  Client should handle this
 	appropriately.
 
-C->S: toggleextendedtext <type>...
+C->S: toggleextendedtext <type>
 	Ask the server to send extended text information for a given type.
-	type is a list of decimal integers.
+	type is the decimal representation of an int.
 	Currently supported/reserved values for types are described in drawextinfo
 
 S->C: ExtendedTextSet <type1> <type2> .... <typen>
@@ -410,27 +423,27 @@ ITEM MANIPULATION RELATED COMMANDS
  Client requests to server:
 
 C->S: move <to> <tag> <nrof>
-	All parameters are integers sent in string format.  <to> is where to move
-	the object to, tag is the object tag, nrof is how many to move.  This
-	command is used to pickup/drop objects.  If <to> or <tag> is zero, the
-	object is being moved from/to the ground.  This command is used to move
-	items from a container into inventory and vice versa.  if nrof
-	is zero, all objects will be moved.
+    All parameters are integers sent in string format.  <to> is where to move
+    the object to, tag is the object tag, nrof is how many to move.  This
+    command is used to pickup/drop objects.  If <to> or <tag> is zero, the
+    object is being moved from/to the ground.  This command is used to move
+    items from a container into inventory and vice versa.  if nrof
+    is zero, all objects will be moved.
 
 C->S: examine <val>
-	Tells the server that I want to examine object <val>, where <val> is a
-	text string that represents that objects tag.  Objects tags are unique
-	for each object.
+    Tells the server that I want to examine object <val>, where <val> is a
+    text string that represents that objects tag.  Objects tags are unique
+    for each object.
 
 C->S: apply <val>
-	Tells the server that I want to apply the object <val>.  Like examine,
-	<val> is a text representation of an integer tag.
+    Tells the server that I want to apply the object <val>.  Like examine,
+    <val> is a text representation of an integer tag.
 
 C->S: lock <val><tag>
-	Tells to server to set the inventory lock flag of item tag to val.
-	val of 1 means that the item should be locked, 0 means unlocked.
-	val is 1 byte binary, tag is 4 byte binary.  The server should send
-	and upditem command with new flags to reflect this change.
+    Tells to server to set the inventory lock flag of item tag to val.
+    val of 1 means that the item should be locked, 0 means unlocked.
+    val is 1 byte binary, tag is 4 byte binary.  The server should send
+    and upditem command with new flags to reflect this change.
 
 C->S: mark <tag>
 	'marks' and item for secondary usage.  Some actions in crossfire
@@ -444,17 +457,24 @@ C->S: mark <tag>
 	client knowing this is not strictly needed)
 
 C->S: inscribe 0 <tag1> <tag2>
-	Player wants to write spell 'tag1' on scroll 'tag2'. This is rougly equivalent
-	of manually marking an item, readying the spell, and using the inscription skill.
-	'0' should be one byte, tags should be 4 byte integers.
+    Player wants to write spell 'tag1' on scroll 'tag2'. This is rougly equivalent
+    of manually marking an item, readying the spell, and using the inscription skill.
+    '0' should be one byte, tags should be 4 byte integers.
 
 Server updates to client:
+
+S->C: item1 <location><tag1><flags1><weight1><face1><name1><anim1>
+	<animspeed1><nrof1><object2....>
 
 S->C: item2 <location><tag1><flags1><weight1><face1><name1><anim1>
 	<animspeed1><nrof1><type1><object2....>
 
 	Sends item information to the client.  All parameters are sent as 4
 	byte ints, except for name, anim, animspeed and type.
+
+	The item1 command is an extension of the item command.  It includes
+	additional fields.  It has replaced the item command, which is no
+	longer detailed here.
 
 	location is where the object is located (0=ground, any other value
 	means is the tag of the object (either player or container)).  This
@@ -494,6 +514,8 @@ S->C: item2 <location><tag1><flags1><weight1><face1><name1><anim1>
 
 	nrof:  How many objects comprise this item.  This is used for
 	the name field and calculating total weight.  It is 4 bytes.
+
+	item2 is an extension, and adds the following information:
 
 	type: A numeric type id for the item.  The only meaining of this
 	value is really for sorting - all armors will have type values
@@ -615,8 +637,8 @@ S->C: player <tag><weight><face><name>
 S->C: stats <stat1><val1><stat2><val2>...
 	The is a server message that tells the client values of the various
 	stats.  All values are binary.  that <stat> values are listed in the
-	newclient.h file and are sent as 8bits. All the values sent are
-	16 bits with these exceptions:
+	newclient.h file.  All the values sent are 16 bits with these
+	exceptions:
 	-weight limit:
 		data is 32 bits.
 	-speed, weapon_sp is converted to an int first by multiply by
@@ -665,18 +687,40 @@ S->C: anim <num><flags><face1><face2>...
 	Note that how fast the object is animated is contained in the
 	item commands.
 
+S->C: pixmap <face><len><data>
+	Sends xpm version of an image to the client.  All data is in binary
+	form (4 byte for face & len).  <face> is the face number.  <len> is
+	the length of data, and <data> is the xpm data itself.
+
+S->C: bitmap <face><fg><bg><data>
+	Sends a bitmap version of an image to the client.  <face> is the face
+	number (4 bytes), <fg> and <bg> are 1 byte, and determine the
+	foreground and background colors.  <data> is 72 bytes of data.
+	(Images are 24x24, but you get 8 bits/byte, so 24*24/8 = 72)
+
+S->C: image <face><len><data>
 S->C: image2 <face><set><len><data>
-	Sends a png version of an image to the client.  <face> is the face
-	number (4 bytes), <set> the faceset the image is part of,
-	<len> the length of data (4 bytes), data is the png data used to
+	Command added in SC version 1023.
+	This command is much the same as the pixmap command above. face
+	and len are 4 binary bytes.  Data is the png data used to
 	the image.
 
+	If the client has requested a specific faceset, then the
+	image2 command will be used.  This includes the faceset the
+	image belongs to (8 bit data).
+
+	There is no image1 command.  Image2 was used to keep the version
+	in sync with the face2 command below.  It is also more intuitive
+	as in the server, the image2 flag is used to determine if we are
+	using these new commands.
+
+S->C: face <num><name>
+S->C: face1 <num><checksum><name>
 S->C: face2 <num><setnum><checksum><name>
-	Informs the client that image <num> (binary short) of faceset <setnum>
-	(A byte) is associated with <name>.  This is used when the client is
-	caching images.  In normal
+	Informs the client that <num> (binary short) is associated with
+	<name>.  This is used when the client is caching images.  In normal
 	operation, when the server runs accross a face that it hasn't sent
-	the client, it sends a png for that face.  If the face
+	the client, it sends a pixmap or bitmap for that face.  If the face
 	mode is none, the server then sends this command.  The client can
 	then check to see if it might have cached this face, and if not,
 	should then request it from the server.  Note that the num to name
@@ -684,6 +728,18 @@ S->C: face2 <num><setnum><checksum><name>
 	server.  For this reason, this data needs to be sent each
 	time run.  The client should be able to load/determine what face
 	to load via the name.
+
+	In sc version 1026 and later, the server will use the face1 command
+	which include a checksum that is a 32 bit value.  This can be used by
+	the client to know if its face is up to date.  The checksum is a 32
+	bit unsigned value.  If the client reports a sc_version of 1025
+	or earlier, the server will use the face command not not face1.
+
+	The face2 command is used if the client has sent used the
+	faceset setup command.  This is the same as the face1 command,
+	except we also include what faceset the image belongs to.  This
+	lets the client has multiple image sets installed and still
+	be able to cache properly.  setnum is 8 bit binary data.
 
 C->S: setfacemode <val>
 	This tells the server what type of display mode the client is using.
@@ -707,8 +763,8 @@ S->C: smooth <facenbr><smoothpic>
 	Following are the facenbr of the picture involved in the
 	smoothing algorithm. See doc on smoothing on how to use them.
 	This info may be send automatically from server if client has
-	smoothing enabled but may also be requested by client using
-	the asksmooth command below
+    smoothing enabled but may also be requested by client using
+    the asksmooth command below
 C->S: asksmooth <facenbr>
 	Parameters is a plain text integer.
 	Ask server to send a smooth sequence. Server will respond with a smooth command.
@@ -717,9 +773,181 @@ C->S: asksmooth <facenbr>
 ******************************************************************************
 MAP UPDATE COMMANDS
 
+S->C: map <ecell1><ecell2>...<255>[<face1><cell1...><face2><cell2...>]
+	Sends a map to the client.  All cell type values are stored as
+	x*mapy+y. Thus, we can fit the map coordinates into 1 byte up to
+	a mapsize of 11x11. (this size is limited by needing to set
+	the high bit)
+
+	<ecell1><ecell2>... is a list of cells that are empty.  This list
+	could be empty.  255 is used to mark the end of this list, whether
+	anything is included or not.  Note that the max xy hash value is
+	121, so we never need to worry about this value appearing as a map
+	cell.
+
+	the face values are 16 bit values representing the face for that
+	space.  Like other data, they are stored MSB first.  The MSB of
+	the last face in a layer has the high bit set.  this makes the max
+	theoretical face number that is supported to 32767 (old code says
+	16383, but that certainly does not seem right).  It would seem that
+	a marker of 0xff could be put at the end of a layer, and only cost
+	a byte, but at present, that doesn't seem really important.
+
+	<cell1...> is a list of cells that use this face.  The last face in
+	this list has the high bit set.  Being the max cell value is 121,
+	this does does not pose a problem.  This cell list is only for the
+	current layer.
+
+	The section in brackets ([]) represent data that is sent for each
+	layer.  At present time, only 3 layers are supported, but in theory,
+	any number could be.  It is up to the client to detect the end of
+	one layer, and know to put the next information a layer down.
+
+	Note:  The server does try to do some intelligence in only sending data
+	that has changed and packing repetative data.  Thus, the server doesn't
+	send a full map each tick, only a portion of the map.  Worst case
+	data scenario right now is roughly 1100 bytes of data sent (a very
+	unlikely scenario - it assumes 3 images per space and no redundant
+	images.
+
+	Note: The map command may get depreciated and instead replaced by
+	the map1 command below.  While the map1 command needs 2 bytes for
+	coordinates, it is smarter for other updates, so may not in
+	face use more bandwidth.
+
+S->C: map1 <coord1>[darkness1][face1a][face1b][face1c]<coord2>[darkness2][face2a]...
+S->C: map1a <coord1>[darkness1][face1a][face1b][face1c]<coord2>[darkness2][face2a]...
+
+	This is an update of the map command to support large map sizes.
+	The old map command supported a maximum map size of 15x15 -
+	anything larger than that required a new command.
+
+	Given that this larger map now needs 2 bytes for the coordinates -
+	the same as for the images, trying to optimize one vs the other
+	does not makes much sense.
+
+	The map1a is an enhancement to the map1 command.
+
+	All data is in standard binary form.
+
+	the coord values are flags + x + y values.  The value itself, but
+	the data represented looks like this:
+	first 6 bits: The x coordinate
+	next 6 bits: the y coordinate
+	last 4 bits: MSB - true if we send darkness
+		     MSB-1 - will send floor face
+		     MSB-2 - will send intermediate face
+		     MSB-3 (aka LSB) - will send top face
+
+	6 bits is enough for 63x63 maps.  For the time being, it should
+	be a safe assumption that we won't be sending anything larger
+	than that.
+
+	Through the use of this bitmasks, any and all of the following values
+	may be optional.  This allows the update of one face on the space
+	without needing to send the others (in the old map command, this is
+	not possible, so as an arrow flies over a space, the floor + arrow
+	needs to get resent - this allows just the arrow to get sent).
+	This should conserve bandwidth when spells are cast (we have an
+	extra byte for the coordinate, but save 2 bytes for the image
+	itself, plus another 2 potential bytes if there is something on the
+	space.)
+
+	If all the flag values are 0, this then means the space is considered
+	blocked from view, and should be drawn as black.  This conserves
+	bandwidth for sending blocked spaces, which occur pretty frequently.
+	Once a space is marked as block, if it re-appears within view, the 3
+	layers should be marked is blank.
+
+	For spaces that are empty, one or more of the faces will be sent as
+	blank faces (exactly how many will depend on what was on the floor
+	before - for example, if a floor disappears, then only the floor needs
+	to get updated, but if there was stuff on the floor, then that face
+	will also need to get cleared).  There may be cases where
+	transitioning from the blocked to empty space occurs, in which case
+	the server will send the floor as an empty space.
+
+	The darkness value is a single byte - 0 is pitch black, while 255 is
+	fully illuminated.  It is up to the client to figure out what it wants
+	to do with this (use masking to reduce visibility, or actually do a
+	real light reduction on the image).
+
+	The face values are 16 bit values, as before.  They will be sent
+	in MSB order of the flag (ie, floor, then intermediate, then
+	top, presuming the bit in the flag is set that says that layer
+	is being sent).  Blank faces may get sent if an object disappears -
+	in the example of the flying arrow, for the space the arrow
+	leaves, a blank face will be sent in place of the arrow.  Blank faces
+	will be sent as face 0.
+
+	Map1a refinements:
+
+	The main addition to the map1a command is handling of big images.  Big
+	images are those images that do not fit in one space, eg, if a store
+	is combined into 1 64x64 image, this falls into a big image.  The
+	archetype/object of a big image has the same face for all the spaces.
+
+	When the server detects such an object, it only sends the face for the
+	lower right corner.  The client then needs to extrapolate where this
+	should be drawn.  By only sending the lower right, the client can much
+	more easily handle tall objects.  The sending of a big image face is
+	no different in either the map1 or map1a command.
+
+	The main difference in the map1a command is what to do when the lower
+	right corner would not normally be visible to the client (blocked,
+	darkness, or off the edge of the map).  The map1 command will just not
+	send any data - thus, even if some part is visible, it won't be sent.
+	The map1a command will send this big face for such squares even if
+	that square is not visible.  It only sends this information if some
+	other part of the object is visible (eg, top portion).  Also, for such
+	spaces, it only sends the big face number, and not any other faces
+	that may be on that space.  The map1a command will also send
+	coordinates outside the normal map size.  For example, the player
+	selected a 25x25 map size.  There is a big image (3x3) whose left side
+	is just at the edge of the players map (upper corner of it at 25,18).
+	The server will send this face at 27,20 - the lower right space of
+	this big image.
+
+	The server tries to keep the same layer for the head as what appears
+	on the map.  Thus, a 2x2 store would normally be on layer 2 (with
+	layer 1 being the grass, stone, whatever).  In such a case, even if
+	the lower right corner was not visible, it will send the big face at
+	layer 2 on that space.  There can be spaces in which a big image is on
+	different layers on different spaces - in that case, if the lower
+	right is visible, the layer it appears on there will be used.
+	Otherwise, the layer of the first visible space it appears on
+	(starting from upper left) will be used.
+
+	The server does remember the heads for out of normal map bounds.
+	However, these values are not shifted but cleared when the map scrolls.
+	Taking the example of an image at 27,20 above, if the player moves to
+	the east, the server will send the map scroll command, send the face at
+	26,20, and send neither a clear nor update for 27,20.  When the player
+	moves east again, the image is now on the normal map at 25,20, and
+	will once again get sent, no delete for 26,20 will be sent.
+	OTOH, if the object was a living object and was partially off the
+	map when killed, an update removing that face for the object it was
+	standing on will be sent by the server.
+
+	Various notes about the map1 command:
+
+	this implementation is much simpler than the map command
+	because it now works on spaces rather than layers, and most all the
+	code also works on spaces.
+
+	The downside of this is that this will need to get redone
+	if we want to put more than 3 faces on a space (as we are then
+	out of bits).  It would be trivial to do something different, like
+	send as many faces as desired and just have a marking tag at the
+	end - the problem with this is that if something changes,
+	then once again, you need to send the entire space as there is
+	no way to say 'face xyz has disappeared'.  And in any case, to
+	support more faces will require more work on the server.
+
+
 S->C: map2 <coord1><len1/type1><data1><len2/type2><data2>...<coord2>
 
-	This is an update of the map1 commands above [removed].  It is meant to be
+	This is an update of the map1 commands above.  It is meant to be
 	extensible.  It is also meant to incorporate the ideas of the
 	extended map info command.
 
@@ -912,25 +1140,99 @@ S->C: ExtendedInfoSet <string1> <string2> .... <stringn>
 	Each string represent an info which is enabled. Look
 	at toggleextendedinfos and mapextended for details.
 
+S->C: mapextended <what><length><coord1>[data1a][data1b][data1c]<coord2>...
+	This command is send from server when there is at least
+	1 ExtendedInfo activated using toggleextendedinfos and
+	the client called setup extendedMapInfos 1 (see setup command).
+	Basically this command is made of a block telling what infos comes
+	with this command, a block telling what length this info is and then
+	the infos themselfes. Here is described more in details those blocks.
+	<what> (uses N bytes)
+		How to know N?
+		In each byte, if the highest bit (bit 7) is set, this mean
+		another byte will follow. This would allow easy extension of protocol
+		without breaking client and needing a new command.
+		Here is described, for each byte, the signifiance of the bits:
+		Byte 0:
+			bit 0 EMI_NOREDRAW
+					Tells the client it's useless to redraw screen immediatly,
+					another map command will follow.
+			bit 1 EMI_SMOOTH
+					Tells the client there is datas in the [datas] blocks about
+					smoothing.
+			bit 7 EMI_HASMOREBITS
+					Tells the client to read the next byte as part of the <what>
+					block too. See above signifiance of higher bit.
+	<length> (uses 1 byte)
+		A one byte info describing the size (in bytes) of each data block. So
+		each data block may have a size of 0 to 255 bytes. Note that all data blocks
+		send in one mapextended command have the same size but different
+		mapextended commands may have different blocksize, even with same datas
+		present.
+	Following is a set of blocks made of a <coord> and 0 to 3 <data>
+	<coord> (uses 2 bytes)
+		This is the same as for the map1 and map1a commands, except the darkness bit
+		is reserved for future use. If it is set to 1, the next byte will be part
+		of the coords too (for larger visible map, but not used yet).
+	<data> (uses <length> bytes)
+		the coord block tells the client which square is concerned and which layers
+		in this square are concerned. According to this there may be up to 3 <data>
+		blocks following the <coord> block (same as for map1 and map1a). Ok, now
+		what stand in those <data>?
+		First each <data> block has a length determined by the <length> block. So
+		if there are parts of the data the client may not understand, it's ok, he will
+		skip to the end of the <data> block, jumoing to the next. Should help add
+		additionnal information. Since the protocol evolved as on timeline basis.
+		If a client can't understand a data type cause it is too old, he won't
+		understand the next one too, etc, until the next <data> block is reached.
+		So to prevent problem, the server take care to put information in the data
+		block following the order of protocol evolution. If server need to
+		say to the client A BB C, assuming that A was defined in the
+		protocol before BB was defined which was before C was defined, it would say
+		ABBC and never ACBB. Now let's say later a developper want to extend BB to BBB,
+		the server should put the datas in the following order: ABBCB  cause the last B
+		is more recent in protocol than the 2 first BB and the C. All this make sure
+		there will be no mistakes or conflict between different protocol versions.
+		Ok, following is the information which may be present in a <data> block if
+		the corresponding flags are put.
+
+		if EMI_SMOOTH is present in <WHAT>
+			1 byte telling the smoothlevel of the object at <coord>
+				see developper notes on smoothing to know what this means. (TODO)
+
+		<data> stops here for now. Later there will be datas for sending text from
+		a specific location, telling client to play special effects, etc.
+		gime some time
+									Tchize.
+
+
 ******************************************************************************
 SOUND RELATED COMMANDS:
 
 C->S: setsound <val>
-	Obsolete command, should not be used, will be removed at some point.
+	<val> is a plaintext integer.  Current supported values are 0 and 1.
+	0 says that the client does not want sounds, 1 says it does want
+	sound information.  By default, the server does not send sound
+	information.
+	Note that the player can use the 'sound' command once the game
+	is started to control future sound transmissions.  However, if
+	the client was not started with sound support, the necessary
+	initialization of the sound device might not have happened.
+	However, if the client started with sounds enabled, the user can
+	certainly disable future sounds.
 
 S->C: sound <x><y><num><type>
-	Obsolete, will never be sent.
-
-S->C: sound2 <x><y><dir><volume><type><len of subtype>subtype<len of name>name
-	Plays a sound. See the 'sound' document for more information.
-	'x' and 'y' are bytes, position of the sound relative to the player.
-	'dir' is a byte from 0 to 8, the direction the sound is moving to.
-	'volume' is a byte from 1 to 100, arbitrary intensity of the sound.
-	'type' is a byte, the major sound type.
-	'len of action' is a byte, length of action.
-	'action' is a string, the actual sound name to play.
-	'len of name' is a byte, length of name.
-	'name' is the name of the sound emitter, that can be used to find a specific sound.
+	Informs the client to play a sound.  All arguments are binary data.
+	x,y are signed 1 byte values which are offsets from the player.
+	num is the sound number stored as a short (16 bit).
+	(IT is up to client to determine which sound to
+	play based on that.)  Since sound numbers seldom change (and in fact,
+	new sounds will have a higher number than the old sounds - old
+	sounds numbers will not change in meaning like what can happen with
+	the images), this should not be much of a problem.
+	type is a 1 byte value which determines sound type.  Currently, 0
+	is normal sound, 1 is spell sound.  This may be extended in the
+	future.
 
 ******************************************************************************
 MISC COMMANDS:
@@ -951,11 +1253,6 @@ S->C: setup <option1> <value1> <option2> <value2>
 	(please keep this alphabetized to make it easier to see different
 	options)
 
-	bot (0/1 value):
-	    If set to 1, the client will not be considered a player when
-	    updating information to the metaserver. This is to avoid having
-	    a server with many bots appear more crowded than others.
-
 	darkness (0/1 value):
 	    If set to 1 (default), the server will send darkness information
 	    in the map protocol commands.  If 0, the server will not
@@ -964,17 +1261,18 @@ S->C: setup <option1> <value1> <option2> <value2>
 	    this does not allow the client to cheat.  In the case of the
 	    old 'map' protocol command, turning darkness off will result
 	    in the masking faces not getting sent to the client.
+	    Note: This is ignored if the map2 protocol command is being
+	    used, as darkness is always set then.
 
 	exp64: If true, client can handle the 64 bit exp values that
 	    are now used.  Otherwise, values are sent as 32 bit.  Setting
 	    this flag also means that skill exp will be sent, and it will
 	    be sent in revised method as described in the stats command.
 	    Value is an integer in string format.
-	    This is always the default on servers with protocol version >=1028.
 
 	extendedMapInfos (0/1)
 	    Toggle sending from server of extended map informations.
-	    What lies in this extended info depended on what extended
+  	    What lies in this extended info depended on what extended
 	    infos the client asked. See toggleextendedinfos command for
 	    details.
 
@@ -993,14 +1291,40 @@ S->C: setup <option1> <value1> <option2> <value2>
 	    valid, the server returns the faceset the client will be
 	    using (default 0).
 
-	inscribe (0/1):
-	    Client will probably always send 1. Server will reply with 1 if it
-	    supports the 'inscribe' command, 0 else.
+    inscribe (0/1):
+        Client will probably always send 1. Server will reply with 1 if it
+        supports the 'inscribe' command, 0 else.
+
+	itemcmd (1/2):
+	    Defines the revision of the item command that will be used to send
+	    information about objects. If set to 1 (the default) item1 commands
+	    will be sent. If set to 2, item2 commands will be sent. This may in
+	    future accept extra values beyond these two.
+
+	map1cmd: parameter is an integer in string form like above.
+	   this requests the server to use/not use the map1 protocol
+	   command.  Note that if the map size is greater than 11 in either
+	   direction, the server will use the map1 protocol command no
+	   matter what.  This parameter can be useful if the client wants
+	   the map1 protocol command for smaller maps because of the
+	   the additional information provided.
+	   Note that the server will return the mode it will be using
+	   when it sends back the setup command, and not necessarily
+	   what the client requests.  Thus, if the mapsize is 15x15,
+	   and the client does a 'setup map1cmd 0', the server will
+	   send back a 'setup map1cmd 1' because it will still end up
+	   using the map1cmd due to the map size.
+
+	map1acmd:  Specifies that the server uses the map1a protocol format -
+	    this is largely the same as the map1 command, but adds support
+	    for big images.
 
 	map2cmd: This indicates client support for the map2 protocol command.
 	    See the map2 protocol details above for the main differences.
 	    Note that if map2 protocol is used, the following setup commands
 	    have no effect, either as being redundant or not applicable:
+	    darkness: always on
+	    extendedMapInfos: Data is included in map2
 
 	mapsize x X y
 	    Sets the map size to x X y.  Note the spaces here are only for
@@ -1040,24 +1364,22 @@ S->C: setup <option1> <value1> <option2> <value2>
 	    of war mode to receive newmap commands from the server each time
 	    the player changes maps.
 
-	sound (bitmask)
-	    Obsolete, server will return FALSE.
-
-	sound2
-            New sound support. Check above for more information.
+	sound
+	    Set to true if the client wants to get sent sound information.
+	    This is an integer in string form (0/1).
 
 	spellmon (0/1)
 	    If set to 1 the client has indicated that it wishes to be
 	    sent the spell list and updated when it changes.
 
+	sexp (send skill experience):
+	    Obsolete - was used to denote that client wanted skill exp
+	    sent.  Under revised skill system, this info just doesn't
+	    exist anymore in the same form.
+
 	tick (0/1)
 	    If set, the client want tick commands so it knows animation
 	    timing.
-
-	want_pickup (0/1)
-	    If set, the client wants pickup mode to be sent when player
-	    correctly logs in (to synchronise interface).
-	    Note that this flag only sends at login, not when mode changes.
 
 	All data in the setup command is in ascii text form.  options and
 	values can not have whitepace - the client and server use whitspace
@@ -1075,33 +1397,33 @@ it easier to read the different structures.
 C->S: requestinfo <info_type>[options]
 S->C: replyinfo <info_type>[options]<data>
 
-	The requestinfo command is a general purpose way for the client to request
-	some piece of data the server may have.  The server still needs to be
-	coded to respond to the specific info_type, but if the passed info_type is
-	not supported, the server will still respond with the replyinfo, but with
-	an empty data list.
+    The requestinfo command is a general purpose way for the client to request
+    some piece of data the server may have.  The server still needs to be
+    coded to respond to the specific info_type, but if the passed info_type is
+    not supported, the server will still respond with the replyinfo, but with
+    an empty data list.
 
-	This mechanism allows the client to send requests for data and not need to
-	do complicated checking if the server would understand the specific
-	request - if the server understands it, the data gets sent back.  If the
-	server doesn't understand it, the client gets no data, but does get the
-	replyinfo so that it knows that the server does not support that
-	particular aspect.
+    This mechanism allows the client to send requests for data and not need to
+    do complicated checking if the server would understand the specific
+    request - if the server understands it, the data gets sent back.  If the
+    server doesn't understand it, the client gets no data, but does get the
+    replyinfo so that it knows that the server does not support that
+    particular aspect.
 
-	Only one info_type is allowed for each requestinfo.  If the client
-	requests many pieces of information (say image sets available, spell
-	listings, etc), it should send multiple requestinfos.
+    Only one info_type is allowed for each requestinfo.  If the client
+    requests many pieces of information (say image sets available, spell
+    listings, etc), it should send multiple requestinfos.
 
-	[options] is specific to the info_type - it could be a range of values, or
-	empty.
+    [options] is specific to the info_type - it could be a range of values, or
+    empty.
 
-	Requestinfo requests will not change any data on the server - the setup
-	command should be used for that.  The requestinfo just requests data.
-	Note that since the requests can be made before a player logs in, the
-	requestinfo command will not generally support getting information related
-	to the player object.
+    Requestinfo requests will not change any data on the server - the setup
+    command should be used for that.  The requestinfo just requests data.
+    Note that since the requests can be made before a player logs in, the
+    requestinfo command will not generally support getting information related
+    to the player object.
 
-	The following info_types are supported:
+    The following info_types are supported:
 
     image_info:
 	'image_info' (no options):
@@ -1442,14 +1764,6 @@ checksum.
 
 SC version 1026 -> 1027: Add requestinfo/replyinfo commands - client
 can check this to know if it should expect a replyinfo to its requestinfo.
-
-SC version 1027 -> 1028: mostly remove obsolete commands:
- image, face, face1, map, map1, map1a, command
-
-SC version 1028 -> 1029: Changes the way weapon_speed is reported for
-  the player - version 1028 needed the client to divide weapon speed
-  by player speed to get actual valu, version 1029 just reports weapon
-  speed as it should be displayed.
 
 ------------------------------------------------------------------------------
 Todo:

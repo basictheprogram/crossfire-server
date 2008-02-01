@@ -180,10 +180,10 @@ static PyObject* Map_Message(Crossfire_Map* map, PyObject* args)
 {
     int   color = NDI_BLUE|NDI_UNIQUE;
     char *message;
-
+    
     if (!PyArg_ParseTuple(args,"s|i",&message,&color))
         return NULL;
-
+        
     MAPEXISTCHECK(map);
 
     cf_map_message(map->map, message, color);
@@ -258,12 +258,12 @@ static PyObject* Map_Insert(Crossfire_Map* map, PyObject* args)
 {
     int x, y;
     Crossfire_Object* what;
-
+    
     if (!PyArg_ParseTuple(args,"O!ii", &Crossfire_ObjectType, &what, &x, &y))
         return NULL;
 
     MAPEXISTCHECK(map);
-
+    
     return Crossfire_Object_wrap(cf_map_insert_object(map->map, what->obj, x, y));
 }
 
@@ -277,44 +277,7 @@ static PyObject* Map_ChangeLight(Crossfire_Map* map, PyObject* args)
 
     return Py_BuildValue("i", cf_map_change_light(map->map, change));
 }
-/**
- * python backend method for Map.TriggerConnected(int connected, CfObject cause, int state)
- * @param connected will be used to locate Objectlink with given id on map
- * @param state: 0=trigger the "release", other is trigger the "push", default is push
- * @param cause, eventual CfObject causing this trigger
- */
-static PyObject* Map_TriggerConnected(Crossfire_Map* map, PyObject* args)
-{
-    objectlink* ol=NULL;
-    int connected;
-    int state;
-    Crossfire_Object* cause=NULL;
-    oblinkpt* olp;
-    if (!PyArg_ParseTuple(args,"ii|O!", &connected,&state,&Crossfire_ObjectType,&cause))
-        return NULL;
 
-    MAPEXISTCHECK(map);
-    /* locate objectlink for this connected value */
-    if (!map->map->buttons){
-        cf_log(llevError, "Map %s called for trigger on connected %d but there ain't any button list for that map!\n", cf_map_get_sstring_property(map->map, CFAPI_MAP_PROP_PATH),connected);
-        return NULL;
-    }
-    for (olp=map->map->buttons;olp;olp=olp->next){
-        if (olp->value==connected){
-            ol = olp->link;
-            break;
-        }
-    }
-    if (ol==NULL){
-        cf_log(llevInfo, "Map %s called for trigger on connected %d but there ain't any button list for that map!\n", cf_map_get_sstring_property(map->map, CFAPI_MAP_PROP_PATH),connected);
-        return NULL;
-    }
-    /* run the object link */
-    cf_map_trigger_connected(ol,cause?cause->obj:NULL,state);
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
 static int Map_InternalCompare(Crossfire_Map* left, Crossfire_Map* right)
 {
     MAPEXISTCHECK_INT(left);
@@ -357,7 +320,7 @@ static void Crossfire_Map_dealloc(PyObject *obj)
     if(self) {
         if (self->map && self->valid) {
             free_map_assoc(self->map);
-        }
+        }            
         self->ob_type->tp_free(obj);
     }
 }
@@ -370,13 +333,13 @@ void Handle_Map_Unload_Hook(Crossfire_Map *map) {
 PyObject *Crossfire_Map_wrap(mapstruct *what)
 {
     Crossfire_Map *wrapper;
-
+    
     /* return None if no object was to be wrapped */
     if(what == NULL) {
         Py_INCREF(Py_None);
         return Py_None;
     }
-
+    
     wrapper = (Crossfire_Map*)find_assoc_pymap(what);
     if (!wrapper) {
         wrapper = PyObject_NEW(Crossfire_Map, &Crossfire_MapType);
@@ -388,6 +351,7 @@ PyObject *Crossfire_Map_wrap(mapstruct *what)
     } else {
         Py_INCREF(wrapper);
     }
-
+        
     return (PyObject *)wrapper;
 }
+

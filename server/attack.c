@@ -5,7 +5,7 @@
 /*
     CrossFire, A Multiplayer game for X-windows
 
-    Copyright (C) 2002-2006 Mark Wedel & Crossfire Development Team
+    Copyright (C) 2002 Mark Wedel & Crossfire Development Team
     Copyright (C) 1992 Frank Tore Johansen
 
     This program is free software; you can redistribute it and/or modify
@@ -24,14 +24,6 @@
 
     The authors can be reached via e-mail to crossfire-devel@real-time.com
 */
-
-/**
- * @file
- * This handles all attacks, magical or not.
- * @todo
- * clean functions. Are all parameters required? Seems quite a mess to send damage/wc etc in attack_ob_simple().
- */
-
 #include <assert.h>
 #include <global.h>
 #include <living.h>
@@ -43,6 +35,11 @@
 #endif
 
 #include <sounds.h>
+
+typedef struct att_msg_str {
+  char *msg1;
+  char *msg2;
+} att_msg;
 
 /*#define ATTACK_DEBUG*/
 
@@ -56,9 +53,6 @@ static void poison_player(object *op, object *hitter, int dam);
 /**
  * Cancels object *op.  Cancellation basically means an object loses
  * its magical benefits.
- *
- * @param op
- * item to cancel. Its inventory will also be cancelled.
  */
 static void cancellation(object *op)
 {
@@ -90,20 +84,11 @@ static void cancellation(object *op)
 
 
 /**
- * Checks to make sure the item actually
+ * did_make_save_item just checks to make sure the item actually
  * made its saving throw based on the tables.  It does not take
  * any further action (like destroying the item).
- * @param op
- * object to check.
- * @param type
- * attack type.
- * @param originator
- * what it attacking?
- * @return
- * TRUE if item saved, FALSE else.
- * @todo
- * check meaning of originator.
  */
+
 static int did_make_save_item(object *op, int type, object *originator) {
     int i, roll, saves=0, attacks=0, number;
     materialtype_t *mt;
@@ -161,16 +146,9 @@ static int did_make_save_item(object *op, int type, object *originator) {
 }
 
 /**
- * Object is attacked with some attacktype (fire, ice, ...).
- * Calls did_make_save_item().  It then performs the
+ * This function calls did_make_save_item.  It then performs the
  * appropriate actions to the item (such as burning the item up,
- * calling cancellation(), etc.)
- * @param op
- * victim of the attack.
- * @param type
- * attacktype.
- * @param originator
- * what is attacking.
+ * calling cancellation, etc.)
  */
 
 void save_throw_object (object *op, int type, object *originator)
@@ -274,20 +252,13 @@ void save_throw_object (object *op, int type, object *originator)
 }
 
 /**
- * Attack a spot on the map.
- *
- * @param op
- * object hitting the map.
- * @param dir
- * direction op is hitting/going.
- * @param type
- * attacktype.
- * @param full_hit
- * if set then monster area does not matter, it gets all damage. Else damage is proportional to
- * affected area vs full monster area.
- * @return
- * 1 if it hits something, 0 otherwise.
+ * Object op is hitting the map.
+ * op is going in direction 'dir'
+ * type is the attacktype of the object.
+ * full_hit is set if monster area does not matter.
+ * returns 1 if it hits something, 0 otherwise.
  */
+
 int hit_map(object *op, int dir, int type, int full_hit) {
     object *tmp, *next;
     mapstruct *map;
@@ -412,21 +383,6 @@ int hit_map(object *op, int dir, int type, int full_hit) {
     return 0;
 }
 
-/**
- * Send an attack message to someone.
- *
- * @param dam
- * amount of damage done.
- * @param type
- * attack type.
- * @param op
- * victim of the attack.
- * @param hitter
- * who is hitting.
- * @todo
- * move check for player at function start? this function seems called for everyone.
- * use string safe functions.
- */
 static void attack_message(int dam, int type, object *op, object *hitter) {
   char buf[MAX_BUF], buf1[MAX_BUF], buf2[MAX_BUF];
   int i, found=0;
@@ -506,17 +462,6 @@ static void attack_message(int dam, int type, object *op, object *hitter) {
 	          sprintf(buf1, "%s %s%s", attack_mess[ATM_PUNCH][i].buf1,
 			  op->name, attack_mess[ATM_PUNCH][i].buf2);
 		  sprintf(buf2, "%s", attack_mess[ATM_PUNCH][i].buf3);
-		  found++;
-		  break;
-	      }
-	}
-	else if (USING_SKILL(hitter, SK_WRAITH_FEED)) {
-          for (i=0; i < MAXATTACKMESS && attack_mess[ATM_WRAITH_FEED][i].level != -1;
-	       i++)
-	      if (dam < attack_mess[ATM_WRAITH_FEED][i].level) {
-	          sprintf(buf1, "%s %s%s", attack_mess[ATM_WRAITH_FEED][i].buf1,
-			  op->name, attack_mess[ATM_WRAITH_FEED][i].buf2);
-		  sprintf(buf2, "%s", attack_mess[ATM_WRAITH_FEED][i].buf3);
 		  found++;
 		  break;
 	      }
@@ -639,35 +584,29 @@ static void attack_message(int dam, int type, object *op, object *hitter) {
 	else {
 	    sprintf(buf,"%s%s you.",hitter->name, buf2);
 	    if (dam != 0) {
-                if (hitter->chosen_skill)
-                    play_sound_player_only(op->contr, SOUND_TYPE_HIT_BY, op, 0, hitter->chosen_skill->name);
-                else if (dam < 10)
-                    play_sound_player_only(op->contr, SOUND_TYPE_HIT_BY, op, 0, "low");
+		if (dam < 10)
+		    play_sound_player_only(op->contr, SOUND_PLAYER_IS_HIT1,0,0);
 		else if (dam < 20)
-                    play_sound_player_only(op->contr, SOUND_TYPE_HIT_BY, op, 0, "medium");
+		    play_sound_player_only(op->contr, SOUND_PLAYER_IS_HIT2,0,0);
 		else
-                    play_sound_player_only(op->contr, SOUND_TYPE_HIT_BY, op, 0, "high");
+		    play_sound_player_only(op->contr, SOUND_PLAYER_IS_HIT3,0,0);
 	    }
 	}
-	draw_ext_info(NDI_BLACK, 0,op,MSG_TYPE_VICTIM, MSG_TYPE_VICTIM_WAS_HIT, buf, NULL);
+	new_draw_info(NDI_BLACK, 0,op,buf);
     } /* end of player hitting player */
 
     /* scale down these messages too */
-    /*if(hitter->type==PLAYER && rndm(0, 2) == 0) {*/
-    if(hitter->type==PLAYER) {
+    if(hitter->type==PLAYER && rndm(0, 2) == 0) {
 	sprintf(buf,"You %s.",buf1);
 	if (dam != 0) {
-            if (hitter->chosen_skill)
-                play_sound_player_only(hitter->contr, SOUND_TYPE_HIT, hitter, 0, hitter->chosen_skill->name);
-	    else if (dam < 10)
-                play_sound_player_only(hitter->contr, SOUND_TYPE_HIT, hitter, 0, "low");
+	    if (dam < 10)
+		play_sound_player_only(hitter->contr, SOUND_PLAYER_HITS1,0,0);
 	    else if (dam < 20)
-                play_sound_player_only(hitter->contr, SOUND_TYPE_HIT, hitter, 0, "medium");
+		play_sound_player_only(hitter->contr, SOUND_PLAYER_HITS2,0,0);
 	    else
-                play_sound_player_only(hitter->contr, SOUND_TYPE_HIT, hitter, 0, "high");
+		play_sound_player_only(hitter->contr, SOUND_PLAYER_HITS3,0,0);
 	}
-	draw_ext_info(NDI_BLACK, 0, hitter,MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_DID_HIT,
-		      buf, NULL);
+	new_draw_info(NDI_BLACK, 0, hitter, buf);
     } else if(get_owner(hitter)!=NULL&&hitter->owner->type==PLAYER) {
       /* look for stacked spells and start reducing the message chances */
         if (hitter->type == SPELL_EFFECT &&
@@ -694,25 +633,13 @@ static void attack_message(int dam, int type, object *op, object *hitter) {
 	       return;
 	} else if (rndm(0, 5) != 0)
 	    return;
-	play_sound_map(SOUND_TYPE_HIT, hitter->owner, 0, "hit");
-	draw_ext_info_format(NDI_BLACK, 0, hitter->owner, MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_PET_HIT,
-		     "Your %s%s %s.",
-		     "Your %s%s %s.",
-		     hitter->name, buf2, op->name);
+        sprintf(buf,"Your %s%s %s.", hitter->name, buf2, op->name);
+	play_sound_map(op->map, op->x, op->y, SOUND_PLAYER_HITS4);
+	new_draw_info(NDI_BLACK, 0, hitter->owner, buf);
     }
 }
 
-/**
- * Find correct parameters for attack, do some sanity checks.
- * @param target
- * will point to victim's head.
- * @param hitter
- * will point to hitter's head.
- * @param simple_attack
- * will be 1 if one of victim or target isn't on a map, 0 else.
- * @return
- * 0 if hitter can attack target, 1 else.
- */
+
 static int get_attack_mode (object **target, object **hitter,
 	int *simple_attack)
 {
@@ -740,21 +667,11 @@ static int get_attack_mode (object **target, object **hitter,
     return 0;
 }
 
-/**
- * Check if target and hitter are still in a relation similar to the one
- * determined by get_attack_mode().
- *
- * @param target
- * who is attacked.
- * @param hitter
- * who is attacking.
- * @param simple_attack
- * previous mode as returned by get_attack_mode().
- * @return
- * 1 if the relation has changed, 0 else.
- */
 static int abort_attack (object *target, object *hitter, int simple_attack)
 {
+/* Check if target and hitter are still in a relation similar to the one
+ * determined by get_attack_mode().  Returns true if the relation has changed.
+ */
     int new_mode;
 
     if (hitter->env == target || target->env == hitter)
@@ -770,21 +687,6 @@ static int abort_attack (object *target, object *hitter, int simple_attack)
 
 static void thrown_item_effect (object *, object *);
 
-/**
- * Handles simple attack cases.
- * @param op
- * victim. Should be the head part.
- * @param hitter
- * attacked. Should be the head part.
- * @param base_dam
- * damage to do.
- * @param base_wc
- * wc to hit with.
- * @return
- * dealt damage.
- * @todo
- * fix void return values. Try to remove gotos. Better document when it's called.
- */
 static int attack_ob_simple (object *op, object *hitter, int base_dam,
 	int base_wc)
 {
@@ -792,7 +694,6 @@ static int attack_ob_simple (object *op, object *hitter, int base_dam,
     uint32 type;
     const char *op_name = NULL;
     tag_t op_tag, hitter_tag;
-    char buf[MAX_BUF];
 
     if (get_attack_mode (&op, &hitter, &simple_attack))
         goto error;
@@ -812,12 +713,11 @@ static int attack_ob_simple (object *op, object *hitter, int base_dam,
             if (execute_event(hitter->current_weapon, EVENT_ATTACK,
                           hitter,op,NULL,SCRIPT_FIX_ALL) != 0)
                 return 0;
-            if (hitter->current_weapon->anim_suffix)
-                apply_anim_suffix(hitter, hitter->current_weapon->anim_suffix);
         }
-    }
+            }
     op_tag = op->count;
     hitter_tag = hitter->count;
+
     /*
      * A little check to make it more difficult to dance forward and back
      * to avoid ever being hit by monsters.
@@ -851,17 +751,15 @@ static int attack_ob_simple (object *op, object *hitter, int base_dam,
 	if (settings.casting_time == TRUE) {
 	    if ((hitter->type == PLAYER)&&(hitter->casting_time > -1)){
 		hitter->casting_time = -1;
-		draw_ext_info(NDI_UNIQUE, 0,hitter,MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_FUMBLE,
-			      "You attacked and lost your spell!", NULL);
+		new_draw_info(NDI_UNIQUE, 0,hitter,"You attacked and lost "
+		    "your spell!");
 	    }
 	    if ((op->casting_time > -1)&&(hitdam > 0)){
 		op->casting_time = -1;
 		if (op->type == PLAYER)  {
-		    draw_ext_info(NDI_UNIQUE, 0,op,MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_FUMBLE,
-				  "You were hit and lost your spell!", NULL);
-		    draw_ext_info_format(NDI_ALL|NDI_UNIQUE,5,NULL,
-			 MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_FUMBLE,
-			"%s was hit by %s and lost a spell.",
+		    new_draw_info(NDI_UNIQUE, 0,op,"You were hit and lost "
+			"your spell!");
+		    new_draw_info_format(NDI_ALL|NDI_UNIQUE,5,NULL,
 			"%s was hit by %s and lost a spell.",
 			op_name,hitter->name);
 		}
@@ -885,9 +783,9 @@ static int attack_ob_simple (object *op, object *hitter, int base_dam,
             if (op->hide && QUERY_FLAG (hitter, FLAG_ALIVE)) {
                 make_visible (op);
                 if (op->type == PLAYER)
-                    draw_ext_info (NDI_UNIQUE, 0, op, MSG_TYPE_VICTIM, MSG_TYPE_VICTIM_WAS_HIT,
-			   "You were hit by a wild attack. You are no longer hidden!",
-			    NULL);
+                    new_draw_info (NDI_UNIQUE, 0, op,
+                                   "You were hit by a wild attack. "
+                                   "You are no longer hidden!");
             }
 
             /* thrown items (hitter) will have various effects
@@ -914,8 +812,7 @@ static int attack_ob_simple (object *op, object *hitter, int base_dam,
 	    && QUERY_FLAG (hitter, FLAG_ALIVE))
 	{
 	    if (op->attacktype & AT_ACID && hitter->type==PLAYER)
-		draw_ext_info(NDI_UNIQUE, 0,hitter, MSG_TYPE_VICTIM, MSG_TYPE_VICTIM_WAS_HIT,
-			      "You are splashed by acid!\n", NULL);
+		new_draw_info(NDI_UNIQUE, 0,hitter,"You are splashed by acid!\n");
 	    hit_player(hitter, random_roll(0, (op->stats.dam), hitter,
 				      PREFER_LOW),op, op->attacktype, 1);
 	    if (was_destroyed (op, op_tag)
@@ -950,15 +847,6 @@ static int attack_ob_simple (object *op, object *hitter, int base_dam,
     return dam;
 }
 
-/**
- * Simple wrapper for attack_ob_simple(), will use hitter's values.
- * @param op
- * victim.
- * @param hitter
- * attacker.
- * @return
- * dealt damage.
- */
 int attack_ob (object *op, object *hitter)
 {
 
@@ -968,14 +856,9 @@ int attack_ob (object *op, object *hitter)
 }
 
 /**
- * Try to put an arrow in inventory.
+ * op is the arrow, tmp is what is stopping the arrow.
  *
- * @param op
- * arrow to try to insert.
- * @param tmp
- * what is stopping the arrow.
- * @return
- * 1 if op was inserted into tmp's inventory, 0 otherwise.
+ * Returns 1 if op was inserted into tmp's inventory, 0 otherwise.
  */
 static int stick_arrow (object *op, object *tmp)
 {
@@ -999,12 +882,7 @@ static int stick_arrow (object *op, object *tmp)
  * hit_with_arrow() disassembles the missile, attacks the victim and
  * reassembles the missile.
  *
- * @param op
- * missile hitting.
- * @param victim
- * who is hit by op.
- * @return
- * pointer to the reassembled missile, or NULL if the missile
+ * It returns a pointer to the reassembled missile, or NULL if the missile
  * isn't available anymore.
  */
 object *hit_with_arrow (object *op, object *victim)
@@ -1015,7 +893,7 @@ object *hit_with_arrow (object *op, object *victim)
     sint16 victim_x, victim_y;
     mapstruct	*victim_map;
     const char* old_skill=NULL;
-    
+
     /* Disassemble missile */
     for (hitter = op->inv; hitter; hitter = hitter->below) {
         if (hitter->type == EVENT_CONNECTOR)
@@ -1047,10 +925,6 @@ object *hit_with_arrow (object *op, object *victim)
     victim_tag = victim->count;
     hitter_tag = hitter->count;
     /* Lauwenmark: Handling plugin attack event for thrown items */
-    /* FIXME provide also to script the skill? hitter is the throwed
-       items, but there is no information about the fact it was
-       thrown
-    */
     if (execute_event(op, EVENT_ATTACK,hitter,victim,NULL,SCRIPT_FIX_ALL) == 0){
         /*
           temporary set the hitter's skill to the one associated with the 
@@ -1058,13 +932,14 @@ object *hit_with_arrow (object *op, object *victim)
           correct level. This might proves an awfull hack :/ We should really
           provide attack_ob_simple with the skill to use...
          */
-        if (container!=NULL) {
+        if (container!=NULL){
             old_skill = hitter->skill;
             hitter->skill = add_refcount(container->skill);
         }
         hit_something = attack_ob_simple (victim, hitter, op->stats.dam,
                                         op->stats.wc);
     }
+
     /* Arrow attacks door, rune of summoning is triggered, demon is put on
      * arrow, move_apply() calls this function, arrow sticks in demon,
      * attack_ob_simple() returns, and we've got an arrow that still exists
@@ -1078,10 +953,12 @@ object *hit_with_arrow (object *op, object *victim)
         }
         return NULL;
     }
+    /*restore object's skill to original value */
     if (container!=NULL){
         free_string(hitter->skill);
         hitter->skill=old_skill;
     }
+
     /* Missile hit victim */
     /* if the speed is > 10, then this is a fast moving arrow, we go straight
      * through the target
@@ -1132,13 +1009,8 @@ object *hit_with_arrow (object *op, object *victim)
     }
     return op;
 }
-/**
- * Handles wall tearing animation. Will change the face according to the hp/maxhp ration.
- *
- * If the wall reaches its last animation, either free it or set it non living so it doesn't block anymore.
- * @param op
- * wall to update.
- */
+
+
 static void tear_down_wall(object *op)
 {
     int perc=0;
@@ -1182,13 +1054,6 @@ static void tear_down_wall(object *op)
     }
 }
 
-/**
- * Creature is scared, update its values.
- * @param target
- * scared creature.
- * @param hitter
- * who scared target.
- */
 static void scare_creature(object *target, object *hitter)
 {
     object *owner = get_owner(hitter);
@@ -1199,31 +1064,19 @@ static void scare_creature(object *target, object *hitter)
     if (!target->enemy) target->enemy=owner;
 }
 
+
 /**
- * Handles one attacktype's damage.
- * This doesn't damage the creature, but returns how much it should
- * take. However, it will do other effects (paralyzation, slow, etc.).
- * @param op
- * victim of the attack.
- * @param hitter
- * attacker.
- * @param dam
- * maximum dealt damage.
- * @param attacknum
- * number of the attacktype of the attack. Must be a single value and not a combination.
- * See @ref Attacktypes "the ATNR_xxx" values.
- * @param magic
- * unused
- * @return
- * damage to actually do.
- * @todo
- * removed unused magic. Rename since it's called for monsters too.
- */
+ * This returns the amount of damage hitter does to op with the
+ * appropriate attacktype.  Only 1 attacktype should be set at a time.
+ * This doesn't damage the player, but returns how much it should
+ * take.  However, it will do other effects (paralyzation, slow, etc.)
+ * Note - changed for PR code - we now pass the attack number and not
+ * the attacktype.  Makes it easier for the PR code.  */
+
 static int hit_player_attacktype(object *op, object *hitter, int dam,
 	uint32 attacknum, int magic) {
 
     int doesnt_slay = 1;
-    char name_hitter[MAX_BUF], name_op[MAX_BUF];
 
     /* Catch anyone that may be trying to send us a bitmask instead of the number */
     if (attacknum >= NROFATTACKS) {
@@ -1235,11 +1088,6 @@ static int hit_player_attacktype(object *op, object *hitter, int dam,
 	LOG(llevError,"hit_player_attacktype called with negative damage: %d\n", dam);
 	return 0;
     }
-
-    if (hitter->current_weapon && hitter->current_weapon->discrete_damage != NULL)
-        dam = hitter->current_weapon->discrete_damage[attacknum];
-    else if (hitter->discrete_damage != NULL)
-        dam = hitter->discrete_damage[attacknum];
 
     /* AT_INTERNAL is supposed to do exactly dam.  Put a case here so
      * people can't mess with that or it otherwise get confused.  */
@@ -1361,16 +1209,11 @@ static int hit_player_attacktype(object *op, object *hitter, int dam,
                    objects */
 		if(rndm(0, dam+4) >
 		    random_roll(0, 39, op, PREFER_HIGH)+2*tmp->magic) {
-		    if(op->type == PLAYER) {
+		    if(op->type == PLAYER)
 			/* Make this more visible */
-                query_name(hitter, name_hitter, MAX_BUF);
-                query_name(tmp, name_op, MAX_BUF);
-			draw_ext_info_format(NDI_UNIQUE|NDI_RED,0, op,
-			     MSG_TYPE_VICTIM, MSG_TYPE_VICTIM_WAS_HIT,
-			     "The %s's acid corrodes your %s!",
-			     "The %s's acid corrodes your %s!",
-			     name_hitter, name_op);
-            }
+			new_draw_info_format(NDI_UNIQUE|NDI_RED,0, op,
+				 "The %s's acid corrodes your %s!",
+				 query_name(hitter), query_name(tmp));
 		    flag = 1;
 		    tmp->magic--;
 		    if(op->type == PLAYER)
@@ -1378,7 +1221,7 @@ static int hit_player_attacktype(object *op, object *hitter, int dam,
 		}
 	    }
 	    if(flag)
-            fix_object(op); /* Something was corroded */
+	      fix_player(op); /* Something was corroded */
 	}
       }
       break;
@@ -1465,21 +1308,17 @@ static int hit_player_attacktype(object *op, object *hitter, int dam,
 	deathstrike_player(op, hitter, &dam);
 	break;
     case ATNR_CHAOS:
-        query_name(op, name_op, MAX_BUF);
-        query_name(hitter, name_hitter, MAX_BUF);
 	LOG(llevError,
 	    "%s was hit by %s with non-specific chaos.\n",
-	    name_op,
-	    name_hitter);
+	    query_name(op),
+	    query_name(hitter));
 	dam = 0;
 	break;
     case ATNR_COUNTERSPELL:
-        query_name(op, name_op, MAX_BUF);
-        query_name(hitter, name_hitter, MAX_BUF);
 	LOG(llevError,
 	    "%s was hit by %s with counterspell attack.\n",
-	    name_op,
-	    name_hitter);
+	    query_name(op),
+	    query_name(hitter));
 	dam = 0;
 	/* This should never happen.  Counterspell is handled
 	 * seperately and filtered out.  If this does happen,
@@ -1507,33 +1346,20 @@ static int hit_player_attacktype(object *op, object *hitter, int dam,
 	 *
 	 * life stealing doesn't do a lot of damage, but it gives the
 	 * damage it does do to the player.  Given that,
-	 * it only does 1/30'th normal damage (hence the divide by
-	 * 3000). Wraith get 1/2 of the damage, and therefore divide
-	 * by 200. This number may need tweaking for game balance.
+	 * it only does 1/10'th normal damage (hence the divide by
+	 * 1000).
 	 */
-
-	int dam_modifier = is_wraith_pl(hitter) ? 200 : 3000;
-
-	/* You can't steal life from something undead or not alive. */
-	if (op->type == GOLEM || (QUERY_FLAG(op, FLAG_UNDEAD)) ||
-	  !(QUERY_FLAG(op, FLAG_ALIVE)) || (op->type == DOOR))
-	  return 0;
+	/* You can't steal life from something undead */
+	if ((op->type == GOLEM) || (QUERY_FLAG(op, FLAG_UNDEAD))) return 0;
 	/* If drain protection is higher than life stealing, use that */
 	if (op->resist[ATNR_DRAIN] >= op->resist[ATNR_LIFE_STEALING])
-	  dam = (dam*(100 - op->resist[ATNR_DRAIN])) / dam_modifier;
-	else dam = (dam*(100 - op->resist[ATNR_LIFE_STEALING])) / dam_modifier;
+	  dam = (dam*(100 - op->resist[ATNR_DRAIN])) / 3000;
+	else dam = (dam*(100 - op->resist[ATNR_LIFE_STEALING])) / 3000;
 	/* You die at -1 hp, not zero. */
 	if (dam > (op->stats.hp+1)) dam = op->stats.hp+1;
 	new_hp = hitter->stats.hp + dam;
 	if (new_hp > hitter->stats.maxhp) new_hp = hitter->stats.maxhp;
 	if (new_hp > hitter->stats.hp) hitter->stats.hp = new_hp;
-
-	/* Wraith also get food through life stealing */
-	if (is_wraith_pl(hitter)) {
-	  if (hitter->stats.food+dam >= 999) hitter->stats.food = 999;
-	  else hitter->stats.food += dam;
-	  fix_object(hitter);
-	}
       }
     }
     return dam;
@@ -1541,33 +1367,20 @@ static int hit_player_attacktype(object *op, object *hitter, int dam,
 
 
 /**
- * An object was killed, handle various things (logging, messages, ...).
- *
  * GROS: This code comes from hit_player. It has been made external to
  * allow script procedures to "kill" objects in a combat-like fashion.
  * It was initially used by (kill-object) developed for the Collector's
  * Sword. Note that nothing has been changed from the original version
  * of the following code.
- *
- * Will LOG pk, handles battleground, and so on.
+ * op is what is being killed.
+ * dam is the damage done to it.
+ * hitter is what is hitting it.
+ * type is the attacktype.
  *
  * This function was a bit of a mess with hitter getting changed,
  * values being stored away but not used, etc.  I've cleaned it up
  * a bit - I think it should be functionally equivalant.
  * MSW 2002-07-17
- *
- * @param op
- * what is being killed.
- * @param dam
- * damage done to it.
- * @param hitter
- * what is hitting it.
- * @param type
- * the attacktype.
- * @return
- * dealt damage.
- * @todo
- * finish commenting what it does exactly.
  */
 static int kill_object(object *op,int dam, object *hitter, int type)
 {
@@ -1578,7 +1391,6 @@ static int kill_object(object *op,int dam, object *hitter, int type)
     int pk=0;         /* true if op and what controls hitter are both players*/
     object *owner=NULL;
     object *skop=NULL;
-    sstring death_animation;
 
     if (op->stats.hp>=0)
 	return -1;
@@ -1588,16 +1400,6 @@ static int kill_object(object *op,int dam, object *hitter, int type)
                 return 0;
     /* Lauwenmark: Handle for the global kill event */
     execute_global_event(EVENT_GKILL, op, hitter);
-
-    if ((op->map) && (death_animation = get_ob_key_value(op, "death_animation")) != NULL) {
-        object* death = create_archetype(death_animation);
-        if (death) {
-            death->map = op->map;
-            death->x = op->x;
-            death->y = op->y;
-            insert_ob_in_map(death, op->map, op, 0);
-        }
-    }
 
     /* maxdam needs to be the amount of damage it took to kill
      * this creature.  The function(s) that call us have already
@@ -1643,12 +1445,10 @@ static int kill_object(object *op,int dam, object *hitter, int type)
 
     /* Player killed something */
     if(owner->type==PLAYER) {
-        char name_op[MAX_BUF], name_hitter[MAX_BUF];
-        query_name(op, name_op, MAX_BUF);
-        if (hitter)
-            query_name(hitter, name_hitter, MAX_BUF);
-        else
-            name_hitter[0] = '\0';
+	log_kill(owner->name,
+		 query_name(op),op->type,
+                (owner!=hitter) ? query_name(hitter) : NULL,
+                (owner!=hitter) ? hitter->type : 0);
 
 	/* Log players killing other players - makes it easier to detect
 	 * and filter out malicious player killers - that is why the
@@ -1658,14 +1458,12 @@ static int kill_object(object *op,int dam, object *hitter, int type)
 	    time_t t=time(NULL);
 	    struct tm *tmv;
 	    char buf[256];
-        char name[MAX_BUF];
 
 	    tmv = localtime(&t);
 	    strftime(buf, 256,"%a %b %d %H:%M:%S %Y", tmv);
-        query_name(op, name, MAX_BUF);
 
 	    LOG(llevInfo,"%s PLAYER_KILL_PLAYER: %s (%s) killed %s\n",
-		buf, owner->name, owner->contr->socket.host, name);
+		buf, owner->name, owner->contr->socket.host, query_name(op));
 	}
 
 	/* try to filter some things out - basically, if you are
@@ -1674,25 +1472,17 @@ static int kill_object(object *op,int dam, object *hitter, int type)
 	 */
 	if ( owner->level < op->level * 2|| op->stats.exp>1000) {
 	    if(owner!=hitter) {
-            char killed[MAX_BUF], with[MAX_BUF];
-            query_name(op, killed, MAX_BUF);
-            query_name(hitter, with, MAX_BUF);
-		draw_ext_info_format(NDI_BLACK, 0, owner, MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_DID_KILL,
-		     "You killed %s with %s.",
-		     "You killed %s with %s.",
-		     killed, with);
+		new_draw_info_format(NDI_BLACK, 0, owner,
+			"You killed %s with %s.",query_name(op),
+			 query_name(hitter));
 	    }
 	    else {
-            char killed[MAX_BUF];
-            query_name(op, killed, MAX_BUF);
-		draw_ext_info_format(NDI_BLACK, 0, owner, MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_DID_KILL,
-		     "You killed %s.",
-		     "You killed %s.",
-		     killed);
+		new_draw_info_format(NDI_BLACK, 0, owner,
+			"You killed %s.",query_name(op));
 	    }
 	    /* Only play sounds for melee kills */
 	    if (hitter->type == PLAYER)
-		play_sound_map(SOUND_TYPE_HIT, owner, 0, "kill");
+		play_sound_map(owner->map, owner->x, owner->y, SOUND_PLAYER_KILLS);
 	}
 
 	/* If a player kills another player, not on
@@ -1740,11 +1530,8 @@ static int kill_object(object *op,int dam, object *hitter, int type)
 
     /* Pet (or spell) killed something. */
     if(owner != hitter ) {
-        char name_op[MAX_BUF], name_hitter[MAX_BUF];
-        query_name(op, name_op, MAX_BUF);
-        query_name(hitter, name_hitter, MAX_BUF);
 	(void) sprintf(buf,"%s killed %s with %s%s.",owner->name,
-	       name_op,name_hitter, battleg? " (duel)": (pk? " (pk)":""));
+	       query_name(op),query_name(hitter), battleg? " (duel)": (pk? " (pk)":""));
     }
     else {
 	(void) sprintf(buf,"%s killed %s%s%s.",hitter->name,op->name,
@@ -1755,8 +1542,7 @@ static int kill_object(object *op,int dam, object *hitter, int type)
     if (!skop) skop = hitter->chosen_skill;
     if (!skill && skop) skill=skop->skill;
 
-    draw_ext_info(NDI_ALL, op->type==PLAYER?1:10, NULL, MSG_TYPE_ADMIN, MSG_TYPE_ADMIN_PLAYER,
-		  buf, NULL);
+    new_draw_info(NDI_ALL, op->type==PLAYER?1:10, NULL, buf);
 
 
     /* If you didn't kill yourself, and your not the wizard */
@@ -1768,16 +1554,11 @@ static int kill_object(object *op,int dam, object *hitter, int type)
 	/* Really don't give much experience for killing other players */
 	if (op->type==PLAYER) {
 	    if (battleg) {
-		draw_ext_info(NDI_UNIQUE, 0,owner, MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_DID_KILL,
-			      "Your foe has fallen!\nVICTORY!!!", NULL);
+		new_draw_info(NDI_UNIQUE, 0,owner, "Your foe has fallen!");
+		new_draw_info(NDI_UNIQUE, 0,owner, "VICTORY!!!");
 	    }
-	    else {
-            exp = settings.pk_max_experience_percent * exp / 100;
-            if (settings.pk_max_experience >= 0)
-                exp = MIN(settings.pk_max_experience, exp);
-            /* Never exceed what victim can lose considering permanent exp. */
-            exp = check_exp_loss(op, exp);
-        }
+	    else
+		exp = MIN(5000000, MAX(0, exp/10));
 	}
 
 	/* Don't know why this is set this way - doesn't make
@@ -1795,9 +1576,7 @@ static int kill_object(object *op,int dam, object *hitter, int type)
 #ifdef PARTY_KILL_LOG
         if (owner->type == PLAYER && owner->contr->party !=NULL )
         {
-            char name[MAX_BUF];
-            query_name(owner, name, MAX_BUF);
-            add_kill_to_party(party, name, query_name(op), exp);
+            add_kill_to_party(party, query_name(owner), query_name(op), exp);
         }
 #endif
         share_exp(owner, exp, skill, SK_EXP_TOTAL);
@@ -1809,11 +1588,9 @@ static int kill_object(object *op,int dam, object *hitter, int type)
 	    object *owner1 = get_owner(op);
 
 	    if(owner1!= NULL && owner1->type == PLAYER) {
-		/*play_sound_player_only(owner1->contr, SOUND_PET_IS_KILLED,0,0);*/
+		play_sound_player_only(owner1->contr, SOUND_PET_IS_KILLED,0,0);
 		/* Maybe we should include the owner that killed this, maybe not */
-		draw_ext_info_format(NDI_UNIQUE, 0,owner1,MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_PET_DIED,
-				     "Your pet, the %s, is killed by %s.",
-				     "Your pet, the %s, is killed by %s.",
+		new_draw_info_format(NDI_UNIQUE, 0,owner1,"Your pet, the %s, is killed by %s.",
 				     op->name,hitter->name);
 	    }
 	    remove_friendly_object(op);
@@ -1842,14 +1619,9 @@ static int kill_object(object *op,int dam, object *hitter, int type)
 
 /**
  * Find out if this is friendly fire (PVP and attacker is peaceful) or not
- *
- * @param op
- * victim.
- * @param hitter
- * attacker.
- * @return
- * 0 this is not friendly fire, 1 if hitter is a peaceful player, 2 if hitter is a pet of a peaceful player.
+ *  Returns 0 this is not friendly fire
  */
+
 int friendly_fire(object *op, object *hitter){
     object *owner;
     int friendlyfire;
@@ -1877,28 +1649,17 @@ int friendly_fire(object *op, object *hitter){
 
 
 /**
- * Object is attacked by something.
- *
  * This isn't used just for players, but in fact most objects.
+ * op is the object to be hit, dam is the amount of damage, hitter
+ * is what is hitting the object, type is the attacktype, and
+ * full_hit is set if monster area does not matter.
+ * dam is base damage - protections/vulnerabilities/slaying matches can
+ * modify it.
  *
  * Oct 95 - altered the following slightly for MULTIPLE_GODS hack
  * which needs new attacktype AT_HOLYWORD to work . b.t.
- *
- * @param op
- * object to be hit
- * @param dam
- * base damage - protections/vulnerabilities/slaying matches can modify it.
- * @param hitter
- * what is hitting the object
- * @param type
- * attacktype
- * @param full_hit
- * set if monster area does not matter.
- * @return
- * dealt damage.
- * @todo
- * rename to something more meaningful.
  */
+
 int hit_player(object *op,int dam, object *hitter, int type, int full_hit) {
     int maxdam=0, ndam=0, attacktype=1, magic=(type & AT_MAGIC);
     int maxattacktype, attacknum;
@@ -2162,18 +1923,7 @@ int hit_player(object *op,int dam, object *hitter, int type, int full_hit) {
     return maxdam;
 }
 
-/**
- * Poison a living thing.
- *
- * @param op
- * victim.
- * @param hitter
- * who is attacking.
- * @param dam
- * damage to deal.
- * @todo
- * rename to poison_living?
- */
+
 static void poison_player(object *op, object *hitter, int dam)
 {
     archetype *at = find_archetype("poisoning");
@@ -2212,23 +1962,15 @@ static void poison_player(object *op, object *hitter, int dam)
 		tmp->stats.Dex= MAX(-(dam/6+1), -10);
 		tmp->stats.Int= MAX(-dam/7, -10);
 		SET_FLAG(tmp,FLAG_APPLIED);
-        fix_object(op);
-		draw_ext_info(NDI_UNIQUE, 0,op,
-			      MSG_TYPE_ATTRIBUTE, MSG_TYPE_ATTRIBUTE_BAD_EFFECT_START,
-			      "You suddenly feel very ill.", NULL);
+		fix_player(op);
+		new_draw_info(NDI_UNIQUE, 0,op,"You suddenly feel very ill.");
 	    }
 	    if (hitter->type == PLAYER)
-		draw_ext_info_format(NDI_UNIQUE, 0, hitter,
-		     MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_DID_HIT,
-		     "You poison %s.",
-		     "You poison %s.",
+		new_draw_info_format(NDI_UNIQUE, 0, hitter, "You poison %s.",
 		     op->name);
 	    else if (get_owner(hitter) != NULL && hitter->owner->type == PLAYER)
-		draw_ext_info_format(NDI_UNIQUE, 0, hitter->owner,
-		     MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_PET_HIT,
-		     "Your %s poisons %s.",
-		     "Your %s poisons %s.",
-		     hitter->name, op->name);
+		new_draw_info_format(NDI_UNIQUE, 0, hitter->owner,
+		     "Your %s poisons %s.", hitter->name, op->name);
 	}
 	tmp->speed_left=0;
     }
@@ -2236,18 +1978,6 @@ static void poison_player(object *op, object *hitter, int dam)
 	tmp->stats.food++;
 }
 
-/**
- * Slow a living thing.
- *
- * @param op
- * victim.
- * @param hitter
- * who is attacking.
- * @param dam
- * damage to deal.
- * @todo
- * rename to slow_living?
- */
 static void slow_player(object *op,object *hitter,int dam)
 {    archetype *at = find_archetype("slowness");
     object *tmp;
@@ -2257,27 +1987,14 @@ static void slow_player(object *op,object *hitter,int dam)
     if((tmp=present_arch_in_ob(at,op)) == NULL) {
       tmp = arch_to_object(at);
       tmp = insert_ob_in_ob(tmp,op);
-      draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_ATTRIBUTE, MSG_TYPE_ATTRIBUTE_BAD_EFFECT_START,
-		    "The world suddenly moves very fast!", NULL);
+      new_draw_info(NDI_UNIQUE, 0,op,"The world suddenly moves very fast!");
     } else
       tmp->stats.food++;
     SET_FLAG(tmp, FLAG_APPLIED);
     tmp->speed_left=0;
-    fix_object(op);
+    fix_player(op);
 }
 
-/**
- * Confuse a living thing.
- *
- * @param op
- * victim.
- * @param hitter
- * who is attacking.
- * @param dam
- * damage to deal.
- * @todo
- * rename to confuse_living?
- */
 void confuse_player(object *op, object *hitter, int dam)
 {
     object *tmp;
@@ -2302,27 +2019,13 @@ void confuse_player(object *op, object *hitter, int dam)
 	tmp->duration = maxduration;
 
     if(op->type == PLAYER && !QUERY_FLAG(op,FLAG_CONFUSED))
-	draw_ext_info(NDI_UNIQUE, 0,op,MSG_TYPE_ATTRIBUTE, MSG_TYPE_ATTRIBUTE_BAD_EFFECT_START,
-		      "You suddenly feel very confused!", NULL);
+	new_draw_info(NDI_UNIQUE, 0,op,"You suddenly feel very confused!");
     SET_FLAG(op, FLAG_CONFUSED);
 }
 
-/**
- * Blind a living thing.
- *
- * @param op
- * victim.
- * @param hitter
- * who is attacking.
- * @param dam
- * damage to deal.
- * @todo
- * rename to blind_living?
- */
 void blind_player(object *op, object *hitter, int dam)
 {
     object *tmp,*owner;
-    char victim[MAX_BUF];
 
     /* Save some work if we know it isn't going to affect the player */
     if (op->resist[ATNR_BLIND]==100) return;
@@ -2339,33 +2042,18 @@ void blind_player(object *op, object *hitter, int dam)
 
       tmp = insert_ob_in_ob(tmp,op);
       change_abil(op,tmp);   /* Mostly to display any messages */
-      fix_object(op);        /* This takes care of some other stuff */
+      fix_player(op);        /* This takes care of some other stuff */
 
       if(hitter->owner) owner = get_owner(hitter);
       else owner = hitter;
 
-      query_name(op, victim, MAX_BUF);
-      draw_ext_info_format(NDI_UNIQUE,0,owner, MSG_TYPE_ATTACK, MSG_TYPE_ATTACK_DID_HIT,
-	  "Your attack blinds %s!",
-	  "Your attack blinds %s!",
-	   victim);
+      new_draw_info_format(NDI_UNIQUE,0,owner,
+	  "Your attack blinds %s!",query_name(op));
     }
     tmp->stats.food += dam;
     if(tmp->stats.food > 10) tmp->stats.food = 10;
 }
 
-/**
- * Paralyze a living thing.
- *
- * @param op
- * victim.
- * @param hitter
- * who is attacking.
- * @param dam
- * damage to deal.
- * @todo
- * rename to paralyze_living?
- */
 void paralyze_player(object *op, object *hitter, int dam)
 {
     float effect,max;
@@ -2401,7 +2089,8 @@ void paralyze_player(object *op, object *hitter, int dam)
 
 
 /**
- * Attempts to kill 'op'.
+ * Attempts to kill 'op'. hitter is the attack object, dam is
+ * the computed damaged.
  *
  * The intention of a death attack is to kill outright things
  * that are a lot weaker than the attacker, have a chance of killing
@@ -2412,13 +2101,6 @@ void paralyze_player(object *op, object *hitter, int dam)
  * whose name or race matches a comma-delimited list in the slaying
  * field of the deathstriking object is affected (this includes undead).
  * If no slaying set, only undead are unaffected.
- *
- * @param op
- * victim.
- * @param hitter
- * attacker.
- * @param[out] dam
- * damage to deal, will contain computed damage or 0 if strike failed.
  */
 static void deathstrike_player(object *op, object *hitter, int *dam)
 {
@@ -2466,16 +2148,9 @@ static void deathstrike_player(object *op, object *hitter, int *dam)
 }
 
 /**
- * Handles any special effects of thrown
+ * handles any special effects of thrown
  * items (like attacking living creatures--a potion thrown at a
  * monster).
- *
- * @param hitter
- * thrown item.
- * @param victim
- * object that is hit by hitter.
- * @todo
- * invert parameters for coherence with other functions?
  */
 static void thrown_item_effect (object *hitter, object *victim)
 {
@@ -2487,13 +2162,13 @@ static void thrown_item_effect (object *hitter, object *victim)
 	    case POTION:
 		/* should player get a save throw instead of checking magic protection? */
 		if(QUERY_FLAG(victim,FLAG_ALIVE)&&!QUERY_FLAG(victim,FLAG_UNDEAD)
-		   &&(victim->resist[ATNR_MAGIC]<60)) (void) ob_apply(hitter,victim, 0);
+		   &&(victim->resist[ATNR_MAGIC]<60)) (void) apply_potion(victim,hitter);
 		break;
 
 	    case POISON: /* poison drinks */
 		/* As with potions, should monster get a save? */
 		if(QUERY_FLAG(victim,FLAG_ALIVE)&&!QUERY_FLAG(victim,FLAG_UNDEAD)
-		   &&(victim->resist[ATNR_POISON]<60)) (void) ob_apply(victim, hitter, 0);
+		   &&(victim->resist[ATNR_POISON]<60)) apply_poison(victim,hitter);
 		break;
 
 	    /* Removed case statements that did nothing.
@@ -2505,15 +2180,8 @@ static void thrown_item_effect (object *hitter, object *victim)
     }
 }
 
-/**
- * Adjustments to attack rolls by various conditions
- * @param hitter
- * who is hitting.
- * @param target
- * victim of the attack.
- * @return
- * adjustment to attack roll.
- */
+/** adj_attackroll() - adjustments to attacks by various conditions */
+
 static int adj_attackroll (object *hitter, object *target) {
   object *attacker = hitter;
   int adjust=0;
@@ -2564,18 +2232,26 @@ static int adj_attackroll (object *hitter, object *target) {
   if((attacker->move_type & target->move_type)==0)
     adjust -= 2;
 
+#if 0
+  /* slower attacks are less likely to succeed. We should use a
+   * comparison between attacker/target speeds BUT, players have
+   * a generally faster speed, so this will wind up being a HUGE
+   * disadantage for the monsters! Too bad, because missiles which
+   * fly fast should have a better chance of hitting a slower target.
+   */
+  if(hitter->speed<target->speed)
+    adjust += ((float) hitter->speed-target->speed);
+#endif
+
+#if 0
+  LOG(llevDebug,"adj_attackroll() returns %d (%d)\n",adjust,attacker->count);
+#endif
+
   return adjust;
 }
 
 
-/**
- * Determine if the object is an 'aimed' missile.
- *
- * @param op
- * object to check.
- * @return
- * 1 if aimed missile, 0 else.
- */
+/** determine if the object is an 'aimed' missile */
 static int is_aimed_missile ( object *op) {
 
     /* I broke what used to be one big if into a few nested
@@ -2590,3 +2266,4 @@ static int is_aimed_missile ( object *op) {
     }
     return 0;
 }
+

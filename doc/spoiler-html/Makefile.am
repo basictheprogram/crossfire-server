@@ -5,11 +5,11 @@ EXTRA_DIST = spells-extract stats-extract\
 
 HTML =	monput.html spells.html stats.html weap.html shield.html helmet.html\
  	mag.html arm.html arche.html bow.html version.html weapmag.html
-
+	
 CLEANFILES = items .bmaps in_monput in_items in_spells in_stats \
-		*x*.ppm tmp.ppm work.ppm *.png $(HTML) spoiler.html
+		*x*.ppm tmp.ppm work.ppm *.gif $(HTML) spoiler.html
 
-CROSSBIN = ../../server/crossfire-server
+CROSSBIN = ../../server/crossfire
 INCDIR = $(top_srcdir)/include
 DTOP = $(top_srcdir)/$(PACKAGE)-doc
 PERL = @PERL@
@@ -90,3 +90,4 @@ archive: spoiler.html
 	$(mkinstalldirs) $(DTOP)/spoiler-html
 	cp spoiler.html $(DTOP)/spoiler-html
 	cp *.gif $(DTOP)/spoiler-html
+	

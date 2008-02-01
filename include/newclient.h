@@ -26,9 +26,7 @@
     The authors can be reached via e-mail at crossfire-devel@real-time.com
 */
 
-/**
- * @file
- * Defines various flags that both the new client and
+/* This file defines various flags that both the new client and
  * newserver uses.  These should never be changed, only expanded.
  * Changing them will likely cause all old clients to not work properly.
  * While called newclient, it is really used by both the client and
@@ -38,11 +36,12 @@
  * CS = Client/Server.
  * (command) is protocol command, ie ITEM
  * (flag) is the flag name
- *
- * Ideally, this file should be the same between the server and
+ */
+
+/* Ideally, this file should be the same between the server and
  * the client.  However, this often drifts apart because of a value
  * that is only useful on the client and server.  Generally, it isn't
- * a problem to have a few extra \#defines if this lets them stay
+ * a problem to have a few extra #defines if this lets them stay
  * in sync.
  *
  * Given this file contains the constants that dictate what is sent
@@ -50,6 +49,8 @@
  * easier - modify this file in one place, copy it over.
  *
  */
+
+
 #ifndef NEWCLIENT_H
 #define NEWCLIENT_H
 
@@ -57,48 +58,43 @@
  * MAXSOCKBUF is used by the client.
  */
 
-/**
- * Maximum size of any packet we expect. This number includes both the length
- * bytes (2 bytes) at the start of each packet and the trailing 0 (1 byte)
+/* Maximum size of any packet we expect. This number includes both the length
+ * bytes (2 bytes) at the start of each packet and the trailing '\0' (1 byte)
  * at the end of each packet.
  */
 #define MAXSOCKRECVBUF (2+65535+1)
 
-/**
- * Maximum size of any packet we send. This number does not include the length
+/* Maximum size of any packet we send. This number does not include the length
  * bytes at the start of each packet. The value is chosen to not overflow the
  * input buffer of old clients (2006-05-21).
  */
 #define MAXSOCKSENDBUF 10239
 
-/**
- * Maximum size of any packet we expect.  Using this makes it so we don't need to
+/* Maximum size of any packet we expect.  Using this makes it so we don't need to
  * allocate and deallocate the same buffer over and over again and the price
  * of using a bit of extra memory.  It also makes the code simpler.
  * The size is big enough to receive any valid packet: 2 bytes for length,
- * 65535 for max. packet size, 1 for appended trailing 0.
+ * 65535 for max. packet size, 1 for appended trailing '\0'.
  */
 #define MAXSOCKBUF (2+65535+1)
 
 
-/**
- * How much the x,y coordinates in the map2 are off from
+/* How much the x,y coordinates in the map2 are off from
  * actual upper left corner.  Necessary for light sources
  * that may be off the edge of the visible map.
  */
 #define MAP2_COORD_OFFSET   15
 
 
-#define CS_QUERY_YESNO	0x1	/**< Yes/no question. */
-#define CS_QUERY_SINGLECHAR 0x2	/**< Single character response expected. */
-#define CS_QUERY_HIDEINPUT 0x4	/**< Hide input being entered. */
+#define CS_QUERY_YESNO	0x1	/* Yes/no question */
+#define CS_QUERY_SINGLECHAR 0x2	/* Single character response expected */
+#define CS_QUERY_HIDEINPUT 0x4	/* Hide input being entered */
 
-#define CS_SAY_NORMAL	0x1	/**< Normal say command. */
-#define CS_SAY_SHOUT	0x2	/**< Text is shouted. */
-#define CS_SAY_GSAY	0x4	/**< Text is group say command. */
+#define CS_SAY_NORMAL	0x1	/* Normal say command */
+#define CS_SAY_SHOUT	0x2	/* Text is shouted. */
+#define CS_SAY_GSAY	0x4	/* Text is group say command */
 
-/**
- * These are multiplication values that should be used when changing
+/* These are multiplication values that should be used when changing 
  * floats to ints, and vice version.  MULTI is integer representatin
  * (float to int), MULTF is float, for going from int to float.
  */
@@ -176,8 +172,7 @@
 #define CS_STAT_SKILLEXP_WISDOM 128
 #define CS_STAT_SKILLEXP_WILEVEL 129
 
-/**
- * CS_STAT_SKILLINFO is used as the starting index point.  Skill number->name
+/* CS_STAT_SKILLINFO is used as the starting index point.  Skill number->name
  * map is generated dynamically for the client, so a bunch of entries will
  * be used here.  CS_NUM_SKILLS does not match how many skills there really
  * are - instead, it is used as a range of values so that the client
@@ -186,55 +181,49 @@
 #define CS_STAT_SKILLINFO   140
 #define CS_NUM_SKILLS	     50
 
-/**
- * These are used with CS_STAT_FLAGS above to communicate S->C what the
+/* These are used with CS_STAT_FLAGS above to communicate S->C what the
  * server thinks the fireon & runon states are.
  */
 #define SF_FIREON   0x01
 #define SF_RUNON    0x02
 
-/**
- * @defgroup NDI_xxx Flags for messages
- *
- * The following are the color flags passed to new_draw_info().
+/* The following are the color flags passed to new_draw_info.
  *
  * We also set up some control flags
  *
  * NDI = New Draw Info
- *
- * Color specifications - note these match the order in xutil.c.
- *
- * Note 2:  Black, the default color, is 0.  Thus, it does not need to
+ */
+
+/* Color specifications - note these match the order in xutil.c */
+/* Note 2:  Black, the default color, is 0.  Thus, it does not need to
  * be implicitly specified.
  */
-/*@{*/
 #define NDI_BLACK	0
 #define NDI_WHITE	1
 #define NDI_NAVY	2
 #define NDI_RED		3
 #define NDI_ORANGE	4
-#define NDI_BLUE	5	/**< Actually, it is Dodger Blue */
-#define NDI_DK_ORANGE	6	/**< DarkOrange2 */
-#define NDI_GREEN	7	/**< SeaGreen */
-#define NDI_LT_GREEN	8	/**< DarkSeaGreen,  which is actually paler
-				* Than seagreen - also background color. */
+#define NDI_BLUE	5	/* Actually, it is Dodger Blue */
+#define NDI_DK_ORANGE	6	/* DarkOrange2 */
+#define NDI_GREEN	7	/* SeaGreen */
+#define NDI_LT_GREEN	8	/* DarkSeaGreen,  which is actually paler */
+				/* Than seagreen - also background color */
 #define NDI_GREY	9
-#define NDI_BROWN	10	/**< Sienna. */
+#define NDI_BROWN	10	/* Sienna */
 #define NDI_GOLD	11
-#define NDI_TAN		12	/**< Khaki. */
+#define NDI_TAN		12	/* Khaki */
 
-#define NDI_MAX_COLOR	12	/**< Last value in. */
-#define NDI_COLOR_MASK	0xff	/**< Gives lots of room for expansion - we are
-				* using an int anyways, so we have the space
-				* to still do all the flags. */
+#define NDI_MAX_COLOR	12	/* Last value in */
+#define NDI_COLOR_MASK	0xff	/* Gives lots of room for expansion - we are */
+				/* using an int anyways, so we have the space */
+				/* to still do all the flags */
 
 
 #define NDI_UNIQUE	0x100	/**< Print this out immediately, don't buffer. */
 #define NDI_ALL		0x200	/**< Inform all players of this message. */
 #define NDI_ALL_DMS 0x400   /**< Inform all logged in DMs. Used in case of errors. Overrides NDI_ALL. */
-/*@}*/
 
-/** Flags for the item command */
+/* Flags for the item command */
 enum {a_none, a_readied, a_wielded, a_worn, a_active, a_applied};
 #define F_APPLIED       0x000F
 #define F_LOCATION      0x00F0
@@ -245,7 +234,6 @@ enum {a_none, a_readied, a_wielded, a_worn, a_active, a_applied};
 #define F_OPEN          0x2000
 #define F_NOPICK        0x4000
 #define F_LOCKED        0x8000
-#define F_BLESSED       0x0100
 
 #define CF_FACE_NONE	0
 #define CF_FACE_BITMAP	1
@@ -253,8 +241,7 @@ enum {a_none, a_readied, a_wielded, a_worn, a_active, a_applied};
 #define CF_FACE_PNG	3
 #define CF_FACE_CACHE	0x10
 
-/**
- * Used in the new_face structure on the magicmap field.  Low bits
+/* Used in the new_face structure on the magicmap field.  Low bits
  * are color informatin.  For now, only high bit information we need
  * is floor information.
  */
@@ -292,23 +279,23 @@ enum {a_none, a_readied, a_wielded, a_worn, a_active, a_applied};
 /* AND'ing this with data from server gets us just the animation id */
 #define ANIM_MASK	0x1fff
 
-
+ 
 /* Constants in the form EMI_ is for extended map infos.
  * Even if the client select the additionnal infos it wants
  * on the map, there may exist cases where this whole info
- * is not given in one buch but in separate bunches. This
+ * is not given in one buch but in separate bunches. This 
  * is done performance reasons (imagine some info related to
  * a visible object and another info related to a 4 square
  * width and height area). At the begin of an extended info packet
  * is a bit field. A bit is activated for each extended info
- * present in the data
+ * present in the data 
  */
 /* Meanings:
  * EMI_NOREDRAW  Take extended infos into account but don't redraw,
  *               some additionnal datas will follow in a new packet
- * EMI_SMOOTH    Datas about smoothing
- */
-#define EMI_NOREDRAW        0x01
+ * EMI_SMOOTH    Datas about smoothing  
+ */ 
+#define EMI_NOREDRAW        0x01  
 #define EMI_SMOOTH          0x02
 
 /* this last one says the bitfield continue un next byte
@@ -318,14 +305,14 @@ enum {a_none, a_readied, a_wielded, a_worn, a_active, a_applied};
  */
 #define EMI_HASMOREBITS     0x80
 
-
+ 
 /*
  * Note!
  * If you add message types here, don't forget
  * to keep the client up to date too!
  */
-
-
+ 
+  
 /* message types */
 #define MSG_TYPE_BOOK		    1
 #define MSG_TYPE_CARD		    2
@@ -545,7 +532,6 @@ enum {a_none, a_readied, a_wielded, a_worn, a_active, a_applied};
 #define MSG_TYPE_ATTACK_NOKEY	    6	/* Keys are like attacks, so... */
 #define MSG_TYPE_ATTACK_NOATTACK    7	/* You avoid attacking */
 #define MSG_TYPE_ATTACK_PUSHED	    8	/* Pushed a friendly player */
-#define MSG_TYPE_ATTACK_MISS	    9	/* attack didn't hit */
 
 #define	MSG_TYPE_COMMUNICATION_RANDOM	1   /* Random event (coin toss) */
 #define	MSG_TYPE_COMMUNICATION_SAY	2   /* Player says something */
@@ -553,8 +539,6 @@ enum {a_none, a_readied, a_wielded, a_worn, a_active, a_applied};
 #define	MSG_TYPE_COMMUNICATION_TELL	4   /* Player tells something */
 #define	MSG_TYPE_COMMUNICATION_EMOTE	5   /* Player emotes */
 #define	MSG_TYPE_COMMUNICATION_PARTY	6   /* Party message */
-#define	MSG_TYPE_COMMUNICATION_SHOUT	7   /* Party message */
-#define	MSG_TYPE_COMMUNICATION_CHAT	8   /* Party message */
 
 #define MSG_TYPE_SPELL_HEAL		1   /* Healing related spells */
 #define MSG_TYPE_SPELL_PET		2   /* Pet related messages */
@@ -583,18 +567,17 @@ enum {a_none, a_readied, a_wielded, a_worn, a_active, a_applied};
 #define MSG_TYPE_VICTIM_DIED		5   /* Player died! */
 #define MSG_TYPE_VICTIM_WAS_PUSHED	6   /* Player was pushed or attempted pushed */
 
-/** Contains the base information we use to make up a packet we want to send. */
+/* Contains the base information we use to make up a packet we want to send. */
 typedef struct SockList {
     int len;
     unsigned char *buf;
 } SockList;
 
-/** Statistics on server. */
 typedef struct CS_Stats {
-    int	    ibytes;	/**< ibytes, obytes are bytes in, out. */
+    int	    ibytes;	/* ibytes, obytes are bytes in, out */
     int	    obytes;
-    short   max_conn;	/**< Maximum connections received. */
-    time_t  time_start;	/**< When we started logging this. */
+    short   max_conn;	/* Maximum connections received */
+    time_t  time_start;	/* When we started logging this */
 } CS_Stats;
 
 

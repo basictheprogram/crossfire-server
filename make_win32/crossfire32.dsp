@@ -104,7 +104,7 @@ PostBuild_Cmds=copy ReleaseQuit\crossfire32.exe ..\crossfire32.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /Gi /GX /O2 /Ob2 /I "..\include" /I "..\random_maps" /I "..\\" /I "..\plugin\include" /I "d:\Python21\include" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "DEBUG" /YX"preheader.pch" /FD /c
-# ADD CPP /nologo /MD /W3 /Gi /GX /O2 /Ob2 /I "..\include" /I "..\random_maps" /D "_CONSOLE" /D "DEBUG" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "DEBUG_MOVEATTACK" /FR /YX"preheader.pch" /FD /c
+# ADD CPP /nologo /MD /W3 /Gi /GX /O2 /Ob2 /I "..\include" /I "..\random_maps" /D "_CONSOLE" /D "DEBUG" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "DEBUG_MOVEATTACK" /YX"preheader.pch" /FD /c
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
 # ADD RSC /l 0x407 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -652,6 +652,29 @@ SOURCE=..\server\disease.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\server\egoitem.c
+
+!IF  "$(CFG)" == "crossfire32 - Win32 FullDebug"
+
+# PROP Intermediate_Dir "FullDebug\server"
+
+!ELSEIF  "$(CFG)" == "crossfire32 - Win32 ReleaseQuit"
+
+# PROP BASE Intermediate_Dir "Win32_Release\server"
+# PROP Intermediate_Dir "ReleaseQuit\server"
+
+!ELSEIF  "$(CFG)" == "crossfire32 - Win32 ReleaseLog"
+
+# PROP BASE Intermediate_Dir "Win32_ReleaseNormal\server"
+# PROP Intermediate_Dir "ReleaseLog\server"
+# ADD BASE CPP /YX"crossfire32.pch"
+# ADD CPP /YX"crossfire32.pch"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=..\server\gods.c
 
 !IF  "$(CFG)" == "crossfire32 - Win32 FullDebug"
@@ -810,14 +833,6 @@ SOURCE=..\server\move.c
 
 !ENDIF 
 
-# End Source File
-# Begin Source File
-
-SOURCE=..\server\ob_methods.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\server\ob_types.c
 # End Source File
 # Begin Source File
 
@@ -1037,6 +1052,29 @@ SOURCE=..\server\spell_effect.c
 # Begin Source File
 
 SOURCE=..\server\spell_util.c
+
+!IF  "$(CFG)" == "crossfire32 - Win32 FullDebug"
+
+# PROP Intermediate_Dir "FullDebug\server"
+
+!ELSEIF  "$(CFG)" == "crossfire32 - Win32 ReleaseQuit"
+
+# PROP BASE Intermediate_Dir "Win32_Release\server"
+# PROP Intermediate_Dir "ReleaseQuit\server"
+
+!ELSEIF  "$(CFG)" == "crossfire32 - Win32 ReleaseLog"
+
+# PROP BASE Intermediate_Dir "Win32_ReleaseNormal\server"
+# PROP Intermediate_Dir "ReleaseLog\server"
+# ADD BASE CPP /YX"crossfire32.pch"
+# ADD CPP /YX"crossfire32.pch"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\server\swamp.c
 
 !IF  "$(CFG)" == "crossfire32 - Win32 FullDebug"
 
@@ -1947,6 +1985,10 @@ SOURCE=..\common\porting.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\common\quest.c
+# End Source File
+# Begin Source File
+
 SOURCE="..\common\re-cmp.c"
 
 !IF  "$(CFG)" == "crossfire32 - Win32 FullDebug"
@@ -2090,186 +2132,6 @@ SOURCE=..\common\utils.c
 
 # End Source File
 # End Group
-# Begin Source File
-
-SOURCE=..\types\altar\altar.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\legacy\apply.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\armour_improver\armour_improver.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\arrow\arrow.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\book\book.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\button\button.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\check_inv\check_inv.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\clock\clock.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\common\common_apply.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\trap\common_trap.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\container\container.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\converter\converter.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\deep_swamp\deep_swamp.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\common\describe.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\director\director.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\exit\exit.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\food\food.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\hole\hole.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\identify_altar\identify_altar.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\lamp\lamp.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\legacy\legacy_describe.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\lighter\lighter.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\pedestal\pedestal.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\player_mover\player_mover.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\potion\potion.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\power_crystal\power_crystal.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\legacy\process.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\common\projectile.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\trap\rune.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\scroll\scroll.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\shop_inventory\shop_inventory.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\shop_mat\shop_mat.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\sign\sign.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\skillscroll\skillscroll.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\spell_effect\spell_effect.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\spellbook\spellbook.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\spinner\spinner.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\thrown_object\thrown_object.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\transport\transport.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\trap\trap.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\trapdoor\trapdoor.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\trigger\trigger.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\trigger_altar\trigger_altar.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\trigger_button\trigger_button.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\types\trigger_pedestal\trigger_pedestal.c
-# End Source File
 # End Group
 # Begin Group "Header-Dateien"
 
@@ -2603,14 +2465,6 @@ SOURCE=..\include\newserver.h
 
 !ENDIF 
 
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\ob_methods.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\ob_types.h
 # End Source File
 # Begin Source File
 

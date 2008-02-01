@@ -29,9 +29,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-/**
- * @file
- * This file contains various \#defines that select various options.
+/* This file contains various #defines that select various options.
  * Some may not be desirable, and some just may not work.
  *
  * There are some options that are not selectable in this file which
@@ -44,7 +42,7 @@
  *	weapons
  * ench_armour: Allow characters to enchant their armor.
  *
- * In theory, most of the values here should just be defaults, and
+ * In theory, most of the values here should just be defaults, and 
  * everything here should just be selectable by different run time
  * flags  However, for some things, that would just be too messy.
  */
@@ -82,60 +80,6 @@
  *
  ***********************************************************************/
 
-/* These are basically experimental values right now - perhaps should
- * be turned into settings values at load time, but want to make
- * sure we go down this road before doing that.
- *
- * MIN_PLAYER_SPEED: If a player is fully loaded with junk, this is
- * how slow the character will move.
- *
- * MAX_PLAYER_SPEED: If the player is unloaded, this is how fast the
- * player will move.  Note that armor will still affect this (a
- * character otherwise unloaded but wearing plate will be slower)
- *
- * FREE_PLAYER_LOAD_PERCENT: This value is how much of the players
- * load is 'free' before it starts slowing them down - just because
- * I pick up a book doesn't make me slower.
- *
- * Example:  Player has a max carrying capacity of 1000 kg.  If he is
- * carrying 1000 KG, he moves at MIN_PLAYER_SPEED (0.25 by default).
- * The free load is 0.50 (50%), which means he can carry 500 kg before
- * he starts to slow down.  So if his load is anywhere between 0 and 500 kg
- * and character is otherwise not wearing armor or other things that slow
- * him down, he moves at 0.75
- * Once he goes above 500 kg, his speed is now a linear difference of
- * MIN and MAX.  With the nice round numbers chosen, it amounts to
- * each 1 kg of look slows character down 0.001 (500 * 0.001 = 0.5,
- * 0.75 - 0.5 = 0.25)
- *
- * The values can be adjusted in various ways - a free load percent
- * of 1.0 means how much you carry does not affect movement speed.
- * One could also adjust these values for slower of faster movement.
- *
- * 0.75 was chosen as default for fast movement as this gives room
- * for magic (and other effects) to speed up the player, but speed
- * still remain below 1.
- *
- * 0.25 was chosen as low end as that is still fairly slow (about
- * 2 spaces/second), but not so slow to be really painful -
- * typically it is low level characters that have this issue
- * more, so I think this will improve playing quality.
- */
-
-#define MIN_PLAYER_SPEED    0.25
-#define MAX_PLAYER_SPEED    0.75
-#define FREE_PLAYER_LOAD_PERCENT    0.50
-
-/*
- * BASE_WEAPON_SPEED is sort of like the speed - what the characters
- * weapon_speed is before we start factoring in bonuses & penalties.
- * Want fast melee?  Increase this.  Slow melee?  decrease this.
- * Note that weapon_speed decreases this, so generally you want
- * to start higher, as there isn't a lot of things that
- * will increase this
- */
-#define BASE_WEAPON_SPEED   1.0
-
 /* Use balanced stat loss code?
  * This code is a little more merciful with repeated stat loss at lower
  * levels. Basically, the more stats you have lost, the less likely that
@@ -154,17 +98,17 @@
  * the character level is divided by that value, and that is how many
  * stats are lost.
  *
- * BALSL_MAX_LOSS_RATIO puts the upper limit on depletion of a stat -
+ * BALSL_MAX_LOSS_RATIO puts the upper limit on depletion of a stat - 
  * basically, level/max_loss_ratio is the most a stat can be depleted.
  *
  * BALSL_LOSS_CHANCE_RATIO controls how likely it is a stat is depleted.
- * The chance not to lose a stat is
+ * The chance not to lose a stat is 
  * depleteness^2 / (depletedness^2+ level/ratio).
  * ie, if the stats current depleted value is 2 and the character is level
  * 15, the chance not to lose the stat is 4/(4+3) or 4/7.  The higher the
  * level, the more likely it is a stat can get really depleted, but
  * this gets more offset as the stat gets more depleted.
- *
+ * 
  */
 /* GD */
 
@@ -204,11 +148,10 @@
 /* you can edit the ones below */
 
 
-/**
- * CS_LOGSTATS will cause the server to log various usage stats
+/* CS_LOGSTATS will cause the server to log various usage stats
  * (number of connections, amount of data sent, amount of data received,
  * and so on.)  This can be very useful if you are trying to measure
- * server/bandwidth usage.  It will periodially dump out information
+ * server/bandwidth usage.  It will periodially dump out information 
  * which contains usage stats for the last X amount of time.
  * CS_LOGTIME is how often it will print out stats.
  */
@@ -219,8 +162,7 @@
 #define CS_LOGTIME  600
 #endif
 
-/**
- * DEBUG generates copious amounts of output.  I tend to change the CC options
+/* DEBUG generates copious amounts of output.  I tend to change the CC options
  * in the crosssite.def file if I want this.  By default, you probably
  * dont want this defined.
  */
@@ -229,8 +171,7 @@
 #define DEBUG
 #endif
 #endif
-
-/**
+/*
  * This option creates more core files.  In some areas, there are certain
  * checks done to try and make the program more stable (ie, check
  * parameter for null, return if it is).  These checks are being done
@@ -239,24 +180,21 @@
  * dump core at that time, allowing for fairly easy tracking down of the
  * problem.  Better to fix problems than create thousands of checks.
  */
+
 #define MANY_CORES
 
-/**
+/*
  * This determines the maximum map size the client can request (and
  * thus what the server will send to the client.
- *
  * Client can still request a smaller map size (for bandwidth reasons
  * or display size of whatever else).
- *
  * The larger this number, the more cpu time and memory the server will
  * need to spend to figure this out in addition to bandwidth needs.
  * The server cpu time should be pretty trivial.
- *
  * There may be reasons to keep it smaller for the 'classic' crossfire
  * experience which was 11x11.  Big maps will likely make the same at
  * least somewhat easier, but client will need to worry about lag
  * more.
- *
  * I put support in for non square map updates in the define, but
  * there very well might be things that break horribly if this is
  * used.  I figure it is easier to fix that if needed than go back
@@ -265,28 +203,27 @@
  *
  * MSW 2001-05-28
  */
+
 #define MAP_CLIENT_X	25
 #define MAP_CLIENT_Y	25
 
-/**
+/*
  * If you feel the game is too fast or too slow, change MAX_TIME.
- * You can experiment with the 'speed \<new_max_time\>' command first.
+ * You can experiment with the 'speed <new_max_time> command first.
  * The length of a tick is MAX_TIME microseconds.  During a tick,
  * players, monsters, or items with speed 1 can do one thing.
  */
 
 #define MAX_TIME	120000
 
-/**
- * Polymorph as it currently stands is unbalancing, so by default
+/* Polymorph as it currently stands is unbalancing, so by default
  * we have it disabled.  It can be enabled and it works, but
  * it can be abused in various ways.
  */
 #define NO_POLYMORPH
 
 
-/**
- * This determine how many entries are stored in the kill log.  You
+/* This determine how many entries are stored in the kill log.  You
  * can see this information with the 'party kills' command.  More entries
  * mean slower performance and more memory.  IF this is not defined, then
  * this feature is disabled.
@@ -295,17 +232,17 @@
 #define PARTY_KILL_LOG 20
 */
 
-/**
+/*
  * The PERM_EXP values adjust the behaviour of permenent experience. - if
- * the setting permanent_experience_percentage is zero, these values have
- * no meaning. The value in the settings file is the percentage of the
+ * the setting permanent_experience_percentage is zero, these values have 
+ * no meaning. The value in the settings file is the percentage of the 
  * experience that is permenent, the rest could be lost on death. When dying,
  * the greatest amount of non-permenent exp it is possible to lose at one time
- * is PERM_EXP_MAX_LOSS_RATIO  - this is calculated as
- * total exp - perm exp * loss ratio. The gain ratio is how much of experienced
- * experience goes to the permanent value. This does not detract from total
- * exp gain (ie, if you gained 100 exp, 100 would go to the skill total and
- * 10 to the permanent value).
+ * is PERM_EXP_MAX_LOSS_RATIO  - this is calculated as 
+ * total exp - perm exp * loss ratio. The gain ratio is how much of experienced 
+ * experience goes to the permanent value. This does not detract from total 
+ * exp gain (ie, if you gained 100 exp, 100 would go to the skill total and 
+ * 10 to the permanent value). 
  *
  * A few thoughts on these default value (by MSW)
  * gain ratio is pretty much meaningless until exp has been lost, as until
@@ -321,7 +258,7 @@
 #define PERM_EXP_GAIN_RATIO           0.10f
 #define PERM_EXP_MAX_LOSS_RATIO       0.50f
 
-/**
+/*
  * WATCHDOG lets sends datagrams to port 13325 on localhost
  * in (more-or-less) regular intervals, so an external watchdog
  * program can kill the server if it hangs (for whatever reason).
@@ -333,8 +270,7 @@
 #endif
 
 
-/**
- * Enable the new material code - it needs some work.  You can
+/* Enable the new material code - it needs some work.  You can
  * enable this, and things will work, just you'll see a whole
  * bunch more materials show up, and thus a whole bunch more materials
  * in your inventory, and the sorting for them isn't really good.
@@ -353,7 +289,7 @@
  *
  ***********************************************************************/
 
-/**
+/*
  * If you compress your files to save space, set the COMPRESS_SUFFIX below
  * to the compression suffix you want (.Z, .gz, .bz2).  The autoconf
  * should already find the program to use.  If you set the suffix to
@@ -369,8 +305,7 @@
 /* #define COMPRESS_SUFFIX ".Z" */
 #endif
 
-/**
- * If you get a complaint about O_NDELAY not being known/undefined, try
+/* If you get a complaint about O_NDELAY not being known/undefined, try
  * uncommenting this.
  * This may cause problems - O_NONBLOCK will return -1 on blocking writes
  * and set error to EAGAIN.  O_NDELAY returns 0.  This is only if no bytes
@@ -410,23 +345,25 @@
  ***********************************************************************
  */
 
-/**
+/*
  * BANFILE - file used to ban certain sites from playing.  See the example
  * ban_file for examples.
  */
+
 #ifndef BANFILE
 #define BANFILE         "ban_file"
 #endif
 
-/**
- * CSPORT is the port used for the new client/server code.  Change
+/* CSPORT is the port used for the new client/server code.  Change
  * if desired.  Only of relevance if ERIC_SERVER is set above
  */
+
 #define CSPORT 13327 /* old port + 1 */
 
 
-/**
- * File containing valid names that can be dm, one on each line.  See
+/*
+ * DMFILE
+ * A file containing valid names that can be dm, one on each line.  See
  * example dm_file for syntax help.
  */
 
@@ -435,19 +372,19 @@
 #endif
 
 
-/**
- * LOGFILE specifies which file to log to when playing with the
+/* LOGFILE specifies which file to log to when playing with the
  * -daemon option.
  */
+
 #ifndef LOGFILE
 #ifdef WIN32 /* change define path */
 #define LOGFILE "var\\crossfire.log"
-#else
+#else 
 #define LOGFILE "/var/log/crossfire/logfile"
 #endif
 #endif
 
-/**
+/*
  * MAP_MAXTIMEOUT tells the maximum of ticks until a map is swapped out
  * after a player has left it.  If it is set to 0, maps are
  * swapped out the instant the last player leaves it.
@@ -469,12 +406,12 @@
  * maps.
  */
 
-/** How many ticks till maps are swapped out. */
+/* How many ticks till maps are swapped out */
 #define MAP_MAXTIMEOUT	1000
-/** At least that many ticks before swapout. */
+/* At least that many ticks before swapout */
 #define MAP_MINTIMEOUT  500
 
-/**
+/*
  * MAP_MAXRESET is the maximum time a map can have before being reset.  It
  * will override the time value set in the map, if that time is longer than
  * MAP_MAXRESET.  This value is in seconds.  If you are low on space on the
@@ -487,13 +424,13 @@
  * in the map archetype.
  */
 
-/** Maximum time to reset. */
+/* Maximum time to reset. */
 #define MAP_MAXRESET	7200
-/** Default time to reset. */
+/* Default time to reset. */
 #define MAP_DEFAULTRESET       7200
 
-/**
- * MAX_OBJECTS is no hard limit.  If this limit is exceeded, Crossfire
+/*
+ * MAX_OBJECTS is no hard limit.  If this limit is exceeded, crossfire
  * will look for maps which are already scheldued for swapping, and
  * promptly swap them out before new maps are being loaded.
  * If playing only by yourself, this number can probably be as low as
@@ -505,9 +442,10 @@
  * might not be a bad idea.  Each object is around 350 bytes right now.
  * 25000 is about 8.5 MB
  */
+
 #define MAX_OBJECTS	100000
 
-/**
+/*
  * Max objects low water mark (lwm).  If defined, the map swapping strategy
  * is a bit different:
  * 1) We only start swapping maps if the number of objects in use is
@@ -532,13 +470,13 @@
 
 /*#define MAX_OBJECTS_LWM	MAX_OBJECTS/2*/
 
-/**
+/*
  * Turning on MEMORY_DEBUG slows down execution, but makes it easier
  * to find memory corruption and leaks.  Currently, the main thing
  * that happens with this activated is that one malloc is done for
  * each object - thus whatever debugging mechanism the malloc library
  * (or other debugging tool provides, like purify), it can track this
- * individual malloc.  Default behaviour when turned off is that
+ * individual malloc.  Default behaviour when turned off is that 
  * enough memory is malloced for a large group of objects so malloc does
  * not need to be called as often.
  * This should only be turned on if some form of memory debugging tool
@@ -549,44 +487,48 @@
 /*#define MEMORY_DEBUG*/
 
 
-/**
+/*
  * If you want to have a Message Of The Day file, define MOTD to be
  * the file with the message.  If the file doesn't exist or if it
  * is empty, no message will be displayed.
  * (It resides in the CONFDIR directory)
  */
+
 #define MOTD "motd"
 
-/**
+/*
  * You can restrict playing in certain times by creating a PERMIT_FILE
  * in CONFDIR. See the sample for usage notes.
  */
+
 #define PERM_FILE "forbid"
 
-/**
+/*
  * If you want to take the game down while installing new versions, or
  * for other reasons, put a message into the SHUTDOWN_FILE file.
  * Remember to delete it when you open the game again.
  * (It resides in the CONFDIR directory)
  */
+
 #ifndef SHUTDOWN_FILE
 #define SHUTDOWN_FILE "shutdown"
 #endif
 
 
-/**
+/*
  * SOCKETBUFSIZE is the size of the buffer used internally by the server for
  * storing backlogged messages for the client.  This is not operating system
  * buffers or the like.  This amount is used per connection (client).
  * This buffer is in addition to OS buffers, so it may not need to be very
  * large.  When the OS buffer and this buffer is exhausted, the server
  * will drop the client connection for falling too far behind.  So if
- * you have very slow client connections, a larger value may be
+ * you have very slow client connections, a larger value may be 
  * warranted.
  */
+
 #define SOCKETBUFSIZE 256*1024
 
-/**
+/*
  * Your tmp-directory should be large enough to hold the uncompressed
  * map-files for all who are playing.
  * It ought to be locally mounted, since the function used to generate
@@ -596,6 +538,7 @@
  * something that is NFS mounted (but performance may suffer as NFS is
  * slower than local disk)
  */
+
 /*#define TMPDIR "/home/hugin/a/crossfire/crossfire/tmp"*/
 #ifdef WIN32 /* change define path tmp */
 #define TMPDIR "tmp"
@@ -604,14 +547,13 @@
 #endif
 
 
-/**
- * Directory to use for unique items. This is placed into the 'lib'
+/* Directory to use for unique items. This is placed into the 'lib' 
  * directory.  Changing this will cause any old unique items file
  * not to be used.
  */
 #define UNIQUE_DIR "unique-items"
 
-/**
+/*
  * If undefined, malloc is always used.
  * It looks like this can be oboleted.  However, it can be useful to
  * track down some bugs, as it will make sure that the entire data structure
@@ -626,21 +568,25 @@
 #define USE_CALLOC
 
 
-/**
+/*
  * These define the players starting map and location on that map, and where
  * emergency saves are defined.  This should be left as is unless you make
  * major changes to the map.
  */
+
 #ifdef WIN32 /* change define path city */
-#  define EMERGENCY_MAPPATH "\\world\\world_105_115"
+
+#  define EMERGENCY_MAPPATH "\\city\\city"
+#  define EMERGENCY_X 15
+#  define EMERGENCY_Y 19
 #else
-#  define EMERGENCY_MAPPATH "/world/world_105_115"
+#  define EMERGENCY_MAPPATH "/city/city"
+#  define EMERGENCY_X 15
+#  define EMERGENCY_Y 19
 #endif
-#  define EMERGENCY_X 5
-#  define EMERGENCY_Y 37
 
 
-/**
+/*
  * These defines tells where, relative to LIBDIR, the maps, the map-index,
  * archetypes highscore and treaures files and directories can be found.
  */
@@ -653,16 +599,16 @@
 #define TREASURES	"treasures"
 #define	BANISHFILE  "banish_file"
 
-#define MAX_ERRORS	25	/**< Bail out if more are received during tick. */
-#define STARTMAX        500     /**< How big array of objects to start with. */
-#define OBJ_EXPAND      100     /**< How big steps to use when expanding array. */
+#define MAX_ERRORS	25	/* Bail out if more are received during tick */
+#define STARTMAX        500     /* How big array of objects to start with */
+#define OBJ_EXPAND      100     /* How big steps to use when expanding array */
 
-#define HIGHSCORE_LENGTH 1000	/**< How many entries there are room for. */
+#define HIGHSCORE_LENGTH 1000	/* How many entries there are room for */
 
-#define ARCHTABLE 8192		/**< Used when hashing archetypes. */
+#define ARCHTABLE 8192		/* Used when hashing archetypes */
 #define MAXSTRING 20
 
-#define COMMAND_HASH_SIZE 107	/**< If you change this, delete all characters :) */
+#define COMMAND_HASH_SIZE 107	/* If you change this, delete all characters :) */
 
 
 
@@ -674,21 +620,22 @@
  *
  ***********************************************************************/
 
-/**
+/*
  * If you want the players to be able to save their characters between
  * games, define SAVE_PLAYER and set PLAYERDIR to the directories
  * where the player-files will be put.
  * Remember to create the directory (make install will do that though).
  *
  * If you intend to run a central server, and not allow the players to
- * start their own Crossfire, you won't need to define this.
+ * start their own crossfire, you won't need to define this.
  *
  */
+
 #ifndef PLAYERDIR
 #define PLAYERDIR "players"
 #endif
 
-/**
+/*
  * If you have defined SAVE_PLAYER, you might want to change this, too.
  * This is the access rights for the players savefiles.
  * Given that crossfire runs in a client/server model, there should
@@ -708,8 +655,7 @@
  * can slow things down some.
  */
 
-/**
- * How often (in seconds) the player is saved if he drops things.  If it is
+/* How often (in seconds) the player is saved if he drops things.  If it is
  * set to 0, the player will be saved for every item he drops.  Otherwise,
  * if the player drops and item, and the last time he was saved
  * due to item drop is longer
@@ -721,7 +667,7 @@
 
 /*#define SAVE_INTERVAL 300*/
 
-/**
+/*
  * AUTOSAVE saves the player every AUTOSAVE ticks.  A value of
  * 5000 with MAX_TIME set at 120,000 means that the player will be
  * saved every 10 minutes.  Some effort should probably be made to
@@ -734,8 +680,7 @@
 
 #define AUTOSAVE 5000
 
-/**
- * Often, emergency save fails because the memory corruption that caused
+/* Often, emergency save fails because the memory corruption that caused
  * the crash has trashed the characters too. Define NO_EMERGENCY_SAVE
  * to disable emergency saves.  This actually does
  * prevent emergency saves now (Version 0.90.5).
@@ -743,17 +688,15 @@
 
 #define NO_EMERGENCY_SAVE
 
-/**
- * By selecting the following, whenever a player does a backup save (with
- * the 'save' command), the player will be saved at home (EMERGENCY_MAP_*
- * information that is specified later).  If this is not set, the player
+/* By selecting the following, whenever a player does a backup save (with
+ * the 'save command), the player will be saved at home (EMERGENCY_MAP_*
+ * information that is specified later).  IF this is not set, the player
  * will be saved at his present location.
  */
 
 /*#define BACKUP_SAVE_AT_HOME*/
 
-/**
- * RESET_LOCATION_TIME is the number of seconds that must elapse before
+/* RESET_LOCATION_TIME is the number of seconds that must elapse before
  * we fill return the player to his savebed location.  If this is zero,
  * this feature is disabled (player will resume where ever he was
  * when he last logged off).  If this is set to less than two hours,
@@ -766,7 +709,7 @@
  * on how the player exited the game.  But if the elapsed time is greater than
  * the value below, player will always get returned to savebed location
  * location.
- *
+ * 
  * Set to one hour as default
  */
 

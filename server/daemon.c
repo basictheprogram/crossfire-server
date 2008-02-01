@@ -26,11 +26,9 @@
     The author can be reached via e-mail to crossfire-devel@real-time.com
 */
 
-/**
- * @file
- * Daemon mode for the server.
- *
- * Shamelessly swiped from xdm source code.
+/*
+ * BecomeDaemon.c
+ * shamelessly swiped from xdm source code.
  * Appropriate copyrights kept, and hereby follow
  * ERic mehlhaff, 3/11/92
  *
@@ -53,6 +51,7 @@
  * Author:  Keith Packard, MIT X Consortium
  */
 
+
 #include <global.h>
 #ifndef __CEXTRACT__
 #include <sproto.h>
@@ -66,17 +65,14 @@
 #include <stdio.h>
 #include <sys/file.h>
 
-/**
- * Starts the server as a daemon.
- */
-void become_daemon ()
+void become_daemon()
 {
-    register int i;
-    int forkresult;
-
-    fputs("\n========================\n",logfile);
-    fputs("Begin New Server Session\n",logfile);
-    fputs("========================\n\n",logfile);
+  register int i;
+  int forkresult;
+ 
+  fputs("\n========================\n",logfile);    
+  fputs("Begin New Server Session\n",logfile);    
+  fputs("========================\n\n",logfile);    
     /*
      * fork so that the process goes into the background automatically. Also
      * has a nice side effect of having the child process get inherited by
@@ -94,7 +90,7 @@ void become_daemon ()
      * Close standard file descriptors and get rid of controlling tty
      */
 
-    close (0);
+    close (0); 
     close (1);
     close (2);
 

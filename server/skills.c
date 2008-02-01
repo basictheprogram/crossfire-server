@@ -5,7 +5,7 @@
 /*
     CrossFire, A Multiplayer game for X-windows
 
-    Copyright (C) 2003-2006 Mark Wedel & Crossfire Development Team
+    Copyright (C) 2003 Mark Wedel & Crossfire Development Team
     Copyright (C) 1992 Frank Tore Johansen
 
     This program is free software; you can redistribute it and/or modify
@@ -25,11 +25,6 @@
     The authors can be reached via e-mail to crossfire-devel@real-time.com
 */
 
-/**
- * @file
- * This file contains core skill handling.
- */
-
 #include <global.h>
 #include <object.h>
 #ifndef __CEXTRACT__
@@ -40,20 +35,7 @@
 #include <spells.h>
 #include <book.h>
 
-/**
- * Computes stealing chance.
- * Increased values indicate better attempts.
- *
- * @param op
- * who is stealing.
- * @param victim
- * who to steal from.
- * @param roll
- * dice roll.
- * @return
- * -1 if op can't steal, else adjusted roll value.
- * @todo rename roll to something more meaningful (check attempt_steal()).
- */
+/* adj_stealchance() - increased values indicate better attempts */
 static int adj_stealchance (object *op, object *victim, int roll) {
     object *equip;
 
@@ -64,8 +46,7 @@ static int adj_stealchance (object *op, object *victim, int roll) {
      */
     if(op->type==PLAYER && op->body_used[BODY_ARMS] <=0 &&
        op->body_info[BODY_ARMS]) {
-	draw_ext_info(NDI_UNIQUE, 0,op,MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-		      "But you have no free hands to steal with!", NULL);
+	new_draw_info(NDI_UNIQUE, 0,op,"But you have no free hands to steal with!");
 	return -1;
     }
 
@@ -102,30 +83,21 @@ static int adj_stealchance (object *op, object *victim, int roll) {
     return roll;
 }
 
-/**
- * Steal objects.
+/*
  * When stealing: dependent on the intelligence/wisdom of whom you're
  * stealing from (op in attempt_steal), offset by your dexterity and
  * skill at stealing. They may notice your attempt, whether successful
  * or not.
- *
- * @param op
- * target (person being pilfered).
- * @param who
- * person doing the stealing.
- * @param skill
- * stealing skill object.
- * @retval 0
- * nothing was stolen.
- * @retval 1
- * something was stolen.
+ * op is the target (person being pilfered)
+ * who is the person doing the stealing.
+ * skill is the skill object (stealing).
  */
+
 static int attempt_steal(object* op, object* who, object *skill)
 {
     object *success=NULL, *tmp=NULL, *next;
     int roll=0, chance=0, stats_value;
     rv_vector	rv;
-    char name[MAX_BUF];
 
     stats_value = ((who->stats.Dex + who->stats.Int) * 3) / 2;
 
@@ -137,21 +109,18 @@ static int attempt_steal(object* op, object* who, object *skill)
 	if(can_detect_enemy(op,who,&rv)) {
 	    npc_call_help(op);
 	    CLEAR_FLAG(op, FLAG_UNAGGRESSIVE);
-	    draw_ext_info(NDI_UNIQUE, 0,who, MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-			  "Your attempt is prevented!", NULL);
+	    new_draw_info(NDI_UNIQUE, 0,who,"Your attempt is prevented!");
 	    return 0;
 	} else /* help npc to detect thief next time by raising its wisdom */
 	    op->stats.Wis += (op->stats.Int/5)+1;
 	    if (op->stats.Wis > MAX_STAT) op->stats.Wis = MAX_STAT;
     }
     if (op->type == PLAYER && QUERY_FLAG(op, FLAG_WIZ)) {
-	draw_ext_info(NDI_UNIQUE, 0, who, MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-		      "You can't steal from the dungeon master!", NULL);
+	new_draw_info(NDI_UNIQUE, 0, who, "You can't steal from the dungeon master!\n");
 	return 0;
     }
     if(op->type == PLAYER && who->type == PLAYER && settings.no_player_stealing) {
-      draw_ext_info(NDI_UNIQUE, 0, who, MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-		    "You can't steal from other players!", NULL);
+      new_draw_info(NDI_UNIQUE, 0, who, "You can't steal from other players!\n");
       return 0;
     }
 
@@ -198,17 +167,21 @@ static int attempt_steal(object* op, object* who, object *skill)
 		/* for players, play_sound: steals item */
 		success = tmp;
 		CLEAR_FLAG(tmp, FLAG_INV_LOCKED);
+
+		/* Don't delete it from target player until we know
+		 * the thief has picked it up.  can't just look at tmp->count,
+		 * as it's possible that it got merged when picked up.
+		 */
+		if (op->type == PLAYER)
+		    esrv_del_item(op->contr, tmp_count);
 	    }
 	    break;
 	}
     } /* for loop looking for an item */
 
     if (!tmp) {
-        query_name(op, name, MAX_BUF);
-	draw_ext_info_format(NDI_UNIQUE, 0, who, MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-			     "%s%s has nothing you can steal!",
-			     "%s%s has nothing you can steal!",
-			     op->type == PLAYER ? "" : "The ", name);
+	new_draw_info_format(NDI_UNIQUE, 0, who, "%s%s has nothing you can steal!",
+			     op->type == PLAYER ? "" : "The ", query_name(op));
 	return 0;
     }
 
@@ -227,12 +200,8 @@ static int attempt_steal(object* op, object* who, object *skill)
 	    /* The unaggressives look after themselves 8) */
 	    if(who->type==PLAYER) {
 		npc_call_help(op);
-        query_name(op, name, MAX_BUF);
-		draw_ext_info_format(NDI_UNIQUE, 0,who,
-			     MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-			     "%s notices your attempted pilfering!",
-			     "%s notices your attempted pilfering!",
-			     name);
+		new_draw_info_format(NDI_UNIQUE, 0,who,
+		  "%s notices your attempted pilfering!",query_name(op));
 	    }
 	    CLEAR_FLAG(op, FLAG_UNAGGRESSIVE);
 	    /* all remaining npc items are guarded now. Set flag NO_STEAL
@@ -243,22 +212,18 @@ static int attempt_steal(object* op, object* who, object *skill)
 	    char buf[MAX_BUF];
 	    /* Notify the other player */
 	    if (success && who->stats.Int > random_roll(0, 19, op, PREFER_LOW)) {
-            query_name(success, name, MAX_BUF);
-		sprintf(buf, "Your %s is missing!", name);
+		sprintf(buf, "Your %s is missing!", query_name(success));
 	    } else {
 		sprintf(buf, "Your pack feels strangely lighter.");
 	    }
-	    draw_ext_info(NDI_UNIQUE, 0,op,MSG_TYPE_ITEM, MSG_TYPE_ITEM_REMOVE,
-			  buf, buf);
+	    new_draw_info(NDI_UNIQUE, 0,op,buf);
 	    if (!success) {
 		if (who->invisible) {
 		    sprintf(buf, "you feel itchy fingers getting at your pack.");
 		} else {
-            query_name(who, name, MAX_BUF);
-		    sprintf(buf, "%s looks very shifty.", name);
+		    sprintf(buf, "%s looks very shifty.", query_name(who));
 		}
-		draw_ext_info(NDI_UNIQUE, 0,op,MSG_TYPE_VICTIM, MSG_TYPE_VICTIM_STEAL,
-			      buf, buf);
+		new_draw_info(NDI_UNIQUE, 0,op,buf);
 	    }
 	} /* else stealing from another player */
 	/* play_sound("stop! thief!"); kindofthing */
@@ -267,18 +232,6 @@ static int attempt_steal(object* op, object* who, object *skill)
 }
 
 
-/**
- * Main stealing function.
- *
- * @param op
- * thief.
- * @param dir
- * direction to steal from.
- * @param skill
- * stealing skill.
- * @return
- * experience gained for stealing, 0 if nothing was stolen.
- */
 int steal(object* op, int dir, object *skill)
 {
     object *tmp, *next;
@@ -340,20 +293,6 @@ int steal(object* op, int dir, object *skill)
     return 0;
 }
 
-/**
- * Attempt to pick a lock. Handles traps.
- *
- * @param door
- * lock to pick.
- * @param pl
- * player picking.
- * @param skill
- * locking skill.
- * @retval 0
- * no lock was picked.
- * @retval 1
- * door was locked.
- */
 static int attempt_pick_lock (object *door, object *pl, object *skill)
 {
     int difficulty= pl->map->difficulty ? pl->map->difficulty : 0;
@@ -375,21 +314,10 @@ static int attempt_pick_lock (object *door, object *pl, object *skill)
 }
 
 
-/**
- * Lock pick handling.
- *
- * Implementation by bt. (thomas@astro.psu.edu)
+/* Implementation by bt. (thomas@astro.psu.edu)
  * monster implementation 7-7-95 by bt.
- *
- * @param pl
- * player picking the lock.
- * @param dir
- * direction to pick.
- * @param skill
- * lock picking skill.
- * @return
- * experience for picking a lock, 0 if nothing was picked.
  */
+
 int pick_lock(object *pl, int dir, object *skill)
 {
     object *tmp;
@@ -400,8 +328,7 @@ int pick_lock(object *pl, int dir, object *skill)
 
     /* For all the stacked objects at this point find a door*/
     if (out_of_map(pl->map,x,y)) {
-	draw_ext_info(NDI_UNIQUE, 0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
-		      "There is no lock there.", NULL);
+	new_draw_info(NDI_UNIQUE, 0,pl,"There is no lock there.");
 	return 0;
     }
 
@@ -409,53 +336,38 @@ int pick_lock(object *pl, int dir, object *skill)
 	if (tmp->type == DOOR || tmp->type == LOCKED_DOOR) break;
 
     if (!tmp) {
-	draw_ext_info(NDI_UNIQUE, 0,pl,MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
-		      "There is no lock there.", NULL);
+	new_draw_info(NDI_UNIQUE, 0,pl,"There is no lock there.");
 	return 0;
     }
     if (tmp->type == LOCKED_DOOR) {
-	draw_ext_info(NDI_UNIQUE, 0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
-		      "You can't pick that lock!", NULL);
+	new_draw_info(NDI_UNIQUE, 0,pl, "You can't pick that lock!");
 	return 0;
     }
 
     if (!tmp->move_block) {
-	draw_ext_info(NDI_UNIQUE, 0,pl,MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
-		      "The door has no lock!", NULL);
+	new_draw_info(NDI_UNIQUE, 0,pl,"The door has no lock!");
 	return 0;
     }
 
     if (attempt_pick_lock(tmp, pl, skill)) {
-	draw_ext_info(NDI_UNIQUE, 0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_SUCCESS,
-		      "You pick the lock.", NULL);
+	new_draw_info(NDI_UNIQUE, 0,pl,"You pick the lock.");
 	return calc_skill_exp(pl,NULL, skill);
     } else {
-	draw_ext_info(NDI_UNIQUE, 0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-		      "You fail to pick the lock.", NULL);
+	new_draw_info(NDI_UNIQUE, 0,pl, "You fail to pick the lock.");
 	return 0;
     }
 }
 
 
-/**
- * Someone is trying to hide.
- * The user becomes undetectable (not just 'invisible') for
+/* HIDE CODE. The user becomes undetectable (not just 'invisible') for
  * a short while (success and duration dependant on player SK_level,
  * dexterity, charisma, and map difficulty).
  * Players have a good chance of becoming 'unhidden' if they move
  * and like invisiblity will be come visible if they attack
  * Implemented by b.t. (thomas@astro.psu.edu)
  * July 7, 1995 - made hiding possible for monsters. -b.t.
- *
- * @param op
- * living trying to hide.
- * @param skill
- * hiding skill.
- * @retval 0
- * op couldn't hide.
- * @retval 1
- * op successfully hide.
  */
+
 static int attempt_hide(object *op, object *skill) {
     int number,difficulty=op->map->difficulty;
     int terrain = hideability(op);
@@ -478,73 +390,46 @@ static int attempt_hide(object *op, object *skill) {
     return 0;
 }
 
-/**
- * Main hide handling.
- * @param op
- * living trying to hide.
- * @param skill
- * hiding skill.
- * @return
- * experience gained for the skill use (can be 0).
- */
+/* patched this to take terrain into consideration */
+
 int hide(object *op, object *skill) {
 
     /* the preliminaries -- Can we really hide now? */
     /* this keeps monsters from using invisibilty spells and hiding */
 
     if (QUERY_FLAG(op, FLAG_MAKE_INVIS)) {
-	draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
-		      "You don't need to hide while invisible!", NULL);
+	new_draw_info(NDI_UNIQUE, 0,op,"You don't need to hide while invisible!");
 	return 0;
     } else if (!op->hide && op->invisible>0 && op->type == PLAYER) {
-	draw_ext_info(NDI_UNIQUE, 0,op,
-		      MSG_TYPE_ATTRIBUTE, MSG_TYPE_ATTRIBUTE_GOOD_EFFECT_END,
-		      "Your attempt to hide breaks the invisibility spell!", NULL);
+	new_draw_info(NDI_UNIQUE, 0,op,"Your attempt to hide breaks the invisibility spell!");
 	make_visible(op);
     }
 
     if(op->invisible>(50*skill->level)) {
-	draw_ext_info(NDI_UNIQUE,0,op, MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
-		      "You are as hidden as you can get.", NULL);
+	new_draw_info(NDI_UNIQUE,0,op,"You are as hidden as you can get.");
 	return 0;
     }
 
     if(attempt_hide(op, skill)) {
-	draw_ext_info(NDI_UNIQUE, 0,op,MSG_TYPE_SKILL, MSG_TYPE_SKILL_SUCCESS,
-		      "You hide in the shadows.", NULL);
+	new_draw_info(NDI_UNIQUE, 0,op,"You hide in the shadows.");
 	update_object(op,UP_OBJ_FACE);
 	return calc_skill_exp(op, NULL, skill);
     }
-    draw_ext_info(NDI_UNIQUE,0,op,MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-		  "You fail to conceal yourself.", NULL);
+    new_draw_info(NDI_UNIQUE,0,op,"You fail to conceal yourself.");
     return 0;
 }
 
 
-/**
- * End of jump. Restore the map.
- * @param pl
- * player.
- * @todo Is fix_object() required?
+/* stop_jump() - End of jump. Clear flags, restore the map, and
+ * freeze the jumper a while to simulate the exhaustion
+ * of jumping.
  */
-static void stop_jump(object *pl) {
-    fix_object(pl);
+static void stop_jump(object *pl, int dist, int spaces) {
+    fix_player(pl);
     insert_ob_in_map(pl,pl->map,pl,0);
 }
 
-/**
- * Someone is trying to jump.
- * @param pl
- * living trying to jump.
- * @param dir
- * direction to jump in.
- * @param spaces
- * distance to jump.
- * @param skill
- * jumping skill.
- * @return
- * experience gained when jumping into another living thing.
- */
+
 static int attempt_jump (object *pl, int dir, int spaces, object *skill) {
     object *tmp;
     int i,exp=0,dx=freearr_x[dir],dy=freearr_y[dir], mflags;
@@ -552,9 +437,9 @@ static int attempt_jump (object *pl, int dir, int spaces, object *skill) {
     mapstruct *m;
 
     /* Jump loop. Go through spaces opject wants to jump. Halt the
-     * jump if a wall or creature is in the way. We set FLY_LOW
+     * jump if a wall or creature is in the way. We set FLAG_FLYING
      * temporarily to allow player to aviod exits/archs that are not
-     * move_on/off fly_low. This will also prevent pickup of objects
+     * fly_on, fly_off. This will also prevent pickup of objects
      * while jumping over them.
      */
 
@@ -575,13 +460,12 @@ static int attempt_jump (object *pl, int dir, int spaces, object *skill) {
 	mflags = get_map_flags(m, &m, x, y, &x, &y);
 
 	if (mflags & P_OUT_OF_MAP) {
-	    (void) stop_jump(pl);
+	    (void) stop_jump(pl,i,spaces);
 	    return 0;
 	}
 	if (OB_TYPE_MOVE_BLOCK(pl, GET_MAP_MOVE_BLOCK(m, x, y))) {
-	    draw_ext_info(NDI_UNIQUE, 0,pl,MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-			  "Your jump is blocked.", NULL);
-	    stop_jump(pl);
+	    new_draw_info(NDI_UNIQUE, 0,pl,"Your jump is blocked.");
+	    stop_jump(pl,i,spaces);
 	    return 0;
 	}
 
@@ -589,19 +473,14 @@ static int attempt_jump (object *pl, int dir, int spaces, object *skill) {
 	    /* Jump into creature */
 	    if(QUERY_FLAG(tmp, FLAG_MONSTER)
 	    || (tmp->type==PLAYER && (!QUERY_FLAG(tmp, FLAG_WIZ) || !tmp->contr->hidden))) {
-		draw_ext_info_format(NDI_UNIQUE, 0,pl,
-			     MSG_TYPE_SKILL, MSG_TYPE_SKILL_SUCCESS,
-			     "You jump into %s%s.",
-			     "You jump into %s%s.",
-			     tmp->type == PLAYER ? "" : "the ", tmp->name);
-
+		new_draw_info_format(NDI_UNIQUE, 0,pl,"You jump into %s%s.",
+		    tmp->type == PLAYER ? "" : "the ", tmp->name);
 		if(tmp->type!=PLAYER ||
 		   (pl->type==PLAYER && pl->contr->party==NULL) ||
 		   (pl->type==PLAYER && tmp->type==PLAYER &&
 		    pl->contr->party!=tmp->contr->party))
 			exp = skill_attack(tmp,pl,pl->facing,"kicked", skill); /* pl makes an attack */
-
-		stop_jump(pl);
+		stop_jump(pl,i,spaces);
 		return exp;  /* note that calc_skill_exp() is already called by skill_attack() */
 	    }
 	    /* If the space has fly on set (no matter what the space is),
@@ -614,7 +493,7 @@ static int attempt_jump (object *pl, int dir, int spaces, object *skill) {
 		pl->map = m;
 		if (pl->contr)
 		    esrv_map_scroll(&pl->contr->socket, dx, dy);
-		stop_jump(pl);
+		stop_jump(pl,i,spaces);
 		return calc_skill_exp(pl,NULL, skill);
 	    }
 	}
@@ -624,26 +503,16 @@ static int attempt_jump (object *pl, int dir, int spaces, object *skill) {
 	if (pl->contr)
 	    esrv_map_scroll(&pl->contr->socket, dx, dy);
     }
-    stop_jump(pl);
+    stop_jump(pl,i,spaces);
     return calc_skill_exp(pl,NULL, skill);
 }
 
-/**
- * Jump skill handling.
- * This is both a new type of movement for player/monsters and
+/* jump() - this is both a new type of movement for player/monsters and
  * an attack as well.
  * Perhaps we should allow more spaces based on level, eg, level 50
  * jumper can jump several spaces?
- *
- * @param pl
- * object jumping.
- * @param dir
- * direction to jump to.
- * @param skill
- * jumping skill.
- * @return
- * experience gained for jumping.
  */
+
 int jump(object *pl, int dir, object *skill)
 {
     int spaces=0,stats;
@@ -663,24 +532,23 @@ int jump(object *pl, int dir, object *skill)
     if(spaces>2)
 	 spaces = 2;
     else if(spaces==0) {
-	draw_ext_info(NDI_UNIQUE, 0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-		      "You are carrying too much weight to jump.", NULL);
+	new_draw_info(NDI_UNIQUE, 0,pl,"You are carrying too much weight to jump.");
 	return 0;
     }
     return attempt_jump(pl,dir,spaces, skill);
 }
 
 
-/**
- * Check for cursed object with the 'detect curse' skill.
- *
- * @param pl
- * player detecting.
- * @param skill
- * detect skill object.
- * @return
- * amount of experience gained (on successful detecting).
+/* skill_ident() - this code is supposed to allow players to identify
+ * classes of objects with the various "auto-ident" skills. Player must
+ * have unidentified objects of the right type in order for the skill
+ * to work. While multiple classes of objects may be identified,
+ * this code is kind of yucky -- it would be nice to make it a bit
+ * more generalized. Right now, skill indices are embedded in this routine.
+ * Returns amount of experience gained (on successful ident).
+ * - b.t. (thomas@astro.psu.edu)
  */
+
 static int do_skill_detect_curse(object *pl, object *skill) {
     object *tmp;
     int success=0;
@@ -711,16 +579,6 @@ static int do_skill_detect_curse(object *pl, object *skill) {
     return success;
 }
 
-/**
- * Check for magic object with the 'detect magic' skill.
- *
- * @param pl
- * player detecting.
- * @param skill
- * detect skill object.
- * @return
- * amount of experience gained (on successful detecting).
- */
 static int do_skill_detect_magic(object *pl, object *skill) {
     object *tmp;
     int success=0;
@@ -748,20 +606,8 @@ static int do_skill_detect_magic(object *pl, object *skill) {
     return success;
 }
 
-/**
- * Helper function for do_skill_ident, so that we can loop
+/* Helper function for do_skill_ident, so that we can loop
  * over inventory AND objects on the ground conveniently.
- *
- * @param tmp
- * object to try to identify.
- * @param pl
- * object identifying.
- * @param obj_class
- * object type to identify.
- * @param skill
- * identification skill.
- * @return
- * experience for successful identification.
  */
 static int do_skill_ident2(object *tmp,object *pl, int obj_class, object *skill)
 {
@@ -778,19 +624,11 @@ static int do_skill_ident2(object *tmp,object *pl, int obj_class, object *skill)
 		if(skill_value >= chance) {
 		  identify(tmp);
      		  if (pl->type==PLAYER) {
-                  char desc[MAX_BUF];
-        	    draw_ext_info_format(NDI_UNIQUE, 0, pl,
-				 MSG_TYPE_SKILL, MSG_TYPE_SKILL_SUCCESS,
-				 "You identify %s.",
-				 "You identify %s.",
-				 ob_describe(tmp, pl, desc, sizeof(desc)));
+        	    new_draw_info_format(NDI_UNIQUE, 0, pl,
+                      "You identify %s.", long_desc(tmp, pl));
         	    if (tmp->msg) {
-          		draw_ext_info_format(NDI_UNIQUE, 0,pl,
-				     MSG_TYPE_ITEM, MSG_TYPE_ITEM_INFO,
-				     "The item has a story:\n%s",
-				     "The item has a story:\n%s",
-				     tmp->msg);
-
+          		new_draw_info(NDI_UNIQUE, 0,pl, "The item has a story:");
+          		new_draw_info(NDI_UNIQUE, 0,pl, tmp->msg);
         	    }
 		  }
 	          success += calc_skill_exp(pl,tmp, skill);
@@ -856,22 +694,12 @@ static int do_skill_ident(object *pl, int obj_class, object *skill) {
     return success;
 }
 
-/**
- * Main identification skill handling.
- * @param pl
- * player identifying.
- * @param skill
- * identification skill.
- * @return
- * experience gained for identification.
- */
 int skill_ident(object *pl, object *skill) {
     int success=0;
 
     if(pl->type != PLAYER) return 0;  /* only players will skill-identify */
 
-    draw_ext_info(NDI_UNIQUE, 0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_SUCCESS,
-		  "You look at the objects nearby...", NULL);
+    new_draw_info(NDI_UNIQUE, 0,pl,"You look at the objects nearby...");
 
     switch (skill->subtype) {
 	case SK_SMITHERY:
@@ -915,15 +743,14 @@ int skill_ident(object *pl, object *skill) {
 	case SK_DET_CURSE:
 	    success = do_skill_detect_curse(pl,skill);
 	    if(success)
-		draw_ext_info(NDI_UNIQUE, 0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_SUCCESS,
-			      "...and discover cursed items!", NULL);
+		new_draw_info(NDI_UNIQUE, 0,pl,"...and discover cursed items!");
 	    break;
 
 	case SK_DET_MAGIC:
 	    success = do_skill_detect_magic(pl,skill);
 	    if(success)
-		draw_ext_info(NDI_UNIQUE, 0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_SUCCESS,
-		      "...and discover items imbued with mystic forces!", NULL);
+		new_draw_info(NDI_UNIQUE, 0,pl,
+		      "...and discover items imbued with mystic forces!");
 	    break;
 
 	default:
@@ -932,37 +759,23 @@ int skill_ident(object *pl, object *skill) {
 	    break;
     }
     if(!success) {
-	draw_ext_info(NDI_UNIQUE, 0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_SUCCESS,
-		      "...and learn nothing more.", NULL);
+	new_draw_info(NDI_UNIQUE, 0,pl,"...and learn nothing more.");
     }
     return success;
 }
 
 
-/**
- * Oratory skill handling.
- * Players using this skill can 'charm' a monster --
+/* players using this skill can 'charm' a monster --
  * into working for them. It can only be used on
  * non-special (see below) 'neutral' creatures.
  * -b.t. (thomas@astro.psu.edu)
- *
- * @param pl
- * player trying to convince a monster.
- * @param dir
- * direction to orate in.
- * @param skill
- * oratory skill object.
- * @return
- * experience gained for oratoring.
- * @todo
- * check if can't be simplified, code looks duplicated.
  */
+
 int use_oratory(object *pl, int dir, object *skill) {
     sint16 x=pl->x+freearr_x[dir],y=pl->y+freearr_y[dir];
     int mflags,chance;
     object *tmp;
     mapstruct *m;
-    char name[MAX_BUF];
 
     if(pl->type!=PLAYER) return 0;	/* only players use this skill */
     m = pl->map;
@@ -972,8 +785,7 @@ int use_oratory(object *pl, int dir, object *skill) {
     /* Save some processing - we have the flag already anyways
      */
     if (!(mflags & P_IS_ALIVE)) {
-	draw_ext_info(NDI_UNIQUE, 0, pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-		      "There is nothing to orate to.", NULL);
+	new_draw_info(NDI_UNIQUE, 0, pl, "There is nothing to orate to.");
 	return 0;
     }
 
@@ -992,47 +804,36 @@ int use_oratory(object *pl, int dir, object *skill) {
     }
 
     if (!tmp) {
-	draw_ext_info(NDI_UNIQUE, 0, pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-		      "There is nothing to orate to.", NULL);
+	new_draw_info(NDI_UNIQUE, 0, pl, "There is nothing to orate to.");
 	return 0;
     }
 
-    query_name(tmp, name, MAX_BUF);
-    draw_ext_info_format(NDI_UNIQUE, 0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_SUCCESS,
-			 "You orate to the %s.",
-			 "You orate to the %s.",
-			 name);
+    new_draw_info_format(NDI_UNIQUE,
+	 0,pl, "You orate to the %s.",query_name(tmp));
 
     /* the following conditions limit who may be 'charmed' */
 
     /* it's hostile! */
     if(!QUERY_FLAG(tmp,FLAG_UNAGGRESSIVE) && !QUERY_FLAG(tmp, FLAG_FRIENDLY)) {
-        query_name(tmp, name, MAX_BUF);
-	draw_ext_info_format(NDI_UNIQUE, 0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-			     "Too bad the %s isn't listening!",
-			     "Too bad the %s isn't listening!",
-			     name);
+	new_draw_info_format(NDI_UNIQUE, 0,pl,
+	   "Too bad the %s isn't listening!\n",query_name(tmp));
 	return 0;
     }
 
     /* it's already allied! */
     if(QUERY_FLAG(tmp,FLAG_FRIENDLY)&&(tmp->attack_movement==PETMOVE)){
 	if(get_owner(tmp)==pl) {
-	    draw_ext_info(NDI_UNIQUE, 0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_SUCCESS,
-		      "Your follower loves your speech.", NULL);
+	    new_draw_info(NDI_UNIQUE, 0,pl,
+		      "Your follower loves your speech.\n");
 	    return 0;
 	} else if (skill->level > tmp->level) {
 	    /* you steal the follower.  Perhaps we should really look at the
 	     * level of the owner above?
 	     */
 	    set_owner(tmp,pl);
-        query_name(tmp, name, MAX_BUF);
-	    draw_ext_info_format(NDI_UNIQUE, 0,pl,
-				 MSG_TYPE_SKILL, MSG_TYPE_SKILL_SUCCESS,
-				 "You convince the %s to follow you instead!",
-				 "You convince the %s to follow you instead!",
-				 name);
-
+	    new_draw_info_format(NDI_UNIQUE, 0,pl,
+		 "You convince the %s to follow you instead!\n",
+		 query_name(tmp));
 	    /* Abuse fix - don't give exp since this can otherwise
 	     * be used by a couple players to gets lots of exp.
 	     */
@@ -1047,11 +848,9 @@ int use_oratory(object *pl, int dir, object *skill) {
 
     /* Ok, got a 'sucker' lets try to make them a follower */
     if(chance>0 && tmp->level<(random_roll(0, chance-1, pl, PREFER_HIGH)-1)) {
-        query_name(tmp, name, MAX_BUF);
-	draw_ext_info_format(NDI_UNIQUE, 0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_SUCCESS,
-	     "You convince the %s to become your follower.",
-	     "You convince the %s to become your follower.",
-	     name);
+	new_draw_info_format(NDI_UNIQUE, 0,pl,
+	     "You convince the %s to become your follower.\n",
+	     query_name(tmp));
 
 	set_owner(tmp,pl);
 	tmp->stats.exp = 0;
@@ -1062,12 +861,8 @@ int use_oratory(object *pl, int dir, object *skill) {
     }
     /* Charm failed.  Creature may be angry now */
     else if((skill->level+((pl->stats.Cha-10)/2)) < random_roll(1, 2*tmp->level, pl, PREFER_LOW)) {
-        query_name(tmp, name, MAX_BUF);
-	draw_ext_info_format(NDI_UNIQUE, 0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-		     "Your speech angers the %s!",
-		     "Your speech angers the %s!",
-		     name);
-
+	new_draw_info_format(NDI_UNIQUE, 0,pl,
+		  "Your speech angers the %s!\n",query_name(tmp));
 	if(QUERY_FLAG(tmp,FLAG_FRIENDLY)) {
 	    CLEAR_FLAG(tmp,FLAG_FRIENDLY);
 	    remove_friendly_object(tmp);
@@ -1078,9 +873,7 @@ int use_oratory(object *pl, int dir, object *skill) {
     return 0;	/* Fall through - if we get here, we didn't charm anything */
 }
 
-/**
- * Singing skill handling.
- * This skill allows the player to pacify nearby creatures.
+/* Singing() -this skill allows the player to pacify nearby creatures.
  * There are few limitations on who/what kind of
  * non-player creatures that may be pacified. Right now, a player
  * may pacify creatures which have Int == 0. In this routine, once
@@ -1088,27 +881,17 @@ int use_oratory(object *pl, int dir, object *skill) {
  * may only pacify a creature once.
  * BTW, I appologize for the naming of the skill, I couldnt think
  * of anything better! -b.t.
- *
- * @param pl
- * player singing.
- * @param dir
- * direction to sing in.
- * @param skill
- * singing skill object.
- * @return
- * experience gained for singing.
  */
+
 int singing(object *pl, int dir, object *skill) {
     int i,exp = 0,chance, mflags;
     object *tmp;
     mapstruct *m;
     sint16  x, y;
-    char name[MAX_BUF];
 
     if(pl->type!=PLAYER) return 0;    /* only players use this skill */
 
-    draw_ext_info_format(NDI_UNIQUE,0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_SUCCESS,
-			 "You sing", NULL);
+    new_draw_info_format(NDI_UNIQUE,0,pl, "You sing");
     for(i=dir;i<(dir+MIN(skill->level,SIZEOFFREE));i++) {
 	x = pl->x+freearr_x[i];
 	y = pl->y+freearr_y[i];
@@ -1144,24 +927,15 @@ int singing(object *pl, int dir, object *skill) {
 	    chance=skill->level*2+(pl->stats.Cha-5-tmp->stats.Int)/2;
 	    if(chance && tmp->level*2<random_roll(0, chance-1, pl, PREFER_HIGH)) {
 		SET_FLAG(tmp,FLAG_UNAGGRESSIVE);
-        query_name(tmp, name, MAX_BUF);
-		draw_ext_info_format(NDI_UNIQUE, 0,pl,
-				     MSG_TYPE_SKILL, MSG_TYPE_SKILL_SUCCESS,
-				     "You calm down the %s",
-				     "You calm down the %s",
-				     name);
-
+		new_draw_info_format(NDI_UNIQUE, 0,pl,
+		     "You calm down the %s\n",query_name(tmp));
 		/* Give exp only if they are not aware */
 		if(!QUERY_FLAG(tmp,FLAG_NO_STEAL))
 		    exp += calc_skill_exp(pl,tmp, skill);
 		SET_FLAG(tmp,FLAG_NO_STEAL);
 	    } else {
-            query_name(tmp, name, MAX_BUF);
-                 draw_ext_info_format(NDI_UNIQUE, 0,pl,
-				      MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-				      "Too bad the %s isn't listening!",
-				      "Too bad the %s isn't listening!",
-				      name);
+                 new_draw_info_format(NDI_UNIQUE, 0,pl,
+                 	"Too bad the %s isn't listening!\n",query_name(tmp));
 		SET_FLAG(tmp,FLAG_NO_STEAL);
 	    }
 	}
@@ -1169,16 +943,10 @@ int singing(object *pl, int dir, object *skill) {
     return exp;
 }
 
-/**
- * Checks for traps on the spaces around the player or in certain objects.
- *
- * @param pl
- * player searching.
- * @param skill
- * find trap skill object.
- * @return
- * experience gained for finding traps.
+/* The find_traps skill (aka, search).  Checks for traps
+ * on the spaces or in certain objects
  */
+
 int find_traps (object *pl, object *skill) {
     object *tmp,*tmp2;
     int i,expsum=0, mflags;
@@ -1228,23 +996,15 @@ int find_traps (object *pl, object *skill) {
 	    }
 	}
     }
-    draw_ext_info(NDI_BLACK, 0, pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_SUCCESS,
-		  "You search the area.", NULL);
+    new_draw_info(NDI_BLACK, 0, pl, "You search the area.");
     return expsum;
 }
 
-/**
- * This skill will disarm any previously discovered trap.
+/* remove_trap() - This skill will disarm any previously discovered trap
  * the algorithm is based (almost totally) on the old command_disarm() - b.t.
- *
- * @param op
- * player disarming. Must be on a map.
- * @param skill
- * disarming skill.
- * @return
- * experience gained to disarm.
  */
-int remove_trap (object *op, object *skill) {
+
+int remove_trap (object *op, int dir, object *skill) {
     object *tmp,*tmp2;
     int i,success=0,mflags;
     mapstruct *m;
@@ -1294,31 +1054,21 @@ int remove_trap (object *op, object *skill) {
 }
 
 
-/**
- * Praying skill handling.
- *
- * When this skill is called from do_skill(), it allows
+/* pray() - when this skill is called from do_skill(), it allows
  * the player to regain lost grace points at a faster rate. -b.t.
- *
  * This always returns 0 - return value is used by calling function
  * such that if it returns true, player gets exp in that skill.  This
  * the effect here can be done on demand, we probably don't want to
  * give infinite exp by returning true in any cases.
- *
- * @param pl
- * object praying, should be a player.
- * @param skill
- * praying skill.
- * @return
- * 0.
  */
+
 int pray (object *pl, object *skill) {
     char buf[MAX_BUF];
     object *tmp;
 
     if(pl->type!=PLAYER) return 0;
 
-    snprintf(buf, sizeof(buf), "You pray.");
+    strcpy(buf,"You pray.");
 
     /* Check all objects - we could stop at floor objects,
      * but if someone buries an altar, I don't see a problem with
@@ -1328,14 +1078,13 @@ int pray (object *pl, object *skill) {
     for (tmp=pl->below; tmp!=NULL; tmp=tmp->below) {
 	/* Only if the altar actually belongs to someone do you get special benefits */
 	if(tmp && tmp->type==HOLY_ALTAR && tmp->other_arch) {
-	    snprintf(buf, sizeof(buf), "You pray over the %s.",tmp->name);
+	    sprintf(buf,"You pray over the %s.",tmp->name);
 	    pray_at_altar(pl,tmp, skill);
 	    break;  /* Only pray at one altar */
 	}
     }
 
-    draw_ext_info(NDI_BLACK,0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_SUCCESS,
-		  buf, buf);
+    new_draw_info(NDI_BLACK,0,pl,buf);
 
     if(pl->stats.grace < pl->stats.maxgrace) {
 	pl->stats.grace++;
@@ -1344,22 +1093,13 @@ int pray (object *pl, object *skill) {
     return 0;
 }
 
-/**
- * Meditation skill handling.
- *
- * This skill allows the player to regain a few sp or hp for a
- * brief period of concentration.
- * The amount of time needed to concentrate and the # of points regained is dependant on
- * the level of the user.
- *
- * Depending on the level, the player can wear armour or not.
- * @author b.t. thomas@astro.psu.edu
- *
- * @param pl
- * livng meditating, should be a player.
- * @param skill
- * meditation skill.
+/* This skill allows the player to regain a few sp or hp for a
+ * brief period of concentration. No armour or weapons may be
+ * wielded/applied for this to work. The amount of time needed
+ * to concentrate and the # of points regained is dependant on
+ * the level of the user. - b.t. thomas@astro.psu.edu
  */
+
 void meditate (object *pl, object *skill) {
     object *tmp;
 
@@ -1367,8 +1107,8 @@ void meditate (object *pl, object *skill) {
 
     /* check if pl has removed encumbering armour and weapons */
     if(QUERY_FLAG(pl,FLAG_READY_WEAPON) && (skill->level<6)) {
-        draw_ext_info(NDI_UNIQUE,0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
-		      "You can't concentrate while wielding a weapon!", NULL);
+        new_draw_info(NDI_UNIQUE,0,pl,
+		      "You can't concentrate while wielding a weapon!\n");
 	return;
     } else {
 	for(tmp=pl->inv;tmp;tmp=tmp->below)
@@ -1378,8 +1118,8 @@ void meditate (object *pl, object *skill) {
 		|| (tmp->type==BOOTS && skill->level<4)
 		|| (tmp->type==GLOVES && skill->level<2) )
   	     && QUERY_FLAG(tmp,FLAG_APPLIED)) {
-         	draw_ext_info(NDI_UNIQUE,0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
-		      "You can't concentrate while wearing so much armour!", NULL);
+         	new_draw_info(NDI_UNIQUE,0,pl,
+		  "You can't concentrate while wearing so much armour!\n");
 	  	return;
 	  }
     }
@@ -1392,8 +1132,7 @@ void meditate (object *pl, object *skill) {
      * meditate. (see 'factor' variable for what sets the amount of time)
      */
 
-    draw_ext_info(NDI_BLACK,0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_SUCCESS,
-		  "You meditate.", NULL);
+    new_draw_info(NDI_BLACK,0,pl, "You meditate.");
 
     if(pl->stats.sp < pl->stats.maxsp) {
 	pl->stats.sp++;
@@ -1404,22 +1143,10 @@ void meditate (object *pl, object *skill) {
     }
 }
 
-/**
- * This routine allows players to inscribe messages in
+/* write_note() - this routine allows players to inscribe messages in
  * ordinary 'books' (anything that is type BOOK). b.t.
- *
- * @param pl
- * player writing.
- * @param item
- * book to write into.
- * @param msg
- * message to write.
- * @param skill
- * writing skill object.
- * @return
- * experience gained for writing.
- * @todo assert() instead of simple check.
  */
+
 static int write_note(object *pl, object *item, const char *msg, object *skill) {
     char buf[BOOK_BUF];
     object *newBook = NULL;
@@ -1428,15 +1155,13 @@ static int write_note(object *pl, object *item, const char *msg, object *skill) 
     if(!item||item->type!=BOOK) return 0;
 
     if(!msg) {
-	draw_ext_info_format(NDI_UNIQUE,0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
-		      "No message to write!\nUsage: use_skill %s <message>",
-		      "No message to write!\nUsage: use_skill %s <message>",
+	new_draw_info(NDI_UNIQUE,0,pl,"No message to write!");
+	new_draw_info_format(NDI_UNIQUE,0,pl,"Usage: use_skill %s <message>",
 		     skill->skill);
 	return 0;
     }
     if (strcasestr_local(msg, "endmsg")) {
-	draw_ext_info(NDI_UNIQUE,0,pl,MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
-		      "Trying to cheat now are we?", NULL);
+	new_draw_info(NDI_UNIQUE,0,pl,"Trying to cheat now are we?");
 	return 0;
     }
 
@@ -1446,11 +1171,11 @@ static int write_note(object *pl, object *item, const char *msg, object *skill) 
 
     buf[0] = 0;
     if(!book_overflow(item->msg,msg,BOOK_BUF)) { /* add msg string to book */
-        if(item->msg)
-            snprintf(buf, sizeof(buf), "%s%s\n", item->msg, msg);
-        else
-            snprintf(buf, sizeof(buf), "%s\n", msg);
+	if(item->msg)
+	    strcpy(buf,item->msg);
 
+	strcat(buf,msg);
+	strcat(buf,"\n"); /* new msg needs a LF */
 	if(item->nrof > 1) {
 	    newBook = get_object();
 	    copy_object(item, newBook);
@@ -1467,83 +1192,62 @@ static int write_note(object *pl, object *item, const char *msg, object *skill) 
              */
             /*	    esrv_send_item(pl, item);*/
 	}
-    query_short_name(item, buf, BOOK_BUF);
-        draw_ext_info_format(NDI_UNIQUE,0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_SUCCESS,
-			     "You write in the %s.",
-			     "You write in the %s.",
-                 buf );
+        new_draw_info_format(NDI_UNIQUE,0,pl, "You write in the %s.",
+                             query_short_name(item));
 	return strlen(msg);
     } else
-    {
-        query_short_name(item, buf, BOOK_BUF);
-        draw_ext_info_format(NDI_UNIQUE,0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
+        new_draw_info_format(NDI_UNIQUE,0,pl,
                              "Your message won't fit in the %s!",
-                             "Your message won't fit in the %s!",
-                             buf);
-    }
+                             query_short_name(item));
+
     return 0;
 }
 
-/**
- * This routine allows players to inscribe spell scrolls
+/* write_scroll() - this routine allows players to inscribe spell scrolls
  * of spells which they know. Backfire effects are possible with the
  * severity of the backlash correlated with the difficulty of the scroll
  * that is attempted. -b.t. thomas@astro.psu.edu
- *
- * @param pl
- * player writing a scroll.
- * @param scroll
- * object to write into.
- * @param skill
- * writing skill.
- * @return
- * experience gained.
  */
+
 static int write_scroll (object *pl, object *scroll, object *skill) {
     int success=0,confused=0, grace_cost = 0;
     object *newscroll, *chosen_spell, *tmp;
 
     /* this is a sanity check */
     if (scroll->type!=SCROLL) {
-        draw_ext_info(NDI_UNIQUE,0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
-            "A spell can only be inscribed into a scroll!", NULL);
+        new_draw_info(NDI_UNIQUE,0,pl,
+            "A spell can only be inscribed into a scroll!");
         return 0;
     }
 
     /* Check if we are ready to attempt inscription */
     chosen_spell=pl->contr->ranges[range_magic];
     if(!chosen_spell) {
-        draw_ext_info(NDI_UNIQUE,0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
-            "You need a spell readied in order to inscribe!", NULL);
+        new_draw_info(NDI_UNIQUE,0,pl,
+            "You need a spell readied in order to inscribe!");
         return 0;
     }
     /* grace can become negative, we don't want a sp spell to block writing. */
     grace_cost = SP_level_spellpoint_cost(pl,chosen_spell,SPELL_GRACE);
     if(grace_cost > 0 && grace_cost > pl->stats.grace) {
-        draw_ext_info_format(NDI_UNIQUE,0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-            "You don't have enough grace to write a scroll of %s.",
+        new_draw_info_format(NDI_UNIQUE,0,pl,
             "You don't have enough grace to write a scroll of %s.",
             chosen_spell->name);
         return 0;
     }
     if(SP_level_spellpoint_cost(pl,chosen_spell,SPELL_MANA) > pl->stats.sp) {
-        draw_ext_info_format(NDI_UNIQUE,0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-            "You don't have enough mana to write a scroll of %s.",
+        new_draw_info_format(NDI_UNIQUE,0,pl,
             "You don't have enough mana to write a scroll of %s.",
             chosen_spell->name);
         return 0;
     }
     /* Prevent an abuse: write a spell you're denied with, then cast it from the
-     * written scroll - gros, 28th July 2006
-     */
+    * written scroll - gros, 28th July 2006 */
     if (chosen_spell->path_attuned & pl->path_denied && settings.allow_denied_spells_writing == 0)
     {
-        char name[MAX_BUF];
-        query_name(chosen_spell, name, MAX_BUF);
-        draw_ext_info_format(NDI_UNIQUE,0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
+        new_draw_info_format(NDI_UNIQUE,0,pl,
             "The simple idea of writing a scroll of %s makes you sick !",
-            "The simple idea of writing a scroll of %s makes you sick !",
-            name);
+            query_name(chosen_spell));
         return 0;
     }
 
@@ -1553,14 +1257,11 @@ static int write_scroll (object *pl, object *scroll, object *skill) {
      */
     if((scroll->stats.sp || scroll->inv) &&
        random_roll(0, scroll->level*2, pl, PREFER_LOW)>skill->level) {
-	    draw_ext_info(NDI_UNIQUE,0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-		"Oops! You accidently read it while trying to write on it.", NULL);
+	    new_draw_info_format(NDI_UNIQUE,0,pl,
+		"Oops! You accidently read it while trying to write on it.");
 	    manual_apply(pl,scroll,0);
 	    return 0;
     }
-
-    if (execute_event(scroll, EVENT_TRIGGER, pl, chosen_spell, NULL, 0) != 0)
-        return 0;
 
     /* ok, we are ready to try inscription */
     if(QUERY_FLAG(pl,FLAG_CONFUSED)) confused = 1;
@@ -1581,15 +1282,15 @@ static int write_scroll (object *pl, object *scroll, object *skill) {
 
 	if(!confused) {
 	    newscroll->level= MAX(skill->level, chosen_spell->level);
-	    draw_ext_info(NDI_UNIQUE,0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_SUCCESS,
-		"You succeed in writing a new scroll.", NULL);
+	    new_draw_info(NDI_UNIQUE,0,pl,
+		"You succeed in writing a new scroll.");
 	} else {
 	    chosen_spell = find_random_spell_in_ob(pl, NULL);
 	    if (!chosen_spell) return 0;
 
 	    newscroll->level= MAX(skill->level, chosen_spell->level);
-	    draw_ext_info(NDI_UNIQUE,0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-		"In your confused state, you write down some odd spell.", NULL);
+	    new_draw_info(NDI_UNIQUE,0,pl,
+		"In your confused state, you write down some odd spell.");
 	}
 
 	if (newscroll->inv) {
@@ -1628,8 +1329,8 @@ static int write_scroll (object *pl, object *scroll, object *skill) {
     } else { /* Inscription has failed */
 
 	if(chosen_spell->level>skill->level || confused) { /*backfire!*/
-	    draw_ext_info(NDI_UNIQUE,0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-		  "Ouch! Your attempt to write a new scroll strains your mind!", NULL);
+	    new_draw_info(NDI_UNIQUE,0,pl,
+		  "Ouch! Your attempt to write a new scroll strains your mind!");
 	    if(random_roll(0, 1, pl, PREFER_LOW)==1)
 		drain_specific_stat(pl,4);
 	    else {
@@ -1637,30 +1338,16 @@ static int write_scroll (object *pl, object *scroll, object *skill) {
 		return (-30*chosen_spell->level);
 	    }
 	} else if(random_roll(0, pl->stats.Int-1, pl, PREFER_HIGH) < 15) {
-	    draw_ext_info(NDI_UNIQUE,0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-		"Your attempt to write a new scroll rattles your mind!", NULL);
+	    new_draw_info(NDI_UNIQUE,0,pl,
+		"Your attempt to write a new scroll rattles your mind!");
 	    confuse_player(pl,pl,99);
 	} else
-	    draw_ext_info(NDI_UNIQUE,0,pl,MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-			  "You fail to write a new scroll.", NULL);
+	    new_draw_info(NDI_UNIQUE,0,pl,"You fail to write a new scroll.");
     }
     return 0;
 }
 
-/**
- * Writing skill handling.
- *
- * Wrapper for write_note() and write_scroll().
- *
- * @param pl
- * player writing.
- * @param params
- * message to inscribe.
- * @param skill
- * writing skill.
- * @return
- * experience gained for using the skill.
- */
+/* write_on_item() - wrapper for write_note and write_scroll */
 int write_on_item (object *pl,const char *params, object *skill) {
     object *item;
     const char *string=params;
@@ -1677,8 +1364,8 @@ int write_on_item (object *pl,const char *params, object *skill) {
 
     /* Need to be able to read before we can write! */
     if(!find_skill_by_name(pl,skat->clone.skill)) {
-	draw_ext_info(NDI_UNIQUE,0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_MISSING,
-	   "You must learn to read before you can write!", NULL);
+	new_draw_info(NDI_UNIQUE,0,pl,
+	   "You must learn to read before you can write!");
 	return 0;
     }
 
@@ -1689,20 +1376,17 @@ int write_on_item (object *pl,const char *params, object *skill) {
 
     /* find an item of correct type to write on */
     if ( !(item = find_marked_object(pl))){
-	draw_ext_info(NDI_UNIQUE,0,pl,MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
-		      "You don't have any marked item to write on.", NULL);
+	new_draw_info(NDI_UNIQUE,0,pl,"You don't have any marked item to write on.");
 	return 0;
     }
 
     if(QUERY_FLAG(item,FLAG_UNPAID)) {
-	draw_ext_info(NDI_UNIQUE,0,pl, MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
-	      "You had better pay for that before you write on it.", NULL);
+	new_draw_info(NDI_UNIQUE,0,pl,
+	      "You had better pay for that before you write on it.");
 	return 0;
     }
     if (msgtype != item->type) {
-	draw_ext_info_format(NDI_UNIQUE,0,pl,MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
-			     "You have no %s to write on",
-			     "You have no %s to write on",
+	new_draw_info_format(NDI_UNIQUE,0,pl,"You have no %s to write on",
                          msgtype==BOOK ? "book" : "scroll");
 	return 0;
     }
@@ -1717,26 +1401,17 @@ int write_on_item (object *pl,const char *params, object *skill) {
 
 
 
-/**
- * Find an object to throw.
- * If we request an object, then
+/* find_throw_ob() - if we request an object, then
  * we search for it in the inventory of the owner (you've
  * got to be carrying something in order to throw it!).
  * If we didnt request an object, then the top object in inventory
  * (that is "throwable", ie no throwing your skills away!)
  * is the object of choice. Also check to see if object is
  * 'throwable' (ie not applied cursed obj, worn, etc).
- *
- * @param op
- * object wishing to throw.
- * @param request
- * requested item to throw.
- * @return
- * throwable object, NULL if none suitable found.
  */
+
 static object *find_throw_ob( object *op, const char *request ) {
     object *tmp;
-    char name[MAX_BUF];
 
     if(!op) { /* safety */
 	LOG(llevError,"find_throw_ob(): confused! have a NULL thrower!\n");
@@ -1758,9 +1433,8 @@ static object *find_throw_ob( object *op, const char *request ) {
             /* can't toss invisible or inv-locked items */
             if (tmp->invisible || QUERY_FLAG(tmp, FLAG_INV_LOCKED))
                 continue;
-            query_name(tmp, name, MAX_BUF);
             if (!request
-            || !strcmp(name, request)
+            || !strcmp(query_name(tmp), request)
             || !strcmp(tmp->name, request))
                 break;
         }
@@ -1774,19 +1448,12 @@ static object *find_throw_ob( object *op, const char *request ) {
 
     if (QUERY_FLAG(tmp,FLAG_APPLIED)) {
 	if(tmp->type!=WEAPON) {
-        query_name(tmp, name, MAX_BUF);
-	    draw_ext_info_format(NDI_UNIQUE, 0,op, MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
-				 "You can't throw %s.",
-				 "You can't throw %s.",
-				 name);
+	    new_draw_info_format(NDI_UNIQUE, 0,op,
+			 "You can't throw %s.",query_name(tmp));
 	    tmp = NULL;
 	} else if (QUERY_FLAG(tmp,FLAG_CURSED)||QUERY_FLAG(tmp,FLAG_DAMNED)) {
-        query_name(tmp, name, MAX_BUF);
-	    draw_ext_info_format(NDI_UNIQUE, 0,op,
-				 MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-				 "The %s sticks to your hand!",
-				 "The %s sticks to your hand!",
-				 name);
+	    new_draw_info_format(NDI_UNIQUE, 0,op,
+				 "The %s sticks to your hand!",query_name(tmp));
 	    tmp = NULL;
 	} else {
 	    if (apply_special (op, tmp, AP_UNAPPLY | AP_NO_MERGE)) {
@@ -1795,11 +1462,7 @@ static object *find_throw_ob( object *op, const char *request ) {
 	    }
 	}
     } else if (QUERY_FLAG(tmp, FLAG_UNPAID)) {
-        query_name(tmp, name, MAX_BUF);
-	draw_ext_info_format(NDI_UNIQUE, 0, op, MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
-			     "You should pay for the %s first.",
-			     "You should pay for the %s first.",
-			     name);
+	new_draw_info_format(NDI_UNIQUE, 0, op, "You should pay for the %s first.", query_name(tmp));
 	tmp = NULL;
     }
 
@@ -1810,15 +1473,9 @@ static object *find_throw_ob( object *op, const char *request ) {
     return tmp;
 }
 
-/**
- * We construct the 'carrier' object in
+/* make_throw_ob() We construct the 'carrier' object in
  * which we will insert the object that is being thrown.
  * This combination  becomes the 'thrown object'. -b.t.
- *
- * @param orig
- * object to wrap.
- * @return
- * object to throw.
  */
 
 static object *make_throw_ob (object *orig) {
@@ -1841,48 +1498,30 @@ static object *make_throw_ob (object *orig) {
 }
 
 
-/**
- * Op throws any object toss_item. This code
+/* do_throw() - op throws any object toss_item. This code
  * was borrowed from fire_bow.
- *
- * @param op
- * living thing throwing something.
- * @param part
- * part of op throwing.
- * @param toss_item
- * item thrown.
- * @param dir
- * direction to throw.
- * @param skill
- * throwing skill.
- * @retval 0
- * skill use failed.
- * @retval 1
- * skill was successfully used.
- * @todo this messy function should probably be simplified.
+ * Returns 1 if skill was successfully used, 0 if not
  */
+
 static int do_throw(object *op, object *part, object *toss_item, int dir, object *skill) {
     object *throw_ob=toss_item, *left=NULL;
     tag_t left_tag;
-    int eff_str = 0,str=op->stats.Str,dam=0;
+    int eff_str = 0,maxc,str=op->stats.Str,dam=0;
     int pause_f,weight_f=0, mflags;
     float str_factor=1.0,load_factor=1.0,item_factor=1.0;
     mapstruct *m;
     sint16  sx, sy;
     tag_t tag;
-    char name[MAX_BUF];
 
     if(throw_ob==NULL) {
 	if(op->type==PLAYER) {
-	    draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
-			  "You have nothing to throw.", NULL);
+	    new_draw_info(NDI_UNIQUE, 0,op,"You have nothing to throw.");
 	}
 	return 0;
     }
     if (QUERY_FLAG(throw_ob, FLAG_STARTEQUIP)) {
 	if (op->type==PLAYER) {
-	    draw_ext_info(NDI_UNIQUE, 0, op, MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
-			  "The gods won't let you throw that.", NULL);
+	    new_draw_info(NDI_UNIQUE, 0, op, "The gods won't let you throw that.");
 	}
 	return 0;
     }
@@ -1898,24 +1537,16 @@ static int do_throw(object *op, object *part, object *toss_item, int dir, object
     }
 
     /* the more we carry, the less we can throw. Limit only on players */
-    /* This logic is basically grabbed right out of fix_object() */
-    if (op->type == PLAYER && 
-	op->carrying > (weight_limit[op->stats.Str] * FREE_PLAYER_LOAD_PERCENT) &&
-        (FREE_PLAYER_LOAD_PERCENT < 1.0)) {
-
-	 int extra_weight = op->carrying - weight_limit[op->stats.Str] * FREE_PLAYER_LOAD_PERCENT;
-         load_factor = (float) extra_weight / (float)(weight_limit[op->stats.Str] * (1.0 - FREE_PLAYER_LOAD_PERCENT));
-    }
+    maxc=max_carry[str]*1000;
+    if(op->carrying>maxc&&op->type==PLAYER)
+	load_factor = (float)maxc/(float) op->carrying;
 
     /* lighter items are thrown harder, farther, faster */
     if(throw_ob->weight>0)
-        item_factor = (float) (weight_limit[op->stats.Str] * FREE_PLAYER_LOAD_PERCENT)/(float) (3.0 * throw_ob->weight);
+	item_factor = (float) maxc/(float) (3.0 * throw_ob->weight);
     else { /* 0 or negative weight?!? Odd object, can't throw it */
-        query_name(throw_ob, name, MAX_BUF);
-	draw_ext_info_format(NDI_UNIQUE, 0,op, MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
-			     "You can't throw %s.",
-			     "You can't throw %s.",
-			     name);
+	new_draw_info_format(NDI_UNIQUE, 0,op,"You can't throw %s.\n",
+			     query_name(throw_ob));
 	return 0;
     }
 
@@ -1928,7 +1559,7 @@ static int do_throw(object *op, object *part, object *toss_item, int dir, object
 
 #ifdef DEBUG_THROW
     LOG(llevDebug,"%s carries %d, eff_str=%d\n",op->name,op->carrying,eff_str);
-    LOG(llevDebug," max_c=%d, item_f=%f, load_f=%f, str=%d\n",(weight_limit[op->stats.Str] * FREE_PLAYER_LOAD_PERCENT),
+    LOG(llevDebug," max_c=%d, item_f=%f, load_f=%f, str=%d\n",maxc,
         item_factor,load_factor,op->stats.Str);
     LOG(llevDebug," str_factor=%f\n",str_factor);
     LOG(llevDebug," item %s weight= %d\n",throw_ob->name,throw_ob->weight);
@@ -1949,24 +1580,16 @@ static int do_throw(object *op, object *part, object *toss_item, int dir, object
 	insert_ob_in_map(throw_ob,part->map,op,0);
 	if(op->type==PLAYER) {
 	    if(eff_str<=1) {
-            query_name(throw_ob, name, MAX_BUF);
-		draw_ext_info_format(NDI_UNIQUE, 0,op,
-			     MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-			     "Your load is so heavy you drop %s to the ground.",
-			     "Your load is so heavy you drop %s to the ground.",
-			     name);
+		new_draw_info_format(NDI_UNIQUE, 0,op,
+			"Your load is so heavy you drop %s to the ground.",
+			query_name(throw_ob));
 	    }
 	    else if(!dir) {
-            query_name(throw_ob, name, MAX_BUF);
-		draw_ext_info_format(NDI_UNIQUE, 0,op,
-				     MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-				     "You throw %s at the ground.",
-				     "You throw %s at the ground.",
-				     name);
+		new_draw_info_format(NDI_UNIQUE, 0,op,"You throw %s at the ground.",
+				     query_name(throw_ob));
 	    }
 	    else
-		draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_SKILL, MSG_TYPE_SKILL_FAILURE,
-			      "Something is in the way.", NULL);
+		new_draw_info(NDI_UNIQUE, 0,op,"Something is in the way.");
 	}
 	return 0;
     } /* if object can't be thrown */
@@ -1978,9 +1601,17 @@ static int do_throw(object *op, object *part, object *toss_item, int dir, object
      * and returns NULL. We must use 'left' then
      */
 
-    if((throw_ob = get_split_ob(throw_ob, 1, NULL, 0))==NULL) {
+    if((throw_ob = get_split_ob(throw_ob, 1))==NULL) {
 	throw_ob = left;
 	remove_ob(left);
+	if (op->type==PLAYER)
+	    esrv_del_item(op->contr, left->count);
+    }
+    else if (op->type==PLAYER) {
+	if (was_destroyed (left, left_tag))
+	    esrv_del_item(op->contr, left_tag);
+	else
+	    esrv_update_item(UPD_NROF, op, left);
     }
 
     /* special case: throwing powdery substances like dust, dirt */
@@ -2099,7 +1730,11 @@ static int do_throw(object *op, object *part, object *toss_item, int dir, object
     throw_ob->move_type = MOVE_FLY_LOW;
     throw_ob->move_on = MOVE_FLY_LOW | MOVE_WALK;
 
-    /* Lauwenmark - Now we can call the associated script_throw event (if any) */
+#if 0
+    /* need to put in a good sound for this */
+    play_sound_map(op->map, op->x, op->y, SOUND_THROW_OBJ);
+#endif
+/* Lauwenmark - Now we can call the associated script_throw event (if any) */
     execute_event(throw_ob, EVENT_THROW,op,NULL,NULL,SCRIPT_FIX_ACTIVATOR);
 #ifdef DEBUG_THROW
     LOG(llevDebug," pause_f=%d \n",pause_f);
@@ -2111,27 +1746,10 @@ static int do_throw(object *op, object *part, object *toss_item, int dir, object
     tag = throw_ob->count;
     insert_ob_in_map(throw_ob,part->map,op,0);
     if (!was_destroyed (throw_ob, tag))
-        ob_process(throw_ob);
+        move_arrow(throw_ob);
     return 1;
 }
 
-/**
- * Throwing skill handling.
- * @param op
- * object throwing.
- * @param part
- * actual part of op throwing.
- * @param dir
- * direction to throw into.
- * @param params
- * optional message, used to find object to throw.
- * @param skill
- * throwing skill.
- * @retval 0
- * skill use failed.
- * @retval 1
- * skill was successfully used.
- */
 int skill_throw (object *op, object *part, int dir, const char *params, object *skill) {
     object *throw_ob;
 

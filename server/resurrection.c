@@ -26,13 +26,6 @@
     The authors can be reached via e-mail at crossfire-devel@real-time.com
 */
 
-/**
- * @file
- * Resurrection / raise dead related code.
- * This is used on servers with permanent death on.
- * @todo document permanent death and death :)
- */
-
 /*  the contents of this file were create solely by peterm@soda.berkeley.edu
     all of the above disclaimers apply.  */
 
@@ -42,23 +35,19 @@
 #endif
 #include <spells.h>
 #include <errno.h>
+#ifdef sequent
+/* stoopid sequent includes don't do this like they should */
+extern char * sys_errlist[];
+extern int sys_nerr;
+#endif
+extern char **classname;
+extern object *objects;
 
 static int resurrection_fails(int levelcaster,int leveldead);
 
 
-/**
- * Resurrect a player. This may change the player's race, or reduce experience.
- *
- * @param op
- * who is resurrecting.
- * @param playername
- * the name of the player to resurrect.
- * @param spell
- * spell that was used to resurrect.
- * @retval 0
- * resurrection failed.
- * @retval 1
- * playername is living again.
+/*  name of the person to resurrect and which spell was used
+ * to resurrect  
  */
 static int resurrect_player(object *op,char *playername,object *spell)
 {
@@ -106,27 +95,21 @@ static int resurrect_player(object *op,char *playername,object *spell)
     strcat(oldname,".dead");
 
     if(! (deadplayer=fopen(oldname,"r"))) {
-	draw_ext_info_format(NDI_UNIQUE, 0, op, MSG_TYPE_SPELL, MSG_TYPE_SPELL_FAILURE,
-		     "The soul of %s cannot be reached.",
-		     "The soul of %s cannot be reached.",
-		     playername);
+	new_draw_info_format(NDI_UNIQUE, 0, op,
+	     "The soul of %s cannot be reached.",playername);
 	return 0;
     }
 
     if(!access(newname,0)) {
-	draw_ext_info_format(NDI_UNIQUE, 0, op, MSG_TYPE_SPELL, MSG_TYPE_SPELL_FAILURE,
-			     "The soul of %s has already been reborn!",
-			     "The soul of %s has already been reborn!",
-			     playername);
+	new_draw_info_format(NDI_UNIQUE, 0, op,
+	     "The soul of %s has already been reborn!",playername);
 	fclose(deadplayer);
 	return 0;
     }
 
     if(! (liveplayer=fopen(newname,"w"))) {
-	draw_ext_info_format(NDI_UNIQUE, 0, op, MSG_TYPE_SPELL, MSG_TYPE_SPELL_FAILURE,
-		     "The soul of %s cannot be re-embodied at the moment.",
-		     "The soul of %s cannot be re-embodied at the moment.",
-		     playername);
+	new_draw_info_format(NDI_UNIQUE, 0, op,
+		"The soul of %s cannot be re-embodied at the moment.",playername);
 	LOG(llevError,"Cannot write player in resurrect_player!\n");
 	fclose(deadplayer);
 	return 0;
@@ -156,34 +139,18 @@ static int resurrect_player(object *op,char *playername,object *spell)
     fclose(liveplayer);
     fclose(deadplayer);
     unlink(oldname);
-    draw_ext_info_format(NDI_UNIQUE, 0, op, MSG_TYPE_SPELL, MSG_TYPE_SPELL_SUCCESS,
-			 "%s lives again!",
-			 "%s lives again!",
-			 playername);
+    new_draw_info_format(NDI_UNIQUE, 0, op,
+	"%s lives again!",playername);
 
     return 1;
 }
 
 
-/**
- * This handles the raise dead / resurrection spells. So try to revive a player.
- * 
- * @author peterm and mehlhaff@soda.berkeley.edu
- *
- * @param op
- * who is doing the resurrecting.
- * @param caster
- * what is casting the spell (op or a scroll/rod).
- * @param spell
- * spell object.
- * @param dir
- * direction the spell is cast.
- * @param arg
- * name of the player to revive.
- * @retval 0
- * spell had no effect, or player couldn't revive.
- * @retval 1
- * player revived, or some nasty things happened.
+/* raise_dead by peterm and mehlhaff@soda.berkeley.edu
+ * op  --  who is doing the resurrecting
+ * spell - spell object 
+ * dir  --  direction the spell is cast
+ * corpseobj - corpse to raise - can be null, in which case this function will find it
  */
 int cast_raise_dead_spell(object *op, object *caster, object *spell, int dir, const char *arg)
 {
@@ -197,10 +164,7 @@ int cast_raise_dead_spell(object *op, object *caster, object *spell, int dir, co
 
     if (spell->last_heal) {
 	if (!arg) {
-	    draw_ext_info_format(NDI_UNIQUE, 0,op,MSG_TYPE_SPELL, MSG_TYPE_SPELL_FAILURE,
-				 "Cast %s on who?",
-				 "Cast %s on who?",
-				 spell->name);
+	    new_draw_info_format(NDI_UNIQUE, 0,op,"Cast %s on who?", spell->name);
 	    return 0;
 	}
 	strcpy(name_to_resurrect, arg);
@@ -222,8 +186,7 @@ int cast_raise_dead_spell(object *op, object *caster, object *spell, int dir, co
 	}
 
 	if(temp == NULL) {
-	    draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_SPELL, MSG_TYPE_SPELL_FAILURE,
-			  "You need a body for this spell.", NULL);
+	    new_draw_info(NDI_UNIQUE, 0,op, "You need a body for this spell.");
 	    return 0;
 	}
 	strcpy(name_to_resurrect, temp->name );
@@ -261,36 +224,20 @@ int cast_raise_dead_spell(object *op, object *caster, object *spell, int dir, co
     return 1;
 }
 
-/**
- * Will the resurrection succeed?
- *
- * Rules:
- * - equal in level, 50% success.
- * - +5 % for each level below, -5% for each level above.
- * - minimum 20%
- *
- * @param levelcaster
- * level at which the spell is cast.
- * @param leveldead
- * dead player's level.
- * @return
- * 0 if succees, 1 if failure.
- */
+
 static int resurrection_fails(int levelcaster,int leveldead)
 {
     int chance=9;
+    /*  scheme:  equal in level, 50% success.
+     * +5 % for each level below, -5% for each level above.
+     * minimum 20%
+     */
     chance+=levelcaster-leveldead;
     if(chance<4) chance=4;
     if(chance>rndm(0, 19)) return 0;  /* resurrection succeeds */
     return 1;
 }
 
-/**
- * Kill a player on a permanent death server with resurrection.
- *
- * @param op
- * player to kill.
- */
 void dead_player(object *op)
 {
     char filename[MAX_BUF];
@@ -307,6 +254,37 @@ void dead_player(object *op)
     strcat(newname,".dead");
 
     if(rename(filename,newname) != 0) {
-	LOG(llevError, "Cannot rename dead player's file %s into %s: %s\n", filename, newname, strerror_local(errno, path, sizeof(path)));
+	LOG(llevError, "Cannot rename dead player's file %s into %s: %s\n", filename, newname, strerror_local(errno));
     }
 }
+
+
+
+#if 0
+/* dead_character & dead_player_exists are no longer used - should perhaps be
+ * removed.  MSW 2006-06-02
+ */
+
+static void dead_character(const char *name) {
+    char buf[MAX_BUF];
+    char buf2[MAX_BUF];
+
+    sprintf(buf,"%s/%s/%s/%s.pl",settings.localdir,settings.playerdir,name, name);
+    /*  peterm:  create a .dead filename....  ***.pl.dead  */
+    strcpy(buf2,buf);
+    strcat(buf,".dead");
+    if(rename(buf2,buf)== -1){
+	LOG(llevError, "Cannot rename dead player's file %s into %s: %s\n", buf2, buf, strerror_local(errno));
+    }
+}
+
+
+static int dead_player_exists(const char *name) {
+    char buf[MAX_BUF];
+
+    sprintf(buf,"%s/%s/%s/%s",settings.localdir,settings.playerdir,name, name);
+    strcat(buf,".pl.dead");
+    return !(access(buf,0));
+}
+
+#endif 

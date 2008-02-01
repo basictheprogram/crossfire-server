@@ -77,7 +77,7 @@ typedef struct
 } CFanimationHook;
 extern CFanimationHook animationbox[];
 extern int animationcount;
-int get_boolean (char* strg,int* bl);
+int get_boolean (char* string,int* bool);
 
 typedef struct _cfpcontext
 {

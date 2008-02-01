@@ -26,9 +26,8 @@
     The authors can be reached via e-mail at crossfire-devel@real-time.com
 */
 
-/**
- * @file
- * Range related commands (casting, shooting, throwing, etc.).
+/* This file deals with range related commands (casting, shooting,
+ * throwing, etc.
  */
 
 #include <global.h>
@@ -40,62 +39,25 @@
 #include <newclient.h>
 #include <commands.h>
 
-/**
- * 'invoke' command, fires a spell immediately.
- *
- * @param op
- * player.
- * @param params
- * spell.
- * @return
- * 1 for success, 0 for failure.
- */
+
 int command_invoke(object *op, char *params)
 {
 	return command_cast_spell(op, params, 'i');
 }
 
-/**
- * 'cast' command, prepares a spell for laster casting.
- *
- * @param op
- * player.
- * @param params
- * spell.
- * @return
- * 1 for success, 0 for failure.
- */
 int command_cast(object *op, char *params)
 {
 	return command_cast_spell(op, params, 'c');
 }
 
-/**
- * Equivalent to command_cast().
- *
- * @param op
- * player.
- * @param params
- * spell.
- * @return
- * 1 for success, 0 for failure.
- * @todo remove.
- */
 int command_prepare(object *op, char *params)
 {
 	return command_cast_spell(op, params, 'p');
 }
 
-/**
- * Shows all spells that op knows.
- *
- * Given there is more than one skill, we can't supply break
+/* Shows all spells that op knows.  If params is supplied, the must match
+ * that.  Given there is more than one skill, we can't supply break
  * them down to cleric/wizardry.
- *
- * @param op
- * player wanting to knows her spells.
- * @param params
- * if supplied, the spell name must match that.
  */
 static void show_matching_spells(object *op, char *params)
 {
@@ -112,14 +74,14 @@ static void show_matching_spells(object *op, char *params)
 	/* If it is a spell, and no params are passed, or they
 	 * match the name, process this spell.
 	 */
-	if (spell->type == SPELL &&
+	if (spell->type == SPELL && 
 	    (!params || !strncmp(params, spell->name, strlen(params)))) {
 	    if (spell->path_attuned & op->path_denied) {
-		snprintf(spell_sort[num_found++], sizeof(spell_sort[0]),
+		sprintf(spell_sort[num_found++],
 			"%s:%-22s %3s %3s", spell->skill?spell->skill:"generic",
 			spell->name, "den", "den");
 	    } else {
-		snprintf(spell_sort[num_found++], sizeof(spell_sort[0]),
+		sprintf(spell_sort[num_found++],
 			"%s:%-22s %3d %3d", spell->skill?spell->skill:"generic",
 			spell->name, spell->level,
 			SP_level_spellpoint_cost(op,spell, SPELL_HIGHEST));
@@ -135,8 +97,7 @@ static void show_matching_spells(object *op, char *params)
 	if (params)
 	    show_matching_spells(op, NULL);
 	else
-	    draw_ext_info(NDI_UNIQUE, 0, op, MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_ERROR,
-			  "You know no spells", NULL);
+	    new_draw_info(NDI_UNIQUE, 0, op, "You know no spells");
     } else {
 	/* Note in the code below that we make some
 	 * presumptions that there will be a colon in the
@@ -151,36 +112,23 @@ static void show_matching_spells(object *op, char *params)
 		strcpy(tmp, spell_sort[i]);
 		cp = strchr(tmp, ':');
 		*cp = '\0';
-
-		draw_ext_info_format(NDI_UNIQUE, 0,op,MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_SUCCESS,
-				     "\n[fixed]%s spells %.*s <lvl> <sp>",
-				     "\n%s spells %.*s <lvl> <sp>",
-				     tmp, 12-strlen(tmp), "              ");
+		new_draw_info(NDI_UNIQUE, 0, op, "");
+		new_draw_info_format(NDI_UNIQUE, 0,op,"%s spells %.*s [lvl] [sp]",
+			      tmp, 12-strlen(tmp), "              ");
 	    }
-	    draw_ext_info_format(NDI_UNIQUE, 0, op, MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_SUCCESS,
-				 "[fixed]%s",
-				 "%s",
-				 strchr(spell_sort[i], ':') + 1);
+	    new_draw_info(NDI_UNIQUE, 0, op, strchr(spell_sort[i], ':') + 1);
 	}
     }
 }
 
 
 
-/**
- * Sets up to cast a spell.
- *
- * Invoke casts a spell immediately, whereas cast just set up the range type.
- *
- * @param op
- * caster.
- * @param params
- * spell name.
- * @param command
- * first letter of the spell type (c=cast, i=invoke, p=prepare).
- * @return
- * 0 if success, 1 for failure.
+/* sets up to cast a spell.  op is the caster, params is the spell name,
+ * and command is the first letter of the spell type (c=cast, i=invoke, 
+ * p=prepare).  Invoke casts a spell immediately, where as cast (and I believe
+ * prepare) just set up the range type.
  */
+
 int command_cast_spell (object *op, char *params, char command)
 {
     int castnow=0;
@@ -189,8 +137,19 @@ int command_cast_spell (object *op, char *params, char command)
 
     if (command=='i') castnow = 1;
 
+    /* Remove control of the golem */
+    if(op->contr->ranges[range_golem]!=NULL) {
+	if (op->contr->golem_count == op->contr->ranges[range_golem]->count) {
+	    remove_friendly_object(op->contr->ranges[range_golem]);
+	    remove_ob(op->contr->ranges[range_golem]);
+	    free_object(op->contr->ranges[range_golem]);
+	}
+        op->contr->ranges[range_golem]=NULL;
+	op->contr->golem_count = 0;
+    }
+
     if(params!=NULL) {
-	tag_t spellnumber = 0;
+	int spellnumber = 0;
 	if ((spellnumber = atoi(params))!=0)
 	    for (spob = op->inv; spob && spob->count != spellnumber; spob=spob->below);
 	else spob = lookup_spell_by_name(op, params);
@@ -216,24 +175,12 @@ int command_cast_spell (object *op, char *params, char command)
 		cp = NULL;
 
 	    if (spob->skill && !find_skill_by_name(op, spob->skill)) {
-		draw_ext_info_format(NDI_UNIQUE, 0, op, MSG_TYPE_SKILL, MSG_TYPE_SKILL_MISSING,
-		    "You need the skill %s to cast %s!",
+		new_draw_info_format(NDI_UNIQUE, 0, op,
 		    "You need the skill %s to cast %s!",
 		    spob->skill, spob->name);
 		return 1;
 	    }
-
-        /* Remove control of the golem */
-        if(op->contr->ranges[range_golem]!=NULL) {
-            if (op->contr->golem_count == op->contr->ranges[range_golem]->count) {
-                remove_friendly_object(op->contr->ranges[range_golem]);
-                remove_ob(op->contr->ranges[range_golem]);
-                free_object(op->contr->ranges[range_golem]);
-            }
-            op->contr->ranges[range_golem]=NULL;
-            op->contr->golem_count = 0;
-        }
-
+		
 	    if (castnow) {
 		cast_spell(op,op,op->facing,spob,cp);
 	    } else {
@@ -245,10 +192,8 @@ int command_cast_spell (object *op, char *params, char command)
 		} else {
 		  op->contr->spellparam[0] = '\0';
 		}
-		draw_ext_info_format(NDI_UNIQUE, 0, op, MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_SUCCESS,
-				     "You ready the spell %s",
-				     "You ready the spell %s",
-				     spob->name);
+		new_draw_info_format(NDI_UNIQUE, 0, op,
+			"You ready the spell %s", spob->name);
 	    }
 	    return 0;
 	} /* else fall through to below and print spells */
@@ -257,29 +202,18 @@ int command_cast_spell (object *op, char *params, char command)
     /* We get here if cast was given without options or we could not find
      * the requested spell.  List all the spells the player knows.
      */
-    draw_ext_info(NDI_UNIQUE, 0,op,MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_ERROR,
-		  "Cast what spell?  Choose one of:", NULL);
+    new_draw_info(NDI_UNIQUE, 0,op,"Cast what spell?  Choose one of:");
     show_matching_spells(op, params);
     return 1;
 }
 
 /**************************************************************************/
 
-/**
- * Check for the validity of a player range.
- *
+/* Returns TRUE if the range specified (int r) is legal - that is,
+ * the character has an item that is equipped for that range type.
+ * return 0 if there is no item of that range type that is usable.
  * This function could probably be simplified, eg, everything
  * should index into the ranges[] array.
- *
- * @param op
- * player to check.
- * @param r
- * range to check.
- *
- * @retval 1
- * range specified is legal - that is, the character has an item that is equipped for that range type.
- * @retval 0
- * no item of that range type that is usable.
  */
 
 int legal_range(object *op,int r) {
@@ -294,10 +228,10 @@ int legal_range(object *op,int r) {
 	    else return 0;
 
 	case range_golem: /* Use scrolls */
-	    if (op->contr->ranges[range_golem] &&
+	    if (op->contr->ranges[range_golem] && 
 		op->contr->ranges[range_golem]->count == op->contr->golem_count)
 		    return 1;
-	    else
+	    else 
 		return 0;
 
 	case range_skill:
@@ -310,17 +244,7 @@ int legal_range(object *op,int r) {
     return 0;
 }
 
-/**
- * Rotate the selected range attack.
- *
- * @param op
- * player.
- * @param k
- * '+' selects next range, other values previous range.
- */
 void change_spell(object *op,char k) {
-
-    char name[MAX_BUF];
 
     do {
 	op->contr->shoottype += ((k == '+') ? 1 : -1);
@@ -331,49 +255,35 @@ void change_spell(object *op,char k) {
     } while (!legal_range(op,op->contr->shoottype));
 
     /* Legal range has already checked that we have an appropriate item
-     * that uses the slot, so we don't need to be too careful about
+     * that uses the slot, so we don't need to be too careful about 
      * checking the status of the object.
      */
     switch(op->contr->shoottype) {
 	case range_none:
-	    draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_ERROR,
-			  "No ranged attack chosen.", NULL);
+	    new_draw_info(NDI_UNIQUE, 0,op, "No ranged attack chosen.");
 	    break;
 
 	case range_golem:
-	    draw_ext_info(NDI_UNIQUE, 0,op, MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_SUCCESS,
-			  "You regain control of your golem.", NULL);
+	    new_draw_info(NDI_UNIQUE, 0,op, "You regain control of your golem.");
 	    break;
 
 	case range_bow:
-        query_name(op->contr->ranges[range_bow], name, MAX_BUF);
-	    draw_ext_info_format(NDI_UNIQUE, 0,op, MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_SUCCESS,
-			 "Switched to %s and %s.",
-			 "Switched to %s and %s.",
-			 name,
-			 op->contr->ranges[range_bow]->race ? op->contr->ranges[range_bow]->race : "nothing");
+	    new_draw_info_format(NDI_UNIQUE, 0,op, "Switched to %s and %s.", query_name(op->contr->ranges[range_bow]),
+		     op->contr->ranges[range_bow]->race ? op->contr->ranges[range_bow]->race : "nothing");
 	    break;
 
 	case range_magic:
-	    draw_ext_info_format(NDI_UNIQUE, 0,op,MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_SUCCESS,
-				 "Switched to spells (%s).",
-				 "Switched to spells (%s).",
-				 op->contr->ranges[range_magic]->name);
+	    new_draw_info_format(NDI_UNIQUE, 0,op,"Switched to spells (%s).",
+			op->contr->ranges[range_magic]->name);
 	    break;
 
 	case range_misc:
-        query_base_name(op->contr->ranges[range_misc], 0, name, MAX_BUF);
-	    draw_ext_info_format(NDI_UNIQUE, 0,op, MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_SUCCESS,
-				 "Switched to %s.",
-				 "Switched to %s.",
-				 name);
+	    new_draw_info_format(NDI_UNIQUE, 0,op, "Switched to %s.", query_base_name(op->contr->ranges[range_misc], 0));
 	    break;
 
-	case range_skill:
-	    draw_ext_info_format(NDI_UNIQUE, 0,op, MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_SUCCESS,
-				 "Switched to skill: %s",
-				 "Switched to skill: %s",
-				 op->chosen_skill ? op->chosen_skill->name : "none");
+	case range_skill: 
+	    new_draw_info_format(NDI_UNIQUE, 0,op, "Switched to skill: %s", op->chosen_skill ?  
+		 op->chosen_skill->name : "none");
 	    break;
 
 	default:
@@ -381,16 +291,7 @@ void change_spell(object *op,char k) {
     }
 }
 
-/**
- * 'rotateshoottype' command, switch range attack.
- *
- * @param op
- * player.
- * @param params
- * arguments to the command.
- * @return
- * 0.
- */
+
 int command_rotateshoottype (object *op, char *params)
 {
   if (!params)
@@ -399,3 +300,4 @@ int command_rotateshoottype (object *op, char *params)
     change_spell(op, params[0]);
   return 0;
 }
+

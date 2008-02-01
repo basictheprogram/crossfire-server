@@ -26,7 +26,7 @@
     The authors can be reached via e-mail at crossfire-devel@real-time.com
 */
 
-/*
+/* 
  * This is the toolkit for common only operations
  * All methods should start with cctk (common check toolkit)
  */
@@ -71,8 +71,8 @@ void cctk_setdatadir(char* datadir){
  * tree. This function requires that cctk_setlog and cctk_setdatadir have both
  * been run already.
  */
-void cctk_init_std_archetypes(void){
-    CCTK_ASSERT((STATUS_LOGDIR|STATUS_DATADIR));
+void cctk_init_std_archetypes(){
+    CCTK_ASSERT(STATUS_LOGDIR|STATUS_DATADIR);
     settings.archetypes="archetypes";
     settings.treasures="treasures.bld";
     init_globals();
@@ -92,17 +92,16 @@ void cctk_init_std_archetypes(void){
  * by setting appropriate flags (so it is part of game, not just a storage)
  * Requires arch and object initialized in status flag
  * @param archname the archetype name to use (NULL= default one)
- * @return created object, including its more parts, or NULL if archetype doesn't exist.
  */
 object* cctk_create_game_object(char* archname){
   archetype *arch;
   object *obj;
-  CCTK_ASSERT((STATUS_OBJECTS|STATUS_ARCH));
+  CCTK_ASSERT(STATUS_OBJECTS|STATUS_ARCH);
   if (archname==NULL)
     archname="empty_archetype";
   arch = find_archetype(archname);
   if (arch==NULL) return NULL;
-  obj = object_create_arch(arch);
+  obj = arch_to_object(arch);
   if (obj==NULL) return NULL;
   CLEAR_FLAG(obj,FLAG_FREED);
   return obj;

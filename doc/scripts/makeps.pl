@@ -27,7 +27,7 @@ else { $BG="\\#ab0945"; }
 $colour = 0;
 # IF you have giftrans installed and want transparent gifs, set
 # appropriately.  IT looks much nicer if you can do it.
-$giftrans = 0;
+$giftrans = 1;
 
 
 $bmaps = $libdir . '/bmaps';
@@ -138,7 +138,7 @@ line: while (<IN>) {
     if ($Fld[1] eq 'msg') {
 	do {
 	    $_ = <IN>;
-	    @Fld = split;
+	    @Fld = split;	    
 	}
 	while ($Fld[1] ne 'endmsg');
     }
@@ -181,7 +181,7 @@ sub assemble {
     my($one_image)=0;
 
     $bmap_file = $archdir.$bmap{$faces{0,0}}.".png";
-    if ($output eq "tex") {$ps_file = $faces{0, 0} . '.ps';     }
+    if ($output eq "tex") {$ps_file = $faces{0, 0} . '.ps';     } 
     elsif ($output eq "png") { $ps_file = $faces{0, 0} . '.png'; }
     else { $ps_file = $faces{0, 0} . '.gif'; }
 
@@ -255,7 +255,7 @@ sub assemble {
     }
     $mul = $size_mul{int(sqrt($w * $h))} * $size;
     if ($output eq "tex") {
-	if ($h == 1) {
+	if ($h == 1) { 
 	    $ps = sprintf "\\psfig{figure=$ps_file,width=%0.2fcm,height=%0.2fcm}", $w * $mul, $h * $mul;
 	} else {
 	    $ps = sprintf "\\raisebox{-%0.2fcm}{\\psfig{figure=$ps_file,width=%0.2fcm,height=%0.2fcm}}", ($h-1) * $mul, $w * $mul, $h * $mul;
@@ -265,3 +265,4 @@ sub assemble {
     }
     $ps;
 }
+
