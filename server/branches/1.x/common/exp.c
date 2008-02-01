@@ -143,11 +143,15 @@ int has_ability(const object *ob) {
     return FALSE;
 }
 
-/* This loads the experience table from the exp_table
+/**
+ * This loads the experience table from the exp_table
  * file.  This tends to exit on any errors, since it
  * populates the table as it goes along, so if there
  * are errors, the table is likely in an inconsistent
  * state.
+ *
+ * @note
+ * will call exit() if file is invalid or not found.
  */
 void init_experience(void)
 {
@@ -160,7 +164,8 @@ void init_experience(void)
     sprintf(buf,"%s/exp_table",settings.confdir);
 
     if ((fp = open_and_uncompress(buf, 0, &comp)) == NULL) {
-        return;
+        LOG(llevError,"Fatal error: could not open experience table (%s)\n", buf);
+        exit(1);
     }
     while (fgets(buf, MAX_BUF-1, fp) != NULL) {
 	if (buf[0] == '#') continue;
@@ -220,6 +225,11 @@ void init_experience(void)
 	}
     }
     close_and_delete(fp, comp);
+    if (settings.max_level == 0 || lastlevel != settings.max_level) {
+        LOG(llevError,"Fatal: exp_table does not have any level definition or not %d as defined, found %d.\n",
+            settings.max_level, lastlevel);
+        exit(1);
+    }
     if (lastlevel != settings.max_level && lastlevel != 0) {
 	LOG(llevError,"Warning: exp_table does not have %d entries (%d)\n",
 	    settings.max_level, lastlevel);
