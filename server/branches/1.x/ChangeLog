@@ -31,7 +31,7 @@ server/apply.c: Store away player x and y positions so we
   can do proper comparisions.  Move update of applier values out of
   if coordinates are different, since those need to get updated in all
   cases.
-MSW 2008-01-27	
+MSW 2008-01-27
 
 Fix buffer overflows in get_ob_diff(). Introduce a new module stringbuffer
 which implements a buffer that can hold variable-sized strings.
