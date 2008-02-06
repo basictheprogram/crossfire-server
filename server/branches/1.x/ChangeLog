@@ -17,7 +17,7 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
-Add printf() like variant to StringBuffer module.
+Add stringbuffer_append_printf() and stringbuffer_append_stringbuffer().
   common/stringbuffer.c
   include/stringbuffer.h
 Andreas Kirschbaum 2008-02-07
