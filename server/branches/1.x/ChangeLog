@@ -17,6 +17,13 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Change heading of high score command output to match the actual highscore data
+by using <> instead of [] around max grace, hp, and sp.  The reason is that
+when [max x] gets to a client that supports mediaTags, the text is treated
+as a tag, and a log message is created about an unknown tag.
+  server/hiscore.c
+Kevin Bulgrien, 2008-02-06
+
 Add stringbuffer_append_printf(), stringbuffer_append_stringbuffer(), and
 stringbuffer_finish_shared().
   common/stringbuffer.c

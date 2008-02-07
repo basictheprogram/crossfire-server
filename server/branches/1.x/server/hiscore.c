@@ -361,7 +361,7 @@ void display_high_score(object *op,int max, const char *match) {
     }
     if(op != NULL)
 	    clear_win_info(op);
-    new_draw_info(NDI_UNIQUE, 0,op,"Nr    Score    Who [max hp][max sp][max grace]");
+    new_draw_info(NDI_UNIQUE, 0,op,"Nr    Score    Who <max hp><max sp><max grace>");
 
     while(fgets(buf,MAX_BUF,fp)!=NULL) {
 	if(j>=HIGHSCORE_LENGTH||i>=(max-1))
