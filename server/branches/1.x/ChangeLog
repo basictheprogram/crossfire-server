@@ -17,6 +17,11 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Remove to eliminate autoconf complaints that configure.ac and configure.in
+exist.
+  configure.in:
+Kevin Bulgrien, 2008-02-06
+
 Change heading of high score command output to match the actual highscore data
 by using <> instead of [] around max grace, hp, and sp.  The reason is that
 when [max x] gets to a client that supports mediaTags, the text is treated
