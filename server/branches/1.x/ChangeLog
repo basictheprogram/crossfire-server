@@ -17,6 +17,15 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Fix some integer overflows in experience calculations.
+  common/exp.c
+  common/living.c
+  include/libproto.h
+  include/sproto.h
+  server/attack.c
+  server/skill_util.c
+Andreas Kirschbaum, 2008-03-08
+
 Remove to eliminate autoconf complaints that configure.ac and configure.in
 exist.
   configure.in:
