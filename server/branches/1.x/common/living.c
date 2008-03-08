@@ -40,7 +40,7 @@ static const int con_bonus[MAX_STAT + 1]={
   22,25,30,40,50
 };
 
-/* changed the name of this to "sp_bonus" from "int_bonus" 
+/* changed the name of this to "sp_bonus" from "int_bonus"
  * because Pow can now be the stat that controls spellpoint
  * advancement. -b.t.
  */
@@ -54,14 +54,14 @@ static const int grace_bonus[MAX_STAT +1] = {
   30,40,50,70,100
 };
 
-/* 0.92.7 Changed way charisma works.  Values now 
+/* 0.92.7 Changed way charisma works.  Values now
  * represent how much more it costs to buy something than to sell it
  * (10, a value of 10 means it is that if it costs 50 gp to buy, you
  * would only get 5 gp when you sell.)  Let query_cost do the calculations
  * on how to really do this.  Buy keeping it this simple number, it is
  * much easier to know how things will be influenced.  A value of '1' means
  * buying and selling is both the same value - any value less than or equal
- * to 1 should not be used.  
+ * to 1 should not be used.
  * At least as of now, the only place that uses this code is query_cost,
  * in server/shop.c.  This bonus is split evenly between buying and selling
  * (ie, if the bonus is 2.0, then items are bought for 1.33 list, and sold
@@ -118,7 +118,7 @@ const uint32 weight_limit[MAX_STAT+ 1] = {
     1100000,1200000,1300000,1400000,1500000,/* 15 */
     1650000,1800000,1950000,2100000,2250000,/* 20 */
     2400000,2550000,2700000,2850000,3000000, /* 25 */
-    3250000,3500000,3750000,4000000,4500000  /*30 */ 
+    3250000,3500000,3750000,4000000,4500000  /*30 */
 };
 
 const int learn_spell[MAX_STAT + 1]={
@@ -154,13 +154,13 @@ const int fear_bonus[MAX_STAT + 1]={
  * otherwise the maximum level in any experience
  * category could be quite low. To help the situation
  * out a little I added 10 more levels, and jacked
- * up the last level experience value. Its out of 
- * line with progression of previous levels, so 
+ * up the last level experience value. Its out of
+ * line with progression of previous levels, so
  * if more levels are desired, this should be fixed.
  *  -b.t.
  */
 
-#define MAX_EXP_IN_OBJ levels[settings.max_level]/(MAX_EXP_CAT - 1) 
+#define MAX_EXP_IN_OBJ levels[settings.max_level]/(MAX_EXP_CAT - 1)
 
 #ifndef WIN32
 extern uint64 *levels;
@@ -199,7 +199,7 @@ static const char *const drain_msg[NUM_STATS] = {
   "You feel less healthy",
   "You suddenly begin to lose your memory!",
   "Your face gets distorted!",
-  "Watch out, your mind is going!", 
+  "Watch out, your mind is going!",
   "Your spirit feels drained!"
 };
 const char *const restore_msg[NUM_STATS] = {
@@ -208,7 +208,7 @@ const char *const restore_msg[NUM_STATS] = {
   "You feel your health return.",
   "You feel your wisdom return.",
   "You feel your charisma return.",
-  "You feel your memory return.", 
+  "You feel your memory return.",
   "You feel your spirits return."
 };
 const char *const gain_msg[NUM_STATS] = {
@@ -217,7 +217,7 @@ const char *const gain_msg[NUM_STATS] = {
 	"You feel healthy.",
 	"You feel wiser.",
 	"You seem to look better.",
-	"You feel smarter.", 
+	"You feel smarter.",
 	"You feel more potent."
 };
 const char *const lose_msg[NUM_STATS] = {
@@ -226,16 +226,16 @@ const char *const lose_msg[NUM_STATS] = {
 	"You feel less healthy!",
 	"You lose some of your memory!",
 	"You look ugly!",
-	"You feel stupid!", 
+	"You feel stupid!",
 	"You feel less potent!"
 };
 
 const char *const statname[NUM_STATS] = {
-  "strength", "dexterity", "constitution", "wisdom", "charisma", "intelligence","power" 
+  "strength", "dexterity", "constitution", "wisdom", "charisma", "intelligence","power"
 };
 
 const char *const short_stat_name[NUM_STATS] = {
-  "Str", "Dex", "Con", "Wis", "Cha", "Int","Pow" 
+  "Str", "Dex", "Con", "Wis", "Cha", "Int","Pow"
 };
 
 /*
@@ -370,10 +370,10 @@ int change_abil(object *op, object *tmp) {
     object refop;
     char message[MAX_BUF];
     int potion_max=0;
-  
+
     /* remember what object was like before it was changed.  note that
      * refop is a local copy of op only to be used for detecting changes
-     * found by fix_player.  refop is not a real object 
+     * found by fix_player.  refop is not a real object
      */
     memcpy(&refop, op, sizeof(object));
 
@@ -418,7 +418,7 @@ int change_abil(object *op, object *tmp) {
     }
 
     /* reset attributes that fix_player doesn't reset since it doesn't search
-     * everything to set 
+     * everything to set
      */
     if(flag == -1) {
 	op->attacktype&=~tmp->attacktype;
@@ -447,7 +447,7 @@ int change_abil(object *op, object *tmp) {
     }
     if ( QUERY_FLAG(op,FLAG_LIFESAVE) != QUERY_FLAG(&refop,FLAG_LIFESAVE)){
 	success=1;
-	DIFF_MSG(flag, "You feel very protected.", 
+	DIFF_MSG(flag, "You feel very protected.",
 		 "You don't feel protected anymore.");
     }
     if ( QUERY_FLAG(op,FLAG_REFL_MISSILE) != QUERY_FLAG(&refop,FLAG_REFL_MISSILE)){
@@ -480,7 +480,7 @@ int change_abil(object *op, object *tmp) {
 	    /* double conditional - second case covers if you have move_fly_low -
 	     * in that case, you don't actually land
 	     */
-	    DIFF_MSG(flag, "You soar into the air air!.", 
+	    DIFF_MSG(flag, "You soar into the air air!.",
 		     (op->move_type&MOVE_FLY_LOW ? "You fly lower in the air":
 		      "You float down to the ground."));
 	}
@@ -492,19 +492,19 @@ int change_abil(object *op, object *tmp) {
     }
 
     /* becoming UNDEAD... a special treatment for this flag. Only those not
-     * originally undead may change their status 
-     */ 
-    if(!QUERY_FLAG(&op->arch->clone,FLAG_UNDEAD)) 
+     * originally undead may change their status
+     */
+    if(!QUERY_FLAG(&op->arch->clone,FLAG_UNDEAD))
 	if ( QUERY_FLAG(op,FLAG_UNDEAD) != QUERY_FLAG(&refop,FLAG_UNDEAD)) {
 	    success=1;
 	    if(flag>0) {
-		if(op->race) free_string(op->race); 
+		if(op->race) free_string(op->race);
 		op->race=add_string("undead");
 		new_draw_info(NDI_UNIQUE, 0, op,"Your lifeforce drains away!");
 	    } else {
-		if(op->race) free_string(op->race); 
-		if(op->arch->clone.race) 
-		    op->race=add_string(op->arch->clone.race);  
+		if(op->race) free_string(op->race);
+		if(op->arch->clone.race)
+		    op->race=add_string(op->arch->clone.race);
 		else
 		    op->race = NULL;
 		new_draw_info(NDI_UNIQUE, 0, op,"Your lifeforce returns!");
@@ -520,14 +520,14 @@ int change_abil(object *op, object *tmp) {
 	DIFF_MSG(flag, "You become transparent.", "You can see yourself.");
     }
     /* blinded you can tell if more blinded since blinded player has minimal
-     * vision 
+     * vision
      */
     if(QUERY_FLAG(tmp,FLAG_BLIND)) {
 	success=1;
 	if(flag>0) {
 	    if(QUERY_FLAG(op,FLAG_WIZ))
 		new_draw_info(NDI_UNIQUE, 0, op,"Your mortal self is blinded.");
-	    else { 
+	    else {
 		new_draw_info(NDI_UNIQUE, 0, op,"You are blinded.");
 		SET_FLAG(op,FLAG_BLIND);
 		if(op->type==PLAYER)
@@ -593,20 +593,20 @@ int change_abil(object *op, object *tmp) {
     /* for the future when artifacts set this -b.t. */
     if(tmp->stats.grace && op->type==PLAYER) {
 	success=1;
-	DIFF_MSG(flag*tmp->stats.grace, "You feel closer to your god!", 
+	DIFF_MSG(flag*tmp->stats.grace, "You feel closer to your god!",
 		 "You suddenly feel less holy.");
     }
 
     if(tmp->stats.food && op->type==PLAYER) {
 	success=1;
-	DIFF_MSG(flag*tmp->stats.food, "You feel your digestion slowing down.", 
+	DIFF_MSG(flag*tmp->stats.food, "You feel your digestion slowing down.",
 		 "You feel your digestion speeding up.");
     }
 
     /* Messages for changed resistance */
     for (i=0; i<NROFATTACKS; i++) {
 	if (i==ATNR_PHYSICAL) continue;	/* Don't display about armour */
-    
+
 	if (op->resist[i] != refop.resist[i]) {
 	    success=1;
 	    if (op->resist[i] > refop.resist[i])
@@ -615,7 +615,7 @@ int change_abil(object *op, object *tmp) {
 	    else
 		sprintf(message, "Your resistance to %s drops to %d%%.",
 			change_resist_msg[i], op->resist[i]);
-      
+
 	    new_draw_info(NDI_UNIQUE|NDI_BLUE, 0, op, message);
 	}
     }
@@ -830,7 +830,7 @@ void fix_player(object *op) {
      * archetype clone
      */
     memcpy(&op->resist, &op->arch->clone.resist, sizeof(op->resist));
-  
+
     for (i=0;i<NROFATTACKS;i++) {
 	if (op->resist[i] > 0)
 	    prot[i]= op->resist[i], vuln[i]=0;
@@ -838,12 +838,12 @@ void fix_player(object *op) {
 	    vuln[i]= -(op->resist[i]), prot[i]=0;
 	potion_resist[i]=0;
     }
-  
+
     wc=op->arch->clone.stats.wc;
     op->stats.dam=op->arch->clone.stats.dam;
 
     /* for players which cannot use armour, they gain AC -1 per 3 levels,
-     * plus a small amount of physical resist, those poor suckers. ;) 
+     * plus a small amount of physical resist, those poor suckers. ;)
      * the fact that maxlevel is factored in could be considered sort of bogus -
      * we should probably give them some bonus and cap it off - otherwise,
      * basically, if a server updates its max level, these playes may find
@@ -864,7 +864,7 @@ void fix_player(object *op) {
      */
 
     for(tmp=op->inv;tmp!=NULL;tmp=tmp->below) {
-	/* See note in map.c:update_position about making this additive 
+	/* See note in map.c:update_position about making this additive
 	 * since light sources are never applied, need to put check here.
 	 */
 	if (tmp->glow_radius > op->glow_radius) op->glow_radius=tmp->glow_radius;
@@ -892,20 +892,20 @@ void fix_player(object *op) {
 
 	/* Container objects are not meant to adjust a players, but other applied
 	 * objects need to make adjustments.
-	 * This block should handle all player specific changes 
+	 * This block should handle all player specific changes
 	 * The check for Praying is a bit of a hack - god given bonuses are put
 	 * in the praying skill, and the player should always get those.
-	 * It also means we need to put in additional checks for applied below,	
+	 * It also means we need to put in additional checks for applied below,
 	 * because the skill shouldn't count against body positions being used
 	 * up, etc.
 	 */
 	if ((QUERY_FLAG(tmp,FLAG_APPLIED) && tmp->type!=CONTAINER && tmp->type!=CLOSE_CON) ||
 	   (tmp->type == SKILL && tmp->subtype == SK_PRAYING)) {
 	    if(op->type==PLAYER) {
-		if (tmp->type == BOW) 
+		if (tmp->type == BOW)
 		    op->contr->ranges[range_bow] = tmp;
 
-		if (tmp->type == WAND || tmp->type == ROD || tmp->type==HORN) 
+		if (tmp->type == WAND || tmp->type == ROD || tmp->type==HORN)
 		    op->contr->ranges[range_misc] = tmp;
 
 		for(i=0;i<NUM_STATS;i++)
@@ -913,7 +913,7 @@ void fix_player(object *op) {
 
 		/* these are the items that currently can change digestion, regeneration,
 		 * spell point recovery and mana point recovery.  Seems sort of an arbitary
-		 * list, but other items store other info into stats array. 
+		 * list, but other items store other info into stats array.
 		 */
 		if ((tmp->type == EXPERIENCE)  || (tmp->type == WEAPON) ||
 		    (tmp->type == ARMOUR)   || (tmp->type == HELMET) ||
@@ -946,7 +946,7 @@ void fix_player(object *op) {
 	    /* Pos. and neg. protections are counted seperate (-> pro/vuln).
 	     * (Negative protections are calculated extactly like positive.)
 	     * Resistance from potions are treated special as well. If there's
-	     * more than one potion-effect, the bigger prot.-value is taken. 
+	     * more than one potion-effect, the bigger prot.-value is taken.
 	     */
 	    if (tmp->type != POTION) {
 		for (i=0; i<NROFATTACKS; i++) {
@@ -959,7 +959,7 @@ void fix_player(object *op) {
 			else
 			    potion_resist[i] = tmp->resist[i];
 		    }
-		    else if (tmp->resist[i] > 0) 
+		    else if (tmp->resist[i] > 0)
 			prot[i] += ((100-prot[i])*tmp->resist[i])/100;
 		    else if (tmp->resist[i] < 0)
 			vuln[i] += ((100-vuln[i])*(-tmp->resist[i]))/100;
@@ -988,7 +988,7 @@ void fix_player(object *op) {
 		SET_FLAG(op,FLAG_UNDEAD);
 
 	    if(QUERY_FLAG(tmp,FLAG_MAKE_INVIS)) {
-		SET_FLAG(op,FLAG_MAKE_INVIS); 
+		SET_FLAG(op,FLAG_MAKE_INVIS);
 		op->invisible=1;
 	    }
 
@@ -1001,8 +1001,8 @@ void fix_player(object *op) {
 	    }
 
 	    switch(tmp->type) {
- 		/* skills modifying the character -b.t. */ 
-		/* for all skills and skill granting objects */ 
+ 		/* skills modifying the character -b.t. */
+		/* for all skills and skill granting objects */
 		case SKILL:
 		    if (!QUERY_FLAG(tmp,FLAG_APPLIED)) break;
 
@@ -1012,8 +1012,8 @@ void fix_player(object *op) {
 			LOG(llevDebug, "fix_player, op %s has multiple skills applied\n", op->name);
 		    }
 		    op->chosen_skill = tmp;
-		    if(tmp->stats.dam>0) { 	/* skill is a 'weapon' */ 
-			if(!QUERY_FLAG(op,FLAG_READY_WEAPON)) 
+		    if(tmp->stats.dam>0) { 	/* skill is a 'weapon' */
+			if(!QUERY_FLAG(op,FLAG_READY_WEAPON))
 			    weapon_speed = (int) WEAPON_SPEED(tmp);
 			if(weapon_speed<0) weapon_speed = 0;
 			weapon_weight=tmp->weight;
@@ -1089,10 +1089,10 @@ void fix_player(object *op) {
 		case ARMOUR: /* Only the best of these three are used: */
 		    if(settings.spell_encumbrance == TRUE && op->type==PLAYER)
 			op->contr->encumbrance+=(int)tmp->weight/1000;
-	
+
 		case BRACERS:
 		case FORCE:
-		    if(tmp->stats.wc) { 
+		    if(tmp->stats.wc) {
 			if(best_wc<tmp->stats.wc+tmp->magic) {
 			    wc+=best_wc;
 			    best_wc=tmp->stats.wc+tmp->magic;
@@ -1121,12 +1121,12 @@ void fix_player(object *op) {
     /* We've gone through all the objects the player has equipped.  For many things, we
      * have generated intermediate values which we now need to assign.
      */
-  
+
     /* 'total resistance = total protections - total vulnerabilities'.
      * If there is an uncursed potion in effect, granting more protection
      * than that, we take: 'total resistance = resistance from potion'.
      * If there is a cursed (and no uncursed) potion in effect, we take
-     * 'total resistance = vulnerability from cursed potion'. 
+     * 'total resistance = vulnerability from cursed potion'.
      */
     for (i=0; i<NROFATTACKS; i++) {
 	op->resist[i] = prot[i] - vuln[i];
@@ -1134,7 +1134,7 @@ void fix_player(object *op) {
 				 (potion_resist[i] < 0)))
 	op->resist[i] = potion_resist[i];
     }
-  
+
     /* Figure out the players sp/mana/hp totals. */
     if(op->type==PLAYER) {
 	int pl_level;
@@ -1142,7 +1142,7 @@ void fix_player(object *op) {
 	check_stat_bounds(&(op->stats));
 	pl_level=op->level;
 
-	if(pl_level<1) pl_level=1; /* safety, we should always get 1 levels worth of hp! */ 
+	if(pl_level<1) pl_level=1; /* safety, we should always get 1 levels worth of hp! */
 
 	/* You basically get half a con bonus/level.  But we do take into account rounding,
 	 * so if your bonus is 7, you still get 7 worth of bonus every 2 levels.
@@ -1150,7 +1150,7 @@ void fix_player(object *op) {
 	for(i=1,op->stats.maxhp=0;i<=pl_level&&i<=10;i++) {
 	    j=op->contr->levhp[i]+con_bonus[op->stats.Con]/2;
 	    if(i%2 && con_bonus[op->stats.Con]%2) {
-		if (con_bonus[op->stats.Con]>0) 
+		if (con_bonus[op->stats.Con]>0)
 		    j++;
 		else
 		    j--;
@@ -1164,9 +1164,9 @@ void fix_player(object *op) {
 	if(op->stats.hp>op->stats.maxhp)
 	    op->stats.hp=op->stats.maxhp;
 
-	/* Sp gain is controlled by the level of the player's 
-	 * relevant experience object (mana_obj, see above) 
-	 */ 
+	/* Sp gain is controlled by the level of the player's
+	 * relevant experience object (mana_obj, see above)
+	 */
 	/* following happen when skills system is not used */
 	if(!mana_obj) mana_obj = op;
 	if(!grace_obj) grace_obj = op;
@@ -1182,11 +1182,11 @@ void fix_player(object *op) {
 
 		/* Got some extra bonus at first level */
 		if(i<2) {
-		    stmp = op->contr->levsp[i] +((2.0 * (float)sp_bonus[op->stats.Pow] + 
-			   (float)sp_bonus[op->stats.Int])/6.0); 
+		    stmp = op->contr->levsp[i] +((2.0 * (float)sp_bonus[op->stats.Pow] +
+			   (float)sp_bonus[op->stats.Int])/6.0);
 		} else {
 		    stmp=(float)op->contr->levsp[i]
-			+(2.0 * (float)sp_bonus[op->stats.Pow] + 
+			+(2.0 * (float)sp_bonus[op->stats.Pow] +
 			  (float)sp_bonus[op->stats.Int])/12.0;
 		}
 		if (stmp<1.0) stmp=1.0;
@@ -1218,11 +1218,11 @@ void fix_player(object *op) {
 
 		/* Got some extra bonus at first level */
 		if(i<2) {
-		    grace_tmp = op->contr->levgrace[i]+(((float)grace_bonus[op->stats.Pow] + 
-			   2.0 * (float)grace_bonus[op->stats.Wis])/6.0); 
+		    grace_tmp = op->contr->levgrace[i]+(((float)grace_bonus[op->stats.Pow] +
+			   2.0 * (float)grace_bonus[op->stats.Wis])/6.0);
 		} else {
 		    grace_tmp=(float)op->contr->levgrace[i]
-			+((float)grace_bonus[op->stats.Pow] + 
+			+((float)grace_bonus[op->stats.Pow] +
 			  2.0 * (float)grace_bonus[op->stats.Wis])/12.0;
 		}
 		if (grace_tmp<1.0) grace_tmp=1.0;
@@ -1243,28 +1243,28 @@ void fix_player(object *op) {
 	else
 	    ac-=dex_bonus[op->stats.Dex];
 
-	/* In new exp/skills system, wc bonuses are related to 
+	/* In new exp/skills system, wc bonuses are related to
 	 * the players level in a relevant exp object (wc_obj)
-	 * not the general player level -b.t. 
+	 * not the general player level -b.t.
 	 * I changed this slightly so that wc bonuses are better
-	 * than before. This is to balance out the fact that 
+	 * than before. This is to balance out the fact that
 	 * the player no longer gets a personal weapon w/ 1
 	 * improvement every level, now its fighterlevel/5. So
 	 * we give the player a bonus here in wc and dam
-	 * to make up for the change. Note that I left the 
+	 * to make up for the change. Note that I left the
 	 * monster bonus the same as before. -b.t.
 	 */
 
-	if(op->type==PLAYER && wc_obj && wc_obj->level>1) { 
+	if(op->type==PLAYER && wc_obj && wc_obj->level>1) {
           wc-=(wc_obj->level+thaco_bonus[op->stats.Str]);
-	    for(i=1;i<wc_obj->level;i++) { 
-		/* addtional wc every 6 levels */ 
-		if(!(i%6)) wc--; 
-		/* addtional dam every 4 levels. */ 
-		if(!(i%4) && (dam_bonus[op->stats.Str]>=0)) 
+	    for(i=1;i<wc_obj->level;i++) {
+		/* addtional wc every 6 levels */
+		if(!(i%6)) wc--;
+		/* addtional dam every 4 levels. */
+		if(!(i%4) && (dam_bonus[op->stats.Str]>=0))
 		    op->stats.dam+=(1+(dam_bonus[op->stats.Str]/5));
 	    }
-	} else 
+	} else
 	    wc-=(op->level+thaco_bonus[op->stats.Str]);
 
 	op->stats.dam+=dam_bonus[op->stats.Str];
@@ -1393,7 +1393,7 @@ void set_dragon_name(object *pl, const object *abil, const object *skin) {
 
   /* Perhaps do something more clever? */
   if (!abil || !skin) return;
-  
+
   /* first, look for the highest level */
   for(i=0; i<NROFATTACKS; i++) {
     if (atnr_is_dragon_enabled(i) &&
@@ -1402,15 +1402,15 @@ void set_dragon_name(object *pl, const object *abil, const object *skin) {
       atnr = i;
     }
   }
-  
+
   /* now if there are equals at highest level, pick the one with focus,
      or else at random */
   if (atnr_is_dragon_enabled(abil->stats.exp) &&
       abil->resist[abil->stats.exp] >= level)
     atnr = abil->stats.exp;
-  
+
   level = (int)(level/5.);
-  
+
   /* now set the new title */
   if (pl->contr != NULL) {
     if(level == 0)
@@ -1431,7 +1431,7 @@ void set_dragon_name(object *pl, const object *abil, const object *skin) {
 	sprintf(pl->contr->title, "big %s dragon", attacks[atnr]);
     }
   }
-  
+
   strcpy(pl->contr->own_title, "");
 }
 
@@ -1445,7 +1445,7 @@ void dragon_level_gain(object *who) {
     object *skin = NULL;    /* pointer to dragon skin force*/
     object *tmp = NULL;     /* tmp. object */
     char buf[MAX_BUF];      /* tmp. string buffer */
-  
+
     /* now grab the 'dragon_ability'-forces from the player's inventory */
     for (tmp=who->inv; tmp!=NULL; tmp=tmp->below) {
 	if (tmp->type == FORCE) {
@@ -1457,34 +1457,34 @@ void dragon_level_gain(object *who) {
     }
     /* if the force is missing -> bail out */
     if (abil == NULL) return;
-  
+
     /* The ability_force keeps track of maximum level ever achieved.
-     * New abilties can only be gained by surpassing this max level 
+     * New abilties can only be gained by surpassing this max level
      */
     if (who->level > abil->level) {
 	/* increase our focused ability */
 	abil->resist[abil->stats.exp]++;
-    
+
 
 	if (abil->resist[abil->stats.exp]>0 && abil->resist[abil->stats.exp]%5 == 0) {
 	    /* time to hand out a new ability-gift */
 	    dragon_ability_gain(who, (int)abil->stats.exp,
 			       (int)((1+abil->resist[abil->stats.exp])/5.));
 	}
-    
+
 	if (abil->last_eat > 0 && atnr_is_dragon_enabled(abil->last_eat)) {
 	    /* apply new ability focus */
 	    sprintf(buf, "Your metabolism now focuses on %s!",
 		    change_resist_msg[abil->last_eat]);
 	    new_draw_info(NDI_UNIQUE|NDI_BLUE, 0, who, buf);
-      
+
 	    abil->stats.exp = abil->last_eat;
 	    abil->last_eat = 0;
 	}
-    
+
 	abil->level = who->level;
     }
-  
+
     /* last but not least, set the new title for the dragon */
     set_dragon_name(who, abil, skin);
 }
@@ -1534,18 +1534,18 @@ object *give_skill_by_name(object *op, const char *skill_name)
  */
 void player_lvl_adj(object *who, object *op) {
     char buf[MAX_BUF];
-    
-    if(!op)        /* when rolling stats */ 
-	op = who;	
- 
+
+    if(!op)        /* when rolling stats */
+	op = who;
+
     if(op->level < settings.max_level && op->stats.exp >= level_exp(op->level+1,who->expmul)) {
 	op->level++;
-	
+
 	if (op != NULL && op == who && op->stats.exp > 1 && is_dragon_pl(who))
 	  dragon_level_gain(who);
 
         /* Only roll these if it is the player (who) that gained the level */
-	if(who && op==who && (who->level < 11) && who->type==PLAYER) { 
+	if(who && op==who && (who->level < 11) && who->type==PLAYER) {
 	    who->contr->levhp[who->level] = die_roll(2, 4, who, PREFER_HIGH)+1;
 	    who->contr->levsp[who->level] = die_roll(2, 3, who, PREFER_HIGH);
 	    who->contr->levgrace[who->level]=die_roll(2, 2, who, PREFER_HIGH)-1;
@@ -1594,9 +1594,9 @@ sint64 level_exp(int level,double expmul) {
 void calc_perm_exp(object *op)
 {
     int p_exp_min;
-    
+
     /* Ensure that our permanent experience minimum is met.
-     * permenent_exp_ratio is an integer percentage, we divide by 100 
+     * permenent_exp_ratio is an integer percentage, we divide by 100
      * to get the fraction   */
     p_exp_min = (int)(settings.permanent_exp_ratio * (float)(op->stats.exp)/100);
 
@@ -1639,7 +1639,7 @@ static void add_player_exp(object *op, sint64 exp, const char *skill_name, int f
 	    skill_obj = op->chosen_skill;
 	else {
 	    for (i=0; i<NUM_SKILLS; i++)
-		if (op->contr->last_skill_ob[i] && 
+		if (op->contr->last_skill_ob[i] &&
 		  !strcmp(op->contr->last_skill_ob[i]->skill, skill_name)) {
 		    skill_obj = op->contr->last_skill_ob[i];
 		    break;
@@ -1730,7 +1730,7 @@ static void subtract_player_exp(object *op, sint64 exp, const char *skill, int f
     sint64 del_exp;
 
     for(tmp=op->inv;tmp;tmp=tmp->below)
-	if(tmp->type==SKILL && tmp->stats.exp) { 
+	if(tmp->type==SKILL && tmp->stats.exp) {
 	    if (flag == SK_SUBTRACT_SKILL_EXP && skill && !strcmp(tmp->skill, skill)) {
 		del_exp = check_exp_loss(tmp, exp);
 		tmp->stats.exp -= del_exp;
@@ -1747,7 +1747,7 @@ static void subtract_player_exp(object *op, sint64 exp, const char *skill, int f
     if (flag != SK_SUBTRACT_SKILL_EXP) {
 	del_exp = check_exp_loss(op, exp);
 	op->stats.exp -= del_exp;
-	player_lvl_adj(op,NULL); 
+	player_lvl_adj(op,NULL);
     }
 }
 
@@ -1763,21 +1763,21 @@ static void subtract_player_exp(object *op, sint64 exp, const char *skill, int f
  * these last two values are only used for players.
  * @see share_exp() for a party-aware version.
  */
- 
+
 void change_exp(object *op, sint64 exp, const char *skill_name, int flag) {
 
 #ifdef EXP_DEBUG
 #ifndef WIN32
-    LOG(llevDebug,"change_exp() called for %s, exp = %lld\n",query_name(op),exp); 
+    LOG(llevDebug,"change_exp() called for %s, exp = %lld\n",query_name(op),exp);
 #else
-    LOG(llevDebug,"change_exp() called for %s, exp = %I64d\n",query_name(op),exp); 
+    LOG(llevDebug,"change_exp() called for %s, exp = %I64d\n",query_name(op),exp);
 #endif
 #endif
 
     /* safety */
-    if(!op) { 
-	LOG(llevError,"change_exp() called for null object!\n"); 
-	return; 
+    if(!op) {
+	LOG(llevError,"change_exp() called for null object!\n");
+	return;
     }
 
     /* if no change in exp, just return - most of the below code
@@ -1785,7 +1785,7 @@ void change_exp(object *op, sint64 exp, const char *skill_name, int flag) {
      */
     if (exp == 0) return;
 
-    /* Monsters are easy - we just adjust their exp - we   
+    /* Monsters are easy - we just adjust their exp - we
      * don't adjust level, since in most cases it is unrelated to
      * the exp they have - the monsters exp represents what its
      * worth.
@@ -1805,8 +1805,8 @@ void change_exp(object *op, sint64 exp, const char *skill_name, int flag) {
 
 	op->stats.exp += exp;
     }
-    else {				/* Players only */ 
-	if(exp>0) 
+    else {				/* Players only */
+	if(exp>0)
 	    add_player_exp(op, exp, skill_name, flag);
 	else
 	    /* note that when you lose exp, it doesn't go against
@@ -1818,7 +1818,7 @@ void change_exp(object *op, sint64 exp, const char *skill_name, int flag) {
     }
 }
 
-/* Applies a death penalty experience, the size of this is defined by the 
+/* Applies a death penalty experience, the size of this is defined by the
  * settings death_penalty_percentage and death_penalty_levels, and by the
  * amount of permenent experience, whichever gives the lowest loss.
  */
@@ -1830,7 +1830,7 @@ void apply_death_exp_penalty(object *op) {
     sint64 level_loss;   /* defined by the setting 'death_penalty_levels */
 
     for(tmp=op->inv;tmp;tmp=tmp->below)
-	if(tmp->type==SKILL && tmp->stats.exp) { 
+	if(tmp->type==SKILL && tmp->stats.exp) {
 
 	    percentage_loss = tmp->stats.exp * settings.death_penalty_ratio/100;
 	    level_loss = tmp->stats.exp - levels[MAX(0,tmp->level - settings.death_penalty_level)];
@@ -1872,7 +1872,7 @@ int did_make_save(const object *op, int level, int bonus)
 	return 0;
     return 1;
 }
-    
+
 /**
  * Gives experience to a player/monster, sharing it with party if applicable.  This
  * does bounds checking to make sure we don't overflow the max exp.

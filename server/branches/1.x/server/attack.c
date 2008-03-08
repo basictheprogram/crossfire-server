@@ -927,8 +927,8 @@ object *hit_with_arrow (object *op, object *victim)
     /* Lauwenmark: Handling plugin attack event for thrown items */
     if (execute_event(op, EVENT_ATTACK,hitter,victim,NULL,SCRIPT_FIX_ALL) == 0){
         /*
-          temporary set the hitter's skill to the one associated with the 
-          throw wrapper. This is needed to that thrower gets it's xp at the 
+          temporary set the hitter's skill to the one associated with the
+          throw wrapper. This is needed to that thrower gets it's xp at the
           correct level. This might proves an awfull hack :/ We should really
           provide attack_ob_simple with the skill to use...
          */
