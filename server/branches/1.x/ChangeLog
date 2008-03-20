@@ -17,6 +17,10 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Implement strerror_local() for systems not having strerror_r().
+  common/porting.c
+Andreas Kirschbaum 2008-03-20
+
 Fix some integer overflows in experience calculations.
   common/exp.c
   common/living.c

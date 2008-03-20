@@ -39,6 +39,7 @@
 #define pid_t int  /* we include it non global, because there is a redefinition in python.h */
 #else
 #include <ctype.h>
+#include <errno.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 
@@ -374,7 +375,10 @@ char *strerror_local(int errnum)
 #if defined(HAVE_STRERROR)
     return(strerror(errnum));
 #else
-    return("strerror_local not implemented");
+    static char buf[256];
+
+    snprintf(buf, size, "%s", strerror(errnum));
+    return buf;
 #endif
 }
 
