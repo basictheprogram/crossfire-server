@@ -17,6 +17,10 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Fix protocol issues regarding sent items: do not send invisible items.
+  common/object.c
+Andreas Kirschbaum 2008-03-21
+
 Fix protocol issues regarding face caching.
   socket/request.c
 Andreas Kirschbaum 2008-03-21
