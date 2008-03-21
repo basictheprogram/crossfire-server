@@ -17,6 +17,10 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Fix protocol issues regarding face caching.
+  socket/request.c
+Andreas Kirschbaum 2008-03-21
+
 Implement strerror_local() for systems not having strerror_r().
   common/porting.c
 Andreas Kirschbaum 2008-03-20
