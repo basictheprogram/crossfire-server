@@ -17,6 +17,12 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Fix bug #1929084: Wrong artifact stats on forged items. Use 'legal_artifact_combination'
+to check that the item matches the artifact.
+ common/recipe.c treasure.c
+ include/libproto.h
+Nicolas Weeger 2008-05-07
+
 Remove autohook inserted in items, and use was_destroyed() to check item's validity.
  plugins/cfpython/include/cfpython_object.h: keep item's count, change check macros.
  plugins/cfpython/cfpython_map.c: fix wrong EXISTCHECK_INT to MAPEXISTCHECK_INT.
