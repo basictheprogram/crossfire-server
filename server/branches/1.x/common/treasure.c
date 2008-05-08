@@ -1276,23 +1276,29 @@ void init_artifacts(void) {
 	    cp++;
     if (*cp=='\0') continue;
     
-	if (!strncmp(cp, "Allowed", 7)) {
-		if (art==NULL) {
-		  art=get_empty_artifact();
-		  nrofartifacts++;
-		}
-		cp = strchr(cp,' ') + 1;
-		if (!strcmp(cp,"all")) continue;
-                  do {
-		    nrofallowedstr++;
-		    if ((next=strchr(cp, ','))!=NULL)
-		       *(next++) = '\0';
-		    tmp = (linked_char*) malloc(sizeof(linked_char));
-		    tmp->name = add_string(cp);
-		    tmp->next = art->allowed;
-		    art->allowed = tmp;
-		  } while ((cp=next)!=NULL);
+        if (!strncmp(cp, "Allowed", 7)) {
+            if (art==NULL) {
+                art=get_empty_artifact();
+                nrofartifacts++;
+            }
 
+            cp = strchr(cp,' ') + 1;
+            while (*(cp + strlen(cp) - 1) == ' ')
+                cp[strlen(cp) - 1] = '\0';
+
+            if (!strcmp(cp,"all")) continue;
+
+            do {
+                while (*cp == ' ')
+                    cp++;
+                nrofallowedstr++;
+                if ((next=strchr(cp, ','))!=NULL)
+                    *(next++) = '\0';
+                tmp = (linked_char*) malloc(sizeof(linked_char));
+                tmp->name = add_string(cp);
+                tmp->next = art->allowed;
+                art->allowed = tmp;
+            } while ((cp=next)!=NULL);
         }
         else if (sscanf(cp, "chance %d", &value))
             art->chance = (uint16) value;
