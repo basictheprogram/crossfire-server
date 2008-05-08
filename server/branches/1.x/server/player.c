@@ -2339,12 +2339,19 @@ static int save_life(object *op) {
     return 0;
 }
 
-/* This goes throws the inventory and removes unpaid objects, and puts them
- * back in the map (location and map determined by values of env).  This
- * function will descend into containers.  op is the object to start the search
- * from.
+/**
+ * This goes throws the inventory and removes unpaid objects, and puts them
+ * back in the map (location and map determined by values of env) or frees them.  This
+ * function will descend into containers.
+ *
+ * @param op
+ * object to start the search from.
+ * @param env
+ * top-level container, should be in a map if free_items is 0, unused if free_items is 1.
+ * @param free_items
+ * if set, unpaid items are freed, else they are inserted in the same map as env.
  */
-static void remove_unpaid_objects(object *op, object *env)
+void remove_unpaid_objects(object *op, object *env, int free_items)
 {
     object *next;
 
@@ -2354,13 +2361,15 @@ static void remove_unpaid_objects(object *op, object *env)
 			 */
 	if (QUERY_FLAG(op, FLAG_UNPAID)) {
 	    remove_ob(op);
-	    op->x = env->x;
-	    op->y = env->y;
-	    if (env->type == PLAYER)
-		esrv_del_item(env->contr, op->count);
-	    insert_ob_in_map(op, env->map, NULL,0);
+            if (free_items)
+                free_object(op);
+            else {
+                op->x = env->x;
+                op->y = env->y;
+                insert_ob_in_map(op, env->map, NULL, 0);
+            }
 	}
-	else if (op->inv) remove_unpaid_objects(op->inv, env);
+        else if (op->inv) remove_unpaid_objects(op->inv, env, free_items);
 	op=next;
     }
 }
@@ -2874,7 +2883,7 @@ void kill_player(object *op)
 	 * in the map.
 	 */
         if (is_in_shop(op))
-            remove_unpaid_objects(op->inv, op);
+            remove_unpaid_objects(op->inv, op, 0);
 
 	/* Move player to his current respawn-position (usually last savebed) */
 	enter_player_savebed(op);
