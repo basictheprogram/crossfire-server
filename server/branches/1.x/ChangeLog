@@ -17,19 +17,16 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
-<<<<<<< .courant
-=======
+Fix a potential underflow, forbid players to create too powerful missiles.
+ server/spell_effect.c
+Nicolas Weeger 2008-05-08
+
 Remove unpaid items when returning a player to his savebed for map reset or
 after server-specific timeout.
  include/sproto.h
  server/login.c player.c
 Nicolas Weeger 2008-05-08
 
-Generate NPC information page.
- utils/mapper.c
-Nicolas Weeger 2008-05-08
-
->>>>>>> .fusion-droit.r8920
 Better and more logical fix for bug #1936178: Trying to remove removed object causes server crash.
  random_maps/treasure.c: remove doors after door replacing.
 Nicolas Weeger 2008-05-08
