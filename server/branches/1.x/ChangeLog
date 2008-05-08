@@ -17,6 +17,10 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Better and more logical fix for bug #1936178: Trying to remove removed object causes server crash.
+ random_maps/treasure.c: remove doors after door replacing.
+Nicolas Weeger 2008-05-08
+
 Fix artifact reading to (kind of) trim strings. Fix add missing artifacts
 to fix alchemy warning.
  common/treasure.c
