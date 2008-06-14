@@ -119,14 +119,18 @@ static void attempt_do_alchemy(object *caster, object *cauldron) {
     object *item, *skop;
 
     if (caster->type!=PLAYER)
-	return; /* only players for now */ 
+	return; /* only players for now */
 
     /* if no ingredients, no formula! lets forget it */
-    if (!(formula=content_recipe_value(cauldron))) return;
- 
+    if (!(formula=content_recipe_value(cauldron))) {
+        new_draw_info_format(NDI_UNIQUE, 0, caster, "The %s is empty.",
+                             cauldron->name);
+        return;
+    }
+
     numb=numb_ob_inside(cauldron);
     if ((fl=get_formulalist(numb))) {
-        if (QUERY_FLAG(caster, FLAG_WIZ)) { 
+        if (QUERY_FLAG(caster, FLAG_WIZ)) {
 	    rp = find_recipe(fl, formula, cauldron->inv);
 	    if (rp != NULL) {
 #ifdef ALCHEMY_DEBUG
