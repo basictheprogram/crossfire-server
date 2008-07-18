@@ -662,9 +662,14 @@ void check_login(object *op) {
                 party_name[strlen(party_name) - 1] = '\0';
         }
         else if (!strcmp(buf, "party_rejoin_password")) {
+            size_t len;
             snprintf(party_password, sizeof(party_password), bufall + strlen("party_rejoin_password") + 1);
-            if (strlen(party_password) > 0)
-                party_password[strlen(party_password) - 1] = '\0';
+            len = strlen(party_password);
+            /* Remove trailing \n if needed. If password is 8 chars long,
+             * snprintf would already have dropped the \n.
+             */
+            if (len > 0 && len < 8)
+                party_password[len - 1] = '\0';
         }
     } /* End of loop loading the character file */
     remove_ob(op);

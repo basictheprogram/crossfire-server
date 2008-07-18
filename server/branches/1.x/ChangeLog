@@ -17,6 +17,11 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Merged fix for bug #2009686 from trunk (party password does not work if 8
+characters long)
+ server/login.c
+Arvid Norlander 2008-07-18
+
 Merged fix for bug #2009802 from trunk (alchemy experience not stored
 correctly).
  common/recipe.c
