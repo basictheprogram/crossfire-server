@@ -17,6 +17,14 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Backported fix for bug #2017790 "Cannot build talking books, listening books or
+signs".  In order to miminize the code changes in the branch, only a minimal
+fix was merged from trunk, without including the other improvements to the
+code.
+ include/sproto.h
+ server/build_map.c
+Raphael Quinet 2008-07-19
+
 Merged fix for bug #2009686 from trunk (party password does not work if 8
 characters long)
  server/login.c
