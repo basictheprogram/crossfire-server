@@ -17,6 +17,10 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Fix for bug introduced when backporting.
+ server/build_map.c
+Raphael Quinet 2008-07-25
+
 Backported fix for bug #2017790 "Cannot build talking books, listening books or
 signs".  In order to miminize the code changes in the branch, only a minimal
 fix was merged from trunk, without including the other improvements to the

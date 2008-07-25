@@ -799,15 +799,15 @@ void apply_map_builder( object* pl, int dir )
         switch (material->subtype) {
             case ST_MAT_FLOOR:
                 built = apply_builder_floor(pl, new_item, x, y);
-                return;
+                break;
 
             case ST_MAT_WALL:
                 built = apply_builder_wall(pl, new_item, x, y);
-                return;
+                break;
 
             case ST_MAT_ITEM:
                 built = apply_builder_item(pl, new_item, x, y);
-                return;
+                break;
 
             default:
                 new_draw_info(NDI_UNIQUE, 0, pl, "Don't know how to apply this material, sorry.");
