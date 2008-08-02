@@ -17,6 +17,12 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Backported from trunk: fix for bug #2028541: Any object using a non-default
+move_slow_penalty was always saved with the value 0 because the code was
+using FAST_SAVE_LONG instead of FAST_SAVE_DOUBLE for a floating-point value.
+ common/loader.l
+Raphaël Quinet 2008-08-02
+
 Fix for bug introduced when backporting.
  server/build_map.c
 Raphael Quinet 2008-07-25
