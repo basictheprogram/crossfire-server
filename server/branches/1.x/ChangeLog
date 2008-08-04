@@ -17,6 +17,10 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Avoid problems if the floor was already removed together with a wall.
+ server/build_map.c
+Raphaël Quinet 2008-08-04
+
 Merged bug fix from trunk: when building a new floor on top of an old floor,
 the old one was never removed, resulting in a stack of floors in some buildable
 areas.

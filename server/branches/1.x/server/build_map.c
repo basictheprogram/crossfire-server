@@ -390,6 +390,7 @@ int apply_builder_floor(object* pl, object* new_floor, short x, short y )
             if ( floor != NULL ) {
                 remove_ob(floor);
                 free_object(floor);
+                floor = NULL;
             }
             }
         else if ( ( FLOOR == tmp->type ) || ( QUERY_FLAG(tmp, FLAG_IS_FLOOR ) ) ) 
