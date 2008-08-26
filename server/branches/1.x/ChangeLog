@@ -17,6 +17,12 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
+Backport from trunk: Inform other party members when a player leaves a
+party by joining or creating another party, not only when the player uses
+"party leave".
+ server/c_party.c
+Raphaël Quinet 2008-08-26
+
 Avoid problems if the floor was already removed together with a wall.
  server/build_map.c
 Raphaël Quinet 2008-08-04
