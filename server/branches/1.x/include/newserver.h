@@ -37,11 +37,23 @@
 #ifndef NEWSERVER_H
 #define NEWSERVER_H
 
-/* Reduce this from 50 to 5 - as it is now, there will never be more
- * than 3 anyways.
+/**
+ * The lower bound for the number of objects to send for the 'look' window
+ * (container or ground view).
  */
+#define MIN_NUM_LOOK_OBJECTS 3 /* 3=prev group, one object, next group */
 
-#define NUM_LOOK_OBJECTS 50
+/**
+ * Default value for the number of objects to send for the 'look' window
+ * (container or ground view).
+ */
+#define DEFAULT_NUM_LOOK_OBJECTS 50
+
+/**
+ * The upper bound for the number of objects to send for the 'look' window
+ * (container or ground view).
+ */
+#define MAX_NUM_LOOK_OBJECTS 100
 
 struct map_cell_struct {
   uint16 faces[MAP_LAYERS];
@@ -146,6 +158,10 @@ typedef struct socket_struct {
     /* Below here is information only relevant for old sockets */
     char    *comment;	    /* name or listen comment */
     enum Old_Mode old_mode;
+    uint8   num_look_objects; /* The maximum number of objects to show on the ground view;
+                                 this number includes the prev/next group fake items.
+                                 Can be set through "num_look_objects" setup option;
+                                 defaults to DEFAULT_NUM_LOOK_OBJECTS. */
 } socket_struct;
 
 
