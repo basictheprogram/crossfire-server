@@ -161,7 +161,7 @@ typedef struct obj {
     sint32	last_heal;	/* Last healed. Depends on constitution */
     sint32	last_sp;	/* As last_heal, but for spell points */
     sint16	last_grace;	/* as last_sp, except for grace */
-    sint16	last_eat;	/* How long since we last ate */
+    sint32	last_eat;	/* How long since we last ate */
     sint16	invisible;	/* How much longer the object will be invis */
     uint8	pick_up;        /* See crossfire.doc */
     sint8	item_power;	/* power rating of the object */
