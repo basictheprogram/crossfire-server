@@ -270,13 +270,18 @@ void set_up_cmd(char *buf, int len, socket_struct *ns)
 		if ((x>11 || y>11) && ns->mapmode == Map0Cmd) ns->mapmode = Map1Cmd;
 	    }
 	} else if (!strcmp(cmd,"extendedMapInfos")) {
-	    /* Added by tchize
-	     * prepare to use the mapextended command
-	     */
-	    char tmpbuf[20];
-	    ns->ext_mapinfos = (atoi(param));
-	    sprintf(tmpbuf,"%d", ns->ext_mapinfos);
-	    safe_strcat(cmdback, tmpbuf, &slen, HUGE_BUF);
+	    int ext_mapinfos;
+
+	    ext_mapinfos = atoi(param);
+	    if (ext_mapinfos != 0 && ext_mapinfos != 1) {
+		safe_strcat(cmdback, "FALSE", &slen, HUGE_BUF);
+	    } else {
+		char tmpbuf[20];
+
+		ns->ext_mapinfos = ext_mapinfos;
+		snprintf(tmpbuf, sizeof(tmpbuf), "%d", ext_mapinfos);
+		safe_strcat(cmdback, tmpbuf, &slen, HUGE_BUF);
+	    }
 	} else if (!strcmp(cmd,"extendedTextInfos")) {
 	    int has_readable_type;
 
