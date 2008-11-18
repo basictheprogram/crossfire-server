@@ -1319,7 +1319,8 @@ S->C: setup <option1> <value1> <option2> <value2>
 	    this is largely the same as the map1 command, but adds support
 	    for big images.
 
-	map2cmd: This indicates client support for the map2 protocol command.
+	map2cmd: (1)
+	    This indicates client support for the map2 protocol command.
 	    See the map2 protocol details above for the main differences.
 	    Note that if map2 protocol is used, the following setup commands
 	    have no effect, either as being redundant or not applicable:

@@ -186,8 +186,15 @@ void set_up_cmd(char *buf, int len, socket_struct *ns)
 	    if (atoi(param)) ns->mapmode = Map1aCmd;
 	    safe_strcat(cmdback, ns->mapmode == Map1aCmd?"1":"0", &slen, HUGE_BUF);
 	} else if (!strcmp(cmd,"map2cmd")) {
-	    if (atoi(param)) ns->mapmode = Map2Cmd;
-	    safe_strcat(cmdback, ns->mapmode == Map2Cmd?"1":"0", &slen, HUGE_BUF);
+	    int map2cmd;
+
+	    map2cmd = atoi(param);
+	    if (map2cmd != 1) {
+		safe_strcat(cmdback, "FALSE", &slen, HUGE_BUF);
+	    } else {
+		ns->mapmode = Map2Cmd;
+		safe_strcat(cmdback, "1", &slen, HUGE_BUF);
+	    }
         } else if (!strcmp(cmd,"newmapcmd")) {
             ns->newmapcmd= atoi(param);
 	    safe_strcat(cmdback, param, &slen, HUGE_BUF);
