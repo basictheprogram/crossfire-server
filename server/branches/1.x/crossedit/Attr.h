@@ -9,15 +9,15 @@
 
 /*** variables, index ***/
 typedef enum {
-    I_Path, I_X, I_Y, I_Weight, I_Connect, I_Hp, 
-    I_Trigger, I_Sacrifice, I_Count, I_Lockcode, 
-    I_Direction, I_Rotation, I_NoPick, I_Unique, 
+    I_Path, I_X, I_Y, I_Weight, I_Connect, I_Hp,
+    I_Trigger, I_Sacrifice, I_Count, I_Lockcode,
+    I_Direction, I_Rotation, I_NoPick, I_Unique,
     I_WeightL, I_Brand, I_Maker
 } AttrIndex;
 
-typedef enum _AttrType { 
+typedef enum _AttrType {
     TypeString,
-    TypeToggle 
+    TypeToggle
 } AttrType;
 
 typedef void (*AttrFunc)(object *, char *, XtPointer);
@@ -63,7 +63,7 @@ struct _Attr {
 #endif
     Boolean isup;            /* is window popped up  */
     Boolean modified;        /* should not used */
-    CnvBrowse dump;          /* showing window for dump_object */  
+    CnvBrowse dump;          /* showing window for dump_object */
 };
 
 /*
@@ -76,7 +76,7 @@ struct _Attr {
 /*
  * function inteface
  */
-extern Attr AttrCreate ( char *name, App app, object *ob, 
+extern Attr AttrCreate ( char *name, App app, object *ob,
 			AttrDef *desc, unsigned long flags, Edit);
 extern void AttrChange ( Attr self, object *ob, unsigned long flags, Edit);
 extern void AttrDestroy ( Attr self );

@@ -14,7 +14,7 @@
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-	
+
 	The authors can be reached via e-mail to Jarkko.Sonninen@lut.fi
 	or Petri.Heinila@lut.fi .
 */
@@ -25,7 +25,7 @@
 #include "debug.h"
 
 /**********************************************************************
- * application resources 
+ * application resources
  **********************************************************************/
 
 #define Offset(field) XtOffsetOf(AppRes, field)
@@ -56,7 +56,7 @@ static XrmOptionDescRec options[] = {
     {"-xpm","*useColorPixmaps",XrmoptionNoArg,"TRUE"},
     {"-png","*usePng",XrmoptionNoArg,"TRUE"},
 
-}; 
+};
 
 static String fallback_resources[] = {
 #include <Crossedit.ad.h>
@@ -116,11 +116,11 @@ int main (int argc, char **argv, char **env)
     if (getenv("LIBDIR")) LibDir = getenv("LIBDIR");
 #endif
 
-    /*XtAppInitialize (&app_con, "Crossedit", NULL, 0,  &argc, argv, 
+    /*XtAppInitialize (&app_con, "Crossedit", NULL, 0,  &argc, argv,
 		     fallback_resources, NULL, 0);*/
 
     XtToolkitInitialize ();
-    app_con = XtCreateApplicationContext();    
+    app_con = XtCreateApplicationContext();
 #if 1
     XtAppSetFallbackResources (app_con, fallback_resources);
 #endif

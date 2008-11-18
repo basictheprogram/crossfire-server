@@ -90,12 +90,12 @@ void find_in_layout(int mode, char target,int *fx,int *fy,char **layout,RMParms 
   }
   }
 }
-        
-    
-    
 
-  
-  
+
+
+
+
+
 /* orientation:  0 means random,
   1 means descending dungeon
   2 means ascending dungeon
@@ -117,7 +117,7 @@ void place_exits(mapstruct *map, char **maze,char *exitstyle,int orientation,RMP
   int upx=-1,upy=-1;  /* location of up exit */
   int downx=-1,downy=-1;
   int final_map_exit=1;
- 
+
   if(RP->exit_on_final_map){
 	  if(strstr(RP->exit_on_final_map,"no")) final_map_exit=0;
     }
@@ -181,7 +181,7 @@ void place_exits(mapstruct *map, char **maze,char *exitstyle,int orientation,RMP
     /* next, look for a C, the map center.  */
     find_in_layout(0,'C',&cx,&cy,maze,RP);
 
-    
+
     /* if we didn't find an up, find an empty place far from the center */
     if(upx==-1 && cx!=-1) {
       if(cx > RP->Xsize/2) upx = 1;
@@ -197,7 +197,7 @@ void place_exits(mapstruct *map, char **maze,char *exitstyle,int orientation,RMP
           else
             if(upx>1 && upy>1) find_in_layout(4,0,&upx,&upy,maze,RP);
     }
-    
+
     /* no indication of where to place the exit, so just place it. */
     if(upx==-1) find_in_layout(0,0,&upx,&upy,maze,RP);
 
@@ -210,9 +210,9 @@ void place_exits(mapstruct *map, char **maze,char *exitstyle,int orientation,RMP
         random_sign = create_archetype("sign");
         random_sign->x = the_exit_up->x+freearr_x[j];
         random_sign->y = the_exit_up->y+freearr_y[j];
-		  
+
 		sprintf(buf,"This is a random map.\nLevel: %d\n", (RP->dungeon_level)-1);
-        
+
 		random_sign->msg = add_string(buf);
         insert_ob_in_map(random_sign,map,NULL,0);
       }
@@ -231,7 +231,7 @@ void place_exits(mapstruct *map, char **maze,char *exitstyle,int orientation,RMP
     find_in_layout(0,'>',&downx,&downy,maze,RP);
     /* if no > is found use C */
     if(downx==-1) { downx = cx; downy=cy;};
-        
+
     /* make the other exit far away from this one if
        there's no center. */
     if(downx==-1) {
@@ -247,7 +247,7 @@ void place_exits(mapstruct *map, char **maze,char *exitstyle,int orientation,RMP
           if(downx>1 && downy==1) find_in_layout(2,0,&downx,&downy,maze,RP);
           else
             if(downx>1 && downy>1) find_in_layout(4,0,&downx,&downy,maze,RP);
-      
+
     }
     /* no indication of where to place the down exit, so just place it */
     if(downx==-1) find_in_layout(0,0,&downx,&downy,maze,RP);
@@ -277,7 +277,7 @@ void place_exits(mapstruct *map, char **maze,char *exitstyle,int orientation,RMP
         /* set the exit down. */
 #endif
         /* load it */
-        if((new_map=ready_map_name(RP->final_map,0)) == NULL) 
+        if((new_map=ready_map_name(RP->final_map,0)) == NULL)
 	    return;
 
         the_exit_down->slaying = add_string(RP->final_map);
@@ -308,10 +308,10 @@ void place_exits(mapstruct *map, char **maze,char *exitstyle,int orientation,RMP
 
         insert_ob_in_map(the_exit_back,new_map,NULL,0);
 			}
-			
+
 		set_map_timeout(new_map);   /* So it gets swapped out */
       }
-      else 
+      else
         the_exit_down->slaying = add_string("/!");
       /* Block the exit so things don't get dumped on top of it. */
       the_exit_down->move_block = MOVE_ALL;
@@ -319,7 +319,7 @@ void place_exits(mapstruct *map, char **maze,char *exitstyle,int orientation,RMP
       maze[the_exit_down->x][the_exit_down->y]='>';
     }
   }
-    
+
 }
 
 

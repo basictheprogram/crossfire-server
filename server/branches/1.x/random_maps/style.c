@@ -57,7 +57,7 @@ static int pointer_strcmp(const void *p1, const void *p2)
  * skip_dirs controls our behavioru - if nonzero, we don't
  * skip any subdirectories - if zero, we store those away,
  * since there are cases where we want to choose a random
- * directory. 
+ * directory.
  */
 int load_dir (const char *dir, char ***namelist, int skip_dirs)
 {
@@ -99,14 +99,14 @@ int load_dir (const char *dir, char ***namelist, int skip_dirs)
 
 
 
-  
+
 /* this function loads and returns the map requested.
  * dirname, for example, is "/styles/wallstyles", stylename, is,
  * for example, "castle", difficulty is -1 when difficulty is
  * irrelevant to the style.  If dirname is given, but stylename
  * isn't, and difficult is -1, it returns a random style map.
  * Otherwise, it tries to match the difficulty given with a style
- * file, named style_name_# where # is an integer 
+ * file, named style_name_# where # is an integer
  */
 
 /* remove extern, so visible to command_style_map_info function */
@@ -145,7 +145,7 @@ mapstruct *find_style(const char *dirname,const char *stylename,int difficulty) 
     mapstruct *style_map = NULL;
     struct stat file_stat;
     int i, only_subdirs=0;
-  
+
     /* if stylename exists, set style_file_path to that file.*/
     if(stylename && strlen(stylename)>0)
 	sprintf(style_file_path,"%s/%s",dirname,stylename);
@@ -180,7 +180,7 @@ mapstruct *find_style(const char *dirname,const char *stylename,int difficulty) 
 	if (n<=0) return 0; /* nothing to load.  Bye. */
 
 	/* Picks a random map.  Note that if this is all directories,
-	 * we know it won't be able to load, so save a few ticks.   
+	 * we know it won't be able to load, so save a few ticks.
 	 * the door handling checks for this failure and handles
 	 * it properly.
 	 */
@@ -255,7 +255,7 @@ object *pick_random_object(mapstruct *style) {
     if (new_obj->head) return new_obj->head;
     else return new_obj;
 }
-				
+
 
 void free_style_maps(void)
 {

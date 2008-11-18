@@ -307,7 +307,7 @@ static void first_arch_pass(FILE *fp) {
 	/* copy the body_info to the body_used - this is only really
 	 * need for monsters, but doesn't hurt to do it for everything.
 	 * by doing so, when a monster is created, it has good starting
-	 * values for the body_used info, so when items are created 
+	 * values for the body_used info, so when items are created
 	 * for it, they can be properly equipped.
 	 */
 	memcpy(&at->clone.body_used, &op->body_info, sizeof(op->body_info));
@@ -631,11 +631,11 @@ archetype *type_to_archetype(int type) {
  * the given type.
  * Used in treasure-generation.
  */
- 
+
 /*
  * Commented as it does not seems used in code. If you uncomment
  * this function, make sure you write appropriate unit test!!!!!!!
- * 
+ *
 object *clone_arch(int type) {
   archetype *at;
   object *op=get_object();
@@ -651,7 +651,7 @@ object *clone_arch(int type) {
 */
 
 /**
- * Create a full object using the given archetype. 
+ * Create a full object using the given archetype.
  * This instanciate not only the archetype but also
  * all linked archetypes in case of multisquare archetype.
  */

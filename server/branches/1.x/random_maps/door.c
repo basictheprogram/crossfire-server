@@ -60,13 +60,13 @@ void put_doors(mapstruct *the_map, char **maze, const char *doorstyle, RMParms *
 		sprintf(doorpath,"/styles/doorstyles/hdoors%s", strrchr(vdoors->path, '/'));
 		hdoors = find_style(doorpath, 0, -1);
 	}
-	for(i=0; i<RP->Xsize; i++) 
+	for(i=0; i<RP->Xsize; i++)
 		for(j=0; j<RP->Ysize; j++) {
 			if(maze[i][j]=='D') {
 				int sindex;
 				object *this_door, *new_door;
 				sindex = surround_check2(maze, i, j, RP->Xsize, RP->Ysize);
-				if(sindex==3) 
+				if(sindex==3)
 					this_door=pick_random_object(hdoors);
 				else
 					this_door=pick_random_object(vdoors);

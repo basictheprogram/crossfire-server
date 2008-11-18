@@ -185,7 +185,7 @@ static score *add_score(score *new_score) {
   score *tmp_score,pscore[HIGHSCORE_LENGTH];
   char buf[MAX_BUF], filename[MAX_BUF], *bp;
   int nrofscores=0,flag=0,i,comp;
- 
+
   new_score->position=HIGHSCORE_LENGTH+1;
   old_score.position= -1;
   sprintf(filename,"%s/%s",settings.localdir,HIGHSCORE);
@@ -297,7 +297,7 @@ void check_score(object *op, int quiet) {
     new_score.exp=op->stats.exp;
     if(op->map == NULL)
 	*new_score.maplevel = '\0';
-    else { 
+    else {
 	strncpy(new_score.maplevel,
 		op->map->name?op->map->name:op->map->path,
 		BIG_NAME-1);
@@ -320,7 +320,7 @@ void check_score(object *op, int quiet) {
     if(new_score.position == -1) {
 	new_score.position = HIGHSCORE_LENGTH+1; /* Not strictly correct... */
 
-	if(!strcmp(old_score->name,new_score.name)) 
+	if(!strcmp(old_score->name,new_score.name))
 	    new_draw_info(NDI_UNIQUE, 0,op,"You didn't beat your last highscore:");
 	else
 	    new_draw_info(NDI_UNIQUE, 0,op,"You didn't enter the highscore list:");
@@ -379,7 +379,7 @@ void display_high_score(object *op,int max, const char *match) {
 	    }
 	    else continue;
 	}
-	/* Replaced what seemed to an overly complicated word wrap method 
+	/* Replaced what seemed to an overly complicated word wrap method
 	 * still word wraps, but assumes at most 2 lines of data.
 	 * mw - 2-12-97
 	 */
@@ -400,7 +400,7 @@ void display_high_score(object *op,int max, const char *match) {
 	    cp = buf;
 	    i++;
 	}
-	if(op == NULL) 
+	if(op == NULL)
 		LOG(llevDebug, "%s\n", buf);
 	else
 		new_draw_info(NDI_UNIQUE, 0,op,buf);

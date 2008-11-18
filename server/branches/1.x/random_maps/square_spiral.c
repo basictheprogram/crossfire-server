@@ -69,7 +69,7 @@ void find_top_left_corner(char **maze,int *cx, int *cy) {
   while(maze[*cx][*cy]==0) (*cy)--;
   /* proceed right until a corner is detected */
   while(maze[*cx][*cy+1]==0) (*cx)++;
-  
+
   /* cx and cy should now be the top-right corner of the onion layer */
 }
 
@@ -112,11 +112,11 @@ char **make_square_spiral_layout(int xsize, int ysize,int options) {
 
     /* walk rightuntil we find the bottom-right corner */
     while(((tx + 1) < xsize) && maze[tx+1][ty]) tx++;
-    
+
     make_wall(maze,tx+1,ty,0);   /* make a horizontal wall with a door */
     tx++;  /* set up for next layer. */
   }
-      
+
   /* place the exits.  */
 
   if(RANDOM() %2) {
@@ -127,7 +127,7 @@ char **make_square_spiral_layout(int xsize, int ysize,int options) {
     maze[cx][cy]='<';
     maze[xsize-2][1]='>';
   }
-    
+
   return maze;
 }
 

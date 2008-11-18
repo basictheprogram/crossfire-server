@@ -103,7 +103,7 @@
 #ifndef STREAM_MAX
 #define STREAM_MAX OPEN_MAX  /*  */
 #endif
-#ifndef _POSIX_ARG_MAX 
+#ifndef _POSIX_ARG_MAX
 #define _POSIX_ARG_MAX 4096
 #endif
 

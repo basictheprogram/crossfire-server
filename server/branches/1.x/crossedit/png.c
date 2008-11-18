@@ -66,7 +66,7 @@ struct Pngx_Color_Values {
 #define COLOR_FACTOR       3
 #define BRIGHTNESS_FACTOR  1
 
-/* This function is used to find the pixel and return it 
+/* This function is used to find the pixel and return it
  * to the caller.  We store what pixels we have already allocated
  * and try to find a match against that.  The reason for this is that
  * XAllocColor is a very slow routine. Before my optimizations,
@@ -80,7 +80,7 @@ static long pngx_find_color(Display *display, Colormap *cmap, int red, int green
     XColor  scolor;
 
     for (i=0; i<colors_alloced; i++) {
-	if ((color_values[i].red == red) && (color_values[i].green == green) && 
+	if ((color_values[i].red == red) && (color_values[i].green == green) &&
 	    (color_values[i].blue == blue)) return color_values[i].pixel_value;
 
 	tmpclose = COLOR_FACTOR * (abs(red - color_values[i].red) +
@@ -100,7 +100,7 @@ static long pngx_find_color(Display *display, Colormap *cmap, int red, int green
     }
 
     /* If the colormap is full, no reason to do anything more */
-    if (colors_alloced == colormap_size) 
+    if (colors_alloced == colormap_size)
 	return color_values[close_entry].pixel_value;
 
 
@@ -201,8 +201,8 @@ int init_pngx_loader(Display *display)
 	    bshift = -bshift;
 	}
     }
-    
-	
+
+
     if (xvret->class==PseudoColor) {
 	need_color_alloc=1;
 	if (xvret->colormap_size>256) {
@@ -219,7 +219,7 @@ int init_pngx_loader(Display *display)
 
     ximage = XCreateImage(display, visual,
 		      depth,
-		      ZPixmap, 0, 0, 
+		      ZPixmap, 0, 0,
 		      256, 256,  pad, 0);
     if (!ximage) {
 	fprintf(stderr,"Failed to create Ximage\n");
@@ -241,7 +241,7 @@ int png_to_xpixmap(Display *display, Drawable draw, char *data, int len,
     static char *pixels=NULL;
     static int pixels_byte=0, rows_byte=0;
     static png_bytepp	rows=NULL;
-    
+
     png_structp	png_ptr=NULL;
     png_infop	info_ptr=NULL, end_info=NULL;
     int bit_depth, color_type, interlace_type, compression_type, filter_type,
@@ -364,7 +364,7 @@ int png_to_xpixmap(Display *display, Drawable draw, char *data, int len,
 	return PNGX_OUTOFMEM;
     }
 
-    for (y=0; y<*height; y++) 
+    for (y=0; y<*height; y++)
 	rows[y] = pixels + y * *width * bpp;
 
     png_read_image(png_ptr, rows);
@@ -373,7 +373,7 @@ int png_to_xpixmap(Display *display, Drawable draw, char *data, int len,
 	    *width, *height, bpp, color_type);
 #endif
 
-    *pix = XCreatePixmap(display, draw, *width, *height, 
+    *pix = XCreatePixmap(display, draw, *width, *height,
 			DefaultDepth(display,  DefaultScreen(display)));
 
     gc=XCreateGC(display, *pix, 0, NULL);

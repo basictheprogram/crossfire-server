@@ -29,7 +29,7 @@ char **make_snake_layout(int xsize, int ysize,int options) {
   }
 
   /* write the outer walls */
-  for(i=0;i<xsize;i++) 
+  for(i=0;i<xsize;i++)
     maze[i][0] = maze[i][ysize-1] = '#';
   for(j=0;j<ysize;j++)
     maze[0][j] = maze[xsize-1][j] = '#';
@@ -80,14 +80,14 @@ char **make_snake_layout(int xsize, int ysize,int options) {
       orientation ^= 1; /* toggle the value of orientation */
     }
   }
-  
+
   /* place the exit up/down */
   if(RANDOM() %2)
     { maze[1][1] = '<'; maze[xsize-2][ysize-2]='>'; }
   else
     { maze[1][1] = '>'; maze[xsize-2][ysize-2]='<'; }
-    
-  
+
+
   return maze;
 }
 

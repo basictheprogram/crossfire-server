@@ -75,7 +75,7 @@ static char defaultTranslations[] = "\
 
 CrListClassRec crListClassRec = {
   { /*** Core ***/
-    /* superclass            */ (WidgetClass) &widgetClassRec,    
+    /* superclass            */ (WidgetClass) &widgetClassRec,
     /* class_name            */ "CrList",
     /* widget_size           */ sizeof(CrListRec) ,
     /* class_initialize      */ ClassInitialize ,
@@ -89,7 +89,7 @@ CrListClassRec crListClassRec = {
     /* resources             */ resources,
     /* num_resources         */ XtNumber(resources),
     /* xrm_class             */ NULLQUARK,
-    /* compress_motion       */ TRUE, 
+    /* compress_motion       */ TRUE,
     /* compress_exposure     */ TRUE,
     /* compress_enterleave   */ TRUE,
     /* visible_interest      */ FALSE,
@@ -109,7 +109,7 @@ CrListClassRec crListClassRec = {
     /* extension             */ NULL
   },
   { /*** CrList ***/
-     /* empty                    */ 0,				
+     /* empty                    */ 0,
   }
 };
 
@@ -140,7 +140,7 @@ static void SetSize(Widget w)
 
     height = --i * FontSize;
     width = self->core.width;
-    
+
     /*** do request from parent container ***/
     switch(XtMakeResizeRequest(w,width,height,&rWidth,&rHeight)) {
       case XtGeometryYes:
@@ -165,7 +165,7 @@ static void SetSize(Widget w)
 /*
  * function: get y's node in list from top
  * y       : index
- * return  : 
+ * return  :
  */
 static CrListNode GetYNode (Widget w, int y)
 {
@@ -180,7 +180,7 @@ static CrListNode GetYNode (Widget w, int y)
 
     node = self->crList.next ((XtPointer)self->crList.caller, (XtPointer)0);
     for (i = 0; node && i < y; i++)
-	node = self->crList.next 
+	node = self->crList.next
 	    ((XtPointer)self->crList.caller, (XtPointer)node);
 
     return (node);
@@ -191,7 +191,7 @@ static CrListCall GetYCall (Widget w, int y)
 {
     CrListNode node = GetYNode (w, y);
     static struct _CrListCall ret;
-    
+
     ret.index = -1; /* empty list */
     ret.node = NULL;
     if (!node)
@@ -255,18 +255,18 @@ static void Initialize(Widget req,Widget new,Arg args[],Cardinal *num)
 {
     CrListWidget w = (CrListWidget)new;
     XGCValues   values;
-    
+
     debug1("CrList-%s-Initialize()\n",XtName(new));
-    if(w->crList.caller == NULL) 
+    if(w->crList.caller == NULL)
 	CnvDie(new,"Object has no container");
 
     if (!w->core.width)
 	w->core.width++;
-    SetSize(new);    
+    SetSize(new);
     w->crList.gc = GCCreate (new);
     values.font = w->crList.font->fid;
     values.foreground   = w->crList.foreground;
-    w->crList.normal_GC = XtGetGC 
+    w->crList.normal_GC = XtGetGC
 	(new, (unsigned) (GCForeground | GCFont), &values);
 }
 
@@ -289,14 +289,14 @@ static void Redisplay(Widget w,XEvent *event,Region region)
     CrListNode node;
     int y;
     XRectangle rect;
-    
+
     debug0("CrList-Redisplay()\n");
 
     if (region) {
 	XClipBox(region,&rect);
 	rect.height = rect.height / FontSize + 2;
 	rect.y /= FontSize;
-	XClearArea(XtDisplay(w),XtWindow(w), 0, rect.y * FontSize, 
+	XClearArea(XtDisplay(w),XtWindow(w), 0, rect.y * FontSize,
 		   0, rect.height * FontSize - 1, False);
     } else {
 	rect.y = 0;
@@ -309,11 +309,11 @@ static void Redisplay(Widget w,XEvent *event,Region region)
 	/*DrawObject(w,0,y,node);*/
 	DrawFacePart(w, self->crList.gc, node->face, 0, y * FontSize, 0, 0);
 	XDrawString(XtDisplay(w),XtWindow(w),
-		    self->crList.normal_GC 
+		    self->crList.normal_GC
 		    /*DefaultGCOfScreen(XtScreen(w))*/,
 		    FontSize + 8, y * FontSize + 16,
 		    node->name,strlen(node->name));
-	node = self->crList.next 
+	node = self->crList.next
 	    ((XtPointer)self->crList.caller, (XtPointer)node);
     }
 }
@@ -323,7 +323,7 @@ static Boolean SetValues(Widget cur,Widget req,Widget new,
 {
   /* CrListWidget self = (CrListWidget)new; */
   debug0("SetValues()\n");
-  SetSize(new); 
+  SetSize(new);
   return True;
 }
 

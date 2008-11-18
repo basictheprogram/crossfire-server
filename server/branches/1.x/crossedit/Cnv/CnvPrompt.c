@@ -36,7 +36,7 @@ static void CnvPromptCb (Widget w, XtPointer client, XtPointer call)
     char *t;
     CnvPromptSelect = (int) client;	/* set cardinal */
     XtVaGetValues(CnvPromptWidgetText, XtNstring, &t, NULL);
-    
+
     snprintf(CnvPromptString, sizeof(CnvPromptString), "%s", t);
 
     XtDestroyWidget (CnvGetShell (w));
@@ -53,7 +53,7 @@ int CnvPrompt(String msg,String def,String ans,...)
 
     if (!CnvPromptActionFlag) {
 	XtAppContext a = XtWidgetToApplicationContext (cnv->shell);
-	XtAppAddActions (a,CnvPromptActionTable, 
+	XtAppAddActions (a,CnvPromptActionTable,
 			 XtNumber (CnvPromptActionTable));
     }
 
@@ -92,14 +92,14 @@ int CnvPrompt(String msg,String def,String ans,...)
 	  "<Key>Tab: CnvNop()\n"),
 	 XtNwidth,336,
 	 NULL);
-    
+
     /* Put the cursor at the end of the line. */
-    XtVaSetValues(CnvPromptWidgetText, 
+    XtVaSetValues(CnvPromptWidgetText,
         XtNinsertPosition, strlen(def),
         NULL);
-    
+
     XtInstallAllAccelerators(cont,cont);
-    
+
     /*** button-list ***/
     va_start(al,ans);
     for(i=1;(str = (String)va_arg(al,String)) != NULL; i++) {
@@ -119,7 +119,7 @@ int CnvPrompt(String msg,String def,String ans,...)
     }
     i = CnvPromptSelect;
     CnvPromptSelect = 0;
-    
+
     debug1("CnvPrompt '%s'\n", CnvPromptString);
     strncpy(ans,CnvPromptString,CnvPromptMax);
     ans[CnvPromptMax] = '\0';

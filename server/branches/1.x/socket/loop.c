@@ -1,4 +1,3 @@
-
 /*
  * static char *rcsid_loop_c =
  *    "$Id$";
@@ -66,7 +65,7 @@
 
 /*****************************************************************************
  * Start of command dispatch area.
- * The commands here are protocol commands. 
+ * The commands here are protocol commands.
  ****************************************************************************/
 
 /* Either keep this near the start or end of the file so it is
@@ -95,7 +94,7 @@ struct player_cmd_mapping {
  * Dispatch tables for the server.
  *
  * CmdMapping is the dispatch table for the server, used in handle_client,
- * which gets called when the client has input.  All commands called here 
+ * which gets called when the client has input.  All commands called here
  * use the same parameter form (char* data, int len, int clientnum.
  * We do implicit casts, because the data that is being passed is
  * unsigned (pretty much needs to be for binary data), however, most
@@ -131,7 +130,7 @@ static struct client_cmd_mapping client_commands[] = {
     { "version",	version_cmd },
     { "toggleextendedinfos", toggle_extended_infos_cmd}, /*Added: tchize*/
     { "toggleextendedtext", toggle_extended_text_cmd},   /*Added: tchize*/
-    { "asksmooth", ask_smooth_cmd},   /*Added: tchize (smoothing technologies)*/ 
+    { "asksmooth", ask_smooth_cmd},   /*Added: tchize (smoothing technologies)*/
     { NULL, NULL}	/* terminator (I, II & III)*/
 };
 
@@ -202,7 +201,7 @@ void handle_oldsocket(socket_struct *ns)
 	} while ((stat<0) && (errno == EINTR));
 
 	if (stat<0 && errno != EAGAIN && errno !=EWOULDBLOCK) {
-#endif	
+#endif
 	    LOG(llevError, "Cannot read from socket: %s\n", strerror_local(errno));
 	    ns->status = Ns_Dead;
 	    return;
@@ -271,7 +270,7 @@ void handle_oldsocket(socket_struct *ns)
 	    if (ns->password_fails >= MAX_PASSWORD_FAILURES) {
 		const char *buf="You failed to log in too many times, you will now be kicked.\n";
 		LOG(llevInfo, "A player connecting from %s in oldsocketmode has been dropped for password failure\n",
-		    ns->host); 
+		    ns->host);
 		cs_write_string(ns, buf, strlen(buf));
 		ns->status = Ns_Dead;
 	    }
@@ -279,7 +278,7 @@ void handle_oldsocket(socket_struct *ns)
 		const char *buf="Could not login you in.  Check your name and password.\n";
 		cs_write_string(ns, buf, strlen(buf));
 	    }
-	}	
+	}
 	else {
 	    const char *buf="Could not login you in.  Check your name and password.\n";
 	    cs_write_string(ns, buf, strlen(buf));
@@ -338,7 +337,7 @@ void handle_client(socket_struct *ns, player *pl)
 	if (pl && pl->state==ST_PLAYING && pl->ob != NULL && pl->ob->speed_left < 0) {
 	    return;
 	}
-	    
+
 	if (ns->status == Ns_Old) {
 	    handle_oldsocket(ns);
 	    return;
@@ -426,7 +425,7 @@ void handle_client(socket_struct *ns, player *pl)
  * Tell watchdog that we are still alive
  *
  * I put the function here since we should hopefully already be getting
- * all the needed include files for socket support 
+ * all the needed include files for socket support
  */
 
 void watchdog(void)
@@ -525,7 +524,7 @@ static int is_fd_valid(int fd) {
  *
  * A bit of this code is grabbed out of socket.c
  * There are 2 lists we need to look through - init_sockets is a list
- * 
+ *
  */
 void doeric_server(void)
 {
@@ -589,7 +588,7 @@ void doeric_server(void)
 	}
     }
 
-    if (socket_info.nconns==1 && first_player==NULL) 
+    if (socket_info.nconns==1 && first_player==NULL)
 	block_until_new_connection();
 
     /* Reset timeout each time, since some OS's will change the values on
@@ -598,7 +597,7 @@ void doeric_server(void)
     socket_info.timeout.tv_sec = 0;
     socket_info.timeout.tv_usec = 0;
 
-    pollret= select(socket_info.max_filedescriptor, &tmp_read, &tmp_write, 
+    pollret= select(socket_info.max_filedescriptor, &tmp_read, &tmp_write,
 		    &tmp_exceptions, &socket_info.timeout);
 
     if (pollret==-1) {

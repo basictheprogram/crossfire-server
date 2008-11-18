@@ -61,7 +61,7 @@ struct map_cell_struct {
   int darkness;
 };
 
-/* This basically defines the largest size an 
+/* This basically defines the largest size an
  * archetype may be - it is used for allocation of
  * some structures, as well as determining how far
  * we should look for the heads of big images.
@@ -96,7 +96,7 @@ enum Old_Mode {Old_Listen=1, Old_Player=2};
 
 /* Only one map mode can actually be used, so lets make it a switch
  * instead of having a bunch of different fields that needed to
- * get toggled.  Note ordering here is important - 
+ * get toggled.  Note ordering here is important -
  * Map2Cmd > Map1aCmd > Map1Cmd.  This way, when a new feature is
  * added, a simple > compare can be done instead a bunch of ==
  */
@@ -113,7 +113,7 @@ typedef struct buffer_struct {
 } buffer_struct;
 
 /* how many times we are allowed to give the wrong password before being kicked. */
-#define MAX_PASSWORD_FAILURES 5 
+#define MAX_PASSWORD_FAILURES 5
 
 typedef struct socket_struct {
     enum Sock_Status status;
@@ -142,7 +142,7 @@ typedef struct socket_struct {
                                     used to arrange text in books, scrolls, or scripted dialogs */
     uint32  monitor_spells:1; /* Client wishes to be informed when their spell list changes */
     uint32  tick:1;	    /* Client wishes to get tick commands */
-    uint32  supported_readables; /* each bit is a readable supported by client */                    
+    uint32  supported_readables; /* each bit is a readable supported by client */
     uint32  cs_version, sc_version; /* versions of the client */
     enum MapMode mapmode;   /* Type of map commands the client wants. */
     uint16  look_position;  /* start of drawing of look window */
@@ -151,9 +151,9 @@ typedef struct socket_struct {
     uint8   faceset;	    /* Set the client is using, default 0 */
     uint32  ext_mapinfos:1;  /* If true client accept additionnal info on maps*/
     uint32	is_bot:1;		/* Client shouldn't be reported to metaserver */
-    /* Below are flags for extedend infos to pass to client 
+    /* Below are flags for extedend infos to pass to client
      * with S->C mapextended command */
-    uint32  EMI_smooth:1;   /* Send smooth in extendmapinfos*/    
+    uint32  EMI_smooth:1;   /* Send smooth in extendmapinfos*/
 
     /* Below here is information only relevant for old sockets */
     char    *comment;	    /* name or listen comment */

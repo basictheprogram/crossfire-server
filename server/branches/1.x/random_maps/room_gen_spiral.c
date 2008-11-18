@@ -62,7 +62,7 @@ char **map_gen_spiral(int xsize, int ysize, int option) {
   int ic,jc;
   float SizeX,SizeY;
   float xscale,yscale;
-  
+
   /* allocate that array, set it up */
   char **maze = (char **)calloc(sizeof(char*),xsize);
   for(i=0;i<xsize;i++) {
@@ -84,7 +84,7 @@ char **map_gen_spiral(int xsize, int ysize, int option) {
 
   /* the order in which these are evaluated matters*/
 
-  /* the following two are mutually exclusive.  
+  /* the following two are mutually exclusive.
      pick one if they're both set. */
   if((option & REGULAR_SPIRAL) && (option & FIT_SPIRAL))
     {
@@ -96,7 +96,7 @@ char **map_gen_spiral(int xsize, int ysize, int option) {
     }
 
   xscale=yscale=MAX_FINE;  /* fine spiral */
-  
+
   /* choose the spiral pitch */
   if(! (option & FINE_SPIRAL) ) {
     float pitch = (RANDOM() %5)/10. + 10./22.;
@@ -121,7 +121,7 @@ char **map_gen_spiral(int xsize, int ysize, int option) {
       maze[(int)(ic + x )][(int)(jc + y )]='\0';
       parm+=0.01;
     };
-  
+
 maze[(int)(ic + x+0.5)][(int)(jc + y+0.5)]='<';
 
 
@@ -155,7 +155,7 @@ void connect_spirals(int xsize,int ysize,int sym, char **layout) {
     /* go up */
     for(i=ic,j=jc-1; j>0 && layout[i][j]=='#'   ;j--)
       layout[i][j]=0;
-    /* go down */  
+    /* go down */
     for(i=ic,j=jc+1; j<ysize-1 && layout[i][j]=='#'  ;j++)
       layout[i][j]=0;
   }
@@ -180,7 +180,7 @@ void connect_spirals(int xsize,int ysize,int sym, char **layout) {
       layout[i][j]=0;
       layout[i+ic][j]=0;
     }
-    /* go down */  
+    /* go down */
     for(i=ic/2,j=jc+1; j<ysize-1 && layout[i][j]=='#'  ;j++) {
       layout[i][j]=0;
       layout[i+ic][j]=0;
@@ -193,14 +193,14 @@ void connect_spirals(int xsize,int ysize,int sym, char **layout) {
     for(j=0;j<ysize;j++) {
       if(layout[i][j]=='D') {  /* remove bad door. */
         int si = surround_check(layout,i,j,xsize,ysize);
-        if(si!=3 && si!=12) { 
+        if(si!=3 && si!=12) {
           layout[i][j]=0;
           /* back up and recheck any nearby doors */
           i=0;j=0;
         }
       }
     }
-         
+
 
 
 }

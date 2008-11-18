@@ -89,9 +89,9 @@ static void CnvPathSelectDirCb(Widget w,XtPointer client,XtPointer call)
     while(*str != '/' && str > path) str--;
     *str = 0;
   } else   if(strcmp(ret->string,".") == 0) {
-    sprintf(path,"%s",p->current);        
+    sprintf(path,"%s",p->current);
   } else {
-    sprintf(path,"%s/%s",p->current,ret->string);    
+    sprintf(path,"%s/%s",p->current,ret->string);
   }
   p->hold = CnvPathHold;
   CnvPathListGet(p,path);
@@ -137,7 +137,7 @@ static void Layout(CnvPath self,String name)
   self->fileList = XtVaCreateManagedWidget
     ("fileList",listWidgetClass,fileView,
      XtNtranslations,XtParseTranslationTable
-     ("#override <Btn1Up>(2): Set() Notify() CnvPathReturn()\n" 
+     ("#override <Btn1Up>(2): Set() Notify() CnvPathReturn()\n"
       "<Btn1Down>: Set() Notify() \n"),
      NULL);
   XtAddCallback(self->fileList,XtNcallback,CnvPathSelectFileCb,
@@ -167,7 +167,7 @@ static void Layout(CnvPath self,String name)
 }
 
 /**********************************************************************
- * 
+ *
  **********************************************************************/
 
 /*
@@ -176,7 +176,7 @@ static void Layout(CnvPath self,String name)
 static void CnvPathEnter(CnvPath self)
 {
     String str;
-    
+
     self->hold = CnvPathOk;
     XtVaGetValues(self->text,
 		  XtNstring,&str,
@@ -299,7 +299,7 @@ static void CnvPathListGet(CnvPath self,String directory)
  * create new instance of file-selector, no show
  * dir is crossfire path eg "/"
  * name: name of this module
- * root: all 
+ * root: all
  * dir : starting directory
  */
 CnvPath CnvPathCreate(String name,String root,String dir)
@@ -342,7 +342,7 @@ void CnvPathDestroy(CnvPath self)
 
 /*
  * member: select a filepath
- * return: PathResponce & results are in Path-structure 
+ * return: PathResponce & results are in Path-structure
  */
 CnvPathResponce CnvPathSelect(CnvPath self)
 {
@@ -368,7 +368,7 @@ CnvPathResponce CnvPathSelect(CnvPath self)
 
 /*
  * member: select a filepath
- * return: PathResponce & results are in Path-structure 
+ * return: PathResponce & results are in Path-structure
  */
 CnvPathResponce CnvPathSelectAbs(CnvPath self,String path)
 {
@@ -433,9 +433,9 @@ Boolean CnvPathNoAccess(Widget w, String path)
   } else {
     return False;
   }
-} 
+}
 
-/* 
+/*
  * - path is full absolute name
  * - return true if NO access
  */
@@ -471,7 +471,7 @@ Boolean CnvPathNoWrite(Widget w, String path)
   } else {
     return False;
   }
-} 
+}
 
 /*** end of CnvPath.c ***/
 

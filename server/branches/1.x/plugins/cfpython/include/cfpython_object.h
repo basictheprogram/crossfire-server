@@ -47,7 +47,7 @@ extern PyTypeObject Crossfire_PlayerType;
         PyErr_SetString(PyExc_ReferenceError, "Crossfire object no longer exists"); \
         return NULL; \
     } }
-    
+
 #define EXISTCHECK_INT( ob ) \
     { \
     if (!ob || !ob->obj || (was_destroyed(ob->obj, ob->obj->count))) { \

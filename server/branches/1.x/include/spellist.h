@@ -224,7 +224,7 @@ spell spells[NROFREALSPELLS]={
 {"comet",                        8,15,  0, 20, 0, 0,  0,  1, 0, 0, 0,
  PATH_MISSILE, NULL,},							/* 90 */
 {"mystic fist",                  5,10,  0, 15, 0, 0,  1,  1, 0, 0, 0,
- PATH_SUMMON, "mystic_fist",}, 
+ PATH_SUMMON, "mystic_fist",},
 {"raise dead",                  10,150,  0, 60, 0, 0,  0,  1, 0, 1, 0,
  PATH_RESTORE, "enchantment",},
 {"resurrection",                20,250, 0, 180, 0, 0,  0,  0, 0, 1, 0,
@@ -320,15 +320,15 @@ PATH_INFO,"enchantment",},
 {"xray",			10,20,	0, 20, 1, 1, 1,  1, 0, 0, 0,
 PATH_INFO,"enchantment",},
 {"pacify",			4, 10,	1, 2, 0, 0, 3,  1, 0, 1, 0,
-PATH_MIND,"enchantment",}, 
+PATH_MIND,"enchantment",},
 {"summon fog",                   2, 5,  10, 10, 0, 0, 2,  1, 0, 0, 0,
 PATH_CREATE,"fog",},
 {"steambolt",                    5, 10, 10, 10, 0, 0,  1,  1, 0, 0, 0,
 PATH_FIRE, "steambolt",},
 {"command undead",               4, 12,  0, 10, 0, 0, 3,  1, 0, 1, 0,
-PATH_MIND,"enchantment",},					/* 140 */ 
+PATH_MIND,"enchantment",},					/* 140 */
 {"holy orb",                    7, 12,  0, 5, 0, 0, 3,  1, 0, 1, 0,
-PATH_TURNING,"holy_orb",}, 
+PATH_TURNING,"holy_orb",},
 /* most of the next 13 spells work best if MULTIPLE_GODS is defined. -b.t. */
 {"summon avatar",               10, 60, 0, 15, 0, 0, 1,  1, 0, 1, 0,
  PATH_SUMMON, "avatar",},
@@ -339,27 +339,27 @@ PATH_TURNING,"holy_orb",},
 {"curse",                        2, 8,  0, 5, 0, 0,  2,  1, 0, 1, 0,
  PATH_ABJURE, "enchantment",},
 {"regeneration",                 7, 15,  0, 10, 0, 0, 1,  1, 0, 1, 0,
- PATH_ABJURE, "enchantment",}, 
-/* consecrate spell has no use w/o MULTIPLE_GODS defined. We make book=0 
+ PATH_ABJURE, "enchantment",},
+/* consecrate spell has no use w/o MULTIPLE_GODS defined. We make book=0
  * in that case -b.t. */
 {"consecrate",                    4, 35,  0, 50, 0, 0, 1,  1, 0, 1, 0,
  PATH_ABJURE, "enchantment",},
 {"summon cult monsters",          3, 12,  0, 10, 0, 0, 2,  1, 0, 1, 0,
  PATH_SUMMON, NULL,},
 {"cause critical wounds",	  7, 25,   0,  5, 0, 0, 0,  1, 0, 1, 0,
- PATH_WOUNDING,"cause_wounds",}, 
+ PATH_WOUNDING,"cause_wounds",},
 {"holy wrath",	  		  14, 40,   0,  5, 0, 0, 1,  1, 0, 1, 0,
  PATH_TURNING,"holy_wrath",},                                /* 150 */
 {"retributive strike",		  26, 150,   0, 15, 0, 0, 0,  1, 0, 1, 0,
- PATH_WOUNDING,"god_power",}, 
+ PATH_WOUNDING,"god_power",},
 {"finger of death",	  	  15, 50,   0,  5, 0, 0, 0,  1, 0, 1, 0,
- PATH_DEATH, NULL,}, 
+ PATH_DEATH, NULL,},
 {"insect plague",	  	  12, 40,   0,  5, 0, 0, 0,  1, 0, 1, 0,
- PATH_SUMMON,"insect_plague",}, 
+ PATH_SUMMON,"insect_plague",},
 {"call holy servant",	  	  5, 30,   0,  5, 0, 0, 3,  1, 0, 1, 0,
- PATH_SUMMON, "holy_servant",}, 
+ PATH_SUMMON, "holy_servant",},
 {"wall of thorns",	  	  6, 20,   0, 5, 0, 0, 0,  0, 0, 1, 0,
- PATH_CREATE, "thorns"}, 
+ PATH_CREATE, "thorns"},
 {"staff to snake",	  	  2, 8,   0, 5, 0, 0, 1,  1, 0, 1, 0,
  PATH_CREATE, "snake_golem"},
 {"light",              	 	1, 8, 20, 5, 0, 0, 3,  1, 0, 1, 0,
@@ -424,7 +424,7 @@ PATH_TURNING,"holy_orb",},
    PATH_TELE, "dancingsword", },
 {"cause cold",                  2, 10, 5, 10, 3, 2,  5,  1, 0, 1, 0,   /* 187 */
    PATH_WOUNDING,"disease_cold"},
-{"divine shock",              1, 3, 0, 10, 0, 0, 0, 1, 0, 1, 0, 
+{"divine shock",              1, 3, 0, 10, 0, 0, 0, 1, 0, 1, 0,
    PATH_WOUNDING,"divine_shock"},
 {"windstorm",                   3,3,  0, 10, 0, 0,  0,  1, 0, 1, 0,
  PATH_NULL, "windstorm",},
@@ -455,7 +455,7 @@ PATH_TURNING,"holy_orb",},
 {"town portal",	        8, 30, 0, 10, 0, 0,  1,  0, 0, 0, 1,
  PATH_TELE, "perm_magic_portal",},
 {"missile swarm",		7,  6,  0,  3, 0, 0, 1,  1, 0, 0, 0,
-   PATH_MISSILE,"magic_missile"}, 
+   PATH_MISSILE,"magic_missile"},
 {"cause rabies",            12, 120, 0, 10, 0, 0,  0,  1, 0, 1, 0,
  PATH_WOUNDING,"rabies"},
 {"glyph",                  12, 5,   0, 30, 0, 0, 1,  0, 0, 1, 0,
@@ -465,7 +465,7 @@ PATH_TURNING,"holy_orb",},
    path, other arch*/
 
 /*  peterm:  the following defines the parameters for all the
-spells. 
+spells.
   bdam:  base damage or hp of spell or summoned monster
   bdur:  base duration of spell or base range
   ldam:  levels you need over the min for the spell to gain one dam
@@ -485,14 +485,14 @@ spell_parameters SP_PARAMETERS[NROFREALSPELLS] =
 {
 /*  bdam    bdur    ldam    ldur	spl	spell  */
 {   10,     0,      1,      0,		6},	/*magic bullet*/         /* 0 */
-{   8,      6,      3,      0,		24},	/*small fireball*/       
-{   8,      10,     3,      0,		24},	/*medium fireball*/      
-{   8,      14,     4,      0,		32},	/*large fireball*/       
-{   4,      5,      4,      4,		9},	/*burning hands*/        
-{   8,      8,      3,      0,		24},	/*small lightning*/      
-{   8,      16,     3,      0,		24},	/*large lightning*/      
-{   9,      0,      1,      0,		10},	/*magic missile*/        
-{   12,     8,      6,      0,		72},	/*create bomb*/          
+{   8,      6,      3,      0,		24},	/*small fireball*/
+{   8,      10,     3,      0,		24},	/*medium fireball*/
+{   8,      14,     4,      0,		32},	/*large fireball*/
+{   4,      5,      4,      4,		9},	/*burning hands*/
+{   8,      8,      3,      0,		24},	/*small lightning*/
+{   8,      16,     3,      0,		24},	/*large lightning*/
+{   9,      0,      1,      0,		10},	/*magic missile*/
+{   12,     8,      6,      0,		72},	/*create bomb*/
 {   8,      75,     1,      1,		15},	/*summon golem*/
 {   20,     200,    1,      1,		15},	/*summon fire elemental*/   /* 10 */
 {   50,     280,    1,      1,		15},	/*summon earth elemental*/

@@ -2,6 +2,7 @@
  * static char *rcsid_build_map =
  *   "$Id$";
  */
+
 /*
     CrossFire, A Multiplayer game for X-windows
 
@@ -180,27 +181,27 @@ int find_or_create_connection_for_map( object* pl, short x, short y, object* run
     /* Found the force, everything's easy. */
     return force->path_attuned;
     }
-    
+
 /**
  * Returns the marking rune on the square, for purposes of building connections
  */
 object* get_connection_rune( object* pl, short x, short y )
     {
     object* rune;
-    
+
     rune = GET_MAP_OB( pl->map, x, y );
     while ( rune && ( ( rune->type != SIGN ) || ( strcmp( rune->arch->name, "rune_mark" ) ) ) )
         rune = rune->above;
     return rune;
     }
-    
+
 /**
  * Returns the book/scroll on the current square, for purposes of building
  */
 object* get_msg_book( object* pl, short x, short y )
     {
     object* book;
-    
+
     book = GET_MAP_OB( pl->map, x, y );
     while ( book && ( book->type != BOOK ) )
         book = book->above;
@@ -331,7 +332,7 @@ void fix_walls( struct mapdef* map, int x, int y )
     if ( !new_arch )
         return;
 
-    /* Now delete current wall, and insert new one 
+    /* Now delete current wall, and insert new one
      * We save flags to avoid any trouble with buildable/non buildable, and so on
      */
     for ( flag = 0; flag < 4; flag++ )
@@ -368,7 +369,7 @@ int apply_builder_floor(object* pl, object* new_floor, short x, short y )
     sprintf( message, "You change the floor to better suit your tastes." );
 
     /*
-     * Now the building part... 
+     * Now the building part...
      * First, remove wall(s) and floor(s) at position x, y
      */
     above_floor = NULL;
@@ -393,7 +394,7 @@ int apply_builder_floor(object* pl, object* new_floor, short x, short y )
                 floor = NULL;
             }
             }
-        else if ( ( FLOOR == tmp->type ) || ( QUERY_FLAG(tmp, FLAG_IS_FLOOR ) ) ) 
+        else if ( ( FLOOR == tmp->type ) || ( QUERY_FLAG(tmp, FLAG_IS_FLOOR ) ) )
             {
             floor = tmp;
             }
@@ -485,7 +486,7 @@ int apply_builder_wall( object* pl, object* new_wall, short x, short y )
     int xt, yt;
     char message[ MAX_BUF ];
 
-    remove_marking_runes( pl->map, x, y );    
+    remove_marking_runes( pl->map, x, y );
 
     /* Grab existing wall, if any */
     current_wall = NULL;
@@ -849,10 +850,10 @@ int adjust_sign_msg( object* pl, short x, short y, object* tmp )
 	new_draw_info( NDI_UNIQUE, 0, pl, "You need to put a book or scroll with the message." );
 	return -1;
 	}
-	
+
     tmp->msg = book->msg;
     add_refcount( tmp->msg );
-    
+
     if (tmp->invisible)
         {
 	if(book->custom_name != NULL)
@@ -864,7 +865,7 @@ int adjust_sign_msg( object* pl, short x, short y, object* tmp )
 	if ( tmp->name )
 	    free_string( tmp->name );
 	tmp->name = add_string( buf );
-	
+
 	if(book->name_pl != NULL)
 	    {
 	    snprintf(buf2, sizeof(buf2), "talking %s", book->name_pl);
@@ -872,7 +873,7 @@ int adjust_sign_msg( object* pl, short x, short y, object* tmp )
                 free_string( tmp->name_pl );
             tmp->name_pl = add_string( buf2 );
 	    }
-	
+
 	tmp->face = book->face;
 	tmp->invisible = 0;
         }

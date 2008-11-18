@@ -38,7 +38,7 @@ int command_say (object *op, char *params)
     snprintf(buf, MAX_BUF-1, "%s says: %s",op->name, params);
     new_info_map(NDI_WHITE,op->map, buf);
     communicate(op, params);
-  
+
     return 0;
 }
 
@@ -107,9 +107,9 @@ static int command_tell_all(object *op, char *params, int pri, int color, const 
 	    new_draw_info(NDI_UNIQUE, 0,op,"Shout/Chat what?");
 	    return 1;
 	}
-	new_draw_info_format(NDI_UNIQUE | NDI_ALL | color, pri, NULL, 
+	new_draw_info_format(NDI_UNIQUE | NDI_ALL | color, pri, NULL,
 		 "%s %s: %s", op->name, desc, params);
- 
+
         /* Lauwenmark : Here we handle the SHOUT global event */
         execute_global_event(EVENT_SHOUT,op,params,pri);
 	return 1;
@@ -258,7 +258,7 @@ int command_reply (object *op, char *params) {
     /* Update last_tell value */
     strcpy(pl->last_tell, op->name);
 
-    new_draw_info_format(NDI_UNIQUE | NDI_ORANGE, 0, pl->ob, 
+    new_draw_info_format(NDI_UNIQUE | NDI_ORANGE, 0, pl->ob,
 	"%s tells you: %s", op->name, params);
 
     if (pl->hidden && !QUERY_FLAG(op, FLAG_WIZ)) {

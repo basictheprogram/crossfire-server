@@ -78,7 +78,7 @@ int ReadImages(Display *gdisp, Pixmap **pixmaps, Pixmap **masks,
 
     /* This function is called before the game gc's are created.  So
      * we create one for our own use here.
-     */  
+     */
     GC	gc= XCreateGC(gdisp, root, 0, NULL);
 
     if (!nrofpixmaps)
@@ -88,7 +88,7 @@ int ReadImages(Display *gdisp, Pixmap **pixmaps, Pixmap **masks,
      * the pixmap data.  Therefor, only space for the pointers to that data
      * needs to be allocated.  The same might apply for the function
      * that creates bitmaps below, but I am not as sure in that case.
-     * Mark Wedel 
+     * Mark Wedel
      */
 
     *pixmaps = (Pixmap *) malloc(sizeof(Pixmap *) * nrofpixmaps);
@@ -143,7 +143,7 @@ int ReadImages(Display *gdisp, Pixmap **pixmaps, Pixmap **masks,
 	if (type==Dm_Png) {
 #ifdef HAVE_LIBPNG
 	    unsigned long  x,y;
-	    if (png_to_xpixmap(gdisp, root, databuf, len, 
+	    if (png_to_xpixmap(gdisp, root, databuf, len,
 			   &(*pixmaps)[num], &(*masks)[num], cmap, &x, &y)) {
 
 			LOG(llevError,"Error loading png file.\n");
@@ -155,7 +155,7 @@ int ReadImages(Display *gdisp, Pixmap **pixmaps, Pixmap **masks,
     XFreeGC(gdisp, gc);
 
     /* Check for any holes.  There should not be.  This is an interim check
-     * to use until the xbm_values is removed.  The program that 
+     * to use until the xbm_values is removed.  The program that
      * creates the bitmap/pixmap files just adds the bitmaps, so holes should
      * not be in the image file.
      */

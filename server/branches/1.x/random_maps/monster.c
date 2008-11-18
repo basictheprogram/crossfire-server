@@ -60,7 +60,7 @@ void	 insert_multisquare_ob_in_map(object *new_obj,mapstruct *map) {
 
 
 }
-	 
+
 
 /*  place some monsters into the map. */
 void place_monsters(mapstruct *map, char *monsterstyle, int difficulty,RMParms *RP) {

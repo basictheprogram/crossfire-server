@@ -36,7 +36,7 @@ int wall_free_size=0;
 /*  heuristically, we need to change wall_chance based on the size of
     the maze. */
 
-int wall_chance;  
+int wall_chance;
 
 /* the outsize interface routine:  accepts sizes, returns a char
 ** maze.  option is a flag for either a sparse or a full maze. Sparse
@@ -52,17 +52,17 @@ char **maze_gen(int xsize, int ysize,int option) {
   }
 
   /* write the outer walls */
-  for(i=0;i<xsize;i++) 
+  for(i=0;i<xsize;i++)
     maze[i][0] = maze[i][ysize-1] = '#';
   for(j=0;j<ysize;j++)
     maze[0][j] = maze[xsize-1][j] = '#';
-    
-  
+
+
   /* find how many free wall spots there are */
   wall_free_size = 2 * (xsize-4) + 2*(ysize-4 );
 
   make_wall_free_list(xsize,ysize);
-  
+
   /* return the empty maze */
   if(wall_free_size <=0 ) return maze;
 
@@ -75,7 +75,7 @@ char **maze_gen(int xsize, int ysize,int option) {
   }
 
   /* clean up our intermediate data structures. */
-  
+
   free(wall_x_list);
   free(wall_y_list);
 
@@ -95,8 +95,8 @@ void make_wall_free_list(int xsize, int ysize) {
   if(wall_free_size < 0) return;
   wall_x_list = (int *) calloc(sizeof(int),wall_free_size);
   wall_y_list = (int *) calloc(sizeof(int),wall_free_size);
-  
-  
+
+
   /* top and bottom wall */
   for(i = 2; i<xsize-2; i++) {
     wall_x_list[count] = i;
@@ -141,16 +141,16 @@ up, down, right, or left. */
 int find_free_point(char **maze,int *x, int *y,int xc,int yc, int xsize, int ysize) {
 
 /* we will randomly pick from this list, 1=up,2=down,3=right,4=left */
-  int dirlist[4]; 
+  int dirlist[4];
   int count = 0;  /* # elements in dirlist */
 
   /* look up */
   if(yc < ysize-2 && xc > 2 && xc < xsize-2) /* it is valid to look up */
     {
-	 int cleartest = (int) maze[xc][yc+1] + (int)maze[xc-1][yc+1] 
-	               + (int) maze[xc+1][yc+1]; 
-	 cleartest += (int) maze[xc][yc+2] + (int)maze[xc-1][yc+2] 
-	               + (int) maze[xc+1][yc+2]; 
+	 int cleartest = (int) maze[xc][yc+1] + (int)maze[xc-1][yc+1]
+	               + (int) maze[xc+1][yc+1];
+	 cleartest += (int) maze[xc][yc+2] + (int)maze[xc-1][yc+2]
+	               + (int) maze[xc+1][yc+2];
 
 	 if(cleartest == 0) {
 	   dirlist[count] = 1;
@@ -162,10 +162,10 @@ int find_free_point(char **maze,int *x, int *y,int xc,int yc, int xsize, int ysi
   /* look down */
   if(yc > 2 && xc > 2 && xc < xsize-2) /* it is valid to look down */
     {
-	 int cleartest = (int) maze[xc][yc-1] + (int)maze[xc-1][yc-1] 
-	               + (int) maze[xc+1][yc-1]; 
-	 cleartest += (int) maze[xc][yc-2] + (int)maze[xc-1][yc-2] 
-	               + (int) maze[xc+1][yc-2]; 
+	 int cleartest = (int) maze[xc][yc-1] + (int)maze[xc-1][yc-1]
+	               + (int) maze[xc+1][yc-1];
+	 cleartest += (int) maze[xc][yc-2] + (int)maze[xc-1][yc-2]
+	               + (int) maze[xc+1][yc-2];
 
 	 if(cleartest == 0) {
 	   dirlist[count] = 2;
@@ -177,10 +177,10 @@ int find_free_point(char **maze,int *x, int *y,int xc,int yc, int xsize, int ysi
   /* look right */
   if(xc < xsize- 2 && yc > 2 && yc < ysize-2) /* it is valid to look left */
     {
-	 int cleartest = (int) maze[xc+1][yc] + (int)maze[xc+1][yc-1] 
-	               + (int) maze[xc+1][yc+1]; 
-	 cleartest += (int) maze[xc+2][yc] + (int)maze[xc+2][yc-1] 
-	               + (int) maze[xc+2][yc+1]; 
+	 int cleartest = (int) maze[xc+1][yc] + (int)maze[xc+1][yc-1]
+	               + (int) maze[xc+1][yc+1];
+	 cleartest += (int) maze[xc+2][yc] + (int)maze[xc+2][yc-1]
+	               + (int) maze[xc+2][yc+1];
 
 	 if(cleartest == 0) {
 	   dirlist[count] = 3;
@@ -192,10 +192,10 @@ int find_free_point(char **maze,int *x, int *y,int xc,int yc, int xsize, int ysi
   /* look left */
   if(xc > 2 && yc > 2 && yc < ysize-2) /* it is valid to look down */
     {
-	 int cleartest = (int) maze[xc-1][yc] + (int)maze[xc-1][yc-1] 
-	               + (int) maze[xc-1][yc+1]; 
-	 cleartest += (int) maze[xc-2][yc] + (int)maze[xc-2][yc-1] 
-	               + (int) maze[xc-2][yc+1]; 
+	 int cleartest = (int) maze[xc-1][yc] + (int)maze[xc-1][yc-1]
+	               + (int) maze[xc-1][yc+1];
+	 cleartest += (int) maze[xc-2][yc] + (int)maze[xc-2][yc-1]
+	               + (int) maze[xc-2][yc+1];
 
 	 if(cleartest == 0) {
 	   dirlist[count] = 4;
@@ -242,20 +242,20 @@ int find_free_point(char **maze,int *x, int *y,int xc,int yc, int xsize, int ysi
 }
 
 /* recursive routine which will fill every available space in the maze
-	with walls*/ 
+	with walls*/
 
 void fill_maze_full(char **maze, int x, int y, int xsize, int ysize ) {
   int xc,yc;
-  
+
   /* write a wall here */
   maze[x][y] = '#';
-  
+
   /* decide if we're going to pick from the wall_free_list */
   if(RANDOM()%4 && wall_free_size > 0) {
     pop_wall_point(&xc,&yc);
     fill_maze_full(maze,xc,yc,xsize,ysize);
   }
-  
+
  /* change the if to a while for a complete maze.  */
   while(find_free_point(maze,&xc,&yc,x,y,xsize,ysize)!=-1) {
     fill_maze_full(maze,xc,yc,xsize,ysize);
@@ -268,16 +268,16 @@ void fill_maze_full(char **maze, int x, int y, int xsize, int ysize ) {
 
 void fill_maze_sparse(char **maze, int x, int y, int xsize, int ysize ) {
   int xc,yc;
-  
+
   /* write a wall here */
   maze[x][y] = '#';
-  
+
   /* decide if we're going to pick from the wall_free_list */
   if(RANDOM()%4 && wall_free_size > 0) {
     pop_wall_point(&xc,&yc);
     fill_maze_sparse(maze,xc,yc,xsize,ysize);
   }
-  
+
  /* change the if to a while for a complete maze.  */
   if(find_free_point(maze,&xc,&yc,x,y,xsize,ysize)!=-1) {
     fill_maze_sparse(maze,xc,yc,xsize,ysize);
@@ -286,8 +286,8 @@ void fill_maze_sparse(char **maze, int x, int y, int xsize, int ysize ) {
 
 
 
-  
-  
-    
 
-    
+
+
+
+

@@ -38,7 +38,7 @@
 #endif
 
 
-/*  peterm:  
+/*  peterm:
  *  write_rune:
  *  op:  rune writer
  *  skop: skill object used for casting this rune
@@ -48,10 +48,10 @@
  *    a marking rune.
  *  level:  level of casting of the rune
  *  runename:  name of the rune or message displayed by the rune for
- *		a rune of marking 
+ *		a rune of marking
  */
 
-int write_rune(object *op,object *caster, object *spell, int dir, const char *runename) { 
+int write_rune(object *op,object *caster, object *spell, int dir, const char *runename) {
     object *tmp, *rune_spell, *rune;
     char buf[MAX_BUF];
     mapstruct *m;
@@ -59,7 +59,7 @@ int write_rune(object *op,object *caster, object *spell, int dir, const char *ru
 
     if(!dir) {
 	dir=1;
-    } 
+    }
 
     nx=op->x+freearr_x[dir];
     ny=op->y+freearr_y[dir];
@@ -189,7 +189,7 @@ void move_rune(object *op) {
 
 
 /*  peterm: rune_attack
- * function handles those runes which detonate but do not cast spells.  
+ * function handles those runes which detonate but do not cast spells.
  */
 
 
@@ -214,7 +214,7 @@ static void rune_attack(object *op,object *victim)
 }
 
 /*  This function generalizes attacks by runes/traps.  This ought to make
- *  it possible for runes to attack from the inventory, 
+ *  it possible for runes to attack from the inventory,
  *  it'll spring the trap on the victim.
  */
 void spring_trap(object *trap,object *victim)
@@ -230,7 +230,7 @@ void spring_trap(object *trap,object *victim)
 
     if (QUERY_FLAG(trap,FLAG_IS_LINKED))
 	  use_trigger(trap);
- 
+
     /* Check if this trap casts a spell */
     has_spell = ((trap->inv && trap->inv->type == SPELL) ||
 	(trap->other_arch && trap->other_arch->clone.type == SPELL));
@@ -242,7 +242,7 @@ void spring_trap(object *trap,object *victim)
      */
     get_rangevector(env, victim, &rv, 0);
     if (rv.distance > 1 && !has_spell) return;
-     
+
     /* Only living objects can trigger runes that don't cast spells, as
      * doing direct damage to a non-living object doesn't work anyway.
      * Typical example is an arrow attacking a door.
@@ -252,13 +252,13 @@ void spring_trap(object *trap,object *victim)
 
     trap->stats.hp--;  /*decrement detcount */
 
-    if(victim && victim->type==PLAYER && trap->msg != NULL) 
+    if(victim && victim->type==PLAYER && trap->msg != NULL)
 	new_draw_info(NDI_UNIQUE, 0,victim,trap->msg);
 
     /*  Flash an image of the trap on the map so the poor sod
-     *   knows what hit him.  
+     *   knows what hit him.
      */
-    trap_show(trap,env);  
+    trap_show(trap,env);
 
     /* Only if it is a spell do we proceed here */
     if (has_spell) {
@@ -283,7 +283,7 @@ void spring_trap(object *trap,object *victim)
 	    }
 	}
     } else {
-	rune_attack(trap,victim); 
+	rune_attack(trap,victim);
 	if (was_destroyed (trap, trap_tag))
 	    return;
     }
@@ -295,10 +295,10 @@ void spring_trap(object *trap,object *victim)
     }
 }
 
-/* dispel_rune:  by peterm  
+/* dispel_rune:  by peterm
  * dispels the target rune, depending on the level of the actor
  * and the level of the rune  risk flag, if true, means that there is
- * a chance that the trap/rune will detonate 
+ * a chance that the trap/rune will detonate
  */
 int dispel_rune(object *op,object *caster, object *spell, object *skill, int dir)
 {
@@ -314,7 +314,7 @@ int dispel_rune(object *op,object *caster, object *spell, object *skill, int dir
     mflags = get_map_flags(m, &m, x, y, &x, &y);
 
     /* Should we perhaps not allow player to disable traps if a monster/
-     * player is standing on top? 
+     * player is standing on top?
      */
     if (mflags & P_OUT_OF_MAP) {
 	new_draw_info(NDI_UNIQUE, 0,op,"There's nothing there!");
@@ -346,7 +346,7 @@ int dispel_rune(object *op,object *caster, object *spell, object *skill, int dir
 	 * This is for chests, where the rune is in the chests inventory.
 	 */
 	for(tmp2=tmp->inv;tmp2!=NULL;tmp2=tmp2->below) {
-	    if(tmp2->type==RUNE || tmp2->type==TRAP) { 
+	    if(tmp2->type==RUNE || tmp2->type==TRAP) {
 		tmp=tmp2;
 		searchflag=0;
 		break;
@@ -354,7 +354,7 @@ int dispel_rune(object *op,object *caster, object *spell, object *skill, int dir
 	}
 	if(!searchflag) break;
     }
-		
+
     /* no rune there. */
     if(tmp==NULL) {
 	new_draw_info(NDI_UNIQUE, 0,op,"There's nothing there!");
@@ -362,16 +362,16 @@ int dispel_rune(object *op,object *caster, object *spell, object *skill, int dir
     }
     trap_disarm(op,tmp,0, skill);
     return 1;
-	
+
 }
 
 int trap_see(object *op,object *trap) {
     int chance;
 
     chance = random_roll(0, 99, op, PREFER_HIGH);;
-  
+
     /*  decide if we see the rune or not */
-    if((trap->stats.Cha==1) || (chance > MIN(95,MAX(5,((int)((float) (op->map->difficulty 
+    if((trap->stats.Cha==1) || (chance > MIN(95,MAX(5,((int)((float) (op->map->difficulty
 	+ trap->level + trap->stats.Cha-op->level)/10.0 * 50.0)))))) {
 	new_draw_info_format(NDI_UNIQUE, 0,op,"You spot a %s!",trap->name);
 	return 1;
@@ -418,7 +418,7 @@ int trap_disarm(object *disarmer, object *trap, int risk, object *skill) {
         {
             new_draw_info_format(NDI_UNIQUE, 0,disarmer,
                     "You fail to disarm the %s.",trap->name);
-	    if(! (random_roll(0, (MAX(2,skill->level-trap->level 
+	    if(! (random_roll(0, (MAX(2,skill->level-trap->level
 	       + disarmer->stats.Dex/2-6))-1, disarmer, PREFER_LOW)) &&risk) {
 		new_draw_info(NDI_UNIQUE, 0,disarmer,"In fact, you set it off!");
 		spring_trap(trap,disarmer);
@@ -429,16 +429,16 @@ int trap_disarm(object *disarmer, object *trap, int risk, object *skill) {
 
 
 /*  traps need to be adjusted for the difficulty of the map.  The
- * default traps are too strong for wimpy level 1 players, and 
- * unthreatening to anyone of high level 
+ * default traps are too strong for wimpy level 1 players, and
+ * unthreatening to anyone of high level
  */
 
 void trap_adjust(object *trap, int difficulty) {
     int i;
 
     /* now we set the trap level to match the difficulty of the level
-     * the formula below will give a level from 1 to (2*difficulty) with 
-     * a peak probability at difficulty 
+     * the formula below will give a level from 1 to (2*difficulty) with
+     * a peak probability at difficulty
      */
 
     trap->level = rndm(0, difficulty-1) + rndm(0, difficulty-1);
@@ -455,9 +455,9 @@ void trap_adjust(object *trap, int difficulty) {
 	 */
 
 	trap->stats.dam = 0;
-	for(i=0;i<difficulty;i++) 
+	for(i=0;i<difficulty;i++)
 	    trap->stats.dam+=rndm(0, 4);
-    
+
 	/*  the poison trap special case */
 	if(trap->attacktype & AT_POISON) {
 	    trap->stats.dam = rndm(0, difficulty-1);

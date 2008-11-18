@@ -406,15 +406,15 @@ const char* strrstr(const char* haystack, const char* needle){
         haystack++;
     }
     return lastneedle;
-        
+
 }
 #define EOL_SIZE (sizeof("\n")-1)
 void strip_endline(char* buf){
     if (strlen(buf)<sizeof("\n")){
-        return;  
+        return;
     }
     if (!strcmp(buf+strlen(buf)-EOL_SIZE,"\n"))
-        buf[strlen(buf)-EOL_SIZE]='\0';    
+        buf[strlen(buf)-EOL_SIZE]='\0';
 }
 
 /**
@@ -464,17 +464,17 @@ void replace(const char *src, const char *key, const char *replacement, char *re
 void make_list_like(char *input) {
     char *p, tmp[MAX_BUF];
     int i;
-    if (!input || strlen(input) > MAX_BUF-5) return; 
+    if (!input || strlen(input) > MAX_BUF-5) return;
     /* bad stuff would happen if we continued here, the -5 is to make space for ' and ' */
 
     strncpy(tmp, input, MAX_BUF-5);
     /*trim all trailing commas, spaces etc.*/
-    for (i=strlen(tmp); !isalnum(tmp[i]) && i >= 0; i--) 
+    for (i=strlen(tmp); !isalnum(tmp[i]) && i >= 0; i--)
 	tmp[i]='\0';
     strcat(tmp, ".");
 
     p=strrchr(tmp, ',');
-    if (p) { 
+    if (p) {
 	*p='\0';
 	strcpy(input, tmp);
 	p++;

@@ -47,7 +47,7 @@ extern    Pixmap *pixmaps;       /* list of pixmaps */
 
 static XtResource resources[] = {
 #define Offset(field) XtOffsetOf(CrEditRec, crEdit.field)
-    { 
+    {
 	XtNinsertCallback,
 	XtCInsertCallback,
 	XtRCallback,
@@ -150,25 +150,25 @@ static Boolean SetValues(Widget cur,Widget req,Widget new,
  * actions & translations
  **********************************************************************/
 
-static void InsertAc ( Widget w, XEvent * event, 
+static void InsertAc ( Widget w, XEvent * event,
 		      String * argv, Cardinal * argc );
-static void DeleteAc ( Widget w, XEvent * event, 
+static void DeleteAc ( Widget w, XEvent * event,
 		      String * argv, Cardinal * argc );
-static void PropsAc ( Widget w, XEvent * event, 
+static void PropsAc ( Widget w, XEvent * event,
 		      String * argv, Cardinal * argc );
-static void MoveAc ( Widget w, XEvent * e, 
+static void MoveAc ( Widget w, XEvent * e,
 		    String * argv, Cardinal * argc );
-static void ResizeAc ( Widget w, XEvent * e, 
+static void ResizeAc ( Widget w, XEvent * e,
 		      String * argv, Cardinal * argc );
-static void ScrollAc ( Widget w, XEvent * e, 
+static void ScrollAc ( Widget w, XEvent * e,
 		      String * argv, Cardinal * argc );
-static void SelectBeginAc ( Widget w, XEvent * e, 
+static void SelectBeginAc ( Widget w, XEvent * e,
 			   String * argv, Cardinal * argc );
-static void SelectExpandAc ( Widget w, XEvent * e, 
+static void SelectExpandAc ( Widget w, XEvent * e,
 			    String * argv, Cardinal * argc );
-static void SelectEndAc ( Widget w, XEvent * e, 
+static void SelectEndAc ( Widget w, XEvent * e,
 			 String * argv, Cardinal * argc );
-static void FeedAc ( Widget w, XEvent * e, 
+static void FeedAc ( Widget w, XEvent * e,
 		    String * argv, Cardinal * argc );
 
 static XtActionsRec actions[] = {
@@ -256,7 +256,7 @@ CrEditClassRec crEditClassRec = {
 WidgetClass crEditWidgetClass = (WidgetClass)&crEditClassRec;
 
 /**********************************************************************
- * inner functions 
+ * inner functions
  **********************************************************************/
 
 /*
@@ -287,7 +287,7 @@ static void SetSize(Widget w)
     }
     request.x = request.y = 0;
     request.request_mode = CWWidth | CWHeight;
-    
+
     /*** ask it ***/
     switch(XtMakeGeometryRequest(w,&request,&reply)) {
     case XtGeometryYes:
@@ -308,7 +308,7 @@ static void SetSize(Widget w)
     debug3("%s: setting widget size to %dx%d\n",XtName(w),self->core.width,
 	   self->core.height);
 }
-	
+
 /**********************************************************************
  **********************************************************************/
 
@@ -346,17 +346,17 @@ static void UpdatePosition (Widget w, int x, int y,Boolean inv)
     object *op;
     int i;
 
-    if(out_of_map(self->crEdit.map,x,y)) return; 
-    
+    if(out_of_map(self->crEdit.map,x,y)) return;
+
     if (self->crEdit.stacking) {
 	/* stacking mode */
 	float xb, yb;
-	XClearArea (XtDisplay(w), XtWindow(w), 
-		    x * self->crEdit.fontSize, 
-		    y * self->crEdit.fontSize, 
-		    self->crEdit.fontSize, 
+	XClearArea (XtDisplay(w), XtWindow(w),
+		    x * self->crEdit.fontSize,
+		    y * self->crEdit.fontSize,
+		    self->crEdit.fontSize,
 		    self->crEdit.fontSize, False);
-	for (i = 0, op = get_map_ob (self->crEdit.map, x, y); 
+	for (i = 0, op = get_map_ob (self->crEdit.map, x, y);
 	     op;
 	     i++, op = op->above);
 	if (i > 0) {
@@ -389,10 +389,10 @@ static void UpdatePosition (Widget w, int x, int y,Boolean inv)
 		}
 
 		if (HAS_COLOUR(w)) {
-		    XSetForeground(XtDisplay(w), self->crEdit.gc, 
+		    XSetForeground(XtDisplay(w), self->crEdit.gc,
 				   BlackPixelOfScreen(XtScreen(w)));
 		}
-		XDrawRectangle (XtDisplay(w), 
+		XDrawRectangle (XtDisplay(w),
 				XtWindow(w), self->crEdit.gc,
 				(int) xb, (int) yb, FontSize -1, FontSize -1);
 		xb -= dist;
@@ -451,11 +451,11 @@ static void DrawRectangle(Widget w,XRectangle area,Boolean inv)
     int i, j;
 
     if (!self->crEdit.map) return;
-    for (j = area.x; 
-	 j < area.x + area.width &&  j < MAP_WIDTH(self->crEdit.map); 
+    for (j = area.x;
+	 j < area.x + area.width &&  j < MAP_WIDTH(self->crEdit.map);
 	 j++) {
-	for (i = area.y; 
-	     i < area.y + area.height && i < MAP_HEIGHT(self->crEdit.map); 
+	for (i = area.y;
+	     i < area.y + area.height && i < MAP_HEIGHT(self->crEdit.map);
 	     i++) {
 	    UpdatePosition (w,j,i,inv);
 	}
@@ -471,7 +471,7 @@ static void DrawBorder(Widget w,XSegment seg,Boolean inv)
 {
     CrEditWidget self = (CrEditWidget)w;
     int i,x1,x2,y1,y2;
-    
+
     if (!self->crEdit.map) return;
     x1 = seg.x1 < seg.x2 ? seg.x1 : seg.x2;
     y1 = seg.y1 < seg.y2 ? seg.y1 : seg.y2;
@@ -484,28 +484,28 @@ static void DrawBorder(Widget w,XSegment seg,Boolean inv)
        y2 > MAP_HEIGHT(self->crEdit.map)) return;
 
     if (inv) {
-	XDrawRectangle (XtDisplay(w), XtWindow(w), 
-			DefaultGC(XtDisplay(w), XScreenNumberOfScreen(XtScreen(w))), 
-			x1 * self->crEdit.fontSize, 
-			y1 * self->crEdit.fontSize, 
-			(x2 - x1 + 1) * self->crEdit.fontSize - 1, 
+	XDrawRectangle (XtDisplay(w), XtWindow(w),
+			DefaultGC(XtDisplay(w), XScreenNumberOfScreen(XtScreen(w))),
+			x1 * self->crEdit.fontSize,
+			y1 * self->crEdit.fontSize,
+			(x2 - x1 + 1) * self->crEdit.fontSize - 1,
 			(y2 - y1 + 1) * self->crEdit.fontSize - 1);
-	XDrawRectangle (XtDisplay(w), XtWindow(w), 
-			DefaultGC(XtDisplay(w), XScreenNumberOfScreen(XtScreen(w))), 
-			x1 * self->crEdit.fontSize + 1, 
-			y1 * self->crEdit.fontSize + 1, 
-			(x2 - x1 + 1) * self->crEdit.fontSize - 3, 
+	XDrawRectangle (XtDisplay(w), XtWindow(w),
+			DefaultGC(XtDisplay(w), XScreenNumberOfScreen(XtScreen(w))),
+			x1 * self->crEdit.fontSize + 1,
+			y1 * self->crEdit.fontSize + 1,
+			(x2 - x1 + 1) * self->crEdit.fontSize - 3,
 			(y2 - y1 + 1) * self->crEdit.fontSize - 3);
     } else {
 
-    for(i=x1; 
-	i <= x2; 
+    for(i=x1;
+	i <= x2;
 	i++) {
 	UpdatePosition(w,i,seg.y1,inv);
 	    if (y1 != y2)
 	UpdatePosition(w,i,seg.y2,inv);
     }
-	for(i=y1 + 1; 
+	for(i=y1 + 1;
 	    i <= (y2 - 1);
 	i++) {
 	UpdatePosition(w,seg.x1,i,inv);
@@ -521,19 +521,19 @@ static void DrawBorder(Widget w,XSegment seg,Boolean inv)
  * return:
  */
 static int CalcIndex (Widget w, int x, int y) {
-    CrEditWidget self = (CrEditWidget)w; 
+    CrEditWidget self = (CrEditWidget)w;
     object *op;
     int i, j = 0;
     int xp, yp;
     float xb, yb;
-    
+
     xp = x / self->crEdit.fontSize;
     yp = y / self->crEdit.fontSize;
 
     if (out_of_map (self->crEdit.map, xp, yp))
 	return 0;
 
-    for (i = 0, op = get_map_ob (self->crEdit.map, xp, yp); 
+    for (i = 0, op = get_map_ob (self->crEdit.map, xp, yp);
 	 op;
 	 i++, op = op->above);
 
@@ -541,7 +541,7 @@ static int CalcIndex (Widget w, int x, int y) {
 	int diff = self->crEdit.fontSize - FontSize;
 	int depth = diff / STACK_MIN;
 	float dist = 0;
-	
+
 	if (depth == 0)
 	    depth = 1;
 	if (i > depth)
@@ -562,7 +562,7 @@ static int CalcIndex (Widget w, int x, int y) {
 
 	debug4 ("%dx%d %d %f\n", x, y, i, dist);
 	for (j = 0; j <= i; j++) {
-	    if (x < xb && y < yb)	
+	    if (x < xb && y < yb)
 		break;
 	    xb += dist;
 	    yb += dist;
@@ -587,10 +587,10 @@ static void BorderOff(Widget w)
  * actions
  **********************************************************************/
 
-/* 
- * action: insert object to map 
+/*
+ * action: insert object to map
  */
-static void InsertAc (Widget w, XEvent * event, 
+static void InsertAc (Widget w, XEvent * event,
 		      String * argv, Cardinal * argc)
 {
     CrEditWidget self = (CrEditWidget)w;
@@ -609,9 +609,9 @@ static void InsertAc (Widget w, XEvent * event,
     call.rect.width = 0;
     call.rect.height = 0;
     call.map = self->crEdit.map;
-    call.z = self->crEdit.stacking ? 
+    call.z = self->crEdit.stacking ?
 	CalcIndex (w,event->xbutton.x,event->xbutton.y) : 0;
-    
+
     if (!(event->type == MotionNotify  && x == oldx && y == oldy)) {
 	XtCallCallbackList(w,self->crEdit.insertCallbacks,(XtPointer)&call);
     }
@@ -622,7 +622,7 @@ static void InsertAc (Widget w, XEvent * event,
 /*
  * action: set begin of selection
  */
-static void SelectBeginAc(Widget w, XEvent * event, 
+static void SelectBeginAc(Widget w, XEvent * event,
 			  String * argv, Cardinal * argc)
 {
     CrEditWidget self = (CrEditWidget)w;
@@ -637,7 +637,7 @@ static void SelectBeginAc(Widget w, XEvent * event,
 
     debug2("SelectBeginAc() %dx%d\n",x,y);
 
-    if(out_of_map(self->crEdit.map,x,y)) return;    
+    if(out_of_map(self->crEdit.map,x,y)) return;
 
     self->crEdit.seg.x1 = self->crEdit.seg.x2 = x;
     self->crEdit.seg.y1 = self->crEdit.seg.y2 = y;
@@ -647,7 +647,7 @@ static void SelectBeginAc(Widget w, XEvent * event,
 /*
  * action: expand selection
  */
-static void SelectExpandAc(Widget w, XEvent * event, 
+static void SelectExpandAc(Widget w, XEvent * event,
 			   String * argv, Cardinal * argc)
 {
     CrEditWidget self = (CrEditWidget)w;
@@ -720,10 +720,10 @@ static void SelectEndAc(Widget w, XEvent * event,
     XtCallCallbackList(w,self->crEdit.selectCallbacks,(XtPointer)&call);
 }
 
-/* 
- * action: 
+/*
+ * action:
  */
-static void PropsAc(Widget w, XEvent * event, 
+static void PropsAc(Widget w, XEvent * event,
 		     String * argv, Cardinal * argc)
 {
     CrEditWidget self = (CrEditWidget)w;
@@ -740,16 +740,16 @@ static void PropsAc(Widget w, XEvent * event,
     call.rect.width = 0;
     call.rect.height = 0;
     call.map = self->crEdit.map;
-    call.z = self->crEdit.stacking ? CalcIndex 
+    call.z = self->crEdit.stacking ? CalcIndex
 	(w,event->xbutton.x, event->xbutton.y) : 0;
 
     XtCallCallbackList(w,self->crEdit.propsCallbacks,(XtPointer)&call);
 }
 
-/* 
- * action: delete object from map 
+/*
+ * action: delete object from map
  */
-static void DeleteAc(Widget w, XEvent * event, 
+static void DeleteAc(Widget w, XEvent * event,
 		     String * argv, Cardinal * argc)
 {
     CrEditWidget self = (CrEditWidget)w;
@@ -768,7 +768,7 @@ static void DeleteAc(Widget w, XEvent * event,
 	call.rect.width = 0;
 	call.rect.height = 0;
 	call.map = self->crEdit.map;
-	call.z = self->crEdit.stacking ? CalcIndex 
+	call.z = self->crEdit.stacking ? CalcIndex
 	    (w,event->xbutton.x, event->xbutton.y) : 0;
 
 	XtCallCallbackList(w,self->crEdit.deleteCallbacks,(XtPointer)&call);
@@ -778,7 +778,7 @@ static void DeleteAc(Widget w, XEvent * event,
     oldy = y;
 }
 
-/* 
+/*
  * action: feed point
  */
 static void FeedAc (Widget w, XEvent * event, String * argv, Cardinal * argc)
@@ -787,7 +787,7 @@ static void FeedAc (Widget w, XEvent * event, String * argv, Cardinal * argc)
     int x, y;
     static int oldx, oldy;
     struct CrEditCall call;
-    
+
     x = event->xbutton.x / self->crEdit.fontSize;
     y = event->xbutton.y / self->crEdit.fontSize;
 
@@ -798,7 +798,7 @@ static void FeedAc (Widget w, XEvent * event, String * argv, Cardinal * argc)
 	call.rect.width = 0;
 	call.rect.height = 0;
 	call.map = self->crEdit.map;
-	call.z = self->crEdit.stacking ? CalcIndex 
+	call.z = self->crEdit.stacking ? CalcIndex
 	    (w,event->xbutton.x, event->xbutton.y) : 0;
 
 	XtCallCallbackList(w,self->crEdit.feedCallbacks,(XtPointer)&call);
@@ -876,7 +876,7 @@ static void ScrollAc (Widget w, XEvent * e, String * argv, Cardinal * argc)
 	XtCallCallbackList(w,self->crEdit.alignCallbacks,(XtPointer)&call);
     }
 }
-    
+
 /*
  * action: move clipped window in viewport
  */
@@ -940,9 +940,9 @@ static void ClassInitialize(void)
 }
 
 static void Initialize(Widget req,Widget new,Arg args[],Cardinal *num)
-{ 
+{
     CrEditWidget self = (CrEditWidget)new;
-	
+
     debug1("CrEdit-%s-Initialize()\n",XtName(new));
 
     /*** allocate gc ***/
@@ -994,7 +994,7 @@ static Boolean SetValues(Widget cur,Widget req,Widget new,
     CrEditWidget self = (CrEditWidget)new;
     CrEditWidget old = (CrEditWidget)cur;
     debug1("CrEdit-%s-SetValues()\n",XtName(new));
-    
+
     /*** stacking change ***/
     if(self->crEdit.stacking != old->crEdit.stacking) {
 	self->crEdit.fontSize = FontSize + self->crEdit.stacking;
@@ -1058,8 +1058,8 @@ void CrEditBorderOff(Widget w)
 }
 
 /*
- * member: 
- * rect  : 
+ * member:
+ * rect  :
  */
 void CrEditSelect(Widget w,XRectangle rect)
 {

@@ -97,7 +97,7 @@ static void AbsToCr(App self,String abs)
 
 static void Picks(XtPointer client,String entryPath)
 {
-  App self = (App)client; 
+  App self = (App)client;
   String path;
   char mapdir[PATH_MAX+1];
   int i=0;
@@ -125,14 +125,14 @@ static void Walls(XtPointer client,String entryPath)
 
 static void Info(XtPointer client,String entryPath)
 {
-  App self = (App)client; 
+  App self = (App)client;
 
   CnvBrowseShowFile(self->info,entryPath);
 }
 
 
 /**********************************************************************
- * select 
+ * select
  **********************************************************************/
 
 /*
@@ -165,10 +165,10 @@ static CrListNode Next(XtPointer client,XtPointer call)
   }
 
   while (at && !AppArchFilter(self,at))
-      at = at->next;  
-  
+      at = at->next;
+
   if(at) {
-    node.face = at->clone.face; 
+    node.face = at->clone.face;
     node.name = at->name;
     node.ptr = (XtPointer)at;
     return &node;
@@ -176,7 +176,7 @@ static CrListNode Next(XtPointer client,XtPointer call)
   return (CrListNode)NULL;
 }
 
-/* 
+/*
  * create attributes from inventory
  */
 static void SelectCb(Widget w,XtPointer client,XtPointer call)
@@ -196,7 +196,7 @@ static void SelectCb(Widget w,XtPointer client,XtPointer call)
 }
 
 /**********************************************************************
- * look 
+ * look
  **********************************************************************/
 
 /*
@@ -210,7 +210,7 @@ static CrListNode lookNext(XtPointer client,XtPointer call)
     object *op = NULL;
 
     if(self->look.edit == NULL) return NULL;
-   
+
     if(retNode) { /* next */
 	op = ((object *)retNode->ptr)->below;
     } else {
@@ -220,7 +220,7 @@ static CrListNode lookNext(XtPointer client,XtPointer call)
 			   self->look.rect.y,0);
     }
     if(op) {
-	node.face = op->face; 
+	node.face = op->face;
 	node.name = op->name;
 	node.ptr = (XtPointer)op;
 	    return &node;
@@ -228,8 +228,8 @@ static CrListNode lookNext(XtPointer client,XtPointer call)
     return (CrListNode)NULL;
 }
 
-/* 
- * 
+/*
+ *
  */
 static void lookSelectCb(Widget w,XtPointer client,XtPointer call)
 {
@@ -241,7 +241,7 @@ static void lookSelectCb(Widget w,XtPointer client,XtPointer call)
     if (ob->head)
 	ob = ob->head;
     if(!self->attr) {
-	self->attr = AttrCreate 
+	self->attr = AttrCreate
 	    ("attr", self, ob, AttrDescription, GetType(ob), self->look.edit);
     } else {
 	AttrChange(self->attr,ob, GetType(ob), self->look.edit);
@@ -257,7 +257,7 @@ static void lookInsertCb(Widget w,XtPointer client,XtPointer call)
     App self = (App)client;
     CrListCall ret = (CrListCall)call;
 
-    EditInsert (self->look.edit, 
+    EditInsert (self->look.edit,
 		self->look.rect.x, self->look.rect.y, ret->index);
     return;
 }
@@ -269,7 +269,7 @@ static void lookDeleteCb(Widget w,XtPointer client,XtPointer call)
 {
     App self = (App)client;
     CrListCall ret = (CrListCall)call;
-    EditDelete (self->look.edit, self->look.rect.x, self->look.rect.y, 
+    EditDelete (self->look.edit, self->look.rect.x, self->look.rect.y,
 		    ret->index);
     return;
 }
@@ -353,14 +353,14 @@ static CnvMenuRec fileMenu[] = {
     {"new"      ,AppNewCb},
     {"open"     ,AppOpenCb},
 #if 0
-    {"clipboard",AppClipCb}, 
+    {"clipboard",AppClipCb},
 #endif
     {"-----"    ,NULL},
     {"crossfire",AppCrossfireCb},
     {"-----"    ,NULL},
     {"quit"     ,AppQuitCb},
     {""         ,NULL}
-}; 
+};
 
 /**********************************************************************
  * toggle-menu
@@ -389,7 +389,7 @@ static void ToggleFlagCb(Widget w, XtPointer client, XtPointer call)
     for (i = 0; archFlags[i].name; i++) {
 	XtVaSetValues
 	    (archFlags[i].w,
-	     XtNleftBitmap, 
+	     XtNleftBitmap,
 	     (self->arch.flags & archFlags[i].flags) ? bitmaps.mark : None,
 	     NULL);
     }
@@ -406,7 +406,7 @@ static void ToggleAllCb(Widget w, XtPointer client, XtPointer call)
 
     XtVaSetValues (self->arch.w, XtNpackage, self, NULL);
     XtVaSetValues(w,
-		  XtNleftBitmap, 
+		  XtNleftBitmap,
 		  self->arch.all ? bitmaps.mark : None,
 		  NULL);
 }
@@ -417,7 +417,7 @@ static void ToggleClipCb(Widget w, XtPointer client, XtPointer call)
 
   self->clipon = !self->clipon;
   XtVaSetValues(w,
-		XtNleftBitmap, 
+		XtNleftBitmap,
 		self->clipon ? bitmaps.mark : None,
 		NULL);
   if(self->clipon)
@@ -434,19 +434,19 @@ static void AppToggleMenu(App self,String name,Widget parent)
     shell = XtVaCreatePopupShell
 	(name,simpleMenuWidgetClass,parent,
 	 NULL);
-    
+
     entry = XtVaCreateManagedWidget
 	("all",smeBSBObjectClass,shell,
 	 XtNleftBitmap,
 	 self->arch.all ? bitmaps.mark : None,
 	 NULL);
     XtAddCallback(entry,XtNcallback,ToggleAllCb,(XtPointer)self);
-    
+
     for (i = 0; archFlags[i].name; i++) {
 	archFlags[i].w = XtVaCreateManagedWidget
 	    (archFlags[i].name, smeBSBObjectClass,shell,
 	     XtNleftBitmap,
-	     (self->arch.flags  & archFlags[i].flags) ? 
+	     (self->arch.flags  & archFlags[i].flags) ?
 	     bitmaps.mark : None,
 	     NULL);
 	XtAddCallback
@@ -466,7 +466,7 @@ static void AppToggleMenu(App self,String name,Widget parent)
  * editMenu callbacks (cut,copy,paste,...)
  **********************************************************************/
 
-/* 
+/*
  * callback: Cut
  */
 static void CutCb (Widget w, XtPointer client, XtPointer call)
@@ -497,14 +497,14 @@ static void CutCb (Widget w, XtPointer client, XtPointer call)
     AppSelectUnset(self);
 }
 
-/* 
+/*
  * callback: Copy
  */
 static void CopyCb (Widget w, XtPointer client, XtPointer call)
 {
     App self = (App)client;
     XRectangle rect;
-    
+
     debug0 ("AppCopyCb()\n");
     if(!self->look.edit) {
 	CnvNotify("Select area to Copy","Continue",NULL);
@@ -521,13 +521,13 @@ static void CopyCb (Widget w, XtPointer client, XtPointer call)
     AppSelectUnset(self);
 }
 
-/* 
+/*
  * callback: Paste
  */
 static void PasteCb (Widget w, XtPointer client, XtPointer call)
 {
     App self = (App)client;
-   
+
     debug0 ("AppPasteCb()\n");
 
     if(!self->look.edit) {
@@ -542,13 +542,13 @@ static void PasteCb (Widget w, XtPointer client, XtPointer call)
     AppSelectUnset(self);
 }
 
-/* 
+/*
  * callback: Fill
  */
 static void FillCb (Widget w, XtPointer client, XtPointer call)
 {
     App self = (App)client;
-    
+
     debug0 ("AppFillCb()\n");
     if(!self->look.edit) {
 	CnvNotify("Select point to Fill","Continue",NULL);
@@ -559,13 +559,13 @@ static void FillCb (Widget w, XtPointer client, XtPointer call)
     AppSelectUnset(self);
 }
 
-/* 
+/*
  * callback: FillBelow
  */
 static void FillBelowCb (Widget w, XtPointer client, XtPointer call)
 {
     App self = (App)client;
-    
+
     debug0 ("AppFillCb()\n");
     if(!self->look.edit) {
 	CnvNotify("Select point to Fill","Continue",NULL);
@@ -576,7 +576,7 @@ static void FillBelowCb (Widget w, XtPointer client, XtPointer call)
     AppSelectUnset(self);
 }
 
-/* 
+/*
  * callback: Box
  */
 static void BoxCb (Widget w, XtPointer client, XtPointer call)
@@ -593,37 +593,37 @@ static void BoxCb (Widget w, XtPointer client, XtPointer call)
     AppSelectUnset(self);
 }
 
-/* 
+/*
  * callback: Wipe
  */
 static void WipeCb (Widget w, XtPointer client, XtPointer call)
 {
     App self = (App)client;
-    
+
     debug0 ("AppWipeCb()\n");
     if(!self->look.edit) {
 	CnvNotify("Select area to Wipe","Continue",NULL);
 	return;
     }
-    
+
     EditShaveRectangle(self->look.edit, self->look.rect);
     EditModified(self->look.edit);
     AppSelectUnset(self);
 }
 
-/* 
+/*
  * callback: WipeBelow
  */
 static void WipeBelowCb (Widget w, XtPointer client, XtPointer call)
 {
     App self = (App)client;
-    
+
     debug0 ("AppWipeBelowCb()\n");
     if(!self->look.edit) {
 	CnvNotify("Select area to Wipe","Continue",NULL);
 	return;
     }
-    
+
     EditShaveRectangleBelow(self->look.edit, self->look.rect);
     EditModified(self->look.edit);
     AppSelectUnset(self);
@@ -643,53 +643,53 @@ static CnvMenuRec editMenu[] = {
     {"wipe" ,WipeCb},
     {"wipebelow" ,WipeBelowCb},
     {"",     NULL}
-}; 
+};
 
 /**********************************************************************
- * layout 
+ * layout
  **********************************************************************/
 
 /*
- * member: create application window layout 
+ * member: create application window layout
  */
 static void Layout(App self)
 {
     Widget pane, box,use,view;
     char path[PATH_MAX+1];
-    
+
     /*** vertical Pane of widgets ***/
-    pane = XtCreateManagedWidget 
-	("pane", panedWidgetClass, self->shell, 
+    pane = XtCreateManagedWidget
+	("pane", panedWidgetClass, self->shell,
 	 NULL, 0);
-    
+
     /*** menubar ***/
-    box = XtVaCreateManagedWidget 
+    box = XtVaCreateManagedWidget
 	("box", boxWidgetClass, pane,
 	 XtNorientation, XtorientHorizontal,
 	 NULL);
-    use = XtVaCreateManagedWidget 
+    use = XtVaCreateManagedWidget
       ("fileButton",menuButtonWidgetClass, box,
        XtNmenuName,"appFileMenu",
        NULL);
     CnvMenu("appFileMenu",use,fileMenu,(XtPointer)self);
- 
-    use = XtVaCreateManagedWidget 
+
+    use = XtVaCreateManagedWidget
 	("infoButton",menuButtonWidgetClass, box,
 	 XtNmenuName,"info",
 	 NULL);
     sprintf(path,"%s/%s",settings.datadir,"doc");
     self->infof = CnvFilesCreate("info",use,Info,(XtPointer)self,path);
-    
+
     /*** look ***/
     self->look.info = XtVaCreateManagedWidget
 	("info",labelWidgetClass,pane,
 	 NULL);
 
-    view = XtVaCreateManagedWidget 
+    view = XtVaCreateManagedWidget
 	("view", viewportWidgetClass,pane,
 	 NULL);
-    self->look.w = XtVaCreateManagedWidget 
-	("cross",crListWidgetClass,view, 
+    self->look.w = XtVaCreateManagedWidget
+	("cross",crListWidgetClass,view,
 	 XtNpackage, self,
 	 XtNnext, lookNext,
 	 NULL);
@@ -699,34 +699,34 @@ static void Layout(App self)
 		  (XtPointer)self);
     XtAddCallback(self->look.w,XtNdeleteCallback,lookDeleteCb,
 		  (XtPointer)self);
-    
+
     /*** arch ***/
-    box = XtVaCreateManagedWidget 
-	("box", boxWidgetClass, pane, 
+    box = XtVaCreateManagedWidget
+	("box", boxWidgetClass, pane,
 	 XtNorientation, XtorientHorizontal,
 	 NULL);
-    use = XtVaCreateManagedWidget 
+    use = XtVaCreateManagedWidget
 	("archButton",menuButtonWidgetClass, box,
 	 XtNmenuName,"toggle",
 	 NULL);
     AppToggleMenu(self,"toggle",use);
-    use = XtVaCreateManagedWidget 
+    use = XtVaCreateManagedWidget
 	("pickButton",menuButtonWidgetClass, box,
 	 XtNmenuName,"picks",
 	 NULL);
     sprintf(path,"%s/%s/%s",settings.datadir,settings.mapdir,"editor/picks");
     self->picks = CnvFilesCreate("picks",use,Picks,(XtPointer)self,path);
-    use = XtVaCreateManagedWidget 
+    use = XtVaCreateManagedWidget
       ("wallButton",menuButtonWidgetClass, box,
        NULL);
     sprintf(path,"%s/%s/%s",settings.datadir,settings.mapdir,"editor/walls");
     self->walls = CnvFilesCreate("menu",use,Walls,(XtPointer)self,path);
 
-    use = XtVaCreateManagedWidget 
-	("arch", viewportWidgetClass, pane, 
+    use = XtVaCreateManagedWidget
+	("arch", viewportWidgetClass, pane,
 	 NULL);
-    self->arch.w = XtVaCreateManagedWidget 
-	("cross",crListWidgetClass,use, 
+    self->arch.w = XtVaCreateManagedWidget
+	("cross",crListWidgetClass,use,
 	 XtNpackage, self,
 	 XtNnext, Next,
 	 NULL);
@@ -737,8 +737,8 @@ static void Layout(App self)
 #endif
 
     /*** item ***/
-    box = XtVaCreateManagedWidget 
-	("item", formWidgetClass, pane, 
+    box = XtVaCreateManagedWidget
+	("item", formWidgetClass, pane,
 	 XtNorientation, XtorientVertical,
 	 NULL);
     self->item.name = XtVaCreateManagedWidget
@@ -795,7 +795,7 @@ App AppCreate(XtAppContext appCon,
 	exit(EXIT_FAILURE);
     }
 
-    BitmapsCreate(self->display); 
+    BitmapsCreate(self->display);
     self->shell = XtVaAppCreateShell
 	(NULL,AppClass,
 	 applicationShellWidgetClass,
@@ -817,10 +817,10 @@ App AppCreate(XtAppContext appCon,
     self->item.edit = NULL;
 
     /*** ***/
-    XtGetApplicationResources 
-	(self->shell, 
+    XtGetApplicationResources
+	(self->shell,
 	 (XtPointer) & self->res,
-	 resources, resourcesNum, 
+	 resources, resourcesNum,
 	 NULL, 0);
 
     /* Default */
@@ -882,7 +882,7 @@ static void AppDestroy(App self)
 /*
  *
  *Description:
- * update all things 
+ * update all things
  */
 void AppUpdate(App self)
 {
@@ -901,8 +901,8 @@ void AppUpdate(App self)
 
 #if 0
 	if (self->attr) {
-	    object *ob = MapGetObjectZ (self->look.edit->emap, 
-					self->look.rect.x, 
+	    object *ob = MapGetObjectZ (self->look.edit->emap,
+					self->look.rect.x,
 					self->look.rect.y,0);
 	    AttrChange(self->attr, ob, GetType(ob));
 	}
@@ -975,7 +975,7 @@ void AppSelectUnset(App self)
     AppUpdate(self);
 }
 
-/* 
+/*
  * member : item - window to show inserted archetype
  * edit   : object is selectted from self map, NULL if from
  *          main window or no selection

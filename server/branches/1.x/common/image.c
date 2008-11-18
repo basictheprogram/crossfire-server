@@ -38,7 +38,7 @@ New_Face *new_faces;
  * then an index into the new_faces array.
  * This data is redundant with new_face information - the difference
  * is that this data gets sorted, and that doesn't necessarily happen
- * with the new_face data - when accessing new_face[some number], 
+ * with the new_face data - when accessing new_face[some number],
  * that some number corresponds to the face at that number - for
  * xbm, it may not.  At current time, these do in fact match because
  * the bmaps file is created in a sorted order.
@@ -48,11 +48,11 @@ struct bmappair {
     unsigned int number;
 };
 /** The xbm array (which contains name and number information, and
- * is then sorted) contains nroffiles entries. 
+ * is then sorted) contains nroffiles entries.
  */
 static struct bmappair *xbm=NULL;
 
-/** Following can just as easily be pointers, but 
+/** Following can just as easily be pointers, but
  * it is easier to keep them like this.
  */
 New_Face *blank_face, *dark_faces[3], *empty_face, *smooth_face;
@@ -101,7 +101,7 @@ static const char *const colorname[] = {
 "grey",			/* 9  */
 "brown",		/* 10 */
 "yellow",		/* 11 */
-"khaki"			/* 12 */ 
+"khaki"			/* 12 */
 };
 
 static int compar (const struct bmappair *a, const struct bmappair *b) {
@@ -213,20 +213,20 @@ void read_bmap_names(void) {
 	LOG(llevError, "Cannot open bmaps file %s: %s\n", buf, strerror_local(errno));
 	exit(-1);
     }
-    
+
     /* First count how many bitmaps we have, so we can allocate correctly */
     while (fgets (buf, MAX_BUF, fp)!=NULL)
 	if(buf[0] != '#' && buf[0] != '\n' )
 	    nrofbmaps++;
     rewind(fp);
-    
+
     xbm = (struct bmappair *) malloc(sizeof(struct bmappair) * nrofbmaps);
     memset (xbm, 0, sizeof (struct bmappair) * nrofbmaps);
-    
+
     while(nroffiles < nrofbmaps && fgets (buf, MAX_BUF, fp) != NULL) {
 	if (*buf == '#')
 	    continue;
-	
+
 	p = (*buf == '\\') ? (buf + 1): buf;
 	if (!(p = strtok (p , " \t")) || !(q = strtok (NULL , " \t\n"))) {
 	    LOG(llevDebug,"Warning, syntax error: %s\n", buf);
@@ -324,7 +324,7 @@ int find_face(const char *name, int error) {
 	*p = '\0';
 
     tmp.name = (char *)name;
-    bp = (struct bmappair *)bsearch 
+    bp = (struct bmappair *)bsearch
 	(&tmp, xbm, nroffiles, sizeof(struct bmappair), (int (*)(const void*, const void*))compar);
 
     return bp ? bp->number : error;
@@ -392,7 +392,7 @@ int find_smooth(uint16 face, uint16* smoothed) {
     struct smoothing *bp, tmp;
 
     tmp.id = face;
-    bp = (struct smoothing *)bsearch 
+    bp = (struct smoothing *)bsearch
         (&tmp, smooth, nrofsmooth, sizeof(struct smoothing), (int (*)(const void*, const void*))compar_smooth);
     (*smoothed)=0;
     if (bp)

@@ -120,7 +120,7 @@ static int anim_compare(const Animations *a, const Animations *b) {
 }
 
 /**
- * Tries to find the animation id that matches name.  Returns an integer match 
+ * Tries to find the animation id that matches name.  Returns an integer match
  * 0 if no match found (animation 0 is initialized as the 'bug' face
  */
 int find_animation(const char *name)
@@ -129,7 +129,7 @@ int find_animation(const char *name)
 
     search.name = name;
 
-    match = (Animations*)bsearch(&search, animations, (num_animations+1), 
+    match = (Animations*)bsearch(&search, animations, (num_animations+1),
 		sizeof(Animations), (int (*)(const void*, const void*))anim_compare);
 
 
@@ -186,7 +186,7 @@ void animate_object(object *op, int dir) {
     }
     else if (NUM_FACINGS(op)==4) {
 	if (dir==0) base_state=0;
-	else base_state = ((dir-1)/2) * (NUM_ANIMATIONS(op)/4); 
+	else base_state = ((dir-1)/2) * (NUM_ANIMATIONS(op)/4);
     }
     else if (NUM_FACINGS(op)==8) {
 	if (dir==0) base_state=0;

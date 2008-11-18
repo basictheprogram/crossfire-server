@@ -43,7 +43,7 @@ static void CnvNop(Widget w,XEvent *e,String *argv,Cardinal *argc)
 }
 
 static XtActionsRec CnvActions[] = {
-    { "CnvNop", CnvNop }, 
+    { "CnvNop", CnvNop },
 };
 
 /**********************************************************************

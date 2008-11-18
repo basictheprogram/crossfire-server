@@ -87,7 +87,7 @@ void put_decor(mapstruct *map,char **maze,char *decorstyle,int decor_option,RMPa
         for(i=1;i<RP->Xsize-1;i++) for(j=1;j<RP->Ysize-1;j++) {
             if(maze[i][j]==0) {
                 object *new_decor_object, *this_object;
-                
+
                 new_decor_object = pick_random_object(decor_map);
                 this_object = arch_to_object(new_decor_object->arch);
                 copy_object(new_decor_object,this_object);

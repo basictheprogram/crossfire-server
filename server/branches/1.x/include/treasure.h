@@ -68,7 +68,7 @@ enum {
  * TODO: It is a bad way to implement this with a special structure.
  * Because the real arch list is a at runtime not changed, we can grap for example
  * here a clone of the arch, store it in the treasure list and then run the original
- * arch parser over this clone, using the treasure list as script until an END comes. 
+ * arch parser over this clone, using the treasure list as script until an END comes.
  * This will allow ANY changes which is possible and we use ony one parser.
  */
 

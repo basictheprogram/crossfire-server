@@ -1,4 +1,3 @@
-
 /*
  * static char *rcs_treasure_c =
  *   "$Id$";
@@ -306,7 +305,7 @@ static void change_treasure(treasure *t, object *op)
 	/* not great, but better than something that is completely wrong */
 	FREE_AND_COPY(op->name_pl, t->change_arch.name);
     }
-    
+
     if(t->change_arch.title)
     {
         if(op->title)
@@ -320,7 +319,7 @@ static void change_treasure(treasure *t, object *op)
             free_string(op->slaying);
         op->slaying = add_string(t->change_arch.slaying);
     }
-    
+
 }
 
 void create_all_treasures(treasure *t, object *op, int flag, int difficulty, int tries) {
@@ -338,7 +337,7 @@ void create_all_treasures(treasure *t, object *op, int flag, int difficulty, int
         if(t->nrof&&tmp->nrof<=1)
           tmp->nrof = RANDOM()%((int) t->nrof) + 1;
         fix_generated_item (tmp, op, difficulty, t->magic, flag);
-        change_treasure(t, tmp);        
+        change_treasure(t, tmp);
         put_treasure (tmp, op, flag);
       }
     }
@@ -393,7 +392,7 @@ void create_one_treasure(treasurelist *tl, object *op, int flag, int difficulty,
         if(t->nrof && tmp->nrof<=1)
           tmp->nrof = RANDOM()%((int) t->nrof) + 1;
         fix_generated_item (tmp, op, difficulty, t->magic, flag);
-        change_treasure(t, tmp);        
+        change_treasure(t, tmp);
         put_treasure (tmp, op, flag);
     }
 }
@@ -413,7 +412,7 @@ void create_treasure(treasurelist *t, object *op, int flag, int difficulty,
 	LOG(llevDebug,"createtreasure: tries exceeded 100, returning without making treasure\n");
 	return;
     }
-    if (t->total_chance) 
+    if (t->total_chance)
 	create_one_treasure(t, op, flag,difficulty, tries);
     else
   	create_all_treasures(t->items, op, flag, difficulty, tries);
@@ -486,7 +485,7 @@ static int difftomagic_list[DIFFLEVELS][MAXMAGIC+1] =
 
 
 /* calculate the appropriate level for wands staves and scrolls.  If
- * retmult is 1, return the multiplier, not the level, for computing value 
+ * retmult is 1, return the multiplier, not the level, for computing value
  * This code presumes that op has had its spell object created (in op->inv)
  */
 
@@ -665,7 +664,7 @@ void set_ring_bonus(object *op,int bonus) {
 	case 16:
 	case 17:
 	case 18:
-	case 19: 
+	case 19:
 	    {
 	    int b=5+FABS(bonus),val,resist=RANDOM() % num_resist_table;
 
@@ -748,8 +747,8 @@ int get_magic(int diff) {
  * into scrolls/books/wands, makes it unidentified, hides the value, etc.
  */
 /* 4/28/96 added creator object from which op may now inherit properties based on
- * op->type. Right now, which stuff the creator passes on is object type 
- * dependant. I know this is a spagetti manuever, but is there a cleaner 
+ * op->type. Right now, which stuff the creator passes on is object type
+ * dependant. I know this is a spagetti manuever, but is there a cleaner
  * way to do this? b.t. */
 /*
  * ! (flags & GT_ENVIRONMENT):
@@ -1222,7 +1221,7 @@ void dump_monster_treasure (const char *name)
 
   found = 0;
   fprintf (logfile, "\n");
-  for (at = first_archetype; at != NULL; at = at->next) 
+  for (at = first_archetype; at != NULL; at = at->next)
     if (! strcasecmp (at->clone.name, name) && at->clone.title == NULL)
       {
 	fprintf (logfile, "treasures for %s (arch: %s)\n", at->clone.name,
@@ -1259,7 +1258,7 @@ void init_artifacts(void) {
     else has_been_inited = 1;
 
     artifact_init = 1;
-    
+
     sprintf(filename, "%s/artifacts", settings.datadir);
     LOG(llevDebug, "Reading artifacts from %s...",filename);
     if ((fp = open_and_uncompress(filename, 0, &comp)) == NULL) {
@@ -1275,7 +1274,7 @@ void init_artifacts(void) {
 	while(*cp==' ') /* Skip blanks */
 	    cp++;
     if (*cp=='\0') continue;
-    
+
         if (!strncmp(cp, "Allowed", 7)) {
             if (art==NULL) {
                 art=get_empty_artifact();
@@ -1599,7 +1598,7 @@ void generate_artifact(object *op, int difficulty) {
   int i;
 
   al = find_artifactlist(op->type);
-  
+
   if (al==NULL) {
 #if 0 /* This is too verbose, usually */
     LOG(llevDebug, "Couldn't change %s into artifact - no table.\n", op->name);
@@ -1614,7 +1613,7 @@ void generate_artifact(object *op, int difficulty) {
       roll -= art->chance;
       if (roll<0) break;
     }
-	
+
     if (art == NULL || roll>=0) {
 #if 1
       LOG(llevError, "Got null entry and non zero roll in generate_artifact, type %d\n",
@@ -1622,7 +1621,7 @@ void generate_artifact(object *op, int difficulty) {
 #endif
       return;
     }
-    if (!strcmp(art->item->name,"NONE")) 
+    if (!strcmp(art->item->name,"NONE"))
 	return;
     if (FABS(op->magic) < art->item->magic)
       continue; /* Not magic enough to be this item */
@@ -1697,11 +1696,11 @@ void fix_flesh_item(object *item, object *donor) {
 	 */
 	for (i=0; i<NROFATTACKS; i++)
 	    item->resist[i] = donor->resist[i]/2;
-	
+
 	/* item inherits donor's level and exp (important for dragons) */
 	item->level = donor->level;
         item->stats.exp = donor->stats.exp;
-	
+
 	/* if donor has some attacktypes, the flesh is poisonous */
 	if(donor->attacktype&AT_POISON)
 	    item->type=POISON;
@@ -1759,7 +1758,7 @@ void free_artifact(artifact *at)
 void free_artifactlist(artifactlist *al)
 {
     artifactlist *nextal;
-    for (al=first_artifactlist; al!=NULL; al=nextal) {  
+    for (al=first_artifactlist; al!=NULL; al=nextal) {
 	nextal=al->next;
 	if (al->items) {
 		free_artifact(al->items);

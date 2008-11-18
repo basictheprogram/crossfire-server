@@ -14,7 +14,7 @@ static XtResource resources[] = {
   { XtNobject,XtCObject,XtRPointer,sizeof(XtPointer), /* caddr_t ??? */
     Offset(ob),XtRPointer,NULL },
   { XtNadjust,XtCAdjust,XtRBool,sizeof(Boolean),
-    Offset(adjust),XtRString,"true" }, 
+    Offset(adjust),XtRString,"true" },
 };
 #undef Offset
 
@@ -32,7 +32,7 @@ static Boolean SetValues(Widget cur,Widget req,Widget new,
 
 CrFaceClassRec crFaceClassRec = {
   { /****** Core ******/
-    /* superclass            */ (WidgetClass) &widgetClassRec,    
+    /* superclass            */ (WidgetClass) &widgetClassRec,
     /* class_name            */ "CrFace",
     /* widget_size           */ sizeof(CrFaceRec) ,
     /* class_initialize      */ ClassInitialize ,
@@ -46,7 +46,7 @@ CrFaceClassRec crFaceClassRec = {
     /* resources             */ resources,
     /* num_resources         */ XtNumber(resources),
     /* xrm_class             */ NULLQUARK,
-    /* compress_motion       */ TRUE, 
+    /* compress_motion       */ TRUE,
     /* compress_exposure     */ TRUE,
     /* compress_enterleave   */ TRUE,
     /* visible_interest      */ FALSE,
@@ -66,7 +66,7 @@ CrFaceClassRec crFaceClassRec = {
     /* extension             */ NULL
   },
   { /****** CrFace ******/
-     /* empty                    */ 0,				
+     /* empty                    */ 0,
   }
 };
 
@@ -141,7 +141,7 @@ static void Initialize(Widget req,Widget new,Arg args[],Cardinal *num)
     CrFaceWidget w = (CrFaceWidget)new;
 
     /* NULLed allowed */
-    if(w->crFace.ob == NULL) 
+    if(w->crFace.ob == NULL)
 	w->core.width = 1;
 
     if(w->core.width < 10) w->core.width = 96;
@@ -179,8 +179,8 @@ static void Redisplay(Widget w,XEvent *event,Region region)
   GetConst(w,&minx,&miny,&maxx,&maxy);
   for (at = self->crFace.ob->arch;at; at = at->more) {
     DrawObject (w,
-		at->clone.x - minx, 
-		at->clone.y - miny, 
+		at->clone.x - minx,
+		at->clone.y - miny,
 		&at->clone);
   }
 #else
@@ -199,9 +199,9 @@ static void Redisplay(Widget w,XEvent *event,Region region)
       x = self->crFace.ob->x - minx;
       y = self->crFace.ob->y - miny;
       for (obj = self->crFace.ob;obj; obj = obj->more) {
-	  DrawObject (w, 
-		      obj->x - minx - x, 
-		      obj->y - miny - y, 
+	  DrawObject (w,
+		      obj->x - minx - x,
+		      obj->y - miny - y,
 		      obj);
       }
   }

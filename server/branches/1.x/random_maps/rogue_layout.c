@@ -34,7 +34,7 @@ int surround_check(char **layout,int i,int j,int Xsize, int Ysize){
 
 
 /* actually make the layout:  we work by a reduction process:
- * first we make everything a wall, then we remove areas to make rooms 
+ * first we make everything a wall, then we remove areas to make rooms
  */
 
 char **roguelike_layout_gen(int xsize, int ysize, int options) {
@@ -66,7 +66,7 @@ char **roguelike_layout_gen(int xsize, int ysize, int options) {
 
   /* decide on the number of rooms */
   nrooms = RANDOM() % 10 + 6;
-  Rooms = (Room *) calloc(nrooms +1 , sizeof(Room)); 
+  Rooms = (Room *) calloc(nrooms +1 , sizeof(Room));
 
   /* actually place the rooms */
   i=0;
@@ -75,7 +75,7 @@ char **roguelike_layout_gen(int xsize, int ysize, int options) {
     if(!roguelike_place_room(Rooms,xsize,ysize,nrooms)) tries++;
     else i++;
   }
-  
+
   if(i==0) { /* no can do! */
     for(i=1;i<xsize-1;i++)
       for(j=1;j<ysize-1;j++)
@@ -85,15 +85,15 @@ char **roguelike_layout_gen(int xsize, int ysize, int options) {
     free(Rooms);
     return maze;
   }
-    
-  
+
+
   /* erase the areas occupied by the rooms */
   roguelike_make_rooms(Rooms,maze,options);
 
   roguelike_link_rooms(Rooms,maze,xsize,ysize);
 
   /* put in the stairs */
-  
+
   maze[Rooms->x][Rooms->y] = '<';
   /* get the last one */
   for(walk=Rooms;walk->x!=0;walk++);
@@ -119,14 +119,14 @@ char **roguelike_layout_gen(int xsize, int ysize, int options) {
       if(maze[i][j]=='.') maze[i][j]=0;
       if(maze[i][j]=='D') {  /* remove bad door. */
         int si = surround_check(maze,i,j,xsize,ysize);
-        if(si!=3 && si!=12) { 
+        if(si!=3 && si!=12) {
           maze[i][j]=0;
           /* back up and recheck any nearby doors */
           i=0;j=0;
         }
       }
     }
-        
+
   free(Rooms);
   return maze;
 }
@@ -151,7 +151,7 @@ static int roguelike_place_room(Room *Rooms,int xsize, int ysize,int nrooms) {
 
   tx = RANDOM() %xsize;
   ty = RANDOM() %ysize;
- 
+
   /* generate a distribution of sizes centered about basesize */
   sx = (RANDOM() % x_basesize) + (RANDOM() % x_basesize)+ (RANDOM() % x_basesize);
   sy = (RANDOM() % y_basesize) + (RANDOM() % y_basesize)+ (RANDOM() % y_basesize);
@@ -167,7 +167,7 @@ static int roguelike_place_room(Room *Rooms,int xsize, int ysize,int nrooms) {
   /* check to see if it's in the map */
   if(zx > xsize - 1 || ax < 1) return 0;
   if(zy > ysize - 1 || ay < 1) return 0;
-  
+
   /* no small fish */
   if(sx < 3 || sy < 3) return 0;
 
@@ -195,7 +195,7 @@ static int roguelike_place_room(Room *Rooms,int xsize, int ysize,int nrooms) {
   return 1;  /* success */
 
 }
-    
+
 
 /* write all the rooms into the maze */
 static void roguelike_make_rooms(Room *Rooms,char **maze, int options) {
@@ -226,7 +226,7 @@ static void roguelike_make_rooms(Room *Rooms,char **maze, int options) {
   /* enscribe a rectangle */
     for(i=walk->ax;i<walk->zx;i++)
       for(j=walk->ay;j<walk->zy;j++) {
-        if(!making_circle || ((int)(0.5+hypot(walk->x-i,walk->y-j))) <=R) 
+        if(!making_circle || ((int)(0.5+hypot(walk->x-i,walk->y-j))) <=R)
           maze[i][j]='.';
       }
   }
@@ -239,7 +239,7 @@ static void roguelike_link_rooms(Room *Rooms,char **maze,int xsize,int ysize){
   int i,j;
   /* link each room to the previous room */
   if(Rooms[1].x==0) return;  /* only 1 room */
-  
+
   for(walk = Rooms +1; walk->x !=0; walk++) {
     int x1=walk->x;
     int y1=walk->y;
@@ -285,7 +285,7 @@ static void roguelike_link_rooms(Room *Rooms,char **maze,int xsize,int ysize){
         else if(maze[i][j]!='D' && maze[i][j]!='.')
           maze[i][j]=0;
       }
-       
+
     }
     else {  /* connect in y direction first */
       in_wall=0;
@@ -322,12 +322,12 @@ static void roguelike_link_rooms(Room *Rooms,char **maze,int xsize,int ysize){
           in_wall=0;
           maze[i-1][j]='D';
         }
-        else 
-          if(maze[i][j]!='D' && maze[i][j]!='.') 
+        else
+          if(maze[i][j]!='D' && maze[i][j]!='.')
             maze[i][j]=0;
 
       }
-       
+
     }
 
   }

@@ -5,7 +5,7 @@
 
 /**********************************************************************
  CrList resources:
- 
+
  Name         Class        RepType    DefaultValue       Notice
  ----------------------------------------------------------------------
  object       Object       Pointer    NULL               for program

@@ -77,7 +77,7 @@ int surround_flag3(mapstruct *map,int i,int j,RMParms *RP){
      * 1 =  blocked to left,
      * 2 = blocked to right,
      * 4 = blocked above
-     * 8 = blocked below 
+     * 8 = blocked below
      */
 
     int surround_index = 0;
@@ -119,7 +119,7 @@ void make_map_walls(mapstruct *map,char **layout, char *w_style,RMParms *RP) {
     char stylefilepath[256];
     mapstruct *style_map=0;
     object *the_wall;
-  
+
     /* get the style map */
     if(!strcmp(w_style,"none")) return;
     sprintf(styledirname,"%s","/styles/wallstyles");
@@ -246,23 +246,23 @@ object *pick_joined_wall(object *the_wall,char **layout,int i,int j,RMParms *RP)
     return arch_to_object(the_wall->arch);
   }
 
-  
+
 }
-  
+
 
 /* this takes a map, and changes an existing wall to match what's blocked
  * around it, counting only doors and walls as blocked.  If insert_flag is
  * 1, it will go ahead and insert the wall into the map.  If not, it
  * will only return the wall which would belong there, and doesn't
  * remove anything.  It depends on the
- * global, previously-set variable, "wall_name"  
+ * global, previously-set variable, "wall_name"
  */
 
 object * retrofit_joined_wall(mapstruct *the_map,int i,int j,int insert_flag,RMParms *RP) {
     /* 1 = wall to left,
      * 2 = wall to right,
      * 4 = wall above
-     * 8 = wall below 
+     * 8 = wall below
      */
     int surround_index=0;
     int l;
@@ -275,14 +275,14 @@ object * retrofit_joined_wall(mapstruct *the_map,int i,int j,int insert_flag,RMP
 	if ((the_wall->move_type & MOVE_WALK) && the_wall->type!=EXIT && the_wall->type!=TELEPORTER)
 	    break;
 
-  
+
     /* if what we found is a door, don't remove it, set the_wall to NULL to
-     * signal that later. 
+     * signal that later.
      */
     if(the_wall && (the_wall->type==DOOR || the_wall->type==LOCKED_DOOR) ) {
 	the_wall=NULL;
-	/* if we're not supposed to insert a new wall where there wasn't one, 
-	 * we've gotta leave. 
+	/* if we're not supposed to insert a new wall where there wasn't one,
+	 * we've gotta leave.
 	 */
 	if(insert_flag==0) return 0;
     }
@@ -366,5 +366,5 @@ object * retrofit_joined_wall(mapstruct *the_map,int i,int j,int insert_flag,RMP
 	nroferrors--;  /* it's OK not to find an arch. */
     return new_wall;
 }
-  
+
 

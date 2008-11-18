@@ -74,7 +74,7 @@ static void show_matching_spells(object *op, char *params)
 	/* If it is a spell, and no params are passed, or they
 	 * match the name, process this spell.
 	 */
-	if (spell->type == SPELL && 
+	if (spell->type == SPELL &&
 	    (!params || !strncmp(params, spell->name, strlen(params)))) {
 	    if (spell->path_attuned & op->path_denied) {
 		sprintf(spell_sort[num_found++],
@@ -124,7 +124,7 @@ static void show_matching_spells(object *op, char *params)
 
 
 /* sets up to cast a spell.  op is the caster, params is the spell name,
- * and command is the first letter of the spell type (c=cast, i=invoke, 
+ * and command is the first letter of the spell type (c=cast, i=invoke,
  * p=prepare).  Invoke casts a spell immediately, where as cast (and I believe
  * prepare) just set up the range type.
  */
@@ -180,7 +180,7 @@ int command_cast_spell (object *op, char *params, char command)
 		    spob->skill, spob->name);
 		return 1;
 	    }
-		
+
 	    if (castnow) {
 		cast_spell(op,op,op->facing,spob,cp);
 	    } else {
@@ -228,10 +228,10 @@ int legal_range(object *op,int r) {
 	    else return 0;
 
 	case range_golem: /* Use scrolls */
-	    if (op->contr->ranges[range_golem] && 
+	    if (op->contr->ranges[range_golem] &&
 		op->contr->ranges[range_golem]->count == op->contr->golem_count)
 		    return 1;
-	    else 
+	    else
 		return 0;
 
 	case range_skill:
@@ -255,7 +255,7 @@ void change_spell(object *op,char k) {
     } while (!legal_range(op,op->contr->shoottype));
 
     /* Legal range has already checked that we have an appropriate item
-     * that uses the slot, so we don't need to be too careful about 
+     * that uses the slot, so we don't need to be too careful about
      * checking the status of the object.
      */
     switch(op->contr->shoottype) {
@@ -281,8 +281,8 @@ void change_spell(object *op,char k) {
 	    new_draw_info_format(NDI_UNIQUE, 0,op, "Switched to %s.", query_base_name(op->contr->ranges[range_misc], 0));
 	    break;
 
-	case range_skill: 
-	    new_draw_info_format(NDI_UNIQUE, 0,op, "Switched to skill: %s", op->chosen_skill ?  
+	case range_skill:
+	    new_draw_info_format(NDI_UNIQUE, 0,op, "Switched to skill: %s", op->chosen_skill ?
 		 op->chosen_skill->name : "none");
 	    break;
 

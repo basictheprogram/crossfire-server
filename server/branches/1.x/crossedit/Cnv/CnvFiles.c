@@ -2,7 +2,7 @@
 #include <Posix.h>
 
 /**********************************************************************
- * private 
+ * private
  **********************************************************************/
 
 static void entryCb(Widget w,XtPointer client,XtPointer call)
@@ -27,16 +27,16 @@ static void Malfunction(CnvFiles self,String msg)
 }
 
 /**********************************************************************
- * public 
+ * public
  **********************************************************************/
 
 /*
  * member   :
  * name     : resource-name
  * app      : application level shell-widget
- * directory: directory to read menu from 
+ * directory: directory to read menu from
  * proc     : callback to be called
- * client   : 
+ * client   :
  * return   : gives created menu
  */
 CnvFiles CnvFilesCreate(String name,
@@ -68,7 +68,7 @@ void CnvFilesDestroy(CnvFiles self)
 }
 
 /*
- * member   : make menu from directory 
+ * member   : make menu from directory
  * directory: absolute directoryname to scan
  * return   : gives created menu
  */
@@ -104,17 +104,17 @@ Widget CnvFilesRescan(CnvFiles self,String name,Widget parent,
   if((dir = opendir(self->directory)) == NULL) {
     Malfunction(self,"cannot open");
     return NULL;
-  } 
+  }
 
   /*** make menu ***/
   while((dirent = readdir(dir)) != NULL) {
-    if(!strcmp(dirent->d_name,".") || !strcmp(dirent->d_name,"..")) 
+    if(!strcmp(dirent->d_name,".") || !strcmp(dirent->d_name,".."))
       continue;
     sprintf(path,"%s/%s",directory,dirent->d_name);
     if(stat((char*)path,&statbuf) == -1) {
       sprintf(buf,"%s cannot stat",path);
       CnvWarn(self->shell,buf);
-      return NULL;      
+      return NULL;
     }
     if( S_ISREG(statbuf.st_mode) && !access(path, R_OK) ) {
       /*** create menu selection ***/

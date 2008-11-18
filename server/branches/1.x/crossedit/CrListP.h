@@ -33,7 +33,7 @@ typedef struct {
     XtCallbackList selectCallbacks; /* called when selecting */
     XtCallbackList insertCallbacks; /* called when inserting */
     XtCallbackList deleteCallbacks; /* called when  */
-    
+
     CrListNode (*next)(XtPointer, XtPointer); /* called when  */
     void *element;
     XtPointer *caller;

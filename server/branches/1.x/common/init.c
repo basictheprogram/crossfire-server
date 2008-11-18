@@ -48,9 +48,9 @@ CSPORT,				/* Client/server port */
 0, /* argc */
 NULL, /* argv */
 CONFDIR,
-DATADIR, 
+DATADIR,
 LOCALDIR,
-PLAYERDIR, MAPDIR, ARCHETYPES,REGIONS,TREASURES, 
+PLAYERDIR, MAPDIR, ARCHETYPES,REGIONS,TREASURES,
 UNIQUE_DIR, TEMPLATE_DIR,
 TMPDIR,
 STAT_LOSS_ON_DEATH,
@@ -148,7 +148,7 @@ static void init_emergency_mappath(void)
     if ((fp = fopen(filename, "r"))!=NULL) {
 	while (fgets(tmpbuf, MAX_BUF-1, fp)) {
 	    if (tmpbuf[0] == '#') continue; /* ignore comments */
-	    
+
 	    if (online == 0) {
 		tmpbuf[strlen(tmpbuf)-1] = 0;	/* kill newline */
 		settings.emergency_mapname = strdup_local(tmpbuf);
@@ -170,7 +170,7 @@ static void init_emergency_mappath(void)
 	    settings.emergency_x, settings.emergency_y);
     }
 }
-    
+
 
 /**
  * It is vital that init_library() is called by any functions
@@ -226,7 +226,7 @@ void init_environ(void) {
     cp=getenv("CROSSFIRE_TMPDIR");
     if (cp) settings.tmpdir=cp;
 }
-    
+
 
 /**
  * Initialises all global variables.

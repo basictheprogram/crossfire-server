@@ -2,6 +2,7 @@
  * static char *rcsid_egoitem_c =
  *   "$Id$";
  */
+
 /*
     CrossFire, A Multiplayer game for X-windows
 
@@ -24,7 +25,7 @@
 
     The authors can be reached via e-mail to crossfire-devel@real-time.com
 */
- 
+
 
 #include <global.h>
 #ifndef __CEXTRACT__
@@ -71,8 +72,8 @@ static int create_artifact(object *op, const char *artifactname)
 
   This function handles the application of power crystals.
   Power crystals, when applied, either suck power from the applier,
-  if he's at full spellpoints, or gives him power, if it's got 
-  spellpoins stored.  
+  if he's at full spellpoints, or gives him power, if it's got
+  spellpoins stored.
 
 */
 
@@ -84,9 +85,9 @@ int apply_power_crystal(object *op, object *crystal) {
   available_power =  op->stats.sp - op->stats.maxsp;
   power_space = crystal->stats.maxsp - crystal->stats.sp;
   power_grab = 0;
-  if(available_power>=0 && power_space> 0 )  
+  if(available_power>=0 && power_space> 0 )
         power_grab = MIN ( power_space, 0.5 * op->stats.sp );
-  if(available_power < 0 && crystal->stats.sp >0 ) 
+  if(available_power < 0 && crystal->stats.sp >0 )
         power_grab = - MIN( -available_power, crystal->stats.sp);
 
   op->stats.sp-=power_grab;

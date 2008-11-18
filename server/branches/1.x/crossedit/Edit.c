@@ -85,8 +85,8 @@ static void copy_map(mapstruct *m1, mapstruct *m2) {
  * dx    : positive translate to right
  * dy    : positive translate to down
  */
-static mapstruct *MapMoveScrollResize(mapstruct *source, 
-				int width, int height, int dx, int dy) 
+static mapstruct *MapMoveScrollResize(mapstruct *source,
+				int width, int height, int dx, int dy)
 {
     mapstruct *target;
     object *obj,*prt; /* PaRT of obj */
@@ -115,9 +115,9 @@ static mapstruct *MapMoveScrollResize(mapstruct *source,
 
 #define MOVE_AND_CLEAR(to, from) to = from; from = NULL;
     strncpy (target->path, source->path, HUGE_BUF - 1);
-    target->path[HUGE_BUF - 1] = '\0';    
-    MOVE_AND_CLEAR(target->tmpname, source->tmpname);    
-    MOVE_AND_CLEAR(target->name, source->name);    
+    target->path[HUGE_BUF - 1] = '\0';
+    MOVE_AND_CLEAR(target->tmpname, source->tmpname);
+    MOVE_AND_CLEAR(target->name, source->name);
     target->region = source->region;
     MAP_WHEN_RESET(target) = MAP_WHEN_RESET(source);
     MAP_RESET_TIMEOUT(target) = MAP_RESET_TIMEOUT(source);
@@ -128,13 +128,13 @@ static mapstruct *MapMoveScrollResize(mapstruct *source,
     MAP_SWAP_TIME(target) = MAP_SWAP_TIME(source);
     /* fields players/in_memory not copied */
     target->compressed = source->compressed;
-    MAP_DIFFICULTY(target) = MAP_DIFFICULTY(source);    
+    MAP_DIFFICULTY(target) = MAP_DIFFICULTY(source);
     MAP_DARKNESS(target) = MAP_DARKNESS(source);
     MAP_WIDTH(target) = width;
-    MAP_HEIGHT(target) = height;  
+    MAP_HEIGHT(target) = height;
     MAP_ENTER_X(target) = (MAP_ENTER_X(source) + dx) % width;
     MAP_ENTER_Y(target) = (MAP_ENTER_Y(source) + dy) % height;
-    target->outdoor = MAP_OUTDOORS(source);     
+    target->outdoor = MAP_OUTDOORS(source);
     MAP_TEMP(target) = MAP_TEMP(source);
     MAP_PRESSURE(target) = MAP_PRESSURE(source);
     MAP_HUMID(target) = MAP_HUMID(source);
@@ -144,10 +144,10 @@ static mapstruct *MapMoveScrollResize(mapstruct *source,
     /* fields wpartx/wparty not copied */
     MOVE_AND_CLEAR(target->msg, source->msg)
     /* Tiling paths. */
-    for (i = 0; i < 4; i++) { 
+    for (i = 0; i < 4; i++) {
         MOVE_AND_CLEAR(target->tile_path[i], source->tile_path[i]);
-    }    
-#undef MOVE_AND_CLEAR    
+    }
+#undef MOVE_AND_CLEAR
 
     for(y=0; y < sy && y < MAP_HEIGHT(target); y++)
 	for(x=0; x < sx && x < MAP_WIDTH(target); x++)
@@ -199,7 +199,7 @@ static int MapInsertObjectZ(mapstruct *emap,object *o,int x, int y, int z)
     } else {
 	while (op && op->above)
 	    op = op->above;
-    
+
 	above = NULL;
 	below = op;
 	while (op && z-- > 0) {
@@ -219,7 +219,7 @@ static int MapInsertObjectZ(mapstruct *emap,object *o,int x, int y, int z)
         below->above = o;
     else
         set_map_ob (emap, o->x, o->y, o);
-    
+
     return (0);
 }
 
@@ -275,7 +275,7 @@ object *EditCloneInsert (Edit self,object *obj,int x, int y, int z);
 Boolean EditObjectDelete (Edit self, int x, int y, int z);
 
 /*
- * to all refresh  
+ * to all refresh
  */
 const XRectangle EditRectAll = {
     0,0,
@@ -293,7 +293,7 @@ const XRectangle EditRectAll = {
 static Boolean EdFreeMap (Edit self)
 {
     if (!self) return False;
-    
+
     /*** no item from self map anymore ***/
     if (AppItemGetEdit(self->app) == self) {
 	AppItemSet (self->app, NULL,NULL,0);
@@ -313,7 +313,7 @@ static Boolean EdFreeMap (Edit self)
  * member   : load map from file to memory
  *            there should no other map loading function for editor
  *            than self
- * name     : filename of map, relative ( level number )  
+ * name     : filename of map, relative ( level number )
  * return   : True, if map is loaded
  */
 static Boolean Load(Edit self, char *name)
@@ -322,7 +322,7 @@ static Boolean Load(Edit self, char *name)
     mapstruct *tmp;
     char path[PATH_MAX+1],save[PATH_MAX+1];
     char buf[BUFSIZ];
-    
+
     strcpy(path, name);
     if((mask = check_path (path,1)) < 4) {
 	sprintf(buf,"You can't access %s",path);
@@ -416,7 +416,7 @@ static void EditInsertArch (Edit self, int x, int y, int i, archetype * at)
         /*debug3 ("Inserting %s %d %d\n", op->name, op->x, op->y);*/
 
         for (tmp = op; tmp; tmp = tmp->more) {
-            if (self->app->look.rect.x == tmp->x && 
+            if (self->app->look.rect.x == tmp->x &&
 		self->app->look.rect.y == tmp->y)
                 AppUpdate(self->app);
         }
@@ -441,7 +441,7 @@ static int update_wall (Edit self, int x, int y, int add, int rem)
     object *tmp, *op;
     Window w;
     mapstruct * emap;
-    
+
     emap = self->emap;
     w = XtWindow(self->w);
 
@@ -452,12 +452,12 @@ static int update_wall (Edit self, int x, int y, int add, int rem)
 	op = op->above;
 
     /*
-    i = find_draw_arch (self->app->item.wall_map, 
-			self->app->item.wall_set, 
+    i = find_draw_arch (self->app->item.wall_map,
+			self->app->item.wall_set,
 			op->arch);
 			*/
-    i = find_draw_arch (AppItemGetMap(self->app), 
-			AppItemGetWall(self->app), 
+    i = find_draw_arch (AppItemGetMap(self->app),
+			AppItemGetWall(self->app),
 			op->arch);
     if (i >= 0) {
 	/* debug4 ("%d | %d & ~%d = %d\n", i, add, rem, (i | add) & ~rem); */
@@ -486,7 +486,7 @@ static void draw_add (Edit self, int x, int y)
 	CnvDie(self->shell,"Wall Map has wrong width\n");
 
     for (i = 0; i < 4; i++)
-	if (update_wall (self, x + direction_x[i], y + direction_y[i], 
+	if (update_wall (self, x + direction_x[i], y + direction_y[i],
 			 (1 << i), 0))
 	    mask |= (1 << (i ^ 2));
 
@@ -524,7 +524,7 @@ void EditResizeScroll(Edit self,int width,int height,int dx,int dy)
     char buf[BUFSIZ];
 
     if(!self || self->read_only) return;
-    if(self->type != ClipBoard &&  
+    if(self->type != ClipBoard &&
        (width < MapMinWidth || width > MapMaxWidth ||
 	height < MapMinHeight || height > MapMaxHeight)) {
 	sprintf(buf,"Map cannot be smaller than %dx%d",
@@ -535,12 +535,12 @@ void EditResizeScroll(Edit self,int width,int height,int dx,int dy)
 
 
     /*
-     * SelectUnset before EdFreeMap, since, it tries to 
-     *  do that, and there's no mapstuct at that moment 
+     * SelectUnset before EdFreeMap, since, it tries to
+     *  do that, and there's no mapstuct at that moment
      */
     if(self->app->look.edit == self)
 	AppSelectUnset(self->app);
-    
+
     tmp = MapMoveScrollResize(self->emap, width, height, dx, dy);
     self->emap = NULL; /* MapMoveScrollResize destroys the old map */
     EdFreeMap(self);
@@ -593,7 +593,7 @@ static void ClearCb (Widget w, XtPointer client, XtPointer call)
     debug1("ClearCb() %s\n",self->emap->path);
     if(self->read_only) return;
     tmp = get_empty_map(MAP_WIDTH(self->emap), MAP_HEIGHT(self->emap));
-    copy_map (self->emap, tmp); 
+    copy_map (self->emap, tmp);
     EdFreeMap(self);
     self->emap = tmp;
     EditUnmodified(self);
@@ -616,7 +616,7 @@ static void LoadCb (Widget w, XtPointer client, XtPointer call)
 	    EditSave(self);
 	    break;
 	  case 2:
-	    return; 
+	    return;
 	  default:
 	    break;
 	}
@@ -643,8 +643,8 @@ static void ReloadCb (Widget w, XtPointer client, XtPointer call)
     Load(self,self->emap->path);
 }
 
-/* 
- * callback: enter to map in Look window 
+/*
+ * callback: enter to map in Look window
  */
 static void EnterCb (Widget w, XtPointer client, XtPointer call)
 {
@@ -654,7 +654,7 @@ static void EnterCb (Widget w, XtPointer client, XtPointer call)
     char loadPath[PATH_MAX+1];
     const char *path;
     XRectangle rect;
-    
+
     /*** find object ***/
     if(self->app->look.edit)
 	obj = MapGetObjectZ
@@ -718,7 +718,7 @@ static void EnterCb (Widget w, XtPointer client, XtPointer call)
 }
 
 /*
- * callback: reset this map from crossfire 
+ * callback: reset this map from crossfire
  */
 static void ResetCb (Widget w, XtPointer client, XtPointer call)
 {
@@ -816,8 +816,8 @@ static void SetPathCb (Widget w, XtPointer client, XtPointer call)
 {
     char path[CnvPromptMax+1];
     Edit self = (Edit) client;
-    
-    switch (CnvPrompt ("Set path", self->emap->path, path, 
+
+    switch (CnvPrompt ("Set path", self->emap->path, path,
 		       "OK","Cancel",NULL)) {
     case 1:
 	EditSetPath(self,path);
@@ -839,18 +839,18 @@ static void ResizeCb (Widget w, XtPointer client, XtPointer call)
     if (self->read_only)
 	return;
 
-    sprintf (buf, "%dx%d+0+0", 
+    sprintf (buf, "%dx%d+0+0",
 	     MAP_WIDTH(self->emap), MAP_HEIGHT(self->emap));
     switch (CnvPrompt ("ResizeScroll",
 		       buf, path,"OK",NULL)) {
     case 1:
 	res = XParseGeometry (path, &sx, &sy, &x, &y);
-	
+
 	if (!(res & WidthValue))
 	    x = MAP_WIDTH(self->emap);
 	if (!(res & HeightValue))
 	    y = MAP_HEIGHT(self->emap);
-	
+
 	if (!(res & XValue))
 	    sx = 0;
 	if (!(res & YValue))
@@ -877,7 +877,7 @@ static void StartCb (Widget w, XtPointer client, XtPointer call)
     int x, y, flags;
     int width, height;
 
-    sprintf (buf, "%dx%d", 
+    sprintf (buf, "%dx%d",
 	     MAP_ENTER_X(self->emap),
 	     MAP_ENTER_Y(self->emap));
     switch (CnvPrompt ("Start of map", buf,reply,
@@ -913,7 +913,7 @@ static void StartCb (Widget w, XtPointer client, XtPointer call)
 static void AttributesCb (Widget w, XtPointer client, XtPointer call)
 {
     Edit self = (Edit)client;
-	
+
     debug0("Edit::AttributesCb()\n");
 
     if (self->mapattr == NULL) {
@@ -923,19 +923,19 @@ static void AttributesCb (Widget w, XtPointer client, XtPointer call)
     }
 }
 
-/* 
+/*
  * callback: refresh map
  */
 static void RefreshCb (Widget w, XtPointer client, XtPointer call)
-{  
+{
   Edit self = (Edit)client;
   CrEditRefresh(self->w,EditRectAll);
   EditUpdate(self);
 }
 
 #if 0
-/* 
- * callback: toggle write accces 
+/*
+ * callback: toggle write accces
  */
 static void ToggleReadCb (Widget w, XtPointer client, XtPointer call)
 {
@@ -949,8 +949,8 @@ static void ToggleReadCb (Widget w, XtPointer client, XtPointer call)
 }
 #endif
 
-/* 
- * callback: Toggle overwrite mode 
+/*
+ * callback: Toggle overwrite mode
  */
 static void ToggleOverCb (Widget w, XtPointer client, XtPointer call)
 {
@@ -963,8 +963,8 @@ static void ToggleOverCb (Widget w, XtPointer client, XtPointer call)
   debug ("CbEditToggleOver()\n");
 }
 
-/* 
- * callback: Toggle auto choose 
+/*
+ * callback: Toggle auto choose
  */
 static void ToggleAutoCb (Widget w, XtPointer client, XtPointer call)
 {
@@ -977,14 +977,14 @@ static void ToggleAutoCb (Widget w, XtPointer client, XtPointer call)
   debug ("CbEditToggleAuto()\n");
 }
 
-/* 
+/*
  * callback: Toggle showing weak walls
  */
 static void ToggleWeakCb (Widget w, XtPointer client, XtPointer call)
 {
     Edit self = (Edit)client;
     Cardinal weak_walls;
-  
+
     XtVaGetValues(self->w, XtNshow_weak_walls, &weak_walls, NULL);
     XtVaSetValues(self->w, XtNshow_weak_walls, !weak_walls, NULL);
 
@@ -1002,18 +1002,18 @@ static void SetStackingCb(Widget w, XtPointer client, XtPointer call)
     Edit self = (Edit)client;
     Cardinal stacking;
     int ret;
-    
+
     XtVaGetValues(self->w, XtNstacking, &stacking, NULL);
-    
+
     snprintf(buf, sizeof(buf), "%d", stacking);
-    
+
     ret = CnvPrompt("Set stacking (0 = off)", buf, retbuf, "OK", "Cancel", NULL);
-        
+
     if (ret != 1)
         return;
-    
+
     stacking = atoi(retbuf);
-    
+
     debug2("SetStackingCb %s %d\n", retbuf, stacking);
 
     /* TODO How did they come up with this magic number? */
@@ -1024,13 +1024,13 @@ static void SetStackingCb(Widget w, XtPointer client, XtPointer call)
     XtVaSetValues(self->w, XtNstacking, stacking, NULL);
 
     EditUpdate(self);
-} 
+}
 
 static Widget OptionMenu(String name,Edit self,Widget parent)
 {
     Widget shell,refresh, use;
 
-    shell = XtVaCreatePopupShell 
+    shell = XtVaCreatePopupShell
       (name, simpleMenuWidgetClass, parent, NULL);
 
     use = XtVaCreateManagedWidget
@@ -1047,19 +1047,19 @@ static Widget OptionMenu(String name,Edit self,Widget parent)
 	(refresh,XtNcallback,RefreshCb,(XtPointer)self);
     /*** toggles ***/
     XtVaCreateManagedWidget ("line", smeLineObjectClass, shell, NULL);
-    self->iw.overwrite = XtVaCreateManagedWidget 
+    self->iw.overwrite = XtVaCreateManagedWidget
 	("overWrite", smeBSBObjectClass, shell, NULL);
     XtAddCallback (self->iw.overwrite,
 		   XtNcallback,ToggleOverCb, (XtPointer) self);
-    self->iw.auto_choose = XtVaCreateManagedWidget 
+    self->iw.auto_choose = XtVaCreateManagedWidget
 	("autoChoose", smeBSBObjectClass, shell, NULL);
     XtAddCallback (self->iw.auto_choose,
 		   XtNcallback,ToggleAutoCb, (XtPointer) self);
-    self->iw.weak_walls = XtVaCreateManagedWidget 
+    self->iw.weak_walls = XtVaCreateManagedWidget
 	("weakWalls", smeBSBObjectClass, shell, NULL);
     XtAddCallback (self->iw.weak_walls,
 		   XtNcallback,ToggleWeakCb, (XtPointer) self);
-    self->iw.stacking = XtVaCreateManagedWidget 
+    self->iw.stacking = XtVaCreateManagedWidget
 	("sparse", smeBSBObjectClass, shell, NULL);
     XtAddCallback (self->iw.stacking,
 		   XtNcallback,SetStackingCb, (XtPointer) self);
@@ -1110,7 +1110,7 @@ static void PropsCb(Widget w,XtPointer clientData,XtPointer callData)
 	object *ob = MapGetRealObject
 	    (self->emap, call->rect.x, call->rect.y, call->z);
 	if(!self->app->attr) {
-	    self->app->attr = AttrCreate 
+	    self->app->attr = AttrCreate
 		("attr", self->app, ob, AttrDescription, GetType(ob), self);
 	} else {
 	    AttrChange (self->app->attr,ob, GetType(ob), self);
@@ -1142,7 +1142,7 @@ static void FeedCb(Widget w,XtPointer clientData,XtPointer callData)
     Edit self = (Edit)clientData;
     CrEditCall call = (CrEditCall)callData;
     char buf[BUFSIZ],*str;
-    
+
     debug("FeedCb()\n");
     /*** path, modified for game, not clean thing  ***/
     str = buf;
@@ -1155,18 +1155,18 @@ static void FeedCb(Widget w,XtPointer clientData,XtPointer callData)
 	StrPathGenCd(buf,call->map->path);
 	if(strlen(buf) > 2) str = &buf[2];
     }
-    XtVaSetValues (self->app->attr->tags[I_Path].value, 
-		   XtNstring, str, 
+    XtVaSetValues (self->app->attr->tags[I_Path].value,
+		   XtNstring, str,
 		   NULL);
     /*** x ***/
     sprintf (buf, "%d", call->rect.x);
     XtVaSetValues (self->app->attr->tags[I_X].value,
-		   XtNstring, buf, 
+		   XtNstring, buf,
 		   NULL);
     /*** y ***/
     sprintf (buf, "%d", call->rect.y);
     XtVaSetValues (self->app->attr->tags[I_Y].value,
-		   XtNstring, buf, 
+		   XtNstring, buf,
 		   NULL);
 }
 
@@ -1180,7 +1180,7 @@ static void Layout(Edit self,Widget parent,Cardinal stacking)
     Widget editMenu, optionMenu;
 
     /*** shell ***/
-    self->shell = XtVaCreatePopupShell 
+    self->shell = XtVaCreatePopupShell
       ("edit",topLevelShellWidgetClass, self->app->shell,
        XtNwidth,
        (MAP_WIDTH(self->emap) > self->app->res.mapWidth ?
@@ -1198,20 +1198,20 @@ static void Layout(Edit self,Widget parent,Cardinal stacking)
     /*** menu bar ***/
     hbox = XtVaCreateManagedWidget ("hbox", boxWidgetClass,
       vbox, NULL);
-    
+
     if(self->type != ClipBoard) {
-	use = XtVaCreateManagedWidget 
+	use = XtVaCreateManagedWidget
 	    ("mapFileButton", menuButtonWidgetClass, hbox,
 	     XtNmenuName,"fileMenu",
 	     NULL);
 	CnvMenu("fileMenu",use,fileMenu,(XtPointer)self);
 
-	editMenu = XtVaCreateManagedWidget 
+	editMenu = XtVaCreateManagedWidget
 	    ("mapEditButton", menuButtonWidgetClass, hbox,
 	     XtNmenuName,"mapEdit",
 	     NULL);
 
-	optionMenu = XtVaCreateManagedWidget 
+	optionMenu = XtVaCreateManagedWidget
 	    ("mapOptionButton", menuButtonWidgetClass, hbox,
 	     XtNmenuName,"optionMenu",
 	     NULL);
@@ -1220,14 +1220,14 @@ static void Layout(Edit self,Widget parent,Cardinal stacking)
 
 
     /*** editor-widget ***/
-    self->view = XtVaCreateManagedWidget 
-	("veivi",viewportWidgetClass, vbox, 
+    self->view = XtVaCreateManagedWidget
+	("veivi",viewportWidgetClass, vbox,
 	 XtNallowResize,True,
 	 XtNforceBars,True,
 	 XtNallowHoriz,True,
 	 XtNallowVert,True,
 	 NULL);
-    self->w = XtVaCreateManagedWidget 
+    self->w = XtVaCreateManagedWidget
 	("cross",crEditWidgetClass,self->view,
 	 XtNresizable,True,
 	 XtNmap,self->emap,
@@ -1285,10 +1285,10 @@ Edit EditCreate(App app,EditType type,String path)
 	    self->emap->msg = MapMessageCreate (app);
 	}
     }
-    
+
     if (!self->emap)
 	return 0;
-    
+
     /*** creating ***/
     Layout(self,self->app->shell,0);
     EditUnmodified(self);
@@ -1330,10 +1330,10 @@ Edit EditCreate(App app,EditType type,String path)
 void EditDestroy(Edit self)
 {
     char buf[BUFSIZ];
-    
+
     if(!self) return;
     debug1 ("EditDestroy() %s\n",EditGetPath(self));
-    
+
     /*** reply to save if designed ***/
     if (EditIsModified(self)) {
 	sprintf (buf, "Quitting, save %s ?", self->emap->path);
@@ -1383,7 +1383,7 @@ void EditUpdate(Edit self)
 		  XtNtitle,buf,
 		  XtNiconName,buf,
 		  NULL);
-    
+
     /*** info ***/
     if (self->mapattr != NULL)
 	MapAttrChange(self->mapattr, self->emap);
@@ -1392,30 +1392,30 @@ void EditUpdate(Edit self)
     if(self->type != ClipBoard) {
         Cardinal weak_walls;
         Cardinal stacking;
-    
+
 #if 0
-	XtVaSetValues 
+	XtVaSetValues
 	    (self->iw.read_only,
 	     XtNleftBitmap, self->read_only ? bitmaps.mark : None, NULL);
 #endif
-	XtVaSetValues 
-	    (self->iw.overwrite, 
+	XtVaSetValues
+	    (self->iw.overwrite,
 	     XtNleftBitmap, self->overwrite ? bitmaps.mark : None, NULL);
-	XtVaSetValues 
-	    (self->iw.auto_choose, 
-	     XtNleftBitmap, self->auto_choose ? bitmaps.mark : None, 
+	XtVaSetValues
+	    (self->iw.auto_choose,
+	     XtNleftBitmap, self->auto_choose ? bitmaps.mark : None,
 	     NULL);
-        
+
 	XtVaGetValues(self->w, XtNshow_weak_walls, &weak_walls, NULL);
-	XtVaSetValues 
-	    (self->iw.weak_walls, 
-	     XtNleftBitmap, weak_walls ? bitmaps.mark : None, 
+	XtVaSetValues
+	    (self->iw.weak_walls,
+	     XtNleftBitmap, weak_walls ? bitmaps.mark : None,
 	     NULL);
 
 	XtVaGetValues(self->w, XtNstacking, &stacking, NULL);
-	XtVaSetValues 
-	    (self->iw.stacking, 
-	     XtNleftBitmap, (stacking != 0) ? bitmaps.mark : None, 
+	XtVaSetValues
+	    (self->iw.stacking,
+	     XtNleftBitmap, (stacking != 0) ? bitmaps.mark : None,
 	     NULL);
     }
     /*** map area ***/
@@ -1459,7 +1459,7 @@ static Boolean EdSaveMap (Edit self, char *name)
  */
 EditReturn EditSave(Edit self)
 {
-    char path[PATH_MAX+1];  
+    char path[PATH_MAX+1];
 
     if (self->read_only) {
 	CnvNotify ( "Map is read-only!","OK",NULL);
@@ -1609,7 +1609,7 @@ void EditCopyRectangle(Edit self,Edit src,XRectangle rect,int sx,int sy)
     int x, y, z;
     object *obj,*tmp;
 
-    if(!self || 
+    if(!self ||
        !src ||
        self->read_only)
 	return;
@@ -1626,11 +1626,11 @@ void EditCopyRectangle(Edit self,Edit src,XRectangle rect,int sx,int sy)
 
     debug2("EditCopyRectangle() %s -> %s\n",EditGetPath(src),
 	  EditGetPath(self));
-    if(self->overwrite) 
+    if(self->overwrite)
 	for(x=0; x < rect.width; x++)
 	    for(y=0; y < rect.height; y++)
 		EditDeletePoint(self,(sx+x),(sy+y));
-		
+
     for(x=0; x < rect.width; x++)
 	for(y=0; y < rect.height; y++) {
 	    obj = MapGetObjectZ(src->emap,(rect.x + x),(rect.y + y),0);
@@ -1686,14 +1686,14 @@ static void EditObjectCalc(Edit self,object *obj,XRectangle *rect)
     rect->width = 0;
     rect->height = 0;
     for (tmp = obj; tmp; tmp = tmp->more) {
-	if (self->app->look.rect.x == tmp->x && 
+	if (self->app->look.rect.x == tmp->x &&
 	    self->app->look.rect.y == tmp->y)
 	    AppUpdate(self->app);
 	if(tmp->x < rect->x) rect->x = tmp->x;
 	if(tmp->y < rect->y) rect->y = tmp->y;
-	if(tmp->x - rect->x + 1> rect->width) 
+	if(tmp->x - rect->x + 1> rect->width)
 	    rect->width = tmp->x - rect->x + 1;
-	if(tmp->y - rect->y + 1> rect->height) 
+	if(tmp->y - rect->y + 1> rect->height)
 	    rect->height = tmp->y - rect->y + 1;
     }
 }
@@ -1721,7 +1721,7 @@ Boolean EditDelete (Edit self, int x, int y, int z)
 
     if (self->app->item.wall_map)
 	draw_remove (self, x, y);
-    
+
     EditModified(self);
     return True;
 }
@@ -1748,7 +1748,7 @@ Boolean EditObjectDelete (Edit self, int x, int y, int z)
 	else
 	    return False;
     }
-    /* This is just plain wrong 
+    /* This is just plain wrong
     **                    -- deletes object above the selected object!
     ** if (z > 0)
     **    obj = obj->above;
@@ -1785,13 +1785,13 @@ object *EditCloneInsert (Edit self,object *obj,int x, int y, int z)
 	/*** object do not fit ***/
 	if(!MapObjectOut(self->emap,op,x,y)) {
 	    MapInsertObjectZ (self->emap, op, x, y, z);
-	    if (QUERY_FLAG(obj, FLAG_IS_LINKED) && 
+	    if (QUERY_FLAG(obj, FLAG_IS_LINKED) &&
 	      (button_value = get_button_value(obj))) {
 		add_button_link(op, self->emap, button_value);
 	      }
 	    return op;
 	}
-    } 
+    }
     debug0 ("Inserting failed\n");
     return NULL;
 }
@@ -1810,7 +1810,7 @@ Boolean EditInsert (Edit self,int x, int y, int z)
     /*** ***/
     if (!self ||
 	self->read_only ||
-	!self->emap || 
+	!self->emap ||
 	out_of_map (self->emap, x, y))
 	return False;
 
@@ -1844,7 +1844,7 @@ Boolean EditInsert (Edit self,int x, int y, int z)
 	    EditDelete(self, x, y, 0);
     else {
 	tmp = MapGetObjectZ (self->emap, x, y, z);
-	if (tmp && 
+	if (tmp &&
 	    (tmp->arch == self->app->item.clone->arch ||
 	    (self->app->item.wall_map &&
 	      find_draw_arch (AppItemGetMap(self->app),
@@ -1856,7 +1856,7 @@ Boolean EditInsert (Edit self,int x, int y, int z)
     /*** create & insert ***/
     op = EditCloneInsert (self, self->app->item.clone, x, y, z);
 
-    if (self->app->item.wall_map) 
+    if (self->app->item.wall_map)
 	draw_add (self, x, y);
 
     EditObjectCalc(self,op,&rect);
@@ -1884,7 +1884,7 @@ Boolean EditObjectInsert (Edit self,object *obj,int x, int y, int z)
     /*** ***/
     if (!self ||
 	self->read_only ||
-	!self->emap || 
+	!self->emap ||
 	out_of_map (self->emap, x, y) ||
 	!obj)
 	return False;
@@ -1904,7 +1904,7 @@ Boolean EditObjectInsert (Edit self,object *obj,int x, int y, int z)
     tmp = MapGetObjectZ (self->emap, x, y, z);
     if (tmp && (tmp->arch == obj->arch))
 	return False;
-    
+
     /*** create & insert ***/
     op = EditCloneInsert (self, op, x, y, z);
 

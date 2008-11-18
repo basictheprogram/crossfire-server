@@ -511,7 +511,7 @@ static int parse_command(object *op, char *str) {
 		/* Even if tmp2 points the the input_buf, this should still
 		 * be safe operation.
 		 */
-		for(i=0,tmp2=str;tmp2!=tmp;i++,tmp2++) 
+		for(i=0,tmp2=str;tmp2!=tmp;i++,tmp2++)
 		    buf[i]= (*tmp2);
 		buf[i]='\0'; /* null terminate the copy*/
 		strncpy(op->contr->input_buf,tmp2+1, MAX_BUF);

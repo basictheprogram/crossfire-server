@@ -83,7 +83,7 @@ CnvBrowse CnvBrowseCreate
 (String name,Widget parent,CnvBrowseEditProc proc)
 {
     CnvBrowse self;
-    
+
     /* alloc & init state */
     self = (CnvBrowse)XtMalloc(sizeof(struct CnvBrowse));
     self->shell = NULL;
@@ -91,7 +91,7 @@ CnvBrowse CnvBrowseCreate
     self->file = NULL;
     self->isup = False;
     self->proc = proc;
-   
+
     Layout(self,name,parent);
     return self;
 }
@@ -111,7 +111,7 @@ void CnvBrowseDestroy(CnvBrowse self)
 void CnvBrowseShowFile(CnvBrowse self,String file)
 {
     if(!(self && file)) return;
-    CnvBrowseShow(self);  
+    CnvBrowseShow(self);
     XtManageChild(self->file);
     XtVaSetValues(self->text,
 		  XtNtype,XawAsciiFile,

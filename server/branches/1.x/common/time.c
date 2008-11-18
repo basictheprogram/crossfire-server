@@ -92,7 +92,7 @@ const char *month_name[MONTHS_PER_YEAR] = {
 };
 
 /*
- * Initialise all variables used in the timing routines. 
+ * Initialise all variables used in the timing routines.
  */
 
 void

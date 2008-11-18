@@ -50,7 +50,7 @@ is cleared with the top left corner at xstart, ystart */
 void nuke_map_region(mapstruct *map,int xstart,int ystart, int xsize, int ysize) {
   int i,j;
   object *tmp;
-  for(i=xstart;i<xstart + xsize;i++) 
+  for(i=xstart;i<xstart + xsize;i++)
     for(j=ystart;j<ystart +ysize;j++) {
       for(tmp=get_map_ob(map,i,j);tmp!=NULL;tmp=tmp->above) {
         if(!QUERY_FLAG(tmp,FLAG_IS_FLOOR)) {
@@ -66,18 +66,18 @@ void nuke_map_region(mapstruct *map,int xstart,int ystart, int xsize, int ysize)
 
 
 
-/* copy in_map into dest_map at point x,y */ 
+/* copy in_map into dest_map at point x,y */
 
 
 void include_map_in_map(mapstruct *dest_map, mapstruct *in_map,int x, int y) {
   int i,j;
   object *tmp;
   object *new_ob;
-  
+
   /* First, splatter everything in the dest map at the location */
   nuke_map_region(dest_map,x,y,MAP_WIDTH(in_map),MAP_HEIGHT(in_map));
-		
-  for(i=0;i<MAP_WIDTH(in_map);i++) 
+
+  for(i=0;i<MAP_WIDTH(in_map);i++)
     for(j=0;j<MAP_HEIGHT(in_map);j++) {
       for(tmp=get_map_ob(in_map,i,j);tmp!=NULL;tmp=tmp->above) {
         /* don't copy things with multiple squares:  must be dealt with
@@ -102,7 +102,7 @@ int find_spot_for_submap(mapstruct *map,char **layout,int *ix, int *iy,int xsize
   /* don't even try to place a submap into a map if the big map isn't
      sufficiently large. */
   if(2*xsize > MAP_WIDTH(map) || 2*ysize > MAP_HEIGHT(map)) return 0;
-  
+
   /* search a bit for a completely free spot. */
   for(tries=0;tries<20;tries++) {
     /* pick a random location in the layout */
@@ -115,9 +115,9 @@ int find_spot_for_submap(mapstruct *map,char **layout,int *ix, int *iy,int xsize
     if(!is_occupied) break;
   }
 
-	 
+
   /* if we failed, relax the restrictions */
-  
+
   if(is_occupied) { /* failure, try a relaxed placer. */
     /* pick a random location in the layout */
     for(tries=0;tries<10;tries++) {
@@ -134,7 +134,7 @@ int find_spot_for_submap(mapstruct *map,char **layout,int *ix, int *iy,int xsize
   *ix=i;
   *iy=j;
   return 1;
-}  
+}
 
 
 void place_fountain_with_specials(mapstruct *map) {
@@ -176,10 +176,10 @@ void place_special_exit(mapstruct * map, int hole_type,RMParms *RP) {
     char buf[HUGE_BUF], *style, *decor, *mon;
     mapstruct *exit_style=find_style("/styles/misc","obscure_exits",-1);
     int g_xsize,g_ysize;
-  
+
     object *the_exit=get_object();
     if(!exit_style) return;
- 
+
     copy_object(pick_random_object(exit_style),the_exit);
 
     while(i<0) {
@@ -187,14 +187,14 @@ void place_special_exit(mapstruct * map, int hole_type,RMParms *RP) {
 	iy = RANDOM() % (MAP_HEIGHT(map) -2) +1;
 	i = find_first_free_spot(the_exit,map,ix,iy);
     }
-  
+
     ix += freearr_x[i];
     iy += freearr_y[i];
     the_exit->x = ix;
     the_exit->y = iy;
 
     if(!hole_type) hole_type = RANDOM() % NR_OF_HOLE_TYPES + 1 ;
-  
+
     switch(hole_type) {
 	case GLORY_HOLE:   /* treasures */
 	    {
@@ -247,23 +247,23 @@ void place_special_exit(mapstruct * map, int hole_type,RMParms *RP) {
 
     insert_ob_in_map(the_exit,map,NULL,0);
 }
-  
-		  
+
+
 void place_specials_in_map(mapstruct *map, char **layout,RMParms *RP) {
   mapstruct *special_map;
   int ix,iy;  /* map insertion locatons */
   int special_type; /* type of special to make */
 
-  
+
   special_type = RANDOM() % NUM_OF_SPECIAL_TYPES;
   switch(special_type) {
 
     /* includes a special map into the random map being made. */
   case SPECIAL_SUBMAP: {
-    special_map = find_style("/styles/specialmaps",0,RP->difficulty); 
+    special_map = find_style("/styles/specialmaps",0,RP->difficulty);
     if(special_map==NULL) return;
-	 
-    if(find_spot_for_submap(map,layout,&ix,&iy,MAP_WIDTH(special_map),MAP_HEIGHT(special_map))) 
+
+    if(find_spot_for_submap(map,layout,&ix,&iy,MAP_WIDTH(special_map),MAP_HEIGHT(special_map)))
       include_map_in_map(map,special_map,ix,iy);
     break;
   }
@@ -281,5 +281,5 @@ void place_specials_in_map(mapstruct *map, char **layout,RMParms *RP) {
     break;
   }
   }
-  
+
 }

@@ -1,6 +1,6 @@
 /*
 	CrossEdit, A Editor for CrossFire, A Multiplayer game
-	for X-windows	
+	for X-windows
 
 	Copyright (C) 1993 Jarkko Sonninen & Petri Heinila
 
@@ -17,7 +17,7 @@
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-	
+
 	The authors can be reached via e-mail to Jarkko.Sonninen@lut.fi
 	or Petri.Heinila@lut.fi .
 */
@@ -45,7 +45,7 @@ typedef struct {
 }   Arch;
 
 /*
- * item to insert 
+ * item to insert
  */
 typedef struct {
     Widget w;            /* ??? */

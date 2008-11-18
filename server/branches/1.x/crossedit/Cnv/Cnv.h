@@ -36,7 +36,7 @@
 
 /*
  * menu
- */ 
+ */
 typedef struct CnvMenuRec {
     const char *label;
     void (*func) (Widget, XtPointer, XtPointer);
@@ -56,7 +56,7 @@ typedef enum {
 } CnvPathResponce;
 
 /*
- * 
+ *
  */
 typedef struct CnvPath {
     Widget shell;               /* shell widget */
@@ -90,13 +90,13 @@ typedef void (*CnvFilesProc)(XtPointer client,String path);
 
 typedef struct CnvFiles {
   /* private */
-  Widget shell;             /* shellwidget containing menu */ 
+  Widget shell;             /* shellwidget containing menu */
   String name;              /* menu name, to be not ambiguous */
   char directory[PATH_MAX+1]; /* directory to get menu */
   CnvFilesProc proc;           /* function when menu item selected */
   XtPointer client;         /* package pointer */
   /* public */
-} *CnvFiles; 
+} *CnvFiles;
 
 extern CnvFiles CnvFilesCreate(String,Widget,CnvFilesProc,XtPointer,String);
 extern void CnvFilesDestroy ( CnvFiles  );
@@ -112,7 +112,7 @@ typedef struct CnvBrowse *CnvBrowse;
 typedef void (*CnvBrowseEditProc)(CnvBrowse self,XtPointer client,String str);
 
 /*
- * object for showing text 
+ * object for showing text
  */
 struct CnvBrowse {
   Widget shell;

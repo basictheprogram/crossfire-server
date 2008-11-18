@@ -68,7 +68,7 @@ void metaserver_init(void)
 
 #ifdef WIN32 /* ***win32 metaserver_init(): init win32 socket */
 	struct hostent *hostbn;
-	int temp = 1;	
+	int temp = 1;
 #endif
 
     if (!settings.meta_on) {
@@ -88,7 +88,7 @@ void metaserver_init(void)
     }
 #ifdef WIN32 /* ***win32 metaserver_init(): init win32 socket */
     ioctlsocket(metafd, FIONBIO , &temp);
-#else 
+#else
     fcntl(metafd, F_SETFL, O_NONBLOCK);
 #endif
     if ((metafd=socket(AF_INET, SOCK_DGRAM, 0))==-1) {
@@ -184,7 +184,7 @@ void metaserver_update(void)
  * This is a linked list of all the metaservers -
  * never really know how many we have.
  */
- 
+
 typedef struct _MetaServer2 {
     char    *hostname;
     struct _MetaServer2	*next;
@@ -441,7 +441,7 @@ static void metaserver2_updates()
      * so we convert as needed with snprintf.
      * The order of fields here really isn't important.
      * The string after CURLFORM_COPYNAME is the name of the POST variable
-     * as the 
+     * as the
      */
 
     curl_formadd(&formpost, &lastptr,
@@ -563,7 +563,7 @@ static void metaserver2_updates()
 
 /**
  * metserver2_thread is the function called from pthread_create.
- * it is a trivial function - it just sleeps and calls 
+ * it is a trivial function - it just sleeps and calls
  * the update function.  The sleep time here is really
  * quite arbitrary, but once a minute is probably often
  * enough.  A better approach might be to

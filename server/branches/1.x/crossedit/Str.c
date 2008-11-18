@@ -32,12 +32,12 @@
 #endif
 
 /**********************************************************************
- * private 
+ * private
  **********************************************************************/
 
 
 /**********************************************************************
- * public 
+ * public
  **********************************************************************/
 
 /*
@@ -66,7 +66,7 @@ char *StrPathNormalize (char *this,char *src) {
 
     q = p = buf;
     while ((q = strstr (q, "//")))
-	p = ++q;	
+	p = ++q;
 
     *path = '\0';
     q = path;
@@ -96,7 +96,7 @@ char *StrPathNormalize (char *this,char *src) {
  * cwd     : current working directory, this have to be abs. path
  *           this have to be size PATH_MAX + 1, result is put to this
  * cd      : migration
- * return  : pointer to cwd, or NULL on error 
+ * return  : pointer to cwd, or NULL on error
  */
 char *StrPathCd(char *cwd,const char *cd)
 {
@@ -144,7 +144,7 @@ char *StrPathCd(char *cwd,const char *cd)
  * cwd     : currenntr working directory, gerenerated values is subtituted to
  *           this
  * dst     : destination directory
- * return  : pointer to cwd, or NULL on error 
+ * return  : pointer to cwd, or NULL on error
  */
 char *StrPathGenCd(char *cwd,const char *dstArg)
 {
@@ -154,7 +154,7 @@ char *StrPathGenCd(char *cwd,const char *dstArg)
 
     for(i=0; dst[i] && cwd[i] && dst[i] == cwd[i]; i++);
 
-    debug2("cwd:%s dst:%s\n",cwd + i,dst + i); 
+    debug2("cwd:%s dst:%s\n",cwd + i,dst + i);
 
     if(strtok(cwd + i,"/")) {
 	cnt += 1;
@@ -168,8 +168,8 @@ char *StrPathGenCd(char *cwd,const char *dstArg)
 	strcpy(buf,dst + i + 1);
     }
 #else
-    char dst[PATH_MAX+1];   
-    char *cwdFields[PATH_MAX / 2 - 1],*dstFields[PATH_MAX / 2 - 1];   
+    char dst[PATH_MAX+1];
+    char *cwdFields[PATH_MAX / 2 - 1],*dstFields[PATH_MAX / 2 - 1];
     int cwdNum,dstNum,i,start;
     char *fld,buf[PATH_MAX+1];
 
@@ -193,14 +193,14 @@ char *StrPathGenCd(char *cwd,const char *dstArg)
     }
     strcpy(buf,".");
     /*** wile same ***/
-    for(start=0; 
+    for(start=0;
 	start < cwdNum && start < dstNum &&
-	!strcmp(cwdFields[start],dstFields[start]); 
+	!strcmp(cwdFields[start],dstFields[start]);
 	start++);
     /*** whilke guing up***/
     for(i=start; i < cwdNum - 1; i++)
 	strcat(buf,"/..");
-#if 0   
+#if 0
     if(*buf)
 	buf[strlen(buf)-1] = '\0';
 #endif
@@ -209,7 +209,7 @@ char *StrPathGenCd(char *cwd,const char *dstArg)
 	strcat(buf,"/");
 	strcat(buf,dstFields[i]);
     }
-#endif 
+#endif
     return strcpy(cwd,buf);
 }
 
@@ -217,7 +217,7 @@ char *StrPathGenCd(char *cwd,const char *dstArg)
  * function: gets base-part of filename as basename(1)
  * basename: allocated space for name
  * filename: destination directory
- * return  : pointer to basename, or NULL on error 
+ * return  : pointer to basename, or NULL on error
  */
 char *StrBasename(char *basename,const char *filename)
 {

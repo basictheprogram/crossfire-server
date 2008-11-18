@@ -88,7 +88,7 @@ re_cmp(const char *str, const char *regexp) {
     matched = False;
     while (*str != '\0' && !(matched = re_match_token(*str, re_token[0])))
 	str++;
-    
+
     if (matched && *next_regexp == 0)
 	return str;
 

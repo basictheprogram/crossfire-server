@@ -2,6 +2,7 @@
  * static char *rcsid_attack_c =
  *   "$Id$";
  */
+
 /*
     CrossFire, A Multiplayer game for X-windows
 
@@ -899,7 +900,7 @@ object *hit_with_arrow (object *op, object *victim)
         if (hitter->type == EVENT_CONNECTOR)
             continue;
         container = op;
-        /* 11-2007, commented seems buggy 
+        /* 11-2007, commented seems buggy
         hitter = op->inv;*/
         remove_ob (hitter);
         if (free_no_drop(hitter))

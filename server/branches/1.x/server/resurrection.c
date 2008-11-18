@@ -47,7 +47,7 @@ static int resurrection_fails(int levelcaster,int leveldead);
 
 
 /*  name of the person to resurrect and which spell was used
- * to resurrect  
+ * to resurrect
  */
 static int resurrect_player(object *op,char *playername,object *spell)
 {
@@ -148,7 +148,7 @@ static int resurrect_player(object *op,char *playername,object *spell)
 
 /* raise_dead by peterm and mehlhaff@soda.berkeley.edu
  * op  --  who is doing the resurrecting
- * spell - spell object 
+ * spell - spell object
  * dir  --  direction the spell is cast
  * corpseobj - corpse to raise - can be null, in which case this function will find it
  */
@@ -287,4 +287,4 @@ static int dead_player_exists(const char *name) {
     return !(access(buf,0));
 }
 
-#endif 
+#endif

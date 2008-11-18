@@ -84,7 +84,7 @@ void move_deep_swamp (object *op)
                     above->stats.hp = -1;
                     kill_player(above); /* player dies in the swamp */
                 }
-        } else if (!QUERY_FLAG(above, FLAG_ALIVE) && !(above->move_type & MOVE_FLYING) && 
+        } else if (!QUERY_FLAG(above, FLAG_ALIVE) && !(above->move_type & MOVE_FLYING) &&
             !(QUERY_FLAG(above,FLAG_IS_FLOOR)) && !(QUERY_FLAG(above,FLAG_OVERLAY_FLOOR)) &&
             !(QUERY_FLAG(above, FLAG_NO_PICK))) {
             if (rndm(0, 2) == 0) decrease_ob(above);

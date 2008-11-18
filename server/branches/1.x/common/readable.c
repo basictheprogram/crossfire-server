@@ -39,32 +39,32 @@
 #include <spells.h>
 
 
-/* Define this if you want to archive book titles by contents.  
- * This option should enforce UNIQUE combinations of titles,authors and 
- * msg contents during and *between* game sessions. 
- * Note: a slight degeneracy exists since books are archived based on an integer 
- * index value calculated from the message text (similar to alchemy formulae). 
- * Sometimes two widely different messages have the same index value (rare). In 
- * this case,  it is possible to occasionally generate 2 books with same title and 
- * different message content. Not really a bug, but rather a feature. This action 
- * should  keeps player on their toes ;). 
- * Also, note that there is *finite* space available for archiving message and titles. 
- * Once this space is used, books will stop being archived. Not a serious problem 
- * under the current regime, since there are generally fewer possible (random) 
+/* Define this if you want to archive book titles by contents.
+ * This option should enforce UNIQUE combinations of titles,authors and
+ * msg contents during and *between* game sessions.
+ * Note: a slight degeneracy exists since books are archived based on an integer
+ * index value calculated from the message text (similar to alchemy formulae).
+ * Sometimes two widely different messages have the same index value (rare). In
+ * this case,  it is possible to occasionally generate 2 books with same title and
+ * different message content. Not really a bug, but rather a feature. This action
+ * should  keeps player on their toes ;).
+ * Also, note that there is *finite* space available for archiving message and titles.
+ * Once this space is used, books will stop being archived. Not a serious problem
+ * under the current regime, since there are generally fewer possible (random)
  * messages than space available on the titlelists.
  * One exception (for sure) are the monster messages. But no worries, you should
  * see all of the monster info in some order (but not all possible combinations)
  * before the monster titlelist space is run out. You can increase titlelist
- * space by increasing the array sizes for the monster book_authours and book_names 
+ * space by increasing the array sizes for the monster book_authours and book_names
  * (see  max_titles[] array and include/read.h). Since the unique_book algorithm is
- * kinda stupid, this program *may* slow down program execution if defined (but I don't 
+ * kinda stupid, this program *may* slow down program execution if defined (but I don't
  * think its a significant problem, at least, I have no problems running this option
- * on a Sparc 10! Also, once archive title lists are filled and/or all possible msg 
- * combinations have been generated, unique_book isnt called anymore. It takes 5-10 
- * sessions for this to happen). 
+ * on a Sparc 10! Also, once archive title lists are filled and/or all possible msg
+ * combinations have been generated, unique_book isnt called anymore. It takes 5-10
+ * sessions for this to happen).
  * Final note: the game remembers book/title/msg combinations from reading the
  * file lib/bookarch. If you REMOVE this file, you will lose your archive. So
- * be sure to copy it over to the new lib directory when you change versions. 
+ * be sure to copy it over to the new lib directory when you change versions.
  * -b.t.
  */
 
@@ -83,8 +83,8 @@ typedef struct titlestruct {
         const char *name;     /* the name of the book */
         const char *authour;  /* the name of the book authour */
         const char *archname;  /* the archetype name of the book */
-        int level;       /* level of difficulty of this message */ 
-        int size;       /* size of the book message */ 
+        int level;       /* level of difficulty of this message */
+        int size;       /* size of the book message */
         int msg_index;  /* an index value derived from book message */
         struct titlestruct *next;
 } title;
@@ -456,7 +456,7 @@ static const char* const book_descrpt[] =
  * at the bottom of the list. Never delete a subtype because index is used as
  * subtype parameter in arch files!
  */
-static readable_message_type readable_message_types[] = 
+static readable_message_type readable_message_types[] =
 {
 	/*subtype 0  */ {0,0},
                     /* book messages subtypes */
@@ -484,7 +484,7 @@ static readable_message_type readable_message_types[] =
                     {MSG_TYPE_CARD, MSG_TYPE_CARD_MONEY_1},
                     {MSG_TYPE_CARD, MSG_TYPE_CARD_MONEY_2},
                     {MSG_TYPE_CARD, MSG_TYPE_CARD_MONEY_3},
-                    
+
                     /* Paper messages subtypes */
                     {MSG_TYPE_PAPER, MSG_TYPE_PAPER_NOTE_1},
                     {MSG_TYPE_PAPER, MSG_TYPE_PAPER_NOTE_2},
@@ -589,14 +589,14 @@ get_titlelist (int i)
     return tl;
 }
 
-/* HANDMADE STRING FUNCTIONS.., perhaps these belong in another file 
+/* HANDMADE STRING FUNCTIONS.., perhaps these belong in another file
  * (shstr.c ?), but the quantity BOOK_BUF will need to be defined. */
 
 /* nstrtok() - simple routine to return the number of list
  * items in buf1 as separated by the value of buf2
  */
 
-int 
+int
 nstrtok (const char *buf1, const char *buf2)
 {
     char   *tbuf, sbuf[12], buf[MAX_BUF];
@@ -647,7 +647,7 @@ strtoktolin (const char *buf1, const char *buf2)
     return (char *) rbuf;
 }
 
-int 
+int
 book_overflow (const char *buf1, const char *buf2, int booksize)
 {
 
@@ -665,11 +665,11 @@ book_overflow (const char *buf1, const char *buf2, int booksize)
  *
  ****************************************************************************/
 
-/* init_msgfile() - if not called before, initialize the info list 
+/* init_msgfile() - if not called before, initialize the info list
  * reads the messages file into the list pointed to by first_msg
 */
 
-static void 
+static void
 init_msgfile (void)
 {
     FILE   *fp;
@@ -736,7 +736,7 @@ init_msgfile (void)
  * created and updated across multiple runs of the program.
  */
 
-static void 
+static void
 init_book_archive (void)
 {
     FILE   *fp;
@@ -825,11 +825,11 @@ init_book_archive (void)
     LOG (llevDebug, " done.\n");
 }
 
-/* init_mon_info() - creates the linked list of pointers to 
+/* init_mon_info() - creates the linked list of pointers to
  * monster archetype objects if not called previously
  */
 
-static void 
+static void
 init_mon_info (void)
 {
     archetype *at;
@@ -859,14 +859,14 @@ init_mon_info (void)
 }
 
 
-/* init_readable() - initialize linked lists utilized by 
- * message functions in tailor_readable_ob() 
+/* init_readable() - initialize linked lists utilized by
+ * message functions in tailor_readable_ob()
  *
  * This is the function called by the main routine to initialize
  * all the readable information.
  */
 
-void 
+void
 init_readable (void)
 {
     static int did_this;
@@ -923,13 +923,13 @@ find_title (const object *book, int msgtype)
 }
 
 /* new_text_name() - Only for objects of type BOOK. SPELLBOOK stuff is
- * handled directly in change_book_name(). Names are based on text 
+ * handled directly in change_book_name(). Names are based on text
  * msgtype
  * this sets book book->name based on msgtype given.  What name
  * is given is based on various criteria
  */
 
-static void 
+static void
 new_text_name (object *book, int msgtype)
 {
     int     nbr;
@@ -978,12 +978,12 @@ new_text_name (object *book, int msgtype)
     book->name = add_string (name);
 }
 
-/* add_book_author() 
+/* add_book_author()
  * A lot like new_text_name above, but instead chooses an author
  * and sets op->title to that value
  */
 
-static void 
+static void
 add_author (object *op, int msgtype)
 {
     char    title[MAX_BUF], name[MAX_BUF];
@@ -1023,12 +1023,12 @@ add_author (object *op, int msgtype)
     op->title = add_string (title);
 }
 
-/* unique_book() - check to see if the book title/msg is unique. We 
+/* unique_book() - check to see if the book title/msg is unique. We
  * go through the entire list of possibilities each time. If we find
  * a match, then unique_book returns true (because inst unique).
  */
 
-static int 
+static int
 unique_book (const object *book, int msgtype)
 {
     title  *test;
@@ -1040,7 +1040,7 @@ unique_book (const object *book, int msgtype)
      * return 0.
      */
     for (test = get_titlelist (msgtype)->first_book; test; test=test->next) {
-	if (!strcmp(test->name, book->name) && !strcmp(book->title, test->authour)) 
+	if (!strcmp(test->name, book->name) && !strcmp(book->title, test->authour))
 	    return 0;
     }
     return 1;
@@ -1048,7 +1048,7 @@ unique_book (const object *book, int msgtype)
 
 /* add_book_to_list() */
 
-static void 
+static void
 add_book_to_list (const object *book, int msgtype)
 {
     titlelist *tl = get_titlelist (msgtype);
@@ -1083,17 +1083,17 @@ add_book_to_list (const object *book, int msgtype)
 }
 
 
-/* change_book() - give a new, fancier name to generated 
+/* change_book() - give a new, fancier name to generated
  * objects of type BOOK and SPELLBOOK.
- * Aug 96 I changed this so we will attempt to create consistent 
+ * Aug 96 I changed this so we will attempt to create consistent
  * authour/title and message content for BOOKs. Also, we will
- * alter books  that match archive entries to the archival 
+ * alter books  that match archive entries to the archival
  * levels and archetypes. -b.t.
  */
 
 #define MAX_TITLE_CHECK 20
 
-void 
+void
 change_book (object *book, int msgtype)
 {
     int     nbr = sizeof (book_descrpt) / sizeof (char *);
@@ -1107,8 +1107,8 @@ change_book (object *book, int msgtype)
 	      int     tries = 0;
 	      /* look to see if our msg already been archived. If so, alter
 	       * the book to match the archival text. If we fail to match,
-	       * then we archive the new title/name/msg combo if there is 
-	       * room on the titlelist. 
+	       * then we archive the new title/name/msg combo if there is
+	       * room on the titlelist.
 	       */
 
 	      if ((strlen (book->msg) > 5) && (t = find_title (book, msgtype)))
@@ -1178,7 +1178,7 @@ change_book (object *book, int msgtype)
 		     * 1)If no space for a new title exists lets just restore
 		     * the old book properties. Remember, if the book had
 		     * matched an older entry on the titlelist, we shouldn't
-		     * have called this routine in the first place!  
+		     * have called this routine in the first place!
 		     * 2) If we got a unique title, we need to add it to
 		     * the list.
 		     */
@@ -1199,7 +1199,7 @@ change_book (object *book, int msgtype)
 			  /* Lets give the book a description to individualize it some */
 				char new_name[MAX_BUF];
 				snprintf (new_name, MAX_BUF, "%s %s", book_descrpt[RANDOM () % nbr], old_name);
- 
+
 	    			book->name = add_string (new_name);
 			  } else {
 				book->name = add_string (old_name);
@@ -1271,7 +1271,7 @@ get_random_mon (int level)
     /* Case where we are searching by level.  Redone 971225 to be clearer
      * and more random.  Before, it looks like it took a random monster from
      * the list, and then returned the first monster after that which was
-     * appropriate level.  This wasn't very random because if you had a 
+     * appropriate level.  This wasn't very random because if you had a
      * bunch of low level monsters and then a high level one, if the random
      * determine took one of the low level ones, it would just forward to the
      * high level one and return that.  Thus, monsters that immediately followed
@@ -1348,7 +1348,7 @@ get_next_mon (object *tmp)
 
 
 
-/* mon_info_msg() - generate a message detailing the properties 
+/* mon_info_msg() - generate a message detailing the properties
  * of a randomly selected monster.
  */
 
@@ -1362,12 +1362,12 @@ mon_info_msg (int level, int booksize)
     /*preamble */
     strcpy (retbuf, "This beastiary contains:");
 
-    /* lets print info on as many monsters as will fit in our 
-     * document. 
+    /* lets print info on as many monsters as will fit in our
+     * document.
      * 8-96 Had to change this a bit, otherwise there would
      * have been an impossibly large number of combinations
      * of text! (and flood out the available number of titles
-     * in the archive in a snap!) -b.t. 
+     * in the archive in a snap!) -b.t.
      */
     tmp = get_random_mon (level * 3);
     while (tmp) {
@@ -1448,7 +1448,7 @@ static const char *artifact_msg (int level, int booksize)
 	     book_entries > 1 ? "some artifacts" : "an artifact");
 
     /* artifact msg attributes loop. Lets keep adding entries to the 'book'
-     * as long as we have space up to the allowed max # (book_entires) 
+     * as long as we have space up to the allowed max # (book_entires)
      */
     while (book_entries > 0)
       {
@@ -1527,8 +1527,8 @@ static const char *artifact_msg (int level, int booksize)
  *****************************************************************************/
 
 /* spellpath_msg() - generate a message detailing the member
- * incantations/prayers (and some of their properties) belonging to 
- * a given spellpath. 
+ * incantations/prayers (and some of their properties) belonging to
+ * a given spellpath.
  */
 
 char   *
@@ -1597,7 +1597,7 @@ void make_formula_book(object *book, int level) {
     int     chance;
 
     /* the higher the book level, the more complex (ie number of
-     * ingredients) the formula can be. 
+     * ingredients) the formula can be.
      */
     fl = get_formulalist (((RANDOM () % level) / 3) + 1);
 
@@ -1624,7 +1624,7 @@ void make_formula_book(object *book, int level) {
 	book->msg = add_string(" <indecipherable text>\n");
 	new_text_name(book, 4);
 	add_author(book,4);
-	
+
     } else {
 	/* looks like a formula was found. Base the amount
 	 * of information on the booklevel and the spellevel
@@ -1634,7 +1634,7 @@ void make_formula_book(object *book, int level) {
 	archetype *at;
 
 	/* preamble */
-	sprintf(retbuf, "Herein is described a project using %s: \n", 
+	sprintf(retbuf, "Herein is described a project using %s: \n",
 		 formula->skill?formula->skill:"an unknown skill");
 
 	if ((at = find_archetype (op_name)) != (archetype *) NULL)
@@ -1651,7 +1651,7 @@ void make_formula_book(object *book, int level) {
 	     * you get things like 'the wise' because its missing the
 	     * water of section.
 	     */
-	    sprintf(title,"%s: %s of %s", 
+	    sprintf(title,"%s: %s of %s",
 		    formula_book_name[RANDOM() % (sizeof(formula_book_name) / sizeof(char*))],
 		    op_name, formula->title);
 	}
@@ -1705,9 +1705,9 @@ void make_formula_book(object *book, int level) {
 }
 
 
-/* msgfile_msg() - generate a message drawn randomly from a 
+/* msgfile_msg() - generate a message drawn randomly from a
  * file in lib/. Level currently has no effect on the message
- * which is returned. 
+ * which is returned.
  */
 
 char   *
@@ -1765,8 +1765,8 @@ god_info_msg (int level, int booksize)
     name = god->name;
 
     /* preamble.. */
-    snprintf (retbuf, BOOK_BUF, 
-	      "This document contains knowledge concerning the diety %s", 
+    snprintf (retbuf, BOOK_BUF,
+	      "This document contains knowledge concerning the diety %s",
 	      name);
 
     retlen = strlen(retbuf);
@@ -1803,7 +1803,7 @@ god_info_msg (int level, int booksize)
 	    /* enemy race, what the god's holy word effects */
 	    const char   *enemy = god->slaying;
 
-	    if (enemy && !(god->path_denied & PATH_TURNING) && 
+	    if (enemy && !(god->path_denied & PATH_TURNING) &&
 		(i = nstrtok (enemy, ",")) > 0) {
 		    char    tmpbuf[MAX_BUF];
 
@@ -1811,12 +1811,12 @@ god_info_msg (int level, int booksize)
 			    "The holy words of %s have the power to "
 			    "slay creatures belonging to the ",
 			    name);
-		
+
 		    if (i > 1)
 			snprintf (tmpbuf, MAX_BUF, "following races:%s\n ---\n",
 				  strtoktolin (enemy, ","));
 		    else
-			snprintf (tmpbuf, MAX_BUF, "race of%s\n ---\n", 
+			snprintf (tmpbuf, MAX_BUF, "race of%s\n ---\n",
 				  strtoktolin (enemy, ","));
 
 		    buflen = strlen(buf);
@@ -1854,7 +1854,7 @@ god_info_msg (int level, int booksize)
 				  strtoktolin (race, ","));
 		    else
 			snprintf (tmpbuf, MAX_BUF,
-				  "race of %s\n ---\n", 
+				  "race of %s\n ---\n",
 				  strtoktolin (race, ","));
 
 		    buflen = strlen(buf);
@@ -1887,7 +1887,7 @@ god_info_msg (int level, int booksize)
 	    for (tmpvar=0; tmpvar<NROFATTACKS; tmpvar++) {
 		if (god->resist[tmpvar]==100) {
 		    has_effect = 1;
-		    snprintf(tmpbuf, MAX_BUF,"Immunity to %s", 
+		    snprintf(tmpbuf, MAX_BUF,"Immunity to %s",
 				 attacktype_desc[tmpvar]);
 		}
 	    }
@@ -1911,7 +1911,7 @@ god_info_msg (int level, int booksize)
 
 	    if (god->path_attuned) {
 		has_effect = 1;
-		DESCRIBE_PATH_SAFE (buf, god->path_attuned, "Attuned", 
+		DESCRIBE_PATH_SAFE (buf, god->path_attuned, "Attuned",
 				    &buflen, BOOK_BUF);
 	    }
 	    if (god->path_repelled) {
@@ -1944,7 +1944,7 @@ god_info_msg (int level, int booksize)
     }
     if (retlen == introlen) {
 	/* we got no information beyond the preamble! */
-	safe_strcat (retbuf, 
+	safe_strcat (retbuf,
 		     " Unfortunately the rest of the information is"
 		     "  hopelessly garbled!\n ---\n", &retlen, BOOK_BUF);
     }
@@ -1955,15 +1955,15 @@ god_info_msg (int level, int booksize)
     return retbuf;
 }
 
-/* tailor_readable_ob()- The main routine. This chooses a random 
- * message to put in given readable object (type==BOOK) which will 
- * be referred hereafter as a 'book'. We use the book level to de- 
- * termine the value of the information we will insert. Higher 
- * values mean the book will (generally) have better/more info. 
+/* tailor_readable_ob()- The main routine. This chooses a random
+ * message to put in given readable object (type==BOOK) which will
+ * be referred hereafter as a 'book'. We use the book level to de-
+ * termine the value of the information we will insert. Higher
+ * values mean the book will (generally) have better/more info.
  * See individual cases as to how this will be utilized.
- * "Book" name/content length are based on the weight of the 
+ * "Book" name/content length are based on the weight of the
  * document. If the value of msg_type is negative, we will randomly
- * choose the kind of message to generate. 
+ * choose the kind of message to generate.
  * -b.t. thomas@astro.psu.edu
  *
  * book is the object we are creating into.
@@ -1972,7 +1972,7 @@ god_info_msg (int level, int booksize)
  *
  */
 
-void 
+void
 tailor_readable_ob (object *book, int msg_type)
 {
     char    msgbuf[BOOK_BUF];
@@ -2046,7 +2046,7 @@ tailor_readable_ob (object *book, int msg_type)
  *
  *****************************************************************************/
 
-void 
+void
 free_all_readable (void)
 {
     titlelist *tlist, *tnext;
@@ -2095,7 +2095,7 @@ free_all_readable (void)
 
 /* write_book_archive() - write out the updated book archive */
 
-void 
+void
 write_book_archive (void)
 {
     FILE   *fp;

@@ -83,7 +83,7 @@ new_shared_string(const char *str) {
     shared_string *ss;
 
     /* Allocate room for a struct which can hold str. Note
-     * that some bytes for the string are already allocated in the 
+     * that some bytes for the string are already allocated in the
      * shared_string struct.
      */
     ss = (shared_string *) malloc(sizeof(shared_string) - PADDING +
@@ -134,8 +134,8 @@ add_string(const char *str) {
 	if (str != ss->string) {
 	    GATHER(add_stats.strcmps);
 	    if (strcmp(ss->string, str)) {
-		/* Apparantly, a string with the same hash value has this 
-		 * slot. We must see in the list if "str" has been 
+		/* Apparantly, a string with the same hash value has this
+		 * slot. We must see in the list if "str" has been
 		 * registered earlier.
 		 */
 		while (ss->next) {
@@ -322,10 +322,10 @@ void
 ss_dump_statistics(void) {
     static char line[80];
 
-    sprintf(errmsg, "%-13s %6s %6s %6s %6s %6s\n", 
+    sprintf(errmsg, "%-13s %6s %6s %6s %6s %6s\n",
 	    "", "calls", "hashed", "strcmp", "search", "linked");
-    sprintf(line, "%-13s %6d %6d %6d %6d %6d\n", 
-	    "add_string:", add_stats.calls, add_stats.hashed, 
+    sprintf(line, "%-13s %6d %6d %6d %6d %6d\n",
+	    "add_string:", add_stats.calls, add_stats.hashed,
 	    add_stats.strcmps, add_stats.search, add_stats.linked);
     strcat(errmsg, line);
     sprintf(line, "%-13s %6d\n",
@@ -334,8 +334,8 @@ ss_dump_statistics(void) {
     sprintf(line, "%-13s %6d\n",
 	    "free_string:", free_stats.calls);
     strcat(errmsg, line);
-    sprintf(line, "%-13s %6d %6d %6d %6d %6d\n", 
-	    "find_string:", find_stats.calls, find_stats.hashed, 
+    sprintf(line, "%-13s %6d %6d %6d %6d %6d\n",
+	    "find_string:", find_stats.calls, find_stats.hashed,
 	    find_stats.strcmps, find_stats.search, find_stats.linked);
     strcat(errmsg, line);
     sprintf(line, "%-13s %6d\n",
@@ -361,7 +361,7 @@ ss_dump_table(int what) {
 
     for (i = 0; i < TABLESIZE; i++) {
 	shared_string *ss;
-	
+
 	if ((ss = hash_table[i])!=NULL) {
 	    ++entries;
 	    refs += (ss->refcount & ~TOPBIT);
@@ -394,11 +394,11 @@ ss_dump_table(int what) {
     return NULL;
 }
 
-/* buf_overflow() - we don't want to exceed the buffer size of 
+/* buf_overflow() - we don't want to exceed the buffer size of
  * buf1 by adding on buf2! Returns true if overflow will occur.
  */
 
-int 
+int
 buf_overflow (const char *buf1, const char *buf2, int bufsize)
 {
     int     len1 = 0, len2 = 0;

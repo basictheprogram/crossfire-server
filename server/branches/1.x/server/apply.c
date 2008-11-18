@@ -78,7 +78,7 @@ int apply_transport(object *pl, object *transport, int aflag) {
     if (pl->contr->transport && pl->contr->transport != transport) {
 	new_draw_info_format(NDI_UNIQUE, 0, pl,
 		"You must exit %s before you can board %s.",
-			     query_name(pl->contr->transport), 
+			     query_name(pl->contr->transport),
 			     query_name(transport));
 	return 1;
     }
@@ -123,7 +123,7 @@ int apply_transport(object *pl, object *transport, int aflag) {
 				 pl->name, query_name(old_transport));
 	}
 	return 1;
-    } 
+    }
     else {
 	/* player is trying to board a transport */
 	int pc=0, p_limit;
@@ -132,7 +132,7 @@ int apply_transport(object *pl, object *transport, int aflag) {
 	sint16 ox, oy;
 
 	if (aflag & AP_UNAPPLY) return 1;
-        
+
 	/* Can this transport hold the weight of this player? */
 	if (!transport_can_hold(transport, pl, 1)) {
 	    new_draw_info_format(NDI_UNIQUE, 0, pl,
@@ -140,7 +140,7 @@ int apply_transport(object *pl, object *transport, int aflag) {
 			     query_name(transport));
 	    return 1;
 	}
-        
+
         /* If the player is holding the transport, drop it. */
         if (transport->env == pl) {
             old_transport = transport;
@@ -206,7 +206,7 @@ int apply_transport(object *pl, object *transport, int aflag) {
 
 	    str = get_ob_key_value(transport, "face_full");
 	    if (str)
-		transport->face = &new_faces[find_face(str, 
+		transport->face = &new_faces[find_face(str,
 					      transport->face->number)];
 	    str = get_ob_key_value(transport, "anim_full");
 	    if (str)
@@ -223,7 +223,7 @@ int apply_transport(object *pl, object *transport, int aflag) {
 	    if (kv) base_speed = atof(kv);
 	    else base_speed = transport->arch->clone.speed;
 
-	    transport->speed = base_speed - (base_speed * transport->carrying * 
+	    transport->speed = base_speed - (base_speed * transport->carrying *
 			     wsr) / (transport->weight_limit * 100);
 
 	    /* Put some limits on min/max speeds */
@@ -235,7 +235,7 @@ int apply_transport(object *pl, object *transport, int aflag) {
     return 1;
 }
 
-	
+
 
 /**
  * Check if op should abort moving victim because of it's race or slaying.
@@ -264,10 +264,10 @@ int should_director_abort(object *op, object *victim)
      name_flag = 1;
      race_flag = 1;
    }
-   /* If the director has race set, only affect objects with a arch, 
+   /* If the director has race set, only affect objects with a arch,
     * name or race that matches.
     */
-   if ( (op->race) && 
+   if ( (op->race) &&
      ((!(victim->arch && arch_flag && victim->arch->name) || strcmp(op->race, victim->arch->name))) &&
      ((!(victim->name && name_flag) || strcmp(op->race, victim->name))) &&
      ((!(victim->race && race_flag) || strcmp(op->race, victim->race))) ) {
@@ -320,11 +320,11 @@ static int apply_id_altar (object *money, object *altar, object *pl)
 	        new_draw_info(NDI_UNIQUE, 0,pl, marked->msg);
 	    }
 	    return money == NULL;
-	} 
+	}
     }
 
     for (id=pl->inv; id; id=id->below) {
-	if (!QUERY_FLAG(id, FLAG_IDENTIFIED) && !id->invisible && 
+	if (!QUERY_FLAG(id, FLAG_IDENTIFIED) && !id->invisible &&
 	    need_identify(id)) {
 		if (operate_altar(altar,&money)) {
 		    identify(id);
@@ -382,7 +382,7 @@ int apply_potion(object *op, object *tmp)
     int got_one=0,i;
     object *force;
 
-    if(op->type==PLAYER) { 
+    if(op->type==PLAYER) {
       if (!QUERY_FLAG(tmp, FLAG_IDENTIFIED))
         identify(tmp);
     }
@@ -440,11 +440,11 @@ int apply_potion(object *op, object *tmp)
 		}
 	    }
 	    else {
-		if(op->contr->levhp[i]<9) { 
+		if(op->contr->levhp[i]<9) {
 		    op->contr->levhp[i]=9;
 		    break;
 		}
-		if(op->contr->levsp[i]<6) { 
+		if(op->contr->levsp[i]<6) {
 		    op->contr->levsp[i]=6;
 		    break;
 		}
@@ -471,7 +471,7 @@ int apply_potion(object *op, object *tmp)
 		fix_player(op);
 		new_draw_info(NDI_UNIQUE,0,op,"The Gods are angry and punish you.");
 	    }
-	    else 
+	    else
 		new_draw_info(NDI_UNIQUE,0,op,"You are fortunate that you are so pathetic.");
 	}
 	decrease_ob(tmp);
@@ -522,7 +522,7 @@ int apply_potion(object *op, object *tmp)
 	  force->stats.food*=10;
 	  for (i=0; i<NROFATTACKS; i++)
 	    if (force->resist[i] > 0)
-	      force->resist[i] = -force->resist[i];  /* prot => vuln */ 
+	      force->resist[i] = -force->resist[i];  /* prot => vuln */
 	}
 	force->speed_left= -1;
 	force = insert_ob_in_ob(force,op);
@@ -635,12 +635,12 @@ static int check_weapon_power(const object *who, int improvs)
 
     /* The skill system hands out wc and dam bonuses to fighters
      * more generously than the old system (see fix_player). Thus
-     * we need to curtail the power of player enchanted weapons. 
-     * I changed this to 1 improvement per "fighter" level/5 -b.t. 
+     * we need to curtail the power of player enchanted weapons.
+     * I changed this to 1 improvement per "fighter" level/5 -b.t.
      * Note:  Nothing should break by allowing this ratio to be different or
      * using normal level - it is just a matter of play balance.
      */
-    if(who->type==PLAYER) { 
+    if(who->type==PLAYER) {
 	object *wc_obj=NULL;
 
 	for(wc_obj=who->inv;wc_obj;wc_obj=wc_obj->below)
@@ -735,7 +735,7 @@ static int prepare_weapon(object *op, object *improver, object *weapon)
     /* If we break out, i will be less than nrofattacks, preventing
      * improvement of items that already have protections.
      */
-    if (i<NROFATTACKS || 
+    if (i<NROFATTACKS ||
 	weapon->stats.hp ||	/* regeneration */
 	(weapon->stats.sp && weapon->type == WEAPON) ||	/* sp regeneration */
 	weapon->stats.exp ||	/* speed */
@@ -773,7 +773,7 @@ static int prepare_weapon(object *op, object *improver, object *weapon)
  * Checks if weapon was prepared, if enough potions on the floor, ...
  *
  * We are hiding extra information about the weapon in the level and
- * last_eat numbers for an object.  Hopefully this won't break anything ?? 
+ * last_eat numbers for an object.  Hopefully this won't break anything ??
  * level == max improve last_eat == current improve
  */
 static int improve_weapon(object *op,object *improver,object *weapon)
@@ -936,7 +936,7 @@ static int check_improve_weapon (object *op, object *tmp)
  * depends on the level of the character - ie the plus
  * value (magic) of the armour can never be increased beyond
  * the level of the character / 10 -- rounding upish, nor may
- * the armour value of the piece of equipment exceed either 
+ * the armour value of the piece of equipment exceed either
  * the users level or 90)
  * Modified by MSW for partial resistance.  Only support
  * changing of physical area right now.
@@ -959,7 +959,7 @@ static int improve_armour(object *op, object *improver, object *armour)
 	new_draw_info(NDI_UNIQUE, 0, op, "This armour will not accept further enchantment.");
 	return 0;
     }
-	
+
     /* Split objects if needed.  Can't insert tmp until the
      * end of this function - otherwise it will just re-merge.
      */
@@ -1128,9 +1128,9 @@ static int convert_item(object *item, object *converter) {
     insert_ob_in_map_at(item, converter->map, converter, 0, converter->x, converter->y);
     return 1;
 }
-  
+
 /**
- * Handle apply on containers. 
+ * Handle apply on containers.
  * By Eneq(@csd.uu.se).
  * Moved to own function and added many features [Tero.Haatanen@lut.fi]
  * added the alchemical cauldron to the code -b.t.
@@ -1160,7 +1160,7 @@ static int apply_container (object *op, object *sack)
 	if (op->container != sack) {
 	    /* it's closed OR some player has opened it */
 	    if (QUERY_FLAG(sack, FLAG_APPLIED)) {
-		for(tmp=get_map_ob(sack->map, sack->x, sack->y); 
+		for(tmp=get_map_ob(sack->map, sack->x, sack->y);
 		    tmp && tmp->container != sack; tmp=tmp->above);
 		if (tmp) {
 		    /* some other player have opened it */
@@ -1519,7 +1519,7 @@ static void apply_sign (object *op, object *sign, int autoapply)
     /* Sign or magic mouth?  Do we need to see it, or does it talk to us?
      * No way to know for sure.  The presumption is basically that if
      * move_on is zero, it needs to be manually applied (doesn't talk
-     * to us).  
+     * to us).
      */
     if (QUERY_FLAG (op, FLAG_BLIND) && ! QUERY_FLAG (op, FLAG_WIZ) && !sign->move_on) {
         new_draw_info (NDI_UNIQUE, 0, op,
@@ -1553,13 +1553,13 @@ void move_apply (object *trap, object *victim, object *originator)
     return;
 
   /* move_apply() is the most likely candidate for causing unwanted and
-   * possibly unlimited recursion. 
+   * possibly unlimited recursion.
    */
   /* The following was changed because it was causing perfeclty correct
    * maps to fail.  1)  it's not an error to recurse:
    * rune detonates, summoning monster.  monster lands on nearby rune.
    * nearby rune detonates.  This sort of recursion is expected and
-   * proper.  This code was causing needless crashes. 
+   * proper.  This code was causing needless crashes.
    */
     if (recursion_depth >= 500) {
 	LOG (llevDebug, "WARNING: move_apply(): aborting recursion "
@@ -1576,7 +1576,7 @@ void move_apply (object *trap, object *victim, object *originator)
 
     switch (trap->type) {
 	case PLAYERMOVER:
-	    if (trap->attacktype && (trap->level || victim->type!=PLAYER) && 
+	    if (trap->attacktype && (trap->level || victim->type!=PLAYER) &&
 	      !should_director_abort(trap, victim)) {
 		if (!trap->stats.maxsp) trap->stats.maxsp=2.0;
 
@@ -1629,7 +1629,7 @@ void move_apply (object *trap, object *victim, object *originator)
 	     * trigger this here and get hit by own missile - and will be own enemy.
 	     * Victim then is his own enemy and will start to kill herself (this is
 	     * removed) but we have not synced victim and his missile. To avoid senseless
-	     * action, we avoid hits here 
+	     * action, we avoid hits here
 	     */
 	    if ((QUERY_FLAG (victim, FLAG_ALIVE) && trap->speed) && trap->owner != victim)
 		hit_with_arrow (trap, victim);
@@ -1639,7 +1639,7 @@ void move_apply (object *trap, object *victim, object *originator)
 	    apply_spell_effect(trap, victim);
 	    goto leave;
 
-	case TRAPDOOR: 
+	case TRAPDOOR:
 	{
 	    int max, sound_was_played;
 	    object *ab, *ab_next;
@@ -1658,7 +1658,7 @@ void move_apply (object *trap, object *victim, object *originator)
 
 	    for (ab = trap->above, max=100, sound_was_played = 0; --max && ab; ab=ab_next) {
 		/* need to set this up, since if we do transfer the object,
-		 * ab->above would be bogus 
+		 * ab->above would be bogus
 		 */
 		ab_next = ab->above;
 
@@ -1828,7 +1828,7 @@ static void apply_book (object *op, object *tmp)
     	draw_ext_info_format(NDI_UNIQUE | NDI_NAVY, 0, op,
                 msgType->message_type, msgType->message_subtype,
                 "%s\n%s",
-                "You open the %s and start reading.\n%s", 
+                "You open the %s and start reading.\n%s",
                 long_desc(tmp,op), tmp->msg);
     }
 
@@ -1902,12 +1902,12 @@ void do_learn_spell (object *op, object *spell, int special_prayer)
     tmp = get_object();
     copy_object(spell, tmp);
     insert_ob_in_ob(tmp, op);
-    
+
     if (special_prayer) {
 	SET_FLAG(tmp, FLAG_STARTEQUIP);
     }
 
-    new_draw_info_format (NDI_UNIQUE, 0, op, 
+    new_draw_info_format (NDI_UNIQUE, 0, op,
             "Type 'bind cast %s", spell->name);
     new_draw_info (NDI_UNIQUE, 0, op, "to store the spell in a key.");
     esrv_add_spells(op->contr, tmp);
@@ -1928,7 +1928,7 @@ void do_forget_spell (object *op, const char *spell)
         LOG (llevError, "BUG: do_forget_spell(): spell not known\n");
         return;
     }
-    
+
     new_draw_info_format (NDI_UNIQUE|NDI_NAVY, 0, op,
 			  "You lose knowledge of %s.", spell);
     player_unready_range_ob(op->contr, spob);
@@ -1969,9 +1969,9 @@ static void apply_spellbook (object *op, object *tmp)
     if (spell->level > (skop->level+10)) {
 	new_draw_info(NDI_UNIQUE, 0,op,"You are unable to decipher the strange symbols.");
 	return;
-    } 
+    }
 
-    new_draw_info_format(NDI_UNIQUE, 0, op, 
+    new_draw_info_format(NDI_UNIQUE, 0, op,
 	"The spellbook contains the %s level spell %s.",
             get_levelnumber(spell->level), spell->name);
 
@@ -1996,13 +1996,13 @@ static void apply_spellbook (object *op, object *tmp)
     if (spell->skill) {
 	spell_skill = find_skill_by_name(op, spell->skill);
 	if (!spell_skill) {
-	    new_draw_info_format(NDI_UNIQUE, 0, op, 
+	    new_draw_info_format(NDI_UNIQUE, 0, op,
 				 "You lack the skill %s to use this spell",
 				 spell->skill);
 	    return;
 	}
 	if (spell_skill->level < spell->level) {
-	    new_draw_info_format(NDI_UNIQUE, 0, op, 
+	    new_draw_info_format(NDI_UNIQUE, 0, op,
 				 "You need to be level %d in %s to learn this spell.",
 				 spell->level, spell->skill);
 	    return;
@@ -2017,14 +2017,14 @@ static void apply_spellbook (object *op, object *tmp)
      *     a spell.
      *
      *  3 -Automatically fail to learn if you read while confused
-     * 
-     * Overall, chances are the same but a player will find having a high 
-     * literacy rate very useful!  -b.t. 
-     */ 
-    if(QUERY_FLAG(op,FLAG_CONFUSED)) { 
+     *
+     * Overall, chances are the same but a player will find having a high
+     * literacy rate very useful!  -b.t.
+     */
+    if(QUERY_FLAG(op,FLAG_CONFUSED)) {
 	new_draw_info(NDI_UNIQUE,0,op,"In your confused state you flub the wording of the text!");
 	scroll_failure(op, 0 - random_roll(0, spell->level, op, PREFER_LOW), MAX(spell->stats.sp, spell->stats.grace));
-    } else if(QUERY_FLAG(tmp,FLAG_STARTEQUIP) || 
+    } else if(QUERY_FLAG(tmp,FLAG_STARTEQUIP) ||
 	(random_roll(0, 100, op, PREFER_LOW)-(5*skop->level)) <
 	      learn_spell[spell->stats.grace ? op->stats.Wis : op->stats.Int]) {
 
@@ -2072,13 +2072,13 @@ void apply_scroll (object *op, object *tmp, int dir)
 	    new_draw_info(NDI_UNIQUE, 0,op,
 		  "You are unable to decipher the strange symbols.");
 	    return;
-        } 
+        }
 
 	if((exp_gain = calc_skill_exp(op,tmp, skop)))
 	    change_exp(op,exp_gain, skop->skill, 0);
     }
 
-    if (!QUERY_FLAG(tmp, FLAG_IDENTIFIED)) 
+    if (!QUERY_FLAG(tmp, FLAG_IDENTIFIED))
 	identify(tmp);
 
     new_draw_info_format(NDI_BLACK, 0, op,
@@ -2168,15 +2168,15 @@ static void apply_food (object *op, object *tmp)
 	  else
 	    new_draw_info(NDI_UNIQUE, 0,op,"Most of the drink goes down your face not your throat!");
 	}
-      
+
 	if(!QUERY_FLAG(tmp, FLAG_CURSED)) {
 	  char buf[MAX_BUF];
-	  
+
 	  if (!is_dragon_pl(op)) {
 	    /* eating message for normal players*/
 	    if(tmp->type==DRINK)
 	      sprintf(buf,"Ahhh...that %s tasted good.",tmp->name);
-	    else 
+	    else
 	      sprintf(buf,"The %s tasted %s",tmp->name,
 		      tmp->type==FLESH?"terrible!":"good.");
 	  }
@@ -2197,7 +2197,7 @@ static void apply_food (object *op, object *tmp)
 	  if (op->stats.food > 999)
 	    op->stats.food = 999;
 	}
-      
+
 	/* special food hack -b.t. */
 	if(tmp->title || QUERY_FLAG(tmp,FLAG_CURSED))
 	  eat_special_food(op,tmp);
@@ -2221,7 +2221,7 @@ static int dragon_eat_flesh(object *op, object *meal) {
   object *skin = NULL;    /* pointer to dragon skin force*/
   object *abil = NULL;    /* pointer to dragon ability force*/
   object *tmp = NULL;     /* tmp. object */
-  
+
   char buf[MAX_BUF];            /* tmp. string buffer */
   double chance;                /* improvement-chance of one resistance type */
   double totalchance=1;         /* total chance of gaining one resistance */
@@ -2230,11 +2230,11 @@ static int dragon_eat_flesh(object *op, object *meal) {
   int atnr_winner[NROFATTACKS]; /* winning candidates for resistance improvement */
   int winners=0;                /* number of winners */
   int i;                        /* index */
-  
+
   /* let's make sure and doublecheck the parameters */
   if (meal->type!=FLESH || !is_dragon_pl(op))
     return 0;
-  
+
   /* now grab the 'dragon_skin'- and 'dragon_ability'-forces
      from the player's inventory */
   for (tmp=op->inv; tmp!=NULL; tmp=tmp->below) {
@@ -2245,11 +2245,11 @@ static int dragon_eat_flesh(object *op, object *meal) {
 	abil = tmp;
     }
   }
-  
+
   /* if either skin or ability are missing, this is an old player
      which is not to be considered a dragon -> bail out */
   if (skin == NULL || abil == NULL) return 0;
-  
+
   /* now start by filling stomache and health, according to food-value */
   if((999 - op->stats.food) < meal->stats.food)
     op->stats.hp += (999 - op->stats.food) / 50;
@@ -2257,52 +2257,52 @@ static int dragon_eat_flesh(object *op, object *meal) {
     op->stats.hp += meal->stats.food/50;
   if(op->stats.hp>op->stats.maxhp)
     op->stats.hp=op->stats.maxhp;
-  
+
   op->stats.food = MIN(999, op->stats.food + meal->stats.food);
-  
+
   /*LOG(llevDebug, "-> player: %d, flesh: %d\n", op->level, meal->level);*/
-  
+
   /* on to the interesting part: chances for adding resistance */
   for (i=0; i<NROFATTACKS; i++) {
     if (meal->resist[i] > 0 && atnr_is_dragon_enabled(i)) {
       /* got positive resistance, now calculate improvement chance (0-100) */
-      
+
       /* this bonus makes resistance increase easier at lower levels */
       bonus = (settings.max_level - op->level) * 30. / ((double)settings.max_level);
       if (i == abil->stats.exp)
 	bonus += 5;  /* additional bonus for resistance of ability-focus */
-      
+
       /* monster bonus increases with level, because high-level
          flesh is too rare */
       mbonus = op->level * 20. / ((double)settings.max_level);
-      
+
       chance = (((double)MIN(op->level+bonus, meal->level+bonus+mbonus))*100. /
 		((double)settings.max_level)) - skin->resist[i];
-      
+
       if (chance >= 0.)
 	chance += 1.;
       else
 	chance = (chance < -12) ? 0. : 1./pow(2., -chance);
-      
+
       /* chance is proportional to amount of resistance (max. 50) */
       chance *= ((double)(MIN(meal->resist[i], 50)))/50.;
-      
+
       /* doubled chance for resistance of ability-focus */
       if (i == abil->stats.exp)
 	chance = MIN(100., chance*2.);
-      
+
       /* now make the throw and save all winners (Don't insert luck bonus here!) */
       if (RANDOM()%10000 < (int)(chance*100)) {
 	atnr_winner[winners] = i;
 	winners++;
       }
-      
+
       if (chance >= 0.01 ) totalchance *= 1 - chance/100;
-      
+
       /*LOG(llevDebug, "   %s: bonus %.1f, chance %.1f\n", attacks[i], bonus, chance);*/
     }
   }
-  
+
   /* inverse totalchance as until now we have the failure-chance   */
   totalchance = 100 - totalchance*100;
   /* print message according to totalchance */
@@ -2321,27 +2321,27 @@ static int dragon_eat_flesh(object *op, object *meal) {
   else
     sprintf(buf, "The %s had no taste.", meal->name);
   new_draw_info(NDI_UNIQUE, 0, op, buf);
-  
+
   /* now choose a winner if we have any */
   i = -1;
   if (winners>0)
     i = atnr_winner[RANDOM()%winners];
-  
+
   if (i >= 0 && i < NROFATTACKS && skin->resist[i] < 95) {
     /* resistance increased! */
     skin->resist[i]++;
     fix_player(op);
-    
+
     sprintf(buf, "Your skin is now more resistant to %s!", change_resist_msg[i]);
     new_draw_info(NDI_UNIQUE|NDI_RED, 0, op, buf);
   }
-  
+
   /* if this flesh contains a new ability focus, we mark it
      into the ability_force and it will take effect on next level */
   if (meal->last_eat > 0 && atnr_is_dragon_enabled(meal->last_eat)
       && meal->last_eat != abil->last_eat) {
     abil->last_eat = meal->last_eat; /* write: last_eat <new attnr focus> */
-    
+
     if (meal->last_eat != abil->stats.exp) {
       sprintf(buf, "Your metabolism prepares to focus on %s!",
 	      change_resist_msg[meal->last_eat]);
@@ -2371,16 +2371,16 @@ static void apply_savebed (object *pl)
 
     new_draw_info_format(NDI_UNIQUE | NDI_ALL | NDI_DK_ORANGE, 5, pl,
 	"%s leaves the game.",pl->name);
-    
+
     /* update respawn position */
     strcpy(pl->contr->savebed_map, pl->map->path);
     pl->contr->bed_x = pl->x;
     pl->contr->bed_y = pl->y;
-    
+
     strcpy(pl->contr->killer,"left");
     check_score(pl,0); /* Always check score */
     (void)save_player(pl,0);
-#if MAP_MAXTIMEOUT 
+#if MAP_MAXTIMEOUT
     MAP_SWAP_TIME(pl->map) = MAP_TIMEOUT(pl->map);
 #endif
     play_again(pl);
@@ -2702,7 +2702,7 @@ int manual_apply (object *op, object *tmp, int aflag)
 		return 0;
 	    }
 
-	case MENU: 
+	case MENU:
 	    if (op->type == PLAYER) {
 		shop_listing (op);
 		return 1;
@@ -2714,7 +2714,7 @@ int manual_apply (object *op, object *tmp, int aflag)
 	    apply_power_crystal(op,tmp);  /*  see egoitem.c */
 	    return 1;
 
-	case LIGHTER:		/* for lighting torches/lanterns/etc */ 
+	case LIGHTER:		/* for lighting torches/lanterns/etc */
 	    if (op->type == PLAYER) {
 		apply_lighter(op,tmp);
 		return 1;
@@ -2940,7 +2940,7 @@ static int unapply_special (object *who, object *op, int aflags)
 	    } else {
 		if (op->type == BOW)
 		    CLEAR_FLAG (who, FLAG_READY_BOW);
-		else 
+		else
 		    CLEAR_FLAG(who, FLAG_READY_RANGE);
 	    }
 	    break;
@@ -2995,7 +2995,7 @@ static object *get_item_from_body_location(object *start, int loc)
     if (!start) return NULL;
 
     for (tmp=start; tmp; tmp=tmp->below)
-	if (QUERY_FLAG(tmp, FLAG_APPLIED) && tmp->body_info[loc] && 
+	if (QUERY_FLAG(tmp, FLAG_APPLIED) && tmp->body_info[loc] &&
 	    (!tmp->invisible || tmp->type==SKILL)) return tmp;
 
     return NULL;
@@ -3027,7 +3027,7 @@ static int unapply_for_ob(object *who, object *op, int aflags)
 	    if (QUERY_FLAG(tmp, FLAG_APPLIED) && tmp->type == op->type) {
 		if ((aflags & AP_IGNORE_CURSE) ||  (aflags & AP_PRINT) ||
 		    (!QUERY_FLAG(tmp, FLAG_CURSED) && !QUERY_FLAG(tmp, FLAG_DAMNED))) {
-		    if (aflags & AP_PRINT) 
+		    if (aflags & AP_PRINT)
 			new_draw_info(NDI_UNIQUE, 0, who, query_name(tmp));
 		    else
 			unapply_special(who, tmp, aflags);
@@ -3063,7 +3063,7 @@ static int unapply_for_ob(object *who, object *op, int aflags)
 		    /* Not a bug - we'll get this if the player has cursed items
 		     * equipped.
 		     */
-		    LOG(llevError,"Can't find object using location %d (%s) on %s\n", 
+		    LOG(llevError,"Can't find object using location %d (%s) on %s\n",
 			i, body_locations[i].save_name, who->name);
 #endif
 		    return 1;
@@ -3071,7 +3071,7 @@ static int unapply_for_ob(object *who, object *op, int aflags)
 		/* If we are just printing, we don't care about cursed status */
 		if ((aflags & AP_IGNORE_CURSE) ||  (aflags & AP_PRINT) ||
 		    (!(QUERY_FLAG(tmp, FLAG_CURSED) || QUERY_FLAG(tmp, FLAG_DAMNED)))) {
-		    if (aflags & AP_PRINT) 
+		    if (aflags & AP_PRINT)
 			new_draw_info(NDI_UNIQUE, 0, who, query_name(tmp));
 		    else
 			unapply_special(who, tmp, aflags);
@@ -3124,7 +3124,7 @@ int can_apply_object(object *who, object *op)
 	    }
 	}
     }
-	
+
 
     for (i=0; i<NUM_BODY_LOCATIONS; i++) {
 	if (op->body_info[i]) {
@@ -3145,7 +3145,7 @@ int can_apply_object(object *who, object *op)
 		 * enough slots to equip the new item, then just set this can
 		 * continue.  We don't care about the logic below - if you have
 		 * shield equipped and try to equip another shield, there is only
-		 * one choice.  However, the check for the number of body locations 
+		 * one choice.  However, the check for the number of body locations
 		 * does take into the account cases where what is being applied
 		 * may be two handed for example.
 		 */
@@ -3178,7 +3178,7 @@ int can_apply_object(object *who, object *op)
 		    }
 		    /* This object isn't using up all the slots, so there must
 		     * be another.  If so, and it the new item doesn't need all
-		     * the slots, the player then has a choice.  
+		     * the slots, the player then has a choice.
 		     */
 		    if (((who->body_used[i] - tmp1->body_info[i]) != who->body_info[i]) &&
 			(FABS(op->body_info[i]) < who->body_info[i]))
@@ -3217,7 +3217,7 @@ int can_apply_object(object *who, object *op)
     return retval;
 }
 
-		
+
 
 /**
  * who is the object using the object.  It can be a monster
@@ -3290,7 +3290,7 @@ int apply_special (object *who, object *op, int aflags)
 	    /* Some error, so don't try to equip something more */
 	    if (unapply_for_ob(who, op, aflags)) return 1;
 	} else {
-	    if (who->contr->unapply == unapply_never || 
+	    if (who->contr->unapply == unapply_never ||
 		(i & CAN_APPLY_UNAPPLY_CHOICE && who->contr->unapply == unapply_nochoice)) {
 		if (!(aflags & AP_NOPRINT))
 		    new_draw_info(NDI_UNIQUE, 0, who, "You need to unapply some item(s):");
@@ -3311,25 +3311,25 @@ int apply_special (object *who, object *op, int aflags)
 	    return 1;
 	} else {
 	    /* While experience will be credited properly, we want to change the
-	     * skill so that the dam and wc get updated 
+	     * skill so that the dam and wc get updated
 	     */
 	    change_skill(who, skop, aflags & AP_NOPRINT);
 	}
     }
-	
-    if (who->type == PLAYER && op->item_power && 
+
+    if (who->type == PLAYER && op->item_power &&
 	(op->item_power + who->contr->item_power) > (settings.item_power_factor * who->level)) {
 	    if (!(aflags & AP_NOPRINT))
 		new_draw_info(NDI_UNIQUE, 0, who, "Equipping that combined with other items would consume your soul!");
 	return 1;
     }
-	
+
 
     /* Ok.  We are now at the state where we can apply the new object.
      * Note that we don't have the checks for can_use_...
-     * below - that is already taken care of by can_apply_object. 
+     * below - that is already taken care of by can_apply_object.
      */
-			  
+
 
     if(op->nrof > 1)
 	tmp = get_split_ob(op,op->nrof - 1);
@@ -3443,7 +3443,7 @@ int apply_special (object *who, object *op, int aflags)
 	    return 0;
 	    break;
 
-	/* this part is needed for skill-tools */ 
+	/* this part is needed for skill-tools */
 	case SKILL:
 	case SKILL_TOOL:
 	    if (who->chosen_skill) {
@@ -3472,7 +3472,7 @@ int apply_special (object *who, object *op, int aflags)
 	    who->chosen_skill = op;
 	    SET_FLAG (who, FLAG_READY_SKILL);
 	    break;
-	
+
 	case BOW:
 	    if (!check_weapon_power(who, op->last_eat)) {
 		if (!(aflags & AP_NOPRINT)) {
@@ -3497,7 +3497,7 @@ int apply_special (object *who, object *op, int aflags)
 	case WAND:
 	case ROD:
 	case HORN:
-	    /* check for skill, alter player status */ 
+	    /* check for skill, alter player status */
 	    SET_FLAG(op, FLAG_APPLIED);
 	    if (skop) change_skill(who, skop, 0);
 	    if (!(aflags & AP_NOPRINT))
@@ -3612,7 +3612,7 @@ int auto_apply (object *op) {
 		return 0;
 	    while ((op->stats.hp--)>0)
 		create_treasure(op->randomitems, op, op->map?GT_ENVIRONMENT:0,
-				op->stats.exp ? (int)op->stats.exp : 
+				op->stats.exp ? (int)op->stats.exp :
 				op->map == NULL ?  14: op->map->difficulty,0);
 
 	    /* If we generated an object and put it in this object inventory,
@@ -3665,14 +3665,14 @@ void fix_auto_apply(mapstruct *m) {
 						m->difficulty,0);
 				invtmp->randomitems = NULL;
 			}
-			else if (invtmp && invtmp->arch && 
+			else if (invtmp && invtmp->arch &&
 				invtmp->type!=TREASURE &&
-				invtmp->type != SPELL && 
+				invtmp->type != SPELL &&
 				invtmp->type != CLASS &&
 				HAS_RANDOM_ITEMS(invtmp)) {
 				    create_treasure(invtmp->randomitems, invtmp, 0,
 						    m->difficulty,0);
-				/* Need to clear this so that we never try to create 
+				/* Need to clear this so that we never try to create
 				 * treasure again for this object
 				 */
 				invtmp->randomitems = NULL;
@@ -3743,7 +3743,7 @@ void fix_auto_apply(mapstruct *m) {
 
 void eat_special_food(object *who, object *food) {
     object *force;
-    int i, did_one=0; 
+    int i, did_one=0;
     sint8 k;
 
     force = create_archetype(FORCE_NAME);
@@ -3768,7 +3768,7 @@ void eat_special_food(object *who, object *food) {
 	update_ob_speed(force);
 	/* bigger morsel of food = longer effect time */
 	force->stats.food = food->stats.food / 5;
-	SET_FLAG(force, FLAG_IS_USED_UP);   
+	SET_FLAG(force, FLAG_IS_USED_UP);
 	SET_FLAG(force, FLAG_APPLIED);
 	change_abil(who, force);
 	insert_ob_in_ob(force, who);
@@ -3778,26 +3778,26 @@ void eat_special_food(object *who, object *food) {
 
     /* check for hp, sp change */
     if(food->stats.hp!=0) {
-	if(QUERY_FLAG(food, FLAG_CURSED)) { 
+	if(QUERY_FLAG(food, FLAG_CURSED)) {
 	    strcpy(who->contr->killer,food->name);
 	    hit_player(who, food->stats.hp, food, AT_POISON, 1);
 	    new_draw_info(NDI_UNIQUE, 0,who,"Eck!...that was poisonous!");
-	} else { 
-	    if(food->stats.hp>0) 
+	} else {
+	    if(food->stats.hp>0)
 		new_draw_info(NDI_UNIQUE, 0,who,"You begin to feel better.");
-	    else 
+	    else
 		new_draw_info(NDI_UNIQUE, 0,who,"Eck!...that was poisonous!");
 	    who->stats.hp += food->stats.hp;
 	}
     }
     if(food->stats.sp!=0) {
-	if(QUERY_FLAG(food, FLAG_CURSED)) { 
+	if(QUERY_FLAG(food, FLAG_CURSED)) {
 	    new_draw_info(NDI_UNIQUE, 0,who,"You are drained of mana!");
-	    who->stats.sp -= food->stats.sp; 
+	    who->stats.sp -= food->stats.sp;
 	    if(who->stats.sp<0) who->stats.sp=0;
-	    } else { 
+	    } else {
 		new_draw_info(NDI_UNIQUE, 0,who,"You feel a rush of magical energy!");
-		who->stats.sp += food->stats.sp; 
+		who->stats.sp += food->stats.sp;
 		/* place limit on max sp from food? */
 	    }
     }
@@ -3977,7 +3977,7 @@ void apply_changes_to_player(object *pl, object *change) {
 		pl->animation_id = GET_ANIM_ID(change);
 		pl->face = change->face;
 
-		if(QUERY_FLAG(change,FLAG_ANIMATE)) 
+		if(QUERY_FLAG(change,FLAG_ANIMATE))
 		    SET_FLAG(pl,FLAG_ANIMATE);
 		else
 		    CLEAR_FLAG(pl,FLAG_ANIMATE);
