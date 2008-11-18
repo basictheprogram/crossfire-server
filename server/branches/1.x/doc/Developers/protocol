@@ -1378,9 +1378,11 @@ S->C: setup <option1> <value1> <option2> <value2>
     	    intention for this option is to enable clients to use a fixed
     	    number of slots for displaying ground view objects.
 
-	sound
+	sound (bitmask)
 	    Set to true if the client wants to get sent sound information.
-	    This is an integer in string form (0/1).
+	    1=send sound effects
+	    2=send music
+	    64=mute sound; same as "sound" ncom command
 
 	spellmon (0/1)
 	    If set to 1 the client has indicated that it wishes to be
