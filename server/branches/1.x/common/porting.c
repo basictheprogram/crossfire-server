@@ -622,7 +622,7 @@ void make_path_to_file (char *filename)
 	LOG(llevDebug, "\n Checking %s...", buf);
 #endif
 	if (stat(buf, &statbuf) || !S_ISDIR (statbuf.st_mode)) {
-	    LOG(llevDebug, "Was not dir...");
+	    LOG(llevDebug, "Was not dir: %s\n", buf);
 	    if (mkdir (buf, SAVE_DIR_MODE)) {
 		LOG(llevError, "Cannot mkdir %s: %s\n", buf, strerror_local(errno));
 		return;
