@@ -119,6 +119,7 @@ void set_up_cmd(char *buf, int len, socket_struct *ns)
 
     LOG(llevInfo,"Get SetupCmd:: %s\n", buf);
     strcpy(cmdback,"setup");
+    slen = strlen(cmdback);
     for(s=0;s<len; ) {
 
 	cmd = &buf[s];
@@ -139,7 +140,6 @@ void set_up_cmd(char *buf, int len, socket_struct *ns)
 	buf[s++]=0;
 	while (s<len && buf[s] == ' ') s++;
 
-	slen = strlen(cmdback);
 	safe_strcat(cmdback, " ", &slen, HUGE_BUF);
 	safe_strcat(cmdback, cmd, &slen, HUGE_BUF);
 	safe_strcat(cmdback, " ", &slen, HUGE_BUF);
