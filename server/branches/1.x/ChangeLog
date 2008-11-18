@@ -17,9 +17,8 @@ else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 Changes for SVN:
 
-socket/request.c: Properly check "setup spellmon" settings.
-socket/request.c, doc/Developers/protocol: Properly check "setup sound"
- settings; document allowed values.
+socket/request.c, doc/Developers/protocol: Properly check "setup"
+	settings; document allowed values.
 socket/request.c: Properly check input read from client socket.
 Andreas Kirschbaum 2008-11-18
 
