@@ -278,15 +278,18 @@ void set_up_cmd(char *buf, int len, socket_struct *ns)
 	    sprintf(tmpbuf,"%d", ns->ext_mapinfos);
 	    safe_strcat(cmdback, tmpbuf, &slen, HUGE_BUF);
 	} else if (!strcmp(cmd,"extendedTextInfos")) {
-	    /* Added by tchize
-	     * prepare to use the extended text commands
-	     * Client toggle this to non zero to get exttext
-	     */
-	    char tmpbuf[20];
+	    int has_readable_type;
 
-	    ns->has_readable_type = (atoi(param));
-	    sprintf(tmpbuf,"%d", ns->has_readable_type);
-	    safe_strcat(cmdback, tmpbuf, &slen, HUGE_BUF);
+	    has_readable_type = atoi(param);
+	    if (has_readable_type != 0 && has_readable_type != 1) {
+		safe_strcat(cmdback, "FALSE", &slen, HUGE_BUF);
+	    } else {
+		char tmpbuf[20];
+
+		ns->has_readable_type = has_readable_type;
+		snprintf(tmpbuf, sizeof(tmpbuf), "%d", has_readable_type);
+		safe_strcat(cmdback, tmpbuf, &slen, HUGE_BUF);
+	    }
 	} else if (!strcmp(cmd,"tick")) {
 	    ns->tick = atoi(param);
 	    safe_strcat(cmdback, param, &slen, HUGE_BUF);
