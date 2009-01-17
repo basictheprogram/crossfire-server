@@ -1,0 +1,24 @@
+<html>
+<head>
+<title>#MAPNAME#</title>
+</head>
+<body>
+Map #MAPNAME#, in region <a href="#REGIONPATH#">#REGIONNAME#</a>. Map level: #MAPLEVEL#.
+<br />
+<br />
+Map view:
+<br />
+<a href="#MAPPIC#"><img src="#MAPSMALLPIC#"></a>
+<br />
+(click for larger view)
+<br />
+#MAPEXITFROM#
+#MAPEXITTO#
+<br />
+#MAPLORE#
+#QUESTS#
+#MONSTERS#
+<br />
+<a href="#REGIONPATH#">#REGIONNAME#'s map index</a> | <a href="#REGIONINDEXPATH#">Region index</a> | <a href="#INDEXPATH#">Global map index</a> | <a href="#WORLDMAPPATH#">World map</a>
+</body>
+</html>
