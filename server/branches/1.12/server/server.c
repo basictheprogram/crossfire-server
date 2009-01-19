@@ -977,30 +977,15 @@ static void process_players1(void) {
 #endif
         } /* end of for loop for all the players */
     } /* for flag */
-    for (pl=first_player;pl!=NULL;pl=pl->next) {
-        int has_action=1;
-
-        pl->ob->weapon_speed_left += pl->ob->weapon_speed;
-        if (pl->ob->weapon_speed_left > 1.0) pl->ob->weapon_speed_left=1.0;
-
+    for(pl=first_player;pl!=NULL;pl=pl->next) {
         pl->socket.sounds_this_tick = 0;
-
-        if (settings.casting_time == TRUE) {
-            if (pl->ob->casting_time > 0) {
-                pl->ob->casting_time--;
-                has_action=0;
-            }
-        }
-        /* If the character is idle (standing around resting) increase
-         * regen rates.
-         */
-        if (has_action && pl->ob->speed_left > 0) {
-            pl->ob->last_heal -= 2;
-            pl->ob->last_sp -= 2;
-            pl->ob->last_grace -= 2;
-            pl->ob->last_eat +=2;        /* Slow down food consumption */
-        }
-        do_some_living(pl->ob);
+	if (settings.casting_time == TRUE) {
+	    if (pl->ob->casting_time > 0){
+		pl->ob->casting_time--;
+	    }
+	}
+	do_some_living(pl->ob);
+/*	draw(pl->ob);*/	/* updated in socket code */
     }
 }
 
@@ -1017,17 +1002,19 @@ static void process_players2(void) {
     /* Then check if any players should use weapon-speed instead of speed */
     for (pl=first_player;pl!=NULL;pl=pl->next) {
 
-        /* The code that did weapon_sp handling here was out of place -
-         * this isn't called until after the player has finished there
-         * actions, and is thus out of place.  All we do here is bounds
-         * checking.
-         */
-        if (pl->has_hit) {
-            /* This needs to be here - if the player is running, we need to
-             * clear this each tick, but new commands are not being received
-             * so execute_newserver_command() is never called
-             */
-            pl->has_hit=0;
+	/* The code that did weapon_sp handling here was out of place -
+	 * this isn't called until after the player has finished there
+	 * actions, and is thus out of place.  All we do here is bounds
+	 * checking.
+	 */
+	if (pl->has_hit) {
+	    if (pl->ob->speed_left > pl->weapon_sp) pl->ob->speed_left = pl->weapon_sp;
+
+	    /* This needs to be here - if the player is running, we need to
+	     * clear this each tick, but new commands are not being received
+	     * so execute_newserver_command() is never called
+	     */
+	    pl->has_hit=0;
 
         } else if (pl->ob->speed_left>pl->ob->speed)
             pl->ob->speed_left = pl->ob->speed;

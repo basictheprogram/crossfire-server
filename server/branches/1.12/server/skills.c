@@ -1860,7 +1860,7 @@ static object *make_throw_ob(object *orig) {
 static int do_throw(object *op, object *part, object *toss_item, int dir, object *skill) {
     object *throw_ob=toss_item, *left=NULL;
     tag_t left_tag;
-    int eff_str = 0,str=op->stats.Str,dam=0;
+    int eff_str = 0,maxc,str=op->stats.Str,dam=0;
     int pause_f,weight_f=0, mflags;
     float str_factor=1.0,load_factor=1.0,item_factor=1.0;
     mapstruct *m;
@@ -1894,18 +1894,13 @@ static int do_throw(object *op, object *part, object *toss_item, int dir, object
     }
 
     /* the more we carry, the less we can throw. Limit only on players */
-    /* This logic is basically grabbed right out of fix_object() */
-    if (op->type == PLAYER &&
-        op->carrying > (weight_limit[op->stats.Str] * FREE_PLAYER_LOAD_PERCENT) &&
-        (FREE_PLAYER_LOAD_PERCENT < 1.0)) {
-
-        int extra_weight = op->carrying - weight_limit[op->stats.Str] * FREE_PLAYER_LOAD_PERCENT;
-        load_factor = (float) extra_weight / (float)(weight_limit[op->stats.Str] * (1.0 - FREE_PLAYER_LOAD_PERCENT));
-    }
+    maxc=max_carry[str]*1000;
+    if(op->carrying>maxc&&op->type==PLAYER)
+	load_factor = (float)maxc/(float) op->carrying;
 
     /* lighter items are thrown harder, farther, faster */
     if (throw_ob->weight>0)
-        item_factor = (float)(weight_limit[op->stats.Str] * FREE_PLAYER_LOAD_PERCENT)/(float)(3.0 * throw_ob->weight);
+        item_factor = (float) maxc/(float) (3.0 * throw_ob->weight);
     else { /* 0 or negative weight?!? Odd object, can't throw it */
         query_name(throw_ob, name, MAX_BUF);
         draw_ext_info_format(NDI_UNIQUE, 0,op, MSG_TYPE_SKILL, MSG_TYPE_SKILL_ERROR,
