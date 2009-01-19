@@ -648,10 +648,9 @@ static void attack_message(int dam, int type, object *op, object *hitter) {
     } /* end of player hitting player */
 
     /* scale down these messages too */
-    /*if(hitter->type==PLAYER && rndm(0, 2) == 0) {*/
-    if (hitter->type==PLAYER) {
-        sprintf(buf,"You %s.",buf1);
-        if (dam != 0) {
+    if(hitter->type==PLAYER && rndm(0, 2) == 0) {
+	sprintf(buf,"You %s.",buf1);
+	if (dam != 0) {
             if (hitter->chosen_skill)
                 play_sound_player_only(hitter->contr, SOUND_TYPE_HIT, hitter, 0, hitter->chosen_skill->name);
             else if (dam < 10)

@@ -2405,16 +2405,16 @@ void move_player_attack(object *op, int dir) {
                  ((mon->type!=PLAYER || op->contr->party==NULL ||
                    op->contr->party!=mon->contr->party))) {
 
-            /* If the player hasn't hit something this tick, and does
-             * so, give them speed boost based on weapon speed.  Doing
-             * it here is better than process_players2, which basically
-             * incurred a 1 tick offset.
-             */
-            if (op->weapon_speed_left < 0) {
-                op->speed_left = -0.01;
-                return;
-            }
-            op->weapon_speed_left -= 1.0;
+	    /* If the player hasn't hit something this tick, and does
+	     * so, give them speed boost based on weapon speed.  Doing
+	     * it here is better than process_players2, which basically
+	     * incurred a 1 tick offset.
+	     */
+	    if (!op->contr->has_hit) {
+		op->speed_left += op->speed / op->contr->weapon_sp;
+
+		op->contr->has_hit = 1; /* The last action was to hit, so use weapon_sp */
+	    }
 
             skill_attack(mon, op, 0, NULL, NULL);
 
