@@ -14,6 +14,9 @@ small - this just lets others know that the file has changed if nothing
 else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 
+server/plugins.c: Fix possible buffer overflow when initializing plugins.
+Andreas Kirschbaum 2009-02-03
+
 doc/Developers/objects, lib/artifacts: Remove obsolete fields color_fg and
  color_bg.
 lib/adm/map_info: Remove support for color_fg/color_bg fields.
