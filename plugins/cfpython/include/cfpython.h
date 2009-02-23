@@ -42,6 +42,44 @@
     #include <Python.h>
 #endif
 
+/* This is for allowing both python 3 and python 2.
+ * We also use some warnings and such with python 2.6 (and later 2.x).
+ */
+#if PY_MAJOR_VERSION >= 3
+#    define IS_PY3K
+#else /* Python 2.x */
+#    if PY_MINOR_VERSION >= 6 /* 2.6 or later */
+#        define IS_PY26
+#    else
+#        define IS_PY_LEGACY  /* Pre-2.6 lack forward compat. changes for Py3 */
+#    endif
+#    if PY_MINOR_VERSION >= 5 /* PyNumberMethods changed in 2.5 */
+#        define IS_PY25
+#    endif
+#endif
+
+/* Python 2.5 or older doesn't define these. */
+#ifndef Py_SIZE
+#    define Py_SIZE(ob)         (((PyVarObject*)(ob))->ob_size)
+#endif
+#ifndef Py_TYPE
+#    define Py_TYPE(ob)         (((PyObject*)(ob))->ob_type)
+#endif
+
+/* Python 2.6 and later use PyObject_HashNotImplemented to indicate no support
+ * for hash.
+ */
+#ifdef IS_PY_LEGACY
+#  define PyObject_HashNotImplemented NULL
+#endif
+
+/* Handle Bytes vs. String */
+#ifdef IS_PY3K
+#    define CF_IS_PYSTR(cfpy_obj) (PyUnicode_Check(cfpy_obj))
+#else
+#    define CF_IS_PYSTR(cfpy_obj) (PyString_Check(cfpy_obj) || PyUnicode_Check(cfpy_obj))
+#endif
+
 /* Python can define HAVE_GETTIMEOFDAY, but we have our own later on. */
 #ifdef HAVE_GETTIMEOFDAY
 #undef HAVE_GETTIMEOFDAY
@@ -75,13 +113,12 @@
 #include <cfpython_party.h>
 #include <cfpython_region.h>
 
-typedef struct _cfpcontext
-{
+typedef struct _cfpcontext {
     struct _cfpcontext *down;
-    PyObject*   who;
-    PyObject*   activator;
-    PyObject*   third;
-    PyObject*   event;
+    PyObject   *who;
+    PyObject   *activator;
+    PyObject   *third;
+    PyObject   *event;
     char        message[1024];
     int         fix;
     int         event_code;
@@ -92,12 +129,13 @@ typedef struct _cfpcontext
 } CFPContext;
 
 extern f_plug_api gethook;
+
 extern CFPContext *context_stack;
+
 extern CFPContext *current_context;
 
 /* This structure is used to define one python-implemented crossfire command.*/
-typedef struct PythonCmdStruct
-{
+typedef struct PythonCmdStruct {
     char *name;    /* The name of the command, as known in the game.         */
     char *script;  /* The name of the script file to bind.                   */
     double speed;  /* The speed of the command execution.                    */

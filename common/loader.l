@@ -46,7 +46,7 @@ static char *yval(void);
 
 static int lex_error;
 static char msgbuf[HUGE_BUF];
-int    msglen=0, total_msglen=0;
+size_t msglen = 0, total_msglen = 0;
 static char lorebuf[HUGE_BUF];
 
 /** Maps the MOVE_* values to names */
@@ -614,7 +614,7 @@ A	.+
 			 * about not overflowing the buffer.
 			 */
 			if (total_msglen > (HUGE_BUF/2))
-			    LOG(llevDebug, "\n\tWarning message length > %d (max allowed=%d): %d\n>%.80s<\n",
+			    LOG(llevDebug, "\n\tWarning message length > %d (max allowed=%d): %lu\n>%.80s<\n",
 				HUGE_BUF/2, HUGE_BUF, total_msglen,op->msg);
 		    }
 <MESSAGE>.*	    {	safe_strcat(msgbuf, yytext, &msglen, HUGE_BUF);
@@ -629,7 +629,7 @@ A	.+
 			 * about not overflowing the buffer.
 			 */
 			if (strlen(op->lore) > (HUGE_BUF/2))
-			    LOG(llevDebug, "\n\tWarning lore length > %d (max allowed=%d): %d\n>%.80s<\n",
+			    LOG(llevDebug, "\n\tWarning lore length > %d (max allowed=%d): %lu\n>%.80s<\n",
 				HUGE_BUF/2, HUGE_BUF, strlen(op->lore),op->lore);
 		    }
 <LORE>.*	    {strcat(lorebuf, yytext); strcat(lorebuf,"\n"); }
@@ -1069,7 +1069,7 @@ A	.+
  * @param s
  * lex-generated error message.
  */
-int yyerror(const char *s)
+static int yyerror(const char *s)
 {
     LOG(llevError, "%s: %s\n", s, yytext);
     return -1;
@@ -1344,7 +1344,7 @@ static void get_string_move_type(StringBuffer *sb, MoveType mt)
     } while(0)
 /** Adds a long to the buffer.  entryname__ must have a space at the end. */
 #define FAST_SAVE_LONG(sb__, entryname__, entryvalue__) \
-    stringbuffer_append_printf(sb__, "%s%ld\n", entryname__, entryvalue__)
+    stringbuffer_append_printf(sb__, "%s%ld\n", entryname__, (long int)entryvalue__)
 /** Adds a double to the buffer. entryname__ must have a space at the end. */
 #define FAST_SAVE_DOUBLE(sb__, entryname__, entryvalue__) \
     stringbuffer_append_printf(sb__, "%s%f\n", entryname__, entryvalue__)
@@ -1738,7 +1738,7 @@ int save_object(FILE *fp,object *op, int flag) {
          */
         archetype* original = find_archetype(op->arch->name);
         if (!original) {
-            LOG(llevError, "could not find original archetype %s for custom monster!", op->arch->name);
+            LOG(llevError, "could not find original archetype %s for custom monster!\n", op->arch->name);
             abort();
         }
         get_ob_diff(sb, &op->arch->clone, &original->clone);

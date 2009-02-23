@@ -3,9 +3,7 @@ static PyObject *Crossfire_Archetype_GetNext(Crossfire_Archetype *who, void *clo
 static PyObject *Crossfire_Archetype_GetMore(Crossfire_Archetype *who, void *closure);
 static PyObject *Crossfire_Archetype_GetHead(Crossfire_Archetype *who, void *closure);
 static PyObject *Crossfire_Archetype_GetClone(Crossfire_Archetype *who, void *closure);
-
 static PyObject *Crossfire_Archetype_GetNewObject(Crossfire_Archetype *who, PyObject *args);
-
 static int Crossfire_Archetype_InternalCompare(Crossfire_Archetype *left, Crossfire_Archetype *right);
 
 static PyGetSetDef Archetype_getseters[] = {
@@ -18,41 +16,59 @@ static PyGetSetDef Archetype_getseters[] = {
 };
 
 static PyMethodDef ArchetypeMethods[] = {
-    { "NewObject",         (PyCFunction)Crossfire_Archetype_GetNewObject,       METH_VARARGS},
-    {NULL, NULL, 0}
+    { "NewObject", (PyCFunction)Crossfire_Archetype_GetNewObject, METH_NOARGS, NULL },
+    { NULL, NULL, 0, NULL }
 };
 
 /* Our actual Python ArchetypeType */
 PyTypeObject Crossfire_ArchetypeType = {
-            PyObject_HEAD_INIT(NULL)
-                    0,                         /* ob_size*/
-            "Crossfire.Archetype",        /* tp_name*/
-            sizeof(Crossfire_Archetype),  /* tp_basicsize*/
-            0,                         /* tp_itemsize*/
-            0,                         /* tp_dealloc*/
-            0,                         /* tp_print*/
-            0,                         /* tp_getattr*/
-            0,                         /* tp_setattr*/
-            (cmpfunc)Crossfire_Archetype_InternalCompare,                         /* tp_compare*/
-            0,                         /* tp_repr*/
-            0,                         /* tp_as_number*/
-            0,                         /* tp_as_sequence*/
-            0,                         /* tp_as_mapping*/
-            0,                         /* tp_hash */
-            0,                         /* tp_call*/
-            0,                         /* tp_str*/
-            PyObject_GenericGetAttr,   /* tp_getattro*/
-            PyObject_GenericSetAttr,   /* tp_setattro*/
-            0,                         /* tp_as_buffer*/
-            Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,        /* tp_flags*/
-            "Crossfire archetypes",       /* tp_doc */
-            0,                         /* tp_traverse */
-            0,                         /* tp_clear */
-            0,                         /* tp_richcompare */
-            0,                         /* tp_weaklistoffset */
-            0,                         /* tp_iter */
-            0,                         /* tp_iternext */
-            ArchetypeMethods,          /* tp_methods */
-            0,                         /* tp_members */
-            Archetype_getseters,       /* tp_getset */
+    PyObject_HEAD_INIT(NULL)
+#ifndef IS_PY3K
+    0,                         /* ob_size*/
+#endif
+    "Crossfire.Archetype",     /* tp_name*/
+    sizeof(Crossfire_Archetype), /* tp_basicsize*/
+    0,                         /* tp_itemsize*/
+    NULL,                      /* tp_dealloc*/
+    NULL,                      /* tp_print*/
+    NULL,                      /* tp_getattr*/
+    NULL,                      /* tp_setattr*/
+    (cmpfunc)Crossfire_Archetype_InternalCompare, /* tp_compare*/
+    NULL,                      /* tp_repr*/
+    NULL,                      /* tp_as_number*/
+    NULL,                      /* tp_as_sequence*/
+    NULL,                      /* tp_as_mapping*/
+    PyObject_HashNotImplemented, /* tp_hash */
+    NULL,                      /* tp_call*/
+    NULL,                      /* tp_str*/
+    PyObject_GenericGetAttr,   /* tp_getattro*/
+    PyObject_GenericSetAttr,   /* tp_setattro*/
+    NULL,                      /* tp_as_buffer*/
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE, /* tp_flags*/
+    "Crossfire archetypes",    /* tp_doc */
+    NULL,                      /* tp_traverse */
+    NULL,                      /* tp_clear */
+    NULL,                      /* tp_richcompare */
+    0,                         /* tp_weaklistoffset */
+    NULL,                      /* tp_iter */
+    NULL,                      /* tp_iternext */
+    ArchetypeMethods,          /* tp_methods */
+    NULL,                      /* tp_members */
+    Archetype_getseters,       /* tp_getset */
+    NULL,                      /* tp_base */
+    NULL,                      /* tp_dict */
+    NULL,                      /* tp_descr_get */
+    NULL,                      /* tp_descr_set */
+    0,                         /* tp_dictoffset */
+    NULL,                      /* tp_init */
+    NULL,                      /* tp_alloc */
+    NULL,                      /* tp_new */
+    NULL,                      /* tp_free */
+    NULL,                      /* tp_is_gc */
+    NULL,                      /* tp_bases */
+    NULL,                      /* tp_mro */
+    NULL,                      /* tp_cache */
+    NULL,                      /* tp_subclasses */
+    NULL,                      /* tp_weaklist */
+    NULL,                      /* tp_del */
 };
