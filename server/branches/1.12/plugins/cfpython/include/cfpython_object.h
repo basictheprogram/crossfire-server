@@ -28,29 +28,41 @@
 /*****************************************************************************/
 #ifndef CFPYTHON_OBJECT_H
 #define CFPYTHON_OBJECT_H
+
 typedef struct {
     PyObject_HEAD
-            object *obj;
-            tag_t count;
+    object *obj;
+    tag_t count;
 } Crossfire_Object;
+
 extern PyTypeObject Crossfire_ObjectType;
 
 typedef struct {
     PyObject_HEAD
-            object *obj;
-            tag_t count;
+    object *obj;
+    tag_t count;
 } Crossfire_Player;
+
 extern PyTypeObject Crossfire_PlayerType;
 
-#define EXISTCHECK(ob) \
-    { \
+#define EXISTCHECK(ob) { \
     if (!ob || !ob->obj || (was_destroyed(ob->obj, ob->obj->count))) { \
         PyErr_SetString(PyExc_ReferenceError, "Crossfire object no longer exists"); \
         return NULL; \
     } }
 
-#define EXISTCHECK_INT(ob) \
-    { \
+/**
+ * This is meant to be used for parameters where you don't know if the type of
+ * the object is correct. It should NOT be used for the self pointer, since that
+ * will always be a compatible type.
+ */
+#define TYPEEXISTCHECK(ob) { \
+    if (!ob || !PyObject_TypeCheck((PyObject*)ob, &Crossfire_ObjectType) || !ob->obj || (was_destroyed(ob->obj, ob->obj->count))) { \
+        PyErr_SetString(PyExc_ReferenceError, "Not a Crossfire object or Crossfire object no longer exists"); \
+        return NULL; \
+    } }
+
+#define EXISTCHECK_INT(ob) { \
     if (!ob || !ob->obj || (was_destroyed(ob->obj, ob->obj->count))) { \
         PyErr_SetString(PyExc_ReferenceError, "Crossfire object no longer exists"); \
         return -1; \

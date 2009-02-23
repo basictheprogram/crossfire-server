@@ -43,11 +43,11 @@
  * new link object, cleared.
  */
 objectlink *get_objectlink(void) {
-    objectlink *ol=(objectlink *)CALLOC(1,sizeof(objectlink));
+    objectlink *ol = (objectlink *)CALLOC(1, sizeof(objectlink));
     if (!ol)
         fatal(OUT_OF_MEMORY);
-    ol->ob=NULL;
-    ol->next=NULL;
+    ol->ob = NULL;
+    ol->next = NULL;
     ol->id = 0;
     return ol;
 }
@@ -63,7 +63,8 @@ objectlink *get_objectlink(void) {
  * new link pointer.
  */
 oblinkpt *get_objectlinkpt(void) {
-    oblinkpt *obp = (oblinkpt *) malloc(sizeof(oblinkpt));
+    oblinkpt *obp = (oblinkpt *)malloc(sizeof(oblinkpt));
+
     if (!obp)
         fatal(OUT_OF_MEMORY);
     obp->link = NULL;

@@ -34,34 +34,22 @@
 #include <global.h>
 
 /**
- * Clears player structure, including pointed object (through free_object()).
+ * Clears data in player structure.
+ *
+ * Socket isn't touched. Nor is anything that doesn't need to be freed. So you
+ * may need to do a memset() to clear out values.
  *
  * @param pl
- * player to clear. Pointer is invalid after this call.
+ * player to clear. Pointer is still valid, and can be reused for "play again".
  */
-void free_player(player *pl) {
+void clear_player(player *pl) {
     client_spell *info;
     client_spell *next;
 
-    if (first_player!=pl) {
-        player *prev=first_player;
-        while (prev!=NULL&&prev->next!=NULL&&prev->next!=pl)
-            prev=prev->next;
-        if (prev->next!=pl) {
-            LOG(llevError,"Free_player: Can't find previous player.\n");
-            exit(1);
-        }
-        prev->next=pl->next;
-    } else
-        first_player=pl->next;
-
-    if (pl->ob != NULL) {
-        if (!QUERY_FLAG(pl->ob, FLAG_REMOVED)) remove_ob(pl->ob);
-        free_object(pl->ob);
-    }
     /* Clear item stack (used by DMs only) */
     if (pl->stack_items)
         free(pl->stack_items);
+    pl->stack_position = 0;
 
     info = pl->spell_state;
     while (info) {
@@ -69,12 +57,40 @@ void free_player(player *pl) {
         free(info);
         info = next;
     }
+}
+
+/**
+ * Clears player structure, including pointed object (through free_object()).
+ *
+ * @param pl
+ * player to clear. Pointer is invalid after this call.
+ */
+void free_player(player *pl) {
+    if (first_player != pl) {
+        player *prev = first_player;
+
+        while (prev != NULL && prev->next != NULL && prev->next != pl)
+            prev = prev->next;
+        if (prev->next != pl) {
+            LOG(llevError, "Free_player: Can't find previous player.\n");
+            exit(1);
+        }
+        prev->next = pl->next;
+    } else
+        first_player = pl->next;
+
+    if (pl->ob != NULL) {
+        if (!QUERY_FLAG(pl->ob, FLAG_REMOVED))
+            remove_ob(pl->ob);
+        free_object(pl->ob);
+    }
+
+    clear_player(pl);
 
     free(pl->socket.faces_sent);
 
     CFREE(pl);
 }
-
 
 /**
  * Determine if the attacktype represented by the
@@ -88,9 +104,12 @@ void free_player(player *pl) {
  * TRUE if player can gain resistances in that, FALSE else.
  */
 int atnr_is_dragon_enabled(int attacknr) {
-    if (attacknr == ATNR_MAGIC || attacknr == ATNR_FIRE ||
-        attacknr == ATNR_ELECTRICITY || attacknr == ATNR_COLD ||
-        attacknr == ATNR_ACID || attacknr == ATNR_POISON)
+    if (attacknr == ATNR_MAGIC
+    || attacknr == ATNR_FIRE
+    || attacknr == ATNR_ELECTRICITY
+    || attacknr == ATNR_COLD
+    || attacknr == ATNR_ACID
+    || attacknr == ATNR_POISON)
         return 1;
     return 0;
 }
@@ -104,9 +123,11 @@ int atnr_is_dragon_enabled(int attacknr) {
  * TRUE if the adressed object 'ob' is a player of the dragon race.
  */
 int is_dragon_pl(const object *op) {
-    if (op != NULL && op->type == PLAYER && op->arch != NULL
-        && op->arch->clone.race != NULL &&
-        strcmp(op->arch->clone.race, "dragon")==0)
+    if (op != NULL
+    && op->type == PLAYER
+    && op->arch != NULL
+    && op->arch->clone.race != NULL
+    && strcmp(op->arch->clone.race, "dragon") == 0)
         return 1;
     return 0;
 }
@@ -125,12 +146,13 @@ int is_dragon_pl(const object *op) {
  */
 client_spell *get_client_spell_state(player *pl, object *spell) {
     client_spell *info = pl->spell_state;
+
     while (info) {
         if (info->spell == spell)
             return info;
         info = info->next;
     }
-    info = (client_spell*)malloc(sizeof(client_spell));
+    info = (client_spell *)malloc(sizeof(client_spell));
     if (info == NULL)
         fatal(OUT_OF_MEMORY);
     memset(info, 0, sizeof(client_spell));
@@ -150,8 +172,10 @@ client_spell *get_client_spell_state(player *pl, object *spell) {
  */
 int is_wraith_pl(object *op) {
     object *item = NULL;
+
     if (op != NULL && op->type == PLAYER && op->arch != NULL)
-        for (item = op->inv; item!=NULL && strcmp(item->name, "wraith feed"); item=item->below);
+        for (item = op->inv; item != NULL && strcmp(item->name, "wraith feed"); item = item->below)
+            ;
     if (item)
         return 1;
     return 0;
@@ -167,8 +191,10 @@ int is_wraith_pl(object *op) {
  */
 int is_old_wraith_pl(object *op) {
     object *item = NULL;
+
     if (op != NULL && op->type == PLAYER && op->arch != NULL)
-        for (item = op->inv; item!=NULL && strcmp(item->name, "Wraith_Force"); item=item->below);
+        for (item = op->inv; item != NULL && strcmp(item->name, "Wraith_Force"); item = item->below)
+            ;
     if (item)
         return !is_wraith_pl(op);
     return 0;

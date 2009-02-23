@@ -56,106 +56,159 @@ static PyObject *Map_TriggerConnected(Crossfire_Map *map, PyObject *args);
 static int Map_InternalCompare(Crossfire_Map *left, Crossfire_Map *right);
 
 static PyObject *Crossfire_Map_Long(PyObject *obj);
+#ifndef IS_PY3K
 static PyObject *Crossfire_Map_Int(PyObject *obj);
+#endif
 static void Crossfire_Map_dealloc(PyObject *obj);
 static PyObject *Crossfire_Map_new(PyTypeObject *type, PyObject *args, PyObject *kwds);
 
 /* Python binding */
 static PyGetSetDef Map_getseters[] = {
-    {"Difficulty",      (getter)Map_GetDifficulty,  NULL, NULL, NULL },
-    {"Path",            (getter)Map_GetPath,        (setter)Map_SetPath, NULL, NULL },
-    {"TempName",        (getter)Map_GetTempName,    NULL, NULL, NULL },
-    {"Name",            (getter)Map_GetName,        NULL, NULL, NULL },
-    {"ResetTime",       (getter)Map_GetResetTime,   NULL, NULL, NULL },
-    {"ResetTimeout",    (getter)Map_GetResetTimeout,NULL, NULL, NULL },
-    {"Players",         (getter)Map_GetPlayers,     NULL, NULL, NULL },
-    {"Light",           (getter)Map_GetDarkness,    NULL, NULL, NULL },
-    {"Darkness",        (getter)Map_GetDarkness,    NULL, NULL, NULL },
-    {"Width",           (getter)Map_GetWidth,       NULL, NULL, NULL },
-    {"Height",          (getter)Map_GetHeight,      NULL, NULL, NULL },
-    {"EnterX",          (getter)Map_GetEnterX,      NULL, NULL, NULL },
-    {"EnterY",          (getter)Map_GetEnterY,      NULL, NULL, NULL },
-    {"Message",         (getter)Map_GetMessage,     NULL, NULL, NULL },
-    {"Region",          (getter)Map_GetRegion,     NULL, NULL, NULL },
-    {"Unique",          (getter)Map_GetUnique,     NULL, NULL, NULL },
-    { NULL, NULL, NULL, NULL, NULL }
+    { "Difficulty",      (getter)Map_GetDifficulty,  NULL, NULL, NULL },
+    { "Path",            (getter)Map_GetPath,        (setter)Map_SetPath, NULL, NULL },
+    { "TempName",        (getter)Map_GetTempName,    NULL, NULL, NULL },
+    { "Name",            (getter)Map_GetName,        NULL, NULL, NULL },
+    { "ResetTime",       (getter)Map_GetResetTime,   NULL, NULL, NULL },
+    { "ResetTimeout",    (getter)Map_GetResetTimeout, NULL, NULL, NULL },
+    { "Players",         (getter)Map_GetPlayers,     NULL, NULL, NULL },
+    { "Light",           (getter)Map_GetDarkness,    NULL, NULL, NULL },
+    { "Darkness",        (getter)Map_GetDarkness,    NULL, NULL, NULL },
+    { "Width",           (getter)Map_GetWidth,       NULL, NULL, NULL },
+    { "Height",          (getter)Map_GetHeight,      NULL, NULL, NULL },
+    { "EnterX",          (getter)Map_GetEnterX,      NULL, NULL, NULL },
+    { "EnterY",          (getter)Map_GetEnterY,      NULL, NULL, NULL },
+    { "Message",         (getter)Map_GetMessage,     NULL, NULL, NULL },
+    { "Region",          (getter)Map_GetRegion,      NULL, NULL, NULL },
+    { "Unique",          (getter)Map_GetUnique,      NULL, NULL, NULL },
+    {  NULL, NULL, NULL, NULL, NULL }
 };
 
 static PyMethodDef MapMethods[] = {
-    { "Print",    (PyCFunction)Map_Message, METH_VARARGS},
-    { "ObjectAt", (PyCFunction)Map_GetFirstObjectAt, METH_VARARGS},
-    { "CreateObject", (PyCFunction)Map_CreateObject, METH_VARARGS},
-    { "Check",    (PyCFunction)Map_Check, METH_VARARGS},
-    { "Next",    (PyCFunction)Map_Next, METH_VARARGS},
-    { "Insert",  (PyCFunction)Map_Insert, METH_VARARGS},
-    { "ChangeLight", (PyCFunction)Map_ChangeLight, METH_VARARGS},
-    { "TriggerConnected", (PyCFunction)Map_TriggerConnected, METH_VARARGS},
-    {NULL, NULL, 0}
+    { "Print",            (PyCFunction)Map_Message,          METH_VARARGS, NULL },
+    { "ObjectAt",         (PyCFunction)Map_GetFirstObjectAt, METH_VARARGS, NULL },
+    { "CreateObject",     (PyCFunction)Map_CreateObject,     METH_VARARGS, NULL },
+    { "Check",            (PyCFunction)Map_Check,            METH_VARARGS, NULL },
+    { "Next",             (PyCFunction)Map_Next,             METH_NOARGS,  NULL },
+    { "Insert",           (PyCFunction)Map_Insert,           METH_VARARGS, NULL },
+    { "ChangeLight",      (PyCFunction)Map_ChangeLight,      METH_VARARGS, NULL },
+    { "TriggerConnected", (PyCFunction)Map_TriggerConnected, METH_VARARGS, NULL },
+    { NULL, NULL, 0, NULL }
 };
 
-static PyNumberMethods MapConvert[ ] = {
-        0,               /* binaryfunc nb_add; */        /* __add__ */
-        0,               /* binaryfunc nb_subtract; */   /* __sub__ */
-        0,               /* binaryfunc nb_multiply; */   /* __mul__ */
-        0,               /* binaryfunc nb_divide; */     /* __div__ */
-        0,               /* binaryfunc nb_remainder; */  /* __mod__ */
-        0,               /* binaryfunc nb_divmod; */     /* __divmod__ */
-        0,               /* ternaryfunc nb_power; */     /* __pow__ */
-        0,               /* unaryfunc nb_negative; */    /* __neg__ */
-        0,               /* unaryfunc nb_positive; */    /* __pos__ */
-        0,               /* unaryfunc nb_absolute; */    /* __abs__ */
-        0,               /* inquiry nb_nonzero; */       /* __nonzero__ */
-        0,               /* unaryfunc nb_invert; */      /* __invert__ */
-        0,               /* binaryfunc nb_lshift; */     /* __lshift__ */
-        0,               /* binaryfunc nb_rshift; */     /* __rshift__ */
-        0,               /* binaryfunc nb_and; */        /* __and__ */
-        0,               /* binaryfunc nb_xor; */        /* __xor__ */
-        0,               /* binaryfunc nb_or; */         /* __or__ */
-        0,               /* coercion nb_coerce; */       /* __coerce__ */
-        Crossfire_Map_Int, /* unaryfunc nb_int; */       /* __int__ */
-        Crossfire_Map_Long, /* unaryfunc nb_long; */     /* __long__ */
-        0
+static PyNumberMethods MapConvert = {
+    NULL,            /* binaryfunc nb_add; */        /* __add__ */
+    NULL,            /* binaryfunc nb_subtract; */   /* __sub__ */
+    NULL,            /* binaryfunc nb_multiply; */   /* __mul__ */
+#ifndef IS_PY3K
+    NULL,            /* binaryfunc nb_divide; */     /* __div__ */
+#endif
+    NULL,            /* binaryfunc nb_remainder; */  /* __mod__ */
+    NULL,            /* binaryfunc nb_divmod; */     /* __divmod__ */
+    NULL,            /* ternaryfunc nb_power; */     /* __pow__ */
+    NULL,            /* unaryfunc nb_negative; */    /* __neg__ */
+    NULL,            /* unaryfunc nb_positive; */    /* __pos__ */
+    NULL,            /* unaryfunc nb_absolute; */    /* __abs__ */
+#ifdef IS_PY3K
+    NULL,            /* inquiry nb_bool; */          /* __bool__ */
+#else
+    NULL,            /* inquiry nb_nonzero; */       /* __nonzero__ */
+#endif
+    NULL,            /* unaryfunc nb_invert; */      /* __invert__ */
+    NULL,            /* binaryfunc nb_lshift; */     /* __lshift__ */
+    NULL,            /* binaryfunc nb_rshift; */     /* __rshift__ */
+    NULL,            /* binaryfunc nb_and; */        /* __and__ */
+    NULL,            /* binaryfunc nb_xor; */        /* __xor__ */
+    NULL,            /* binaryfunc nb_or; */         /* __or__ */
+#ifndef IS_PY3K
+    NULL,            /* coercion nb_coerce; */       /* __coerce__ */
+#endif
+#ifdef IS_PY3K
+    /* This is not a typo. For Py3k it should be Crossfire_Map_Long
+     * and NOT Crossfire_Map_Int.
+     */
+    Crossfire_Map_Long, /* unaryfunc nb_int; */      /* __int__ */
+    NULL,               /* void *nb_reserved; */
+#else
+    Crossfire_Map_Int,  /* unaryfunc nb_int; */      /* __int__ */
+    Crossfire_Map_Long, /* unaryfunc nb_long; */     /* __long__ */
+#endif
+    NULL,            /* unaryfunc nb_float; */       /* __float__ */
+#ifndef IS_PY3K
+    NULL,            /* unaryfunc nb_oct; */         /* __oct__ */
+    NULL,            /* unaryfunc nb_hex; */         /* __hex__ */
+#endif
+    NULL,            /* binaryfunc nb_inplace_add; */
+    NULL,            /* binaryfunc nb_inplace_subtract; */
+    NULL,            /* binaryfunc nb_inplace_multiply; */
+#ifndef IS_PY3K
+    NULL,            /* binaryfunc nb_inplace_divide; */
+#endif
+    NULL,            /* binaryfunc nb_inplace_remainder; */
+    NULL,            /* ternaryfunc nb_inplace_power; */
+    NULL,            /* binaryfunc nb_inplace_lshift; */
+    NULL,            /* binaryfunc nb_inplace_rshift; */
+    NULL,            /* binaryfunc nb_inplace_and; */
+    NULL,            /* binaryfunc nb_inplace_xor; */
+    NULL,            /* binaryfunc nb_inplace_or; */
+
+    NULL,            /* binaryfunc nb_floor_divide; */
+    NULL,            /* binaryfunc nb_true_divide; */
+    NULL,            /* binaryfunc nb_inplace_floor_divide; */
+    NULL,            /* binaryfunc nb_inplace_true_divide; */
+#if defined(IS_PY25) || defined(IS_PY3K)
+    NULL             /* unaryfunc nb_index; */
+#endif
 };
 
 /* Our actual Python MapType */
 PyTypeObject Crossfire_MapType = {
-            PyObject_HEAD_INIT(NULL)
-                    0,                         /* ob_size*/
-            "Crossfire.Map",           /* tp_name*/
-            sizeof(Crossfire_Map),     /* tp_basicsize*/
-            0,                         /* tp_itemsize*/
-            Crossfire_Map_dealloc,     /* tp_dealloc*/
-            0,                         /* tp_print*/
-            0,                         /* tp_getattr*/
-            0,                         /* tp_setattr*/
-            (cmpfunc)Map_InternalCompare,                         /* tp_compare*/
-            0,                         /* tp_repr*/
-            MapConvert,                /* tp_as_number*/
-            0,                         /* tp_as_sequence*/
-            0,                         /* tp_as_mapping*/
-            0,                         /* tp_hash */
-            0,                         /* tp_call*/
-            0,                         /* tp_str*/
-            PyObject_GenericGetAttr,   /* tp_getattro*/
-            PyObject_GenericSetAttr,   /* tp_setattro*/
-            0,                         /* tp_as_buffer*/
-            Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,        /* tp_flags*/
-            "Crossfire maps",          /* tp_doc */
-            0,                         /* tp_traverse */
-            0,                         /* tp_clear */
-            0,                         /* tp_richcompare */
-            0,                         /* tp_weaklistoffset */
-            0,                         /* tp_iter */
-            0,                         /* tp_iternext */
-            MapMethods,                /* tp_methods */
-            0,                         /* tp_members */
-            Map_getseters,             /* tp_getset */
-            0,                         /* tp_base */
-            0,                         /* tp_dict */
-            0,                         /* tp_descr_get */
-            0,                         /* tp_descr_set */
-            0,                         /* tp_dictoffset */
-            0,                         /* tp_init */
-            0,                         /* tp_alloc */
-            Crossfire_Map_new,         /* tp_new */
+    PyObject_HEAD_INIT(NULL)
+#ifndef IS_PY3K
+    0,                         /* ob_size*/
+#endif
+    "Crossfire.Map",           /* tp_name*/
+    sizeof(Crossfire_Map),     /* tp_basicsize*/
+    0,                         /* tp_itemsize*/
+    Crossfire_Map_dealloc,     /* tp_dealloc*/
+    NULL,                      /* tp_print*/
+    NULL,                      /* tp_getattr*/
+    NULL,                      /* tp_setattr*/
+    (cmpfunc)Map_InternalCompare, /* tp_compare*/
+    NULL,                      /* tp_repr*/
+    &MapConvert,               /* tp_as_number*/
+    NULL,                      /* tp_as_sequence*/
+    NULL,                      /* tp_as_mapping*/
+    PyObject_HashNotImplemented, /* tp_hash */
+    NULL,                      /* tp_call*/
+    NULL,                      /* tp_str*/
+    PyObject_GenericGetAttr,   /* tp_getattro*/
+    PyObject_GenericSetAttr,   /* tp_setattro*/
+    NULL,                      /* tp_as_buffer*/
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE, /* tp_flags*/
+    "Crossfire maps",          /* tp_doc */
+    NULL,                      /* tp_traverse */
+    NULL,                      /* tp_clear */
+    NULL,                      /* tp_richcompare */
+    0,                         /* tp_weaklistoffset */
+    NULL,                      /* tp_iter */
+    NULL,                      /* tp_iternext */
+    MapMethods,                /* tp_methods */
+    NULL,                      /* tp_members */
+    Map_getseters,             /* tp_getset */
+    NULL,                      /* tp_base */
+    NULL,                      /* tp_dict */
+    NULL,                      /* tp_descr_get */
+    NULL,                      /* tp_descr_set */
+    0,                         /* tp_dictoffset */
+    NULL,                      /* tp_init */
+    NULL,                      /* tp_alloc */
+    Crossfire_Map_new,         /* tp_new */
+    NULL,                      /* tp_free */
+    NULL,                      /* tp_is_gc */
+    NULL,                      /* tp_bases */
+    NULL,                      /* tp_mro */
+    NULL,                      /* tp_cache */
+    NULL,                      /* tp_subclasses */
+    NULL,                      /* tp_weaklist */
+    NULL,                      /* tp_del */
 };

@@ -19,7 +19,7 @@
 #include <global.h>
 #include <libproto.h> /* For LOG */
 
-#if defined (__sun__) && defined (StupidSunHeaders)
+#if defined(__sun__) && defined(StupidSunHeaders)
 #include <sys/time.h>
 #include "sunos.h"
 #endif
@@ -47,7 +47,7 @@ static shared_string *hash_table[TABLESIZE];
 void init_hash_table(void) {
     /* A static object should be zeroed out always */
 #if !defined(__STDC__)
-    (void) memset((void *)hash_table, 0, TABLESIZE * sizeof(shared_string *));
+    (void)memset((void *)hash_table, 0, TABLESIZE*sizeof(shared_string *));
 #endif
 }
 
@@ -59,7 +59,7 @@ void init_hash_table(void) {
  * @return
  * hash of string, suitable for use in ::hash_table.
  */
-static int hashstr(const char *str) {
+static unsigned long hashstr(const char *str) {
     unsigned long hash = 0;
     int i = 0;
     unsigned rot = 0;
@@ -68,12 +68,12 @@ static int hashstr(const char *str) {
     GATHER(hash_stats.calls);
 
     for (p = str; i < MAXSTRING && *p; p++, i++) {
-        hash ^= (unsigned long) *p << rot;
+        hash ^= (unsigned long)*p<<rot;
         rot += 2;
-        if (rot >= (sizeof(long) - sizeof(char)) * CHAR_BIT)
+        if (rot >= (sizeof(unsigned long)-sizeof(char))*CHAR_BIT)
             rot = 0;
     }
-    return (hash % TABLESIZE);
+    return (hash%TABLESIZE);
 }
 
 /**
@@ -94,15 +94,13 @@ static shared_string *new_shared_string(const char *str) {
      * that some bytes for the string are already allocated in the
      * shared_string struct.
      */
-    ss = (shared_string *) malloc(sizeof(shared_string) - PADDING +
-                                  strlen(str) + 1);
+    ss = (shared_string *)malloc(sizeof(shared_string)-PADDING+strlen(str)+1);
     if (ss == NULL)
         fatal(OUT_OF_MEMORY);
     ss->u.previous = NULL;
     ss->next = NULL;
     ss->refcount = 1;
     strcpy(ss->string, str);
-
     return ss;
 }
 
@@ -117,7 +115,7 @@ static shared_string *new_shared_string(const char *str) {
  */
 sstring add_string(const char *str) {
     shared_string *ss;
-    int ind;
+    unsigned long ind;
 
     GATHER(add_stats.calls);
 
@@ -125,7 +123,7 @@ sstring add_string(const char *str) {
      * add_string with a null parameter.  But this will prevent a few
      * core dumps.
      */
-    if (str==NULL) {
+    if (str == NULL) {
 #ifdef MANY_CORES
         abort();
 #else
@@ -216,7 +214,7 @@ sstring add_refcount(sstring str) {
  * refcount of the string.
  */
 int query_refcount(sstring str) {
-    return (SS(str)->refcount) & ~TOPBIT;
+    return (SS(str)->refcount)&~TOPBIT;
 }
 
 /**
@@ -229,7 +227,7 @@ int query_refcount(sstring str) {
  */
 sstring find_string(const char *str) {
     shared_string *ss;
-    int ind;
+    unsigned long ind;
 
     GATHER(find_stats.calls);
 
@@ -278,9 +276,9 @@ void free_string(sstring str) {
 
     ss = SS(str);
 
-    if ((--ss->refcount & ~TOPBIT) == 0) {
+    if ((--ss->refcount&~TOPBIT) == 0) {
         /* Remove this entry. */
-        if (ss->refcount & TOPBIT) {
+        if (ss->refcount&TOPBIT) {
             /* We must put a new value into the hash_table[].
             */
             if (ss->next) {
@@ -314,25 +312,20 @@ void free_string(sstring str) {
  * @param size
  * buf's size.
  */
-void ss_dump_statistics(char *buf, int size) {
+void ss_dump_statistics(char *buf, size_t size) {
     static char line[80];
 
-    snprintf(buf, size, "%-13s %6s %6s %6s %6s %6s\n",
-             "", "calls", "hashed", "strcmp", "search", "linked");
-    snprintf(line, sizeof(line), "%-13s %6d %6d %6d %6d %6d\n",
-             "add_string:", add_stats.calls, add_stats.hashed,
-             add_stats.strcmps, add_stats.search, add_stats.linked);
-    snprintf(buf + strlen(buf), size - strlen(buf), "%s", line);
+    snprintf(buf, size, "%-13s %6s %6s %6s %6s %6s\n", "", "calls", "hashed", "strcmp", "search", "linked");
+    snprintf(line, sizeof(line), "%-13s %6d %6d %6d %6d %6d\n", "add_string:", add_stats.calls, add_stats.hashed, add_stats.strcmps, add_stats.search, add_stats.linked);
+    snprintf(buf+strlen(buf), size-strlen(buf), "%s", line);
     snprintf(line, sizeof(line), "%-13s %6d\n", "add_refcount:", add_ref_stats.calls);
-    snprintf(buf + strlen(buf), size - strlen(buf), "%s", line);
+    snprintf(buf+strlen(buf), size-strlen(buf), "%s", line);
     snprintf(line, sizeof(line), "%-13s %6d\n", "free_string:", free_stats.calls);
-    snprintf(buf + strlen(buf), size - strlen(buf), "%s", line);
-    snprintf(line, sizeof(line), "%-13s %6d %6d %6d %6d %6d\n",
-             "find_string:", find_stats.calls, find_stats.hashed,
-             find_stats.strcmps, find_stats.search, find_stats.linked);
-    snprintf(buf + strlen(buf), size - strlen(buf), "%s", line);
+    snprintf(buf+strlen(buf), size-strlen(buf), "%s", line);
+    snprintf(line, sizeof(line), "%-13s %6d %6d %6d %6d %6d\n", "find_string:", find_stats.calls, find_stats.hashed, find_stats.strcmps, find_stats.search, find_stats.linked);
+    snprintf(buf+strlen(buf), size-strlen(buf), "%s", line);
     snprintf(line, sizeof(line), "%-13s %6d\n", "hashstr:", hash_stats.calls);
-    snprintf(buf + strlen(buf), size - strlen(buf), "%s", line);
+    snprintf(buf+strlen(buf), size-strlen(buf), "%s", line);
 }
 #endif /* SS_STATISTICS */
 
@@ -350,40 +343,34 @@ void ss_dump_statistics(char *buf, int size) {
  * @return
  * buf if (what & SS_DUMP_TOTALS) or NULL.
  */
-char *ss_dump_table(int what, char *buf, int size) {
+char *ss_dump_table(int what, char *buf, size_t size) {
     int entries = 0, refs = 0, links = 0;
     int i;
 
     for (i = 0; i < TABLESIZE; i++) {
         shared_string *ss;
 
-        if ((ss = hash_table[i])!=NULL) {
+        if ((ss = hash_table[i]) != NULL) {
             ++entries;
-            refs += (ss->refcount & ~TOPBIT);
+            refs += (ss->refcount&~TOPBIT);
             /* Can't use stderr any longer, need to include global.h and
-              if (what & SS_DUMP_TABLE)
+              if (what&SS_DUMP_TABLE)
               * use logfile. */
-            LOG(llevDebug, "%4d -- %4d refs '%s' %c\n",
-                i, (ss->refcount & ~TOPBIT), ss->string,
-                (ss->refcount & TOPBIT ? ' ' : '#'));
+            LOG(llevDebug, "%4d -- %4d refs '%s' %c\n", i, (ss->refcount&~TOPBIT), ss->string, (ss->refcount&TOPBIT ? ' ' : '#'));
 
             while (ss->next) {
                 ss = ss->next;
                 ++links;
-                refs += (ss->refcount & ~TOPBIT);
+                refs += (ss->refcount&~TOPBIT);
 
-                if (what & SS_DUMP_TABLE)
-                    LOG(llevDebug, "     -- %4d refs '%s' %c\n",
-                        (ss->refcount & ~TOPBIT), ss->string,
-                        (ss->refcount & TOPBIT ? '*' : ' '));
-
+                if (what&SS_DUMP_TABLE)
+                    LOG(llevDebug, "     -- %4d refs '%s' %c\n", (ss->refcount&~TOPBIT), ss->string, (ss->refcount&TOPBIT ? '*' : ' '));
             }
         }
     }
 
-    if (what & SS_DUMP_TOTALS) {
-        snprintf(buf, size, "\n%d entries, %d refs, %d links.",
-                 entries, refs, links);
+    if (what&SS_DUMP_TOTALS) {
+        snprintf(buf, size, "\n%d entries, %d refs, %d links.", entries, refs, links);
         return buf;
     }
     return NULL;
@@ -399,15 +386,18 @@ char *ss_dump_table(int what, char *buf, int size) {
  * size of buf1. Can be NULL.
  * @return
  * true if overflow will occur.
+ *
+ * @todo
+ * This could maybe overflow. Make sure it doesn't.
  */
-int buf_overflow(const char *buf1, const char *buf2, int bufsize) {
-    int     len1 = 0, len2 = 0;
+int buf_overflow(const char *buf1, const char *buf2, size_t bufsize) {
+    size_t len1 = 0, len2 = 0;
 
     if (buf1)
         len1 = strlen(buf1);
     if (buf2)
         len2 = strlen(buf2);
-    if ((len1 + len2) >= bufsize)
+    if ((len1+len2) >= bufsize)
         return 1;
     return 0;
 }

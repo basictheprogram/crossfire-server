@@ -174,7 +174,7 @@ EXTERN const char *const resist_save[NROFATTACKS] = {
     "physical ", "magic ", "fire ", "electricity ", "cold ", "confusion ", "acid ",
     "drain ", "weaponmagic ", "ghosthit ", "poison ", "slow ", "paralyze ",
     "turn_undead ", "fear ", "cancellation ", "deplete ", "death ", "chaos ",
-    "counterspell ", "godpower ", "holyword ", "blind " , "internal ", "life_stealing ",
+    "counterspell ", "godpower ", "holyword ", "blind ", "internal ", "life_stealing ",
     "disease "
 };
 
@@ -183,7 +183,7 @@ EXTERN const char *const attacktype_desc[NROFATTACKS] = {
     "physical", "magic", "fire", "electricity", "cold", "confusion", "acid",
     "drain", "weapon magic", "ghost hit", "poison", "slow", "paralyze",
     "turn undead", "fear", "cancellation", "deplete", "death", "chaos",
-    "counterspell", "god power", "holy word", "blind" , "internal", "life stealing",
+    "counterspell", "god power", "holy word", "blind", "internal", "life stealing",
     "disease"
 };
 
@@ -195,7 +195,7 @@ EXTERN const char *const resist_plus[NROFATTACKS] = {
     "resist paralyzation", "resist turn undead", "resist fear",
     "resist cancellation", "resist depletion", "resist death", "resist chaos",
     "resist counterspell", "resist god power", "resist holy word",
-    "resist blindness" ,  "resist internal", "resist life stealing",
+    "resist blindness", "resist internal", "resist life stealing",
     "resist diseases"
 };
 
@@ -219,7 +219,7 @@ EXTERN const char *const change_resist_msg[NROFATTACKS] = {
  */
 EXTERN int resist_table[] = {
     ATNR_PHYSICAL, ATNR_MAGIC, ATNR_FIRE,
-    ATNR_ELECTRICITY,ATNR_COLD, ATNR_CONFUSION, ATNR_ACID, ATNR_DRAIN,
+    ATNR_ELECTRICITY, ATNR_COLD, ATNR_CONFUSION, ATNR_ACID, ATNR_DRAIN,
     ATNR_GHOSTHIT, ATNR_POISON, ATNR_SLOW, ATNR_PARALYZE, ATNR_TURN_UNDEAD,
     ATNR_FEAR, ATNR_DEPLETE, ATNR_DEATH, ATNR_HOLYWORD, ATNR_BLIND,
     ATNR_LIFE_STEALING, ATNR_DISEASE
@@ -228,31 +228,29 @@ EXTERN int resist_table[] = {
 
 /** Some local definitions for shuffle_attack(). */
 EXTERN Chaos_Attacks ATTACKS[22] = {
-    {AT_PHYSICAL,0},
-    {AT_PHYSICAL,0},  /*face = explosion*/
-    {AT_PHYSICAL,0},
-    {AT_MAGIC,1},
-    {AT_MAGIC,1},   /* face = last-burnout */
-    {AT_MAGIC,1},
-    {AT_FIRE,2},
-    {AT_FIRE,2},    /* face = fire....  */
-    {AT_FIRE,2},
-    {AT_ELECTRICITY,3},
-    {AT_ELECTRICITY,3},  /* ball_lightning */
-    {AT_ELECTRICITY,3},
-    {AT_COLD,4},
-    {AT_COLD,4},    /* face=icestorm*/
-    {AT_COLD,4},
-    {AT_CONFUSION,5},
-    {AT_POISON,7},
-    {AT_POISON,7},  /* face = acid sphere.  generator */
-    {AT_POISON,7},  /* poisoncloud face */
-    {AT_SLOW,8},
-    {AT_PARALYZE,9},
-    {AT_FEAR,10}
+    { AT_PHYSICAL, 0 },
+    { AT_PHYSICAL, 0 },  /*face = explosion*/
+    { AT_PHYSICAL, 0 },
+    { AT_MAGIC, 1 },
+    { AT_MAGIC, 1 },   /* face = last-burnout */
+    { AT_MAGIC, 1 },
+    { AT_FIRE, 2 },
+    { AT_FIRE, 2 },    /* face = fire....  */
+    { AT_FIRE, 2 },
+    { AT_ELECTRICITY, 3 },
+    { AT_ELECTRICITY, 3 },  /* ball_lightning */
+    { AT_ELECTRICITY, 3 },
+    { AT_COLD, 4 },
+    { AT_COLD, 4 },    /* face=icestorm*/
+    { AT_COLD, 4 },
+    { AT_CONFUSION, 5 },
+    { AT_POISON, 7 },
+    { AT_POISON, 7 },  /* face = acid sphere.  generator */
+    { AT_POISON, 7 },  /* poisoncloud face */
+    { AT_SLOW, 8 },
+    { AT_PARALYZE, 9 },
+    { AT_FEAR, 10 }
 };
-
-
 
 #endif /* ifdef init_c */
 

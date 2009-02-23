@@ -110,36 +110,40 @@ i18ndir=$(pkgdatadir)/i18n
 dist_i18n_DATA = i18n/messages.en \
 	i18n/messages.fr
 
-MAINTAINERCLEANFILES = archetypes bmaps faces .collect-stamp
+MAINTAINERCLEANFILES = archetypes bmaps faces .collect-stamp \
+	animations smooth treasures.bld bmaps.paths crossfire.0 crossfire.1
 
 PERL = @PERL@
 
 crossfire.0: bmaps.paths
-	$(PERL) $(srcdir)/adm/collect_images.pl -png
+	$(PERL) $(srcdir)/adm/collect_images.pl -src $(srcdir) -png
 
 .collect-stamp:
 	touch .collect-stamp
 
 collect:
-	$(PERL) -I$(srcdir) collect.pl $(srcdir)/arch
-	$(PERL) $(srcdir)/adm/collect_images.pl -png
+	$(PERL) -I$(srcdir) collect.pl $(builddir)/arch
+	$(PERL) $(srcdir)/adm/collect_images.pl -src $(srcdir) -png
 
 archonly:
-	$(PERL) -I$(srcdir) collect.pl $(srcdir)/arch ARCHONLY
+	$(PERL) -I$(srcdir) collect.pl $(builddir)/arch ARCHONLY
 
 archetypes: .collect-stamp
-	make collect
+	$(MAKE) collect
 
 faces: .collect-stamp
-	make collect
+	$(MAKE) collect
 
 animations: .collect-stamp
-	make collect
+	$(MAKE) collect
 
 bmaps.paths bmaps: .collect-stamp
-	make collect
+	$(MAKE) collect
 
-install-data-local: archetypes crossfire.0 faces animations collect.pl util.pl
+smooth: .collect-stamp
+	$(MAKE) collect
+
+install-data-local: archetypes crossfire.0 faces animations smooth collect.pl util.pl
 	@$(NORMAL_INSTALL)
 	$(mkinstalldirs) $(DESTDIR)$(pkgconfdir)
 	for i in $(CONF_FILES); do \
@@ -166,7 +170,7 @@ install-data-local: archetypes crossfire.0 faces animations collect.pl util.pl
 		echo "Creating directory $(pkgdatadir)/$$i"; \
 		$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)/$$i; \
 	fi; \
-	$(INSTALL_DATA) $(srcdir)/treasures.bld $(DESTDIR)$(pkgdatadir)/treasures
+	$(INSTALL_DATA) $(builddir)/treasures.bld $(DESTDIR)$(pkgdatadir)/treasures
 
 
 # Uninstall unchanged config/var files so make distcheck is happy

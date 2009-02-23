@@ -40,7 +40,6 @@
 
 #include "includes.h"
 
-
 /* Type defines for specific signed/unsigned variables of a certain number
  * of bits.  Not really used anyplace, but if a certain number of bits
  * is required, these type defines should then be used.  This will make
@@ -55,7 +54,6 @@
  * The signedness for char is probably not universal, and using char
  * will probably be more portable than sint8/unit8
  */
-
 
 typedef unsigned int    uint32;
 
@@ -237,18 +235,17 @@ EXTERN long ob_count;
 /*
  * Used in treasure.c
  */
-EXTERN archetype *ring_arch,*amulet_arch,*staff_arch,*crown_arch;
+EXTERN archetype *ring_arch, *amulet_arch, *staff_arch, *crown_arch;
 EXTERN const char *undead_name; /* Used in hit_player() in main.c */
 
 EXTERN Animations *animations;
-EXTERN int num_animations,animations_allocated, bmaps_checksum;
+EXTERN int num_animations, animations_allocated, bmaps_checksum;
 
 /* Rotate right from bsd sum. This is used in various places for checksumming */
-#define ROTATE_RIGHT(c) if ((c) & 01) (c) = ((c) >>1) + 0x80000000; else (c) >>= 1;
+#define ROTATE_RIGHT(c) if ((c)&01) (c) = ((c)>>1)+0x80000000; else (c) >>= 1;
 
-
-#define SET_ANIMATION(ob,newanim) { if(ob->temp_animation_id) { ob->face=&new_faces[animations[ob->temp_animation_id].faces[newanim]]; } else { ob->face=&new_faces[animations[ob->animation_id].faces[newanim]]; } }
-#define GET_ANIMATION(ob,anim) (ob->temp_animation_id ? animations[ob->temp_animation_id].faces[anim] : animations[ob->animation_id].faces[anim])
+#define SET_ANIMATION(ob, newanim) { if (ob->temp_animation_id) { ob->face = &new_faces[animations[ob->temp_animation_id].faces[newanim]]; } else { ob->face = &new_faces[animations[ob->animation_id].faces[newanim]]; } }
+#define GET_ANIMATION(ob, anim) (ob->temp_animation_id ? animations[ob->temp_animation_id].faces[anim] : animations[ob->animation_id].faces[anim])
 #define GET_ANIM_ID(ob) (ob->temp_animation_id ? ob->temp_animation_id : ob->animation_id)
 /* NUM_ANIMATIONS returns the number of animations allocated.  The last
  * usuable animation will be NUM_ANIMATIONS-1 (for example, if an object
@@ -266,10 +263,8 @@ extern int leftof_x[9], leftof_y[9];
 extern New_Face *blank_face, *empty_face;
 extern New_Face *smooth_face;
 
-
 extern uint32 max_time; /* loop time */
 extern socket_struct *init_sockets;
-
 
 #ifndef __CEXTRACT__
 #include "stringbuffer.h"
@@ -278,30 +273,29 @@ extern socket_struct *init_sockets;
 #include "typesproto.h"
 #endif
 
-
-#define decrease_ob(xyz) decrease_ob_nr(xyz,1)
+#define decrease_ob(xyz) decrease_ob_nr(xyz, 1)
 
 /* FREE_AND_CLEAR frees the pointer and then sets it to NULL.
  * This is generally done as a safety, and having this macro
  * makes the code a bit cleaner when doing so.
  */
-#define FREE_AND_CLEAR(xyz) {free((void*)xyz); xyz=NULL; }
-#define FREE_AND_CLEAR_STR(xyz) {free_string(xyz); xyz=NULL; }
+#define FREE_AND_CLEAR(xyz) { free((void *)xyz); xyz = NULL; }
+#define FREE_AND_CLEAR_STR(xyz) { free_string(xyz); xyz = NULL; }
 
 /* FREE_AND_COPY is for the shared string - it is handy enough
  * to use all over the place.
  */
-#define FREE_AND_COPY(sv,nv) { if (sv) free_string(sv); sv=add_string(nv); }
+#define FREE_AND_COPY(sv, nv) { if (sv) free_string(sv); sv = add_string(nv); }
 
 #ifdef CALLOC
 #undef CALLOC
 #endif
 
 #ifdef USE_CALLOC
-# define CALLOC(x,y)    calloc(x,y)
+# define CALLOC(x, y)   calloc(x, y)
 # define CFREE(x)       free(x)
 #else
-# define CALLOC(x,y)    malloc(x*y)
+# define CALLOC(x, y)   malloc(x*y)
 # define CFREE(x)       free(x)
 #endif
 
@@ -328,25 +322,25 @@ extern socket_struct *init_sockets;
  * Server settings.
  */
 typedef struct Settings {
-    char    *logfilename;       /**< Logfile to use */
+    const char *logfilename;    /**< Logfile to use */
     uint16  csport;             /**< Port for new client/server */
     LogLevel debug;             /**< Default debugging level */
     uint8   dumpvalues;         /**< Set to dump various values/tables */
-    char    *dumparg;           /**< Additional argument for some dump functions */
+    const char *dumparg;        /**< Additional argument for some dump functions */
     uint8   daemonmode;         /**< If true, detach and become daemon */
     int     argc;               /**< Parameters that were passed to the program */
     char    **argv;             /**< Only used by xio.c, so will go away at some time */
-    char    *confdir;           /**< Configuration files */
-    char    *datadir;           /**< Read only data files */
-    char    *localdir;          /**< Read/write data files */
-    char    *playerdir;         /**< Where the player files are */
-    char    *mapdir;            /**< Where the map files are */
-    char    *archetypes;        /**< Name of the archetypes file - libdir is prepended */
-    char    *regions;           /**< Name of the regions file - libdir is prepended */
-    char    *treasures;         /**< Location of the treasures file. */
-    char    *uniquedir;         /**< Directory for the unique items */
-    char    *templatedir;       /**< Directory for the template map */
-    char    *tmpdir;            /**< Directory to use for temporary files */
+    const char *confdir;        /**< Configuration files */
+    const char *datadir;        /**< Read only data files */
+    const char *localdir;       /**< Read/write data files */
+    const char *playerdir;      /**< Where the player files are */
+    const char *mapdir;         /**< Where the map files are */
+    const char *archetypes;     /**< Name of the archetypes file - libdir is prepended */
+    const char *regions;        /**< Name of the regions file - libdir is prepended */
+    const char *treasures;      /**< Location of the treasures file. */
+    const char *uniquedir;      /**< Directory for the unique items */
+    const char *templatedir;    /**< Directory for the template map */
+    const char *tmpdir;         /**< Directory to use for temporary files */
     uint8   stat_loss_on_death; /**< If true, chars lose a random stat when they die */
     sint16  pk_luck_penalty;    /**< Amount by which player luck is reduced if they PK */
     uint8   permanent_exp_ratio; /**< How much exp should be 'permenant' and unable to be lost*/
@@ -370,8 +364,8 @@ typedef struct Settings {
     char    who_format[MAX_BUF];     /**< The format that the who command should use */
     char    who_wiz_format[MAX_BUF]; /**< The format that the who command should use when called by a dm*/
     char    motd[MAX_BUF];      /**< Name of the motd file */
-    char    *rules;             /**< Name of rules file*/
-    char    *news;              /**< Name of news file*/
+    const char *rules;          /**< Name of rules file*/
+    const char *news;           /**< Name of news file*/
     char    dm_mail[MAX_BUF];   /**< DM's Email address */
 
     /* The meta_ is information for the metaserver.  These are set in
@@ -406,12 +400,12 @@ typedef struct Settings {
     uint8   create_home_portals;      /**< If 1, can create portals in unique maps (apartments) */
     uint8   personalized_blessings;   /**< If 1, blessed weapons get an owner and a willpower value */
     sint64  pk_max_experience;        /**< Maximum experience one can get for PKing. Ignore if negative. */
-    int     pk_max_experience_percent;   /**< Percentage of experience of victim the killer gets. */
+    int     pk_max_experience_percent; /**< Percentage of experience of victim the killer gets. */
     int     allow_denied_spells_writing; /**< If set, players can write spells they can't cast. */
-    int     allow_broken_converters;     /**< If set, converters will work even if price of generated item is higher
+    int     allow_broken_converters;  /**< If set, converters will work even if price of generated item is higher
                                           * than the price of converted items. */
-    int     log_timestamp;        /**< If set, log will comport a timestamp. */
-    char*   log_timestamp_format; /**< Format for timestap, if log_timestamp is set. */
+    int     log_timestamp;            /**< If set, log will comport a timestamp. */
+    char    *log_timestamp_format;    /**< Format for timestap, if log_timestamp is set. */
 } Settings;
 
 extern Settings settings;
@@ -427,9 +421,9 @@ extern Settings settings;
  * just a memset.
  */
 typedef struct Statistics {
-    uint64  spell_merges;       /**< Number of spell merges done */
-    uint64  spell_hash_full;    /**< Number of times spell hash was full*/
-    uint64  spell_suppressions; /**< Number of times ok_to_put_more() returned FALSE*/
+    uint64 spell_merges;        /**< Number of spell merges done */
+    uint64 spell_hash_full;     /**< Number of times spell hash was full*/
+    uint64 spell_suppressions;  /**< Number of times ok_to_put_more() returned FALSE*/
 } Statistics;
 
 extern Statistics statistics;
@@ -443,7 +437,7 @@ extern Statistics statistics;
  */
 
 #ifdef GETTIMEOFDAY_TWO_ARGS
-#define GETTIMEOFDAY(last_time) gettimeofday(last_time, (struct timezone *) NULL);
+#define GETTIMEOFDAY(last_time) gettimeofday(last_time, (struct timezone *)NULL);
 #else
 #define GETTIMEOFDAY(last_time) gettimeofday(last_time);
 #endif
