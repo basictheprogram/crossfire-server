@@ -37,7 +37,6 @@ types/weapon_improver/weapon_improver.c: All changes in prepare_weapon():
     weapon name.  Add call to esrv_update_item() to update the name
     of the weapon.
 MSW 2009-04-05
-	
 
 socket/item.c, socket/loop.c, socket/lowlevel.c, socket/metaserver.c: Fix some
   format string bugs (found using the GCC format __attribute__ for some
