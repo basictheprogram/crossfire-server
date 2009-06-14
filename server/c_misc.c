@@ -2288,6 +2288,7 @@ int command_title(object *op, char *params) {
         return 1;
     }
     strcpy(op->contr->own_title, params);
+    replace_unprintable_chars(op->contr->own_title);
     return 1;
 }
 
