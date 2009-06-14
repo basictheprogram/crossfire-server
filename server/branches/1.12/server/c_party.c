@@ -73,6 +73,7 @@ partylist *form_party(object *op, const char *params) {
     }
     newparty = (partylist *)malloc(sizeof(partylist));
     newparty->partyname = strdup_local(params);
+    replace_unprintable_chars(newparty->partyname);
     newparty->total_exp = 0;
     newparty->kills = 0;
     newparty->passwd[0] = '\0';
@@ -538,6 +539,7 @@ int command_party(object *op, char *params) {
         while (tmplist != NULL) {
             if (tmplist == op->contr->party) {
                 strcpy(tmplist->passwd, params);
+                replace_unprintable_chars(tmplist->passwd);
                 draw_ext_info_format(NDI_UNIQUE, 0, op, MSG_TYPE_COMMAND, MSG_TYPE_COMMAND_SUCCESS,
                                      "The password for party %s is %s",
                                      "The password for party %s is %s",
