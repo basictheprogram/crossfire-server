@@ -551,11 +551,21 @@ static void alchemy_failure_effect(object *op, object *cauldron, recipe *rp, int
     } else if (level < 40) {                 /* MAKE TAINTED ITEM */
         object *tmp = NULL;
 
+        /*
+         * Note by Nicolas Weeger 2010-09-26
+         * This is an incorrect part.
+         * Calling again attempt_recipe in case of failure will apply again the artifact
+         * combination to the item.
+         * This leads to items with eg 100% resist, or more.
+         * So use the actual item in the cauldron, don't retry the recipe.
+         * This should fix bug #2020224: buggy(?) crafting yields.
+         *
         if (!rp)
             if ((rp = get_random_recipe((recipelist *)NULL)) == NULL)
                 return;
+         */
 
-        if ((tmp = attempt_recipe(op, cauldron, 1, rp, -1, 0))) {
+        if ((tmp = cauldron->inv)) /*attempt_recipe(op, cauldron, 1, rp, -1, 0)))*/ {
             if (!QUERY_FLAG(tmp, FLAG_CURSED)) { /* curse it */
                 SET_FLAG(tmp, FLAG_CURSED);
                 CLEAR_FLAG(tmp, FLAG_KNOWN_CURSED);
@@ -577,6 +587,14 @@ static void alchemy_failure_effect(object *op, object *cauldron, recipe *rp, int
         }
         return;
     }
+#if 0
+    /*
+    Note: this does not work as expected...
+    At this point there is only one item in the cauldron, and get_formulalist(0) will return
+    the first formula list for recipes with 1 ingredient.
+    So disable this, and just use the next case.
+     */
+
     if (level == 40) {                   /* MAKE RANDOM RECIPE */
         recipelist *fl;
         int numb = numb_ob_inside(cauldron);
@@ -589,7 +607,9 @@ static void alchemy_failure_effect(object *op, object *cauldron, recipe *rp, int
             alchemy_failure_effect(op, cauldron, rp, level-1);
         return;
 
-    } else if (level < 45) {                 /* INFURIATE NPC's */
+    } else
+#endif
+        if (level < 45) {                 /* INFURIATE NPC's */
         /* this is kind of kludgy I know...*/
         cauldron->enemy = op;
         npc_call_help(cauldron);
