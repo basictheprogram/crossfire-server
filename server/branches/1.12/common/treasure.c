@@ -1775,7 +1775,7 @@ void add_abilities(object *op, object *change) {
         if (change->stats.dam < 0)
             op->stats.dam = (-change->stats.dam);
         else if (op->stats.dam) {
-            tmp = (signed char)(((int)op->stats.dam*(int)change->stats.dam)/10);
+            tmp = (int)(((int)op->stats.dam*(int)change->stats.dam)/10);
             if (tmp == op->stats.dam) {
                 if (change->stats.dam < 10)
                     op->stats.dam--;
