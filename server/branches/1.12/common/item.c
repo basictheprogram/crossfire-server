@@ -1473,10 +1473,15 @@ void identify(object *op) {
         }
     }
 
-    /* If the object is on a map, make sure we update its face */
-    if (op->map)
+    if (op->map) {
+        /* If the object is on a map, make sure we update its face.
+         * Also send name and such information to a player standing on it.
+         */
+        object *player = present(PLAYER, op->map, op->x, op->y);
+        if (player)
+            esrv_update_item(UPD_FACE | UPD_NAME, player, op);
         update_object(op, UP_OBJ_FACE);
-    else {
+    } else {
         pl = get_player_container(op->env);
         if (pl)
             /* A lot of the values can change from an update - might as well send
