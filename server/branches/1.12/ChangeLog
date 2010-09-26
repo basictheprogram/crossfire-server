@@ -14,6 +14,12 @@ small - this just lets others know that the file has changed if nothing
 else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 
+Tentative fix for bug #2020224: buggy(?) crafting yields.
+Don't call again attempt_recipe(), as that would give again artifact properties
+to the item. Instead, use the item in the cauldron.
+Backported from trunk.
+Nicolas Weeger 2010-09-26
+
 Fix crash when a thrown object breaks while being picked up.
 Andreas Kirschbaum 2009-07-10
 
