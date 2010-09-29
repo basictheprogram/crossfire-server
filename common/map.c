@@ -2611,3 +2611,25 @@ int on_same_map(const object *op1, const object *op2) {
 
     return adjacent_map(op1->map, op2->map, &dx, &dy);
 }
+
+/**
+ * Remove files containing the map's unique items.
+ * @param map
+ */
+void map_remove_unique_files(const mapstruct *map) {
+    char base[HUGE_BUF], path[HUGE_BUF];
+    int count;
+
+    if (map->unique) {
+        /* Unique maps have their full path already set. */
+        unlink(map->path);
+        return;
+    }
+
+    create_items_path(map->path, base, sizeof(base));
+
+    for (count = 0; count < 10; count++) {
+        snprintf(path, sizeof(path), "%s.v%02d", base, count);
+        unlink(path);
+    }
+}
