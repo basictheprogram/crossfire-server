@@ -14,6 +14,9 @@ small - this just lets others know that the file has changed if nothing
 else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 
+Don't send empty "stats " commands. Backport from trunk.
+Andreas Kirschbaum 2012-03-23
+
 Fix Lythander's pipe not having spell it should. Backport from trunk.
 This should fix bug #2518785.
 Nicolas Weeger 2011-05-21
