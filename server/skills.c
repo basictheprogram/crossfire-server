@@ -1079,6 +1079,7 @@ int use_oratory(object *pl, int dir, object *skill) {
         add_friendly_object(tmp);
         SET_FLAG(tmp, FLAG_FRIENDLY);
         tmp->attack_movement = PETMOVE;
+        FREE_AND_COPY(tmp->skill, skill->skill);
         return calc_skill_exp(pl, tmp, skill);
     }
     /* Charm failed.  Creature may be angry now */
