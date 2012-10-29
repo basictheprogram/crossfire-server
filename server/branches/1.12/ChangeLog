@@ -14,6 +14,9 @@ small - this just lets others know that the file has changed if nothing
 else.  With this, include the file(s) that you changed.
 ------------------------------------------------------------------------------
 
+Fix oratory skill to add experience gained by pets into oratory.
+Karla Stenger 2012-10-29
+
 Don't send empty "stats " commands. Backport from trunk.
 Andreas Kirschbaum 2012-03-23
 
