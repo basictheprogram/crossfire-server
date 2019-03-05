@@ -22,7 +22,7 @@ def Walk(root, recurse=0, pattern='*', return_folders=0):
 
     # expand pattern
     pattern = pattern or '*'
-    pat_list = string.splitfields(pattern, ';')
+    pat_list = pattern.split(';')
 
     # check each file
     for name in names:
@@ -60,6 +60,7 @@ def Walk(root, recurse=0, pattern='*', return_folders=0):
 #
 def escape(esc_me):
     # Converting ampersand must be first, since escaping other characters generates ampersands.
+    esc_me = str(esc_me)
     esc_me = esc_me.replace('&', '&amp;', 4)
     esc_me = esc_me.replace('<', '&lt;', 3)
     esc_me = esc_me.replace('>', '&gt;', 3)
@@ -68,7 +69,7 @@ def escape(esc_me):
 
 def arch2xml(root, filename, xsl_file='cfarches.xsl'):
     files = Walk(root, 1, '*.arc', 1)
-    print('searching for arch files in %s') % root
+    print('searching for arch files in %s' % root)
     xml = open(filename, 'w')
     xml.write(
         '<?xml version="1.0"?>\n<?xml-stylesheet type="text/xsl" href="%s"?>\n<ARCHES>' % xsl_file)
@@ -83,10 +84,10 @@ def arch2xml(root, filename, xsl_file='cfarches.xsl'):
         for line in contents:
             xp = line.split()
             if mess == 1 and len(xp) > 1:
-                str = escape(string.join(xp[0:]))
+                str = escape(xp[0:])
                 xml.write('%s\n' % str)
             elif len(xp) == 1:
-                tag = string.lower(xp[0])
+                tag = xp[0].lower()
                 # if an empty comment line, ignore it
                 if tag == '#':
                     continue
@@ -115,9 +116,10 @@ def arch2xml(root, filename, xsl_file='cfarches.xsl'):
                 xml.write('%s\n' % (tag))
             elif len(xp) > 1:
 
-                tag = string.lower(xp[0])
+                tag = xp[0].lower()
                 if (tag[0] == "#"):
-                    str = string.join(xp)[1:]
+                    #str = string.join(xp)[1:]
+                    str = xp[1:]
                     xml.write('     <comment>%s</comment>\n' % (escape(str)))
                 else:
                     # A quick and dirty hack to make multiple independent arches
@@ -132,7 +134,7 @@ def arch2xml(root, filename, xsl_file='cfarches.xsl'):
                         xml.write('\n</arch>\n<arch>\n')
                         need_new_arch = 0
 
-                    str = string.join(xp[1:])
+                    str = xp[1:]
                     xml.write('     <%s>%s</%s>\n' % (tag, str, tag))
         xml.write('\n</arch>\n')
         arc.close()
