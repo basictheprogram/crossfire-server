@@ -452,6 +452,30 @@ class Arch2Json():
         return self.items
 
 
+def face_to_png(arc_dir, _list):
+    graphics = Walk(arc_dir, 1, '*.png', 1)
+    django = DjangoJsonDump('items.facepng')
+
+    for fields in _list:
+        field = fields['fields']
+        obj = field['object']
+
+        try:
+            face = field['face']
+        except KeyError:
+            face = ''
+
+        # relative = relative_path(file, trim_path)
+        png_list = face_png_list(face, graphics)
+        for png in png_list:
+            django.add_kv_to_fields('obj', obj)
+            # django.add_kv_to_fields('face', face)
+            django.add_kv_to_fields('png', png)
+
+            django.create_fields_and_model('fields', 'items.facepng')
+
+    return django
+
 def check_python():
     __min_version__ = (3, 0)
 
@@ -542,6 +566,10 @@ def main(args):
             fields.add_field(item)
             _list.append(copy.deepcopy(fields.field))
 
+    if (args.face_png):
+        django = face_to_png(arc_dir, _list)
+        _list += django.list
+
     # Dump archtypes to one files identified by --onefile
     #
     if (args.onefile):
@@ -550,35 +578,7 @@ def main(args):
     else:
         # Default to dumping archtypes to stdout
         #
-        #print(json.dumps(_list, indent=args.indent))
-        pass
-
-    if (args.face_png):
-        graphics = Walk(arc_dir, 1, '*.png', 1)
-        django = DjangoJsonDump('items.facepng')
-
-        for fields in _list:
-            field = fields['fields']
-            obj = field['object']
-
-            try:
-                face = field['face']
-            except KeyError:
-                face = ''
-
-            # relative = relative_path(file, trim_path)
-            png_list = face_png_list(face, graphics)
-
-            django.add_kv_to_fields('obj', obj)
-            django.add_kv_to_fields('face', face)
-            django.add_kv_to_fields('png', png_list)
-
-            django.create_fields_and_model('fields', 'items.facepng')
-
-
-        #print(json.dumps(django.list, indent=args.indent))
-        blah = _list + django.list
-        print(json.dumps(blah, indent=args.indent))
+        print(json.dumps(_list, indent=args.indent))
 
 if __name__ == '__main__':
     try:
