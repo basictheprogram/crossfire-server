@@ -1,19 +1,26 @@
 from collections import deque
 import json
 import os
-from nose.tools import set_trace
+from nose.tools import set_trace, raises
 
 from arch2json import (
     Animation,
     Arch2Json,
+    arc_to_face_png,
     arc_filename,
     created_timestamp,
+    DjangoJsonDump,
+    exists,
     Field,
+    face_png_list,
     Items,
     Message,
     model_from_path,
+    relative_path,
     updated_timestamp,
 )
+
+from arch2xml import Walk
 
 
 def test_arc_filename1():
@@ -688,9 +695,6 @@ def test_auto_model1():
         '/Users/tanner/projects/crossfire/crossfire-arch/trunk/armour',
     ]
 
-    # import pdb
-    # pdb.set_trace()
-
     for folder in sub_folders:
         model = model_from_path(folder, 'items')
 
@@ -781,3 +785,151 @@ def test_auto_model10():
     for folder in sub_folders:
         model = model_from_path(folder, 'items')
         assert(model)
+
+
+def test_relative_path1():
+    full_path = '/Users/tanner/projects/crossfire/crossfire-arch/trunk/armour/bracers/bracersdex.arc'
+    trim_path = '/Users/tanner/projects/crossfire/crossfire-arch/trunk/'
+    result = relative_path(full_path, trim_path)
+
+    assert(result == 'armour/bracers/bracersdex.arc')
+
+
+def test_relative_path2():
+    full_path = '/Users/tanner/projects/crossfire/crossfire-arch/trunk/armour/bracers/bracersdex.arc'
+    trim_path = '/Users/tanner/projects/crossfire/crossfire-arch/trunk/'
+    face_filename = 'bracersdex.base.111'
+    face_path = 'armour/bracers/' + face_filename + '.png'
+
+    result = relative_path(full_path, trim_path)
+    assert(result == 'armour/bracers/bracersdex.arc')
+
+    face = arc_to_face_png(face_filename, result)
+    assert(face == face_path)
+
+
+def test_exists():
+    assert(not exists('http://www.fakedomain.com/fakeImage.jpg'))
+    assert(exists('http://www.google.com'))
+
+
+def test_face_png_list1():
+    trunk = '/Users/tanner/projects/crossfire/crossfire-arch/trunk'
+    graphics = Walk(trunk, 1, '*.png', 1)
+
+    obj = 'magnifier'
+    face = '/misc/magnifier.111.png'
+
+    png_list = face_png_list(face, graphics)
+    #print('trunk', trunk)
+    #print('png_list', png_list)
+
+    assert(len(png_list) >= 0)
+
+    # If a component is an absolute path, all previous components are thrown away 
+    # and joining continues from the absolute path component.
+    #
+    for png in png_list:
+        assert(png == os.path.join(trunk,'misc/magnifier.base.111.png'))
+
+def test_face_png_list2():
+    trunk = '/Users/tanner/projects/crossfire/crossfire-arch/trunk'
+    graphics = Walk(trunk, 1, '*.png', 1)
+
+    obj = 'egg_disease'
+    face = ''
+
+    png_list = face_png_list(face, graphics)
+    #print('trunk', trunk)
+    #print('png_list', png_list)
+
+    assert(len(png_list) <= 0)
+
+def test_face_png_list3():
+    trunk = '/Users/tanner/projects/crossfire/crossfire-arch/trunk'
+    graphics = Walk(trunk, 1, '*.png', 1)
+
+    obj = 'dwarf_player'
+    face = '/player/race/dwarf_p.151.png'
+
+    dwarf_faces = [
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.131.png', 
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.132.png', 
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.132.png', 
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.131.png', 
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.152.png', 
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.151.png', 
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.151.png', 
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.152.png', 
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.171.png', 
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.172.png', 
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.172.png', 
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.171.png', 
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.112.png', 
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.111.png', 
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.111.png', 
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.112.png'
+    ]
+    png_list = face_png_list(face, graphics)
+    assert(len(png_list) > 1)
+    assert(len(png_list) == len(dwarf_faces))
+    
+    png_set = set(png_list)
+    dwarf_faces_set = set(dwarf_faces)
+
+    assert(png_set == dwarf_faces_set)
+
+    diff = png_set.difference(dwarf_faces_set)
+    assert(diff == set())
+
+def test_django_find1():
+    django = DjangoJsonDump(model='items.facepng')
+    field = django.find_key('fields')
+    model = django.find_key('model')
+
+@raises(ValueError)
+def test_django_find2():
+    django = DjangoJsonDump(model='items.facepng')
+    field = django.find_key('nope')
+    
+def test_django_json1():
+    expected = '[{"fields": {}, "model": "items.facepng"}]'
+    django = DjangoJsonDump('items.facepng')
+    result = json.dumps(django.list)
+    assert(result == expected)
+
+def test_django_json2():
+    #import pdb
+    #pdb.set_trace()
+    expected = '[{"fields": {"obj": "dwarf"}, "model": "items.facepng"}]'
+    django = DjangoJsonDump(model='items.facepng')
+    django.add_kv_to_fields("obj", "dwarf")
+    result = json.dumps(django.list)
+    assert(result == expected)
+
+def test_django_json3():
+    expected = '[{"fields": {"obj": "dwarf", "face": "dwarf_p.151", "png": "player/race/dwarf_p.base.132.png"}, "model": "items.facepng"}]'
+    django = DjangoJsonDump(model='items.facepng')
+    django.add_kv_to_fields('obj', 'dwarf')
+    django.add_kv_to_fields('face', 'dwarf_p.151')
+    django.add_kv_to_fields('png', 'player/race/dwarf_p.base.132.png')
+    result = json.dumps(django.list)
+    assert(result == expected)
+
+def test_django_json5():
+    expected1 = '[{"model": "items.testing"}, {"fields": {}, "model": "items.facepng"}]'
+    expected2 = '[{"model": "items.testing"}, {"fields": {}, "model": "items.testing2"}]'
+    django = DjangoJsonDump(model='items.facepng')
+    django.create_model('items.testing')
+    result1 = json.dumps(django.list)
+    assert(result1 == expected1)
+
+    django.update_model(model='items.testing2', index=1)
+    result2 = json.dumps(django.list)
+    assert(result2 == expected2)
+
+def test_django_json6():
+    expected = '[{"fields": {}, "model": "items.facepng"}]'
+    django = DjangoJsonDump(model='items.facepng')
+    result = json.dumps(django.list)
+    assert(result == expected)

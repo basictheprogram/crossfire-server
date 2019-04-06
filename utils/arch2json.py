@@ -27,19 +27,45 @@ import operator
 import os
 import pprint
 import re
+import requests
 import sys
 
 from arch2xml import Walk
 from collections import deque, OrderedDict
 
 from functools import reduce
-from more_itertools import peekable
 
 # https://pypi.org/project/Deprecated/ from deprecated import deprecated
 
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
+
+
+def face_png_list(face, graphics):
+    #import pdb
+    #pdb.set_trace()
+
+    new_list = list()
+    path_file = os.path.split(face)
+    _path = path_file[0]
+    _file = path_file[1]
+
+    if len(_file) <= 0:
+        return new_list
+
+    _file_parts = _file.split('.')
+
+    regex = '.*'
+    regex += _path
+    regex += '/'
+    regex += _file_parts[0]
+    regex += '.*'
+    regex += _file_parts[2]
+
+    r = re.compile(regex)
+    new_list = list(filter(r.match, graphics))
+    return new_list
 
 
 def arc_filename(filename, override_key=None):
@@ -72,6 +98,22 @@ def created_timestamp(override_key=None, format='%Y-%m-%dT%H:%M:%S.%fZ'):
     k, v = arch_timestamp(k, format)
 
     return k, v
+
+
+def exists(path):
+    r = requests.head(path)
+    return r.status_code == requests.codes.ok
+
+
+def arc_to_face_png(face_filename, arc_relative):
+    arc_filename = os.path.basename(arc_relative)
+    face_relative = arc_relative.replace(arc_filename, face_filename)
+    return face_relative + '.png'
+
+
+def relative_path(full_path, trim_path):
+    relative = full_path.replace(trim_path, '')
+    return relative
 
 
 def model_from_path(pathname, app, ext='.'):
@@ -173,6 +215,52 @@ def updated_timestamp(override_key=None, format='%Y-%m-%dT%H:%M:%S.%fZ'):
 
     return k, v
 
+class DjangoJsonDump():
+    def __init__(self, model):
+        self._list = list()
+        self.create_fields_and_model('fields', model)
+
+        
+    def add_field(self, key, value):
+        self.add_kv_to_field(key=key, value=value)
+
+    def add_kv_to_fields(self, key, value):
+        index = self.find_key('fields')
+        self._list[index]['fields'][key] = value
+
+#    def create_field(self, field='field', index=0):
+#            self._list.insert(index, {field: dict()})       
+
+    def create_fields_and_model(self, fields, model, index=0):
+        self._list.insert(index, {
+            fields: dict(), 
+            'model': model
+        })
+
+    def create_model(self, model, index=0):
+        # Always add model to the begining of the list
+        #
+        if index == 0:
+            self._list.insert(index, {
+                'model': model
+            })    
+        else:
+            list_entry = self._list[index]
+            list_entry['model'] = model
+
+    def find_key(self, key):
+        for i, dic in enumerate(self._list):
+            if key in dic:
+                return i
+        
+        raise ValueError(f'Did not find "{key}" in list')
+
+    def update_model(self, model, index):
+        self.create_model(model=model, index=index)
+
+    @property
+    def list(self):
+        return self._list
 
 class Animation():
     def __init__(self):
@@ -351,7 +439,7 @@ class Arch2Json():
                 value = ' '.join(xp[1:])
                 item_dict[key] = value
 
-            # Handle  msg
+            # Handle msg
             if msg:
                 message.msg = line
                 item_dict.update(message.msg)
@@ -385,19 +473,21 @@ def parse_cli(argv, release):
                        help='Dump all archtypes to one JSON file.')
     group.add_argument('--splitfiles', dest='splitfiles', required=False, action='store_true',
                        help='Dump archtypes to individual JSON file. NOT IMPLEMENTED.')
-
     parser.add_argument('--version', action='version', version=release,
                         help='print version information')
     parser.add_argument('--django', dest='django', required=False,
-                        help='Convert arc file to JSON for a "python manage.py loaddata --format json" import')
+                        help='Convert arc file to JSON for a "python manage.py loaddata --format json" import.')
     parser.add_argument('--indent', dest='indent', type=int, default=4, required=False,
                         help='Indentation on pretty print.')
+    parser.add_argument('--trimpath', dest='trim_path', required=False,
+                        help='Trim this path to create a relative path to the .arc files.')
+    parser.add_argument('--facepng', dest='face_png', required=False, action='store_true',
+                        help='Generate JSON for faces PNG database table.')
     parser.add_argument('arc_dir',
                         help='The crossfire archtype directory.')
 
     args = parser.parse_args()
     return args
-
 
 def main(args):
     parser = Arch2Json()
@@ -405,7 +495,16 @@ def main(args):
 
     _list = []
 
+    # Should be the local path to the trunk of the Arch files
+    #
     arc_dir = args.arc_dir
+
+    # If the trim_path is not set default to the arc_dir
+    #
+    trim_path = args.trim_path
+    if not trim_path:
+        trim_path = arc_dir
+
     files = Walk(arc_dir, 1, '*.arc', 1)
 
     for file in files:
@@ -415,7 +514,16 @@ def main(args):
             contents = arc.read().splitlines()
 
         items = parser.keys(contents)
-        items.add_field('arc_filename', file)
+
+        relative = relative_path(file, trim_path)
+        items.add_field('arc_filename', relative)
+
+        old_face = items.find_key('face')
+        if old_face:
+            face = arc_to_face_png(old_face['face'], relative)
+            items.add_field('face', face)
+            #faces = populate_face_png(items, graphics)
+
 
         # Add created timestamp to item
         k, v = created_timestamp()
@@ -442,8 +550,35 @@ def main(args):
     else:
         # Default to dumping archtypes to stdout
         #
-        print(json.dumps(_list, indent=args.indent))
+        #print(json.dumps(_list, indent=args.indent))
+        pass
 
+    if (args.face_png):
+        graphics = Walk(arc_dir, 1, '*.png', 1)
+        django = DjangoJsonDump('items.facepng')
+
+        for fields in _list:
+            field = fields['fields']
+            obj = field['object']
+
+            try:
+                face = field['face']
+            except KeyError:
+                face = ''
+
+            # relative = relative_path(file, trim_path)
+            png_list = face_png_list(face, graphics)
+
+            django.add_kv_to_fields('obj', obj)
+            django.add_kv_to_fields('face', face)
+            django.add_kv_to_fields('png', png_list)
+
+            django.create_fields_and_model('fields', 'items.facepng')
+
+
+        #print(json.dumps(django.list, indent=args.indent))
+        blah = _list + django.list
+        print(json.dumps(blah, indent=args.indent))
 
 if __name__ == '__main__':
     try:
