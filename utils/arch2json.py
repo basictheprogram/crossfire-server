@@ -41,6 +41,14 @@ from functools import reduce
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
+def filter_walk(root, recurse=0, pattern='*', return_folders=0, exclude=None):
+    #import pdb
+    #pdb.set_trace() 
+    files = Walk(root, recurse, pattern, return_folders)
+    if filter:
+        files = [arc for arc in files if exclude not in arc]
+    
+    return files
 
 def face_png_list(face, graphics):
     #import pdb
@@ -385,6 +393,8 @@ class Arch2Json():
         msg = False
         anim = False
         end = False
+#        title = False
+        arch = False
 
         item_dict = {}
 
@@ -401,15 +411,23 @@ class Arch2Json():
 
             if end:
                 end = False
+                item_dict.clear()
 
             key = xp[0].lower()
 
             if len(xp) == 1:
 
                 if key == 'end':
+#                    if title: 
+#                        title = False
+#                        continue
+
+                    if arch:
+                        arch = False
+                        continue
+
                     self.items.add(item_dict)
                     end = True
-                    continue
 
                 elif key == 'more':
                     # eprint('Saw the more tag?')
@@ -435,7 +453,13 @@ class Arch2Json():
                     key = '%s' % (key)
                     item_dict[key] = key
 
-            elif (len(xp) > 1) and (not msg) and (not anim):
+            #if key == 'title':
+            #    title = True
+            
+            if key == 'arch':
+                arch = True
+
+            if (len(xp) > 1) and (not msg) and (not anim):
                 value = ' '.join(xp[1:])
                 item_dict[key] = value
 
@@ -452,9 +476,11 @@ class Arch2Json():
         return self.items
 
 
-def face_to_png(arc_dir, _list):
-    graphics = Walk(arc_dir, 1, '*.png', 1)
+def face_to_png(arc_dir, _list, trim_path):
+    graphics = filter_walk(arc_dir, 1, '*.png', 1, '/dev/')
     django = DjangoJsonDump('items.facepng')
+        
+    graphics = [relative_path(x, trim_path) for x in graphics]
 
     for fields in _list:
         field = fields['fields']
@@ -465,13 +491,10 @@ def face_to_png(arc_dir, _list):
         except KeyError:
             face = ''
 
-        # relative = relative_path(file, trim_path)
         png_list = face_png_list(face, graphics)
         for png in png_list:
             django.add_kv_to_fields('obj', obj)
-            # django.add_kv_to_fields('face', face)
             django.add_kv_to_fields('png', png)
-
             django.create_fields_and_model('fields', 'items.facepng')
 
     return django
@@ -507,6 +530,8 @@ def parse_cli(argv, release):
                         help='Trim this path to create a relative path to the .arc files.')
     parser.add_argument('--facepng', dest='face_png', required=False, action='store_true',
                         help='Generate JSON for faces PNG database table.')
+    parser.add_argument('--monolithic', dest='monolithic', required=False,
+                        help='Testing the monolithic model.')
     parser.add_argument('arc_dir',
                         help='The crossfire archtype directory.')
 
@@ -529,7 +554,7 @@ def main(args):
     if not trim_path:
         trim_path = arc_dir
 
-    files = Walk(arc_dir, 1, '*.arc', 1)
+    files = filter_walk(arc_dir, 1, '*.arc', 1, '/dev/')
 
     for file in files:
         parser.clear()
@@ -559,15 +584,19 @@ def main(args):
 
         # Add django model
         if (args.django):
-            model = model_from_path(file, args.django)
-            fields.add('model', model)
+            if (args.monolithic):
+                monolithic = args.django + '.' + args.monolithic
+                fields.add('model', monolithic)
+            else: 
+                model = model_from_path(file, args.django)
+                fields.add('model', model)
 
         for item in items.items:
             fields.add_field(item)
             _list.append(copy.deepcopy(fields.field))
 
     if (args.face_png):
-        django = face_to_png(arc_dir, _list)
+        django = face_to_png(arc_dir, _list, trim_path)
         _list += django.list
 
     # Dump archtypes to one files identified by --onefile
