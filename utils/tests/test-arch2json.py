@@ -13,6 +13,7 @@ from arch2json import (
     exists,
     Field,
     face_png_list,
+    filter_walk,
     Items,
     Message,
     model_from_path,
@@ -506,6 +507,50 @@ def test_multiple_objects():
     assert(fields.find('object', 'vial_empty'))
     assert(fields.find('object', 'bag_empty'))
 
+    #print(json.dumps(fields.items, indent=4))
+
+def test_multiple_objects2():
+    BASE_PATH = os.path.dirname(os.path.dirname((os.path.abspath(__file__))))
+    file = BASE_PATH + '/tests/emptybottles.arc'
+
+    parser = Arch2Json()
+
+    with open(file, 'r') as arc:
+        contents = arc.read().splitlines()
+
+    items = parser.keys(contents)
+    items.add_field('arch_filename', file)
+
+    k, v = created_timestamp()
+    items.add_field(k, v)
+
+    k, v = updated_timestamp()
+    items.add_field(k, v)
+
+    assert(items.find('object', 'coffee_empty'))
+    assert(items.find('object', 'w_glass_empty'))
+    assert(items.find('object', 'boozebottle_empty'))
+    assert(items.find('object', 'winebottle_empty'))
+    assert(items.find('object', 'wbottle_empty'))
+    assert(items.find('object', 'potion_empty'))
+    assert(items.find('object', 'vial_empty'))
+    assert(items.find('object', 'bag_empty'))
+    assert(items.find('arch_filename', file))
+    assert(items.find_key('created'))
+    assert(items.find_key('updated'))
+
+    fields = Field()
+    fields.add('model', 'items.potion')
+
+    assert(fields.find_key('fields'))
+    assert(fields.find_key('model'))
+
+    _list = []
+    for item in items.items:
+        fields.add_field(item)
+        _list.append(fields.field)
+
+    # print(json.dumps(_list, indent=4))
 
 def add_items1():
     _dict = {
@@ -644,50 +689,6 @@ def test_from_file3():
         field.add_field(item)
 
     # print(json.dumps(field.field, indent=4))
-
-
-def test_multiple_objects2():
-    BASE_PATH = os.path.dirname(os.path.dirname((os.path.abspath(__file__))))
-    file = BASE_PATH + '/tests/emptybottles.arc'
-
-    parser = Arch2Json()
-
-    with open(file, 'r') as arc:
-        contents = arc.read().splitlines()
-
-    items = parser.keys(contents)
-    items.add_field('arch_filename', file)
-
-    k, v = created_timestamp()
-    items.add_field(k, v)
-
-    k, v = updated_timestamp()
-    items.add_field(k, v)
-
-    assert(items.find('object', 'coffee_empty'))
-    assert(items.find('object', 'w_glass_empty'))
-    assert(items.find('object', 'boozebottle_empty'))
-    assert(items.find('object', 'winebottle_empty'))
-    assert(items.find('object', 'wbottle_empty'))
-    assert(items.find('object', 'potion_empty'))
-    assert(items.find('object', 'vial_empty'))
-    assert(items.find('object', 'bag_empty'))
-    assert(items.find('arch_filename', file))
-    assert(items.find_key('created'))
-    assert(items.find_key('updated'))
-
-    fields = Field()
-    fields.add('model', 'items.potion')
-
-    assert(fields.find_key('fields'))
-    assert(fields.find_key('model'))
-
-    _list = []
-    for item in items.items:
-        fields.add_field(item)
-        _list.append(fields.field)
-
-    # print(json.dumps(_list, indent=4))
 
 
 def test_auto_model1():
@@ -933,3 +934,69 @@ def test_django_json6():
     django = DjangoJsonDump(model='items.facepng')
     result = json.dumps(django.list)
     assert(result == expected)
+
+def test_remove_dev_from_walk1():
+    root = '/Users/tanner/projects/crossfire/crossfire-arch/trunk/'
+    files = Walk(root, 1, '*.arc', 1)
+    result = [arc for arc in files if "/dev/" not in arc]
+    assert("/dev/" not in result)
+    assert("/Dev/" not in result)
+
+def test_remove_dev_from_walk2():
+    root = '/Users/tanner/projects/crossfire/crossfire-arch/trunk/'
+    result = filter_walk(root, 1, '*.arc', 1, '/dev/')
+    assert("/dev/" not in result)
+    assert("/Dev/" not in result)
+
+def test_python1():
+    BASE_PATH = os.path.dirname(os.path.dirname((os.path.abspath(__file__))))
+
+    file = BASE_PATH + '/tests/temp_summon_fog.arc'
+    with open(file, 'r') as arc:
+        contents = arc.read().splitlines()
+
+    #import pdb
+    #pdb.set_trace()
+    parser = Arch2Json()
+    items = parser.keys(contents)
+    items.add_field('arch_filename', file)
+
+    k, v = created_timestamp()
+    items.add_field(k, v)
+
+    k, v = updated_timestamp()
+    items.add_field(k, v)
+
+    assert(items.find('arch_filename', file))
+    assert(items.find_key('created'))
+    assert(items.find_key('updated'))
+
+    field = Field()
+    field.add('model', 'items.ground')
+
+    for item in items.items:
+        field.add_field(item)
+
+    #print(json.dumps(field.field, indent=4))
+
+def test_double_ends():
+    BASE_PATH = os.path.dirname(os.path.dirname((os.path.abspath(__file__))))
+    file = BASE_PATH + '/tests/altarvalk.arc'
+
+    parser = Arch2Json()
+
+    with open(file, 'r') as arc:
+        contents = arc.read().splitlines()
+
+    #import pdb
+    #pdb.set_trace()
+    items = parser.keys(contents)
+
+    assert(items.find('object', 'altar_valkyrie'))
+    assert(items.find('name', 'Altar of Valkyrie'))
+    print(json.dumps(items.items, indent=4))
+
+    assert(items.find('object', 'altar_valkyrie_pray_event'))
+    assert(items.find('title', 'Python'))
+    assert(items.find('slaying', '/python/gods/altar_valkyrie.py'))
+
