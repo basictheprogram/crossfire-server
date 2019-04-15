@@ -994,9 +994,7 @@ def test_double_ends():
 
     assert(items.find('object', 'altar_valkyrie'))
     assert(items.find('name', 'Altar of Valkyrie'))
-    print(json.dumps(items.items, indent=4))
-
     assert(items.find('object', 'altar_valkyrie_pray_event'))
     assert(items.find('title', 'Python'))
     assert(items.find('slaying', '/python/gods/altar_valkyrie.py'))
-
+    #print(json.dumps(items.items, indent=4))

@@ -350,8 +350,7 @@ class Items():
     # https://stackoverflow.com/questions/8653516/python-list-of-dictionaries-search
     #
     def find(self, key, value):
-        for dict_ in (x for x in self._items if x[key] == value):
-            return dict_
+        return next((item for item in self._items if item.get(key) and item[key] == value), None)
 
     def find_key(self, key):
         for dict_ in (x for x in self._items if key in x):
@@ -393,7 +392,6 @@ class Arch2Json():
         msg = False
         anim = False
         end = False
-#        title = False
         arch = False
 
         item_dict = {}
@@ -418,10 +416,6 @@ class Arch2Json():
             if len(xp) == 1:
 
                 if key == 'end':
-#                    if title: 
-#                        title = False
-#                        continue
-
                     if arch:
                         arch = False
                         continue
@@ -453,9 +447,6 @@ class Arch2Json():
                     key = '%s' % (key)
                     item_dict[key] = key
 
-            #if key == 'title':
-            #    title = True
-            
             if key == 'arch':
                 arch = True
 
