@@ -469,7 +469,7 @@ class Arch2Json():
 
             # Side case processing
             # http://mailman.metalforge.org/pipermail/crossfire/2019-April/013601.html
-            if not 'name' in item_dict:
+            if not ('name' in item_dict):
                 item_dict['name'] = item_dict['object']
 
         return self.items
