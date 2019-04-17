@@ -890,6 +890,7 @@ def test_face_png_list3():
 
 def test_django_find1():
     django = DjangoJsonDump(model='items.facepng')
+    django.create_fields_and_model('fields', 'items.facepng')
     field = django.find_key('fields')
     model = django.find_key('model')
 
@@ -903,6 +904,7 @@ def test_django_find2():
 def test_django_json1():
     expected = '[{"fields": {}, "model": "items.facepng"}]'
     django = DjangoJsonDump('items.facepng')
+    django.create_fields_and_model('fields', 'items.facepng')
     result = json.dumps(django.list)
     assert(result == expected)
 
@@ -912,6 +914,7 @@ def test_django_json2():
     # pdb.set_trace()
     expected = '[{"fields": {"obj": "dwarf"}, "model": "items.facepng"}]'
     django = DjangoJsonDump(model='items.facepng')
+    django.create_fields_and_model('fields', 'items.facepng')
     django.add_kv_to_fields("obj", "dwarf")
     result = json.dumps(django.list)
     assert(result == expected)
@@ -920,6 +923,7 @@ def test_django_json2():
 def test_django_json3():
     expected = '[{"fields": {"obj": "dwarf", "face": "dwarf_p.151", "png": "player/race/dwarf_p.base.132.png"}, "model": "items.facepng"}]'
     django = DjangoJsonDump(model='items.facepng')
+    django.create_fields_and_model('fields', 'items.facepng')
     django.add_kv_to_fields('obj', 'dwarf')
     django.add_kv_to_fields('face', 'dwarf_p.151')
     django.add_kv_to_fields('png', 'player/race/dwarf_p.base.132.png')
@@ -931,6 +935,7 @@ def test_django_json5():
     expected1 = '[{"model": "items.testing"}, {"fields": {}, "model": "items.facepng"}]'
     expected2 = '[{"model": "items.testing"}, {"fields": {}, "model": "items.testing2"}]'
     django = DjangoJsonDump(model='items.facepng')
+    django.create_fields_and_model('fields', 'items.facepng')
     django.create_model('items.testing')
     result1 = json.dumps(django.list)
     assert(result1 == expected1)
@@ -938,13 +943,6 @@ def test_django_json5():
     django.update_model(model='items.testing2', index=1)
     result2 = json.dumps(django.list)
     assert(result2 == expected2)
-
-
-def test_django_json6():
-    expected = '[{"fields": {}, "model": "items.facepng"}]'
-    django = DjangoJsonDump(model='items.facepng')
-    result = json.dumps(django.list)
-    assert(result == expected)
 
 
 def test_remove_dev_from_walk1():

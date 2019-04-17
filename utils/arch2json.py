@@ -43,8 +43,6 @@ def eprint(*args, **kwargs):
 
 
 def filter_walk(root, recurse=0, pattern='*', return_folders=0, exclude=None):
-    #import pdb
-    # pdb.set_trace()
     files = Walk(root, recurse, pattern, return_folders)
     if filter:
         files = [arc for arc in files if exclude not in arc]
@@ -53,9 +51,6 @@ def filter_walk(root, recurse=0, pattern='*', return_folders=0, exclude=None):
 
 
 def face_png_list(face, graphics):
-    #import pdb
-    # pdb.set_trace()
-
     new_list = list()
     path_file = os.path.split(face)
     _path = path_file[0]
@@ -229,7 +224,7 @@ def updated_timestamp(override_key=None, format='%Y-%m-%dT%H:%M:%S.%fZ'):
 class DjangoJsonDump():
     def __init__(self, model):
         self._list = list()
-        self.create_fields_and_model('fields', model)
+        #self.create_fields_and_model('fields', model)
 
     def add_field(self, key, value):
         self.add_kv_to_field(key=key, value=value)
@@ -492,9 +487,9 @@ def face_to_png(arc_dir, _list, trim_path):
 
         png_list = face_png_list(face, graphics)
         for png in png_list:
+            django.create_fields_and_model('fields', 'items.facepng')
             django.add_kv_to_fields('obj', obj)
             django.add_kv_to_fields('png', png)
-            django.create_fields_and_model('fields', 'items.facepng')
 
     return django
 
