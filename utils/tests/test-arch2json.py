@@ -509,6 +509,7 @@ def test_multiple_objects():
 
     #print(json.dumps(fields.items, indent=4))
 
+
 def test_multiple_objects2():
     BASE_PATH = os.path.dirname(os.path.dirname((os.path.abspath(__file__))))
     file = BASE_PATH + '/tests/emptybottles.arc'
@@ -551,6 +552,7 @@ def test_multiple_objects2():
         _list.append(fields.field)
 
     # print(json.dumps(_list, indent=4))
+
 
 def add_items1():
     _dict = {
@@ -827,11 +829,12 @@ def test_face_png_list1():
 
     assert(len(png_list) >= 0)
 
-    # If a component is an absolute path, all previous components are thrown away 
+    # If a component is an absolute path, all previous components are thrown away
     # and joining continues from the absolute path component.
     #
     for png in png_list:
-        assert(png == os.path.join(trunk,'misc/magnifier.base.111.png'))
+        assert(png == os.path.join(trunk, 'misc/magnifier.base.111.png'))
+
 
 def test_face_png_list2():
     trunk = '/Users/tanner/projects/crossfire/crossfire-arch/trunk'
@@ -846,6 +849,7 @@ def test_face_png_list2():
 
     assert(len(png_list) <= 0)
 
+
 def test_face_png_list3():
     trunk = '/Users/tanner/projects/crossfire/crossfire-arch/trunk'
     graphics = Walk(trunk, 1, '*.png', 1)
@@ -854,27 +858,27 @@ def test_face_png_list3():
     face = '/player/race/dwarf_p.151.png'
 
     dwarf_faces = [
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.131.png', 
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.132.png', 
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.132.png', 
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.131.png', 
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.152.png', 
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.151.png', 
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.151.png', 
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.152.png', 
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.171.png', 
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.172.png', 
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.172.png', 
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.171.png', 
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.112.png', 
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.111.png', 
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.111.png', 
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.131.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.132.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.132.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.131.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.152.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.151.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.151.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.152.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.171.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.172.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.172.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.171.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.112.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.111.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.111.png',
         '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.112.png'
     ]
     png_list = face_png_list(face, graphics)
     assert(len(png_list) > 1)
     assert(len(png_list) == len(dwarf_faces))
-    
+
     png_set = set(png_list)
     dwarf_faces_set = set(dwarf_faces)
 
@@ -883,30 +887,35 @@ def test_face_png_list3():
     diff = png_set.difference(dwarf_faces_set)
     assert(diff == set())
 
+
 def test_django_find1():
     django = DjangoJsonDump(model='items.facepng')
     field = django.find_key('fields')
     model = django.find_key('model')
 
+
 @raises(ValueError)
 def test_django_find2():
     django = DjangoJsonDump(model='items.facepng')
     field = django.find_key('nope')
-    
+
+
 def test_django_json1():
     expected = '[{"fields": {}, "model": "items.facepng"}]'
     django = DjangoJsonDump('items.facepng')
     result = json.dumps(django.list)
     assert(result == expected)
 
+
 def test_django_json2():
     #import pdb
-    #pdb.set_trace()
+    # pdb.set_trace()
     expected = '[{"fields": {"obj": "dwarf"}, "model": "items.facepng"}]'
     django = DjangoJsonDump(model='items.facepng')
     django.add_kv_to_fields("obj", "dwarf")
     result = json.dumps(django.list)
     assert(result == expected)
+
 
 def test_django_json3():
     expected = '[{"fields": {"obj": "dwarf", "face": "dwarf_p.151", "png": "player/race/dwarf_p.base.132.png"}, "model": "items.facepng"}]'
@@ -916,6 +925,7 @@ def test_django_json3():
     django.add_kv_to_fields('png', 'player/race/dwarf_p.base.132.png')
     result = json.dumps(django.list)
     assert(result == expected)
+
 
 def test_django_json5():
     expected1 = '[{"model": "items.testing"}, {"fields": {}, "model": "items.facepng"}]'
@@ -929,11 +939,13 @@ def test_django_json5():
     result2 = json.dumps(django.list)
     assert(result2 == expected2)
 
+
 def test_django_json6():
     expected = '[{"fields": {}, "model": "items.facepng"}]'
     django = DjangoJsonDump(model='items.facepng')
     result = json.dumps(django.list)
     assert(result == expected)
+
 
 def test_remove_dev_from_walk1():
     root = '/Users/tanner/projects/crossfire/crossfire-arch/trunk/'
@@ -942,11 +954,13 @@ def test_remove_dev_from_walk1():
     assert("/dev/" not in result)
     assert("/Dev/" not in result)
 
+
 def test_remove_dev_from_walk2():
     root = '/Users/tanner/projects/crossfire/crossfire-arch/trunk/'
     result = filter_walk(root, 1, '*.arc', 1, '/dev/')
     assert("/dev/" not in result)
     assert("/Dev/" not in result)
+
 
 def test_python1():
     BASE_PATH = os.path.dirname(os.path.dirname((os.path.abspath(__file__))))
@@ -956,7 +970,7 @@ def test_python1():
         contents = arc.read().splitlines()
 
     #import pdb
-    #pdb.set_trace()
+    # pdb.set_trace()
     parser = Arch2Json()
     items = parser.keys(contents)
     items.add_field('arch_filename', file)
@@ -979,6 +993,7 @@ def test_python1():
 
     #print(json.dumps(field.field, indent=4))
 
+
 def test_double_ends():
     BASE_PATH = os.path.dirname(os.path.dirname((os.path.abspath(__file__))))
     file = BASE_PATH + '/tests/altarvalk.arc'
@@ -989,7 +1004,7 @@ def test_double_ends():
         contents = arc.read().splitlines()
 
     #import pdb
-    #pdb.set_trace()
+    # pdb.set_trace()
     items = parser.keys(contents)
 
     assert(items.find('object', 'altar_valkyrie'))
@@ -998,3 +1013,18 @@ def test_double_ends():
     assert(items.find('title', 'Python'))
     assert(items.find('slaying', '/python/gods/altar_valkyrie.py'))
     #print(json.dumps(items.items, indent=4))
+
+
+def test_no_name():
+    BASE_PATH = os.path.dirname(os.path.dirname((os.path.abspath(__file__))))
+    file = BASE_PATH + '/tests/dragon_guild.arc'
+
+    parser = Arch2Json()
+
+    with open(file, 'r') as arc:
+        contents = arc.read().splitlines()
+
+    items = parser.keys(contents)
+
+    assert(items.find('object', 'Dragon Guild'))
+    assert(items.find('name', 'Dragon Guild'))

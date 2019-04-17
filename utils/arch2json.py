@@ -41,18 +41,20 @@ from functools import reduce
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
+
 def filter_walk(root, recurse=0, pattern='*', return_folders=0, exclude=None):
     #import pdb
-    #pdb.set_trace() 
+    # pdb.set_trace()
     files = Walk(root, recurse, pattern, return_folders)
     if filter:
         files = [arc for arc in files if exclude not in arc]
-    
+
     return files
+
 
 def face_png_list(face, graphics):
     #import pdb
-    #pdb.set_trace()
+    # pdb.set_trace()
 
     new_list = list()
     path_file = os.path.split(face)
@@ -223,12 +225,12 @@ def updated_timestamp(override_key=None, format='%Y-%m-%dT%H:%M:%S.%fZ'):
 
     return k, v
 
+
 class DjangoJsonDump():
     def __init__(self, model):
         self._list = list()
         self.create_fields_and_model('fields', model)
 
-        
     def add_field(self, key, value):
         self.add_kv_to_field(key=key, value=value)
 
@@ -237,11 +239,11 @@ class DjangoJsonDump():
         self._list[index]['fields'][key] = value
 
 #    def create_field(self, field='field', index=0):
-#            self._list.insert(index, {field: dict()})       
+#            self._list.insert(index, {field: dict()})
 
     def create_fields_and_model(self, fields, model, index=0):
         self._list.insert(index, {
-            fields: dict(), 
+            fields: dict(),
             'model': model
         })
 
@@ -251,7 +253,7 @@ class DjangoJsonDump():
         if index == 0:
             self._list.insert(index, {
                 'model': model
-            })    
+            })
         else:
             list_entry = self._list[index]
             list_entry['model'] = model
@@ -260,7 +262,7 @@ class DjangoJsonDump():
         for i, dic in enumerate(self._list):
             if key in dic:
                 return i
-        
+
         raise ValueError(f'Did not find "{key}" in list')
 
     def update_model(self, model, index):
@@ -269,6 +271,7 @@ class DjangoJsonDump():
     @property
     def list(self):
         return self._list
+
 
 class Animation():
     def __init__(self):
@@ -464,13 +467,18 @@ class Arch2Json():
                 animation.anim = line
                 item_dict.update(animation.anim)
 
+            # Side case processing
+            # http://mailman.metalforge.org/pipermail/crossfire/2019-April/013601.html
+            if not 'name' in item_dict:
+                item_dict['name'] = item_dict['object']
+
         return self.items
 
 
 def face_to_png(arc_dir, _list, trim_path):
     graphics = filter_walk(arc_dir, 1, '*.png', 1, '/dev/')
     django = DjangoJsonDump('items.facepng')
-        
+
     graphics = [relative_path(x, trim_path) for x in graphics]
 
     for fields in _list:
@@ -489,6 +497,7 @@ def face_to_png(arc_dir, _list, trim_path):
             django.create_fields_and_model('fields', 'items.facepng')
 
     return django
+
 
 def check_python():
     __min_version__ = (3, 0)
@@ -529,6 +538,7 @@ def parse_cli(argv, release):
     args = parser.parse_args()
     return args
 
+
 def main(args):
     parser = Arch2Json()
     fields = Field()
@@ -564,7 +574,6 @@ def main(args):
             items.add_field('face', face)
             #faces = populate_face_png(items, graphics)
 
-
         # Add created timestamp to item
         k, v = created_timestamp()
         items.add_field(k, v)
@@ -578,7 +587,7 @@ def main(args):
             if (args.monolithic):
                 monolithic = args.django + '.' + args.monolithic
                 fields.add('model', monolithic)
-            else: 
+            else:
                 model = model_from_path(file, args.django)
                 fields.add('model', model)
 
@@ -599,6 +608,7 @@ def main(args):
         # Default to dumping archtypes to stdout
         #
         print(json.dumps(_list, indent=args.indent))
+
 
 if __name__ == '__main__':
     try:
