@@ -838,6 +838,32 @@ def test_face_png_list1():
 
 def test_face_png_list2():
     trunk = '/Users/tanner/projects/crossfire/crossfire-arch/trunk'
+    graphics = filter_walk(trunk, 1, '*.png', 1, '/dev/')
+    for g in graphics:
+        if 'jessyb' in g:
+            # print(g)
+            pass
+
+    obj = 'Balrog'
+    #face = 'monster/demon/jessyb.x11.png'
+    face = 'jessyb.x11.png'
+    png_list = face_png_list(face, graphics)
+
+    # png_list = [
+    #    'monster/giant/JessyB/jessyb.base.x11.png',
+    #    'monster/giant/JessyB/jessyb.clsc.x13.png',
+    #    'monster/giant/JessyB/jessyb.clsc.x12.png',
+    #    'monster/giant/JessyB/jessyb.base.x12.png',
+    #    'monster/giant/JessyB/jessyb.clsc.x11.png',
+    #    'monster/giant/JessyB/jessyb.base.x13.png',
+    # ]
+
+    assert(len(png_list) >= 0)
+    print('xxx', png_list)
+
+
+def test_face_png_list3():
+    trunk = '/Users/tanner/projects/crossfire/crossfire-arch/trunk'
     graphics = Walk(trunk, 1, '*.png', 1)
 
     obj = 'egg_disease'
@@ -852,7 +878,7 @@ def test_face_png_list2():
 
 def test_face_png_list3():
     trunk = '/Users/tanner/projects/crossfire/crossfire-arch/trunk'
-    graphics = Walk(trunk, 1, '*.png', 1)
+    graphics = filter_walk(trunk, 1, '*.png', 1, '/dev/')
 
     obj = 'dwarf_player'
     face = '/player/race/dwarf_p.151.png'
@@ -876,6 +902,7 @@ def test_face_png_list3():
         '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.112.png'
     ]
     png_list = face_png_list(face, graphics)
+
     assert(len(png_list) > 1)
     assert(len(png_list) == len(dwarf_faces))
 
@@ -958,6 +985,21 @@ def test_remove_dev_from_walk2():
     result = filter_walk(root, 1, '*.arc', 1, '/dev/')
     assert("/dev/" not in result)
     assert("/Dev/" not in result)
+
+# Can we din the humanoid monster wizard in trunk/monster/humanoid/Human/wizard.arc
+
+
+def test_remove_dev_from_walk3():
+    root = '/Users/tanner/projects/crossfire/crossfire-arch/trunk/'
+    expected = 'monster/humanoid/Human/wizard.arc'
+    results = filter_walk(root, 1, '*.arc', 1, '/dev/')
+
+    for result in results:
+        assert("/dev/" not in result)
+        assert("/Dev/" not in result)
+
+    # If not found throws StopIteration
+    next(x for x in results if expected in x)
 
 
 def test_python1():

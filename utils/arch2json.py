@@ -565,7 +565,15 @@ def main(args):
 
         old_face = items.find_key('face')
         if old_face:
+            face = old_face['face']
             face = arc_to_face_png(old_face['face'], relative)
+
+            # Special handling of Balrog and the jessyb face.
+            #
+            if 'Balrog' in file:
+                face = old_face['face'] + '.png'
+                eprint(face, ':', old_face['face'])
+
             items.add_field('face', face)
             #faces = populate_face_png(items, graphics)
 
