@@ -572,7 +572,6 @@ def main(args):
             #
             if 'Balrog' in file:
                 face = old_face['face'] + '.png'
-                eprint(face, ':', old_face['face'])
 
             items.add_field('face', face)
             #faces = populate_face_png(items, graphics)
