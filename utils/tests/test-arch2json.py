@@ -695,7 +695,7 @@ def test_from_file3():
 
 def test_auto_model1():
     sub_folders = [
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/armour',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/armour',
     ]
 
     for folder in sub_folders:
@@ -706,7 +706,7 @@ def test_auto_model1():
 
 def test_auto_model2():
     sub_folders = [
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/connect2',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/connect2',
     ]
 
     for folder in sub_folders:
@@ -716,7 +716,7 @@ def test_auto_model2():
 
 def test_auto_model3():
     sub_folders = [
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/connect/Gates/gate.arc'
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/connect/Gates/gate.arc'
     ]
 
     for folder in sub_folders:
@@ -727,7 +727,7 @@ def test_auto_model3():
 
 def test_auto_model4():
     sub_folders = [
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/weapon',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/weapon',
     ]
 
     for folder in sub_folders:
@@ -738,7 +738,7 @@ def test_auto_model4():
 
 def test_auto_model5():
     sub_folders = [
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/monster/misc/serpmen/serp_priest.arc',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/monster/misc/serpmen/serp_priest.arc',
     ]
 
     for folder in sub_folders:
@@ -748,41 +748,41 @@ def test_auto_model5():
 
 def test_auto_model10():
     sub_folders = [
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/armour',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/connect',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/construct',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/dev',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/disease',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/door',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/exit',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/flesh',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/floor',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/food',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/gods',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/ground',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/indoor',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/inorganic',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/jewel',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/light',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/mapbuilding',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/misc',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/monster',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/planes',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/potion',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/random',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/readable',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/river',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/road',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/shop',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/skills',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/spell',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/system',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/talisman',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/transport',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/traps',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/wall',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/weapon',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/armour',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/connect',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/construct',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/dev',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/disease',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/door',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/exit',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/flesh',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/floor',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/food',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/gods',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/ground',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/indoor',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/inorganic',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/jewel',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/light',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/mapbuilding',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/misc',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/monster',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/planes',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/player',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/potion',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/random',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/readable',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/river',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/road',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/shop',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/skills',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/spell',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/system',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/talisman',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/transport',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/traps',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/wall',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/weapon',
     ]
 
     for folder in sub_folders:
@@ -791,16 +791,16 @@ def test_auto_model10():
 
 
 def test_relative_path1():
-    full_path = '/Users/tanner/projects/crossfire/crossfire-arch/trunk/armour/bracers/bracersdex.arc'
-    trim_path = '/Users/tanner/projects/crossfire/crossfire-arch/trunk/'
+    full_path = '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/armour/bracers/bracersdex.arc'
+    trim_path = '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/'
     result = relative_path(full_path, trim_path)
 
     assert(result == 'armour/bracers/bracersdex.arc')
 
 
 def test_relative_path2():
-    full_path = '/Users/tanner/projects/crossfire/crossfire-arch/trunk/armour/bracers/bracersdex.arc'
-    trim_path = '/Users/tanner/projects/crossfire/crossfire-arch/trunk/'
+    full_path = '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/armour/bracers/bracersdex.arc'
+    trim_path = '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/'
     face_filename = 'bracersdex.base.111'
     face_path = 'armour/bracers/' + face_filename + '.png'
 
@@ -810,22 +810,14 @@ def test_relative_path2():
     face = arc_to_face_png(face_filename, result)
     assert(face == face_path)
 
-
-def test_exists():
-    assert(not exists('http://www.fakedomain.com/fakeImage.jpg'))
-    assert(exists('http://www.google.com'))
-
-
 def test_face_png_list1():
-    trunk = '/Users/tanner/projects/crossfire/crossfire-arch/trunk'
+    trunk = '/Users/tanner/projects/crossfire/crossfire-arch_git_svn'
     graphics = Walk(trunk, 1, '*.png', 1)
 
     obj = 'magnifier'
     face = '/misc/magnifier.111.png'
 
     png_list = face_png_list(face, graphics)
-    #print('trunk', trunk)
-    #print('png_list', png_list)
 
     assert(len(png_list) >= 0)
 
@@ -837,7 +829,7 @@ def test_face_png_list1():
 
 
 def test_face_png_list2():
-    trunk = '/Users/tanner/projects/crossfire/crossfire-arch/trunk'
+    trunk = '/Users/tanner/projects/crossfire/crossfire-arch_git_svn'
     graphics = filter_walk(trunk, 1, '*.png', 1, '/dev/')
     for g in graphics:
         if 'jessyb' in g:
@@ -859,48 +851,46 @@ def test_face_png_list2():
     # ]
 
     assert(len(png_list) >= 0)
-    print('xxx', png_list)
 
 
 def test_face_png_list3():
-    trunk = '/Users/tanner/projects/crossfire/crossfire-arch/trunk'
+    trunk = '/Users/tanner/projects/crossfire/crossfire-arch_git_svn'
     graphics = Walk(trunk, 1, '*.png', 1)
 
     obj = 'egg_disease'
     face = ''
 
     png_list = face_png_list(face, graphics)
-    #print('trunk', trunk)
-    #print('png_list', png_list)
 
     assert(len(png_list) <= 0)
 
 
 def test_face_png_list3():
-    trunk = '/Users/tanner/projects/crossfire/crossfire-arch/trunk'
+    trunk = '/Users/tanner/projects/crossfire/crossfire-arch_git_svn'
     graphics = filter_walk(trunk, 1, '*.png', 1, '/dev/')
 
     obj = 'dwarf_player'
     face = '/player/race/dwarf_p.151.png'
 
     dwarf_faces = [
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.131.png',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.132.png',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.132.png',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.131.png',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.152.png',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.151.png',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.151.png',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.152.png',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.171.png',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.172.png',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.172.png',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.171.png',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.112.png',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.111.png',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.base.111.png',
-        '/Users/tanner/projects/crossfire/crossfire-arch/trunk/player/race/dwarf_p.clsc.112.png'
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/player/race/dwarf_p.clsc.131.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/player/race/dwarf_p.base.132.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/player/race/dwarf_p.clsc.132.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/player/race/dwarf_p.base.131.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/player/race/dwarf_p.clsc.152.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/player/race/dwarf_p.base.151.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/player/race/dwarf_p.clsc.151.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/player/race/dwarf_p.base.152.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/player/race/dwarf_p.base.171.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/player/race/dwarf_p.clsc.172.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/player/race/dwarf_p.base.172.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/player/race/dwarf_p.clsc.171.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/player/race/dwarf_p.base.112.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/player/race/dwarf_p.clsc.111.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/player/race/dwarf_p.base.111.png',
+        '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/player/race/dwarf_p.clsc.112.png'
     ]
+
     png_list = face_png_list(face, graphics)
 
     assert(len(png_list) > 1)
@@ -914,6 +904,14 @@ def test_face_png_list3():
     diff = png_set.difference(dwarf_faces_set)
     assert(diff == set())
 
+def test_face_png_list4():
+    trunk = '/Users/tanner/projects/crossfire/crossfire-arch_git_svn'
+    graphics = filter_walk(trunk, 1, '*.png', 1, '/dev/')
+    face = 'jessyb.x11'
+    png_list = face_png_list(face, graphics)
+
+    print("png_list: ", png_list)
+    assert(len(png_list) >= 0)
 
 def test_django_find1():
     django = DjangoJsonDump(model='items.facepng')
@@ -973,7 +971,7 @@ def test_django_json5():
 
 
 def test_remove_dev_from_walk1():
-    root = '/Users/tanner/projects/crossfire/crossfire-arch/trunk/'
+    root = '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/'
     files = Walk(root, 1, '*.arc', 1)
     result = [arc for arc in files if "/dev/" not in arc]
     assert("/dev/" not in result)
@@ -981,7 +979,7 @@ def test_remove_dev_from_walk1():
 
 
 def test_remove_dev_from_walk2():
-    root = '/Users/tanner/projects/crossfire/crossfire-arch/trunk/'
+    root = '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/'
     result = filter_walk(root, 1, '*.arc', 1, '/dev/')
     assert("/dev/" not in result)
     assert("/Dev/" not in result)
@@ -990,7 +988,7 @@ def test_remove_dev_from_walk2():
 
 
 def test_remove_dev_from_walk3():
-    root = '/Users/tanner/projects/crossfire/crossfire-arch/trunk/'
+    root = '/Users/tanner/projects/crossfire/crossfire-arch_git_svn/'
     expected = 'monster/humanoid/Human/wizard.arc'
     results = filter_walk(root, 1, '*.arc', 1, '/dev/')
 
