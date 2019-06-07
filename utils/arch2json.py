@@ -66,7 +66,8 @@ def face_png_list(face, graphics):
     regex += '/'
     regex += _file_parts[0]
     regex += '.*'
-    regex += _file_parts[2]
+    if len(_file_parts) > 2:
+        regex += _file_parts[2]
 
     r = re.compile(regex)
     new_list = list(filter(r.match, graphics))
@@ -473,7 +474,6 @@ class Arch2Json():
 def face_to_png(arc_dir, _list, trim_path):
     graphics = filter_walk(arc_dir, 1, '*.png', 1, '/dev/')
     django = DjangoJsonDump('items.facepng')
-
     graphics = [relative_path(x, trim_path) for x in graphics]
 
     for fields in _list:
@@ -566,7 +566,6 @@ def main(args):
         old_face = items.find_key('face')
         if old_face:
             face = old_face['face']
-            face = arc_to_face_png(old_face['face'], relative)
 
             # Special handling of Balrog and the jessyb face.
             #
